@@ -1,0 +1,17 @@
+[12:21:25] === Iniciando extração ===
+[12:21:25] Período venda: 07/03/2026 a 06/05/2026
+[12:21:25] Período compra: 01/01/2026 a 06/05/2026
+[12:21:32] Abrindo Microvix...
+[12:21:40] Microvix pediu login. Faça login na janela aberta — vou aguardar até 5 minutos e seguir automaticamente.
+[12:21:56] Login detectado após 14s. Prosseguindo...
+[12:21:58] Sessão ativa. Indo para o relatório...
+[12:22:01] ERRO: Page.evaluate: TypeError: Cannot set properties of null (setting 'src')
+    at eval (eval at evaluate (:302:30), <anonymous>:1:37)
+    at eval (<anonymous>)
+    at UtilityScript.evaluate (<anonymous>:302:30)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+[12:22:01] FALHA na extração: Page.evaluate: TypeError: Cannot set properties of null (setting 'src')
+    at eval (eval at evaluate (:302:30), <anonymous>:1:37)
+    at eval (<anonymous>)
+    at UtilityScript.evaluate (<anonymous>:302:30)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)

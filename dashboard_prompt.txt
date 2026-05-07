@@ -1,0 +1,51 @@
+Você é o agente de atualização automática do dashboard operacional do Grupo A.M. Gomes. Execute todas as etapas sem pedir confirmação. Data de hoje: {{DATA_HOJE}}.
+
+## CONTEXTO
+
+Dashboard: /Users/elkgomes/Desktop/claude/dashboard_amgomes.html
+Memória ERP: /Users/elkgomes/.claude/projects/-Users-elkgomes-Desktop-claude/memory/lojas_dados_erp.md
+
+Lojas:
+- L1 = Casa da Beleza Altamira (Empresa 1 no ERP)
+- L3 = Casa da Beleza Itaituba (Empresa 3 no ERP)
+- L4 = MissBeleza Altamira (Empresa 4 no ERP)
+- L5 = MissBeleza Santarém (Empresa 10 no ERP)
+
+Metas Mai/2026: L1 R$140.000 | L3 R$80.000 | L4 R$140.000 | L5 R$90.000
+
+## ETAPA 1 — COLETAR DADOS DO ERP (Microvix)
+
+**Relatório principal:** Faturamento > Relatórios > **Vendas por Lojas**
+URL direta: https://linx.microvix.com.br/gestor_web/faturamento/relatorio_vendas_lojas.asp
+
+1. Acesse a URL acima no Chrome
+2. Selecione as 4 empresas (1, 3, 4, 10) e filtre pelo período: 01/{{MES_ANO}} a {{DATA_HOJE}}
+3. Clique em FILTRAR e aguarde o relatório carregar
+4. **IMPORTANTE:** Colete a coluna **"Venda Líquida"** (NÃO Venda Bruta) de cada loja
+   - Venda Líquida = valor após descontos
+5. Também colete: Qtde Peças (PA), Margem% de cada loja
+
+Se não conseguir acessar o ERP, use os dados da memória em lojas_dados_erp.md como fallback.
+
+## ETAPA 2 — COLETAR DADOS DA PLANILHA DE COMPRAS
+
+1. Busque o arquivo "Gestao de Compras 2026" no Google Drive (ID: 1K51A55Pf5LwJlJB1PYRKldN1sJ-QZygH)
+2. Leia as abas: ALTAMIRA, SANTAREM, ITAITUBA
+3. Calcule totais mensais excluindo linhas onde Status do Pedido = "Athila"
+4. Aba ALTAMIRA: dividir total por 2 entre L1 e L4
+
+## ETAPA 3 — ATUALIZAR O DASHBOARD
+
+1. Leia o arquivo: /Users/elkgomes/Desktop/claude/dashboard_amgomes.html
+2. Atualize:
+   - Badge de data no header para o período atual
+   - Título da Seção 1 com a data atual
+   - 4 KPI cards: novo ranking, **Venda Líquida** (kpi-value principal), PA, Margem%, % de meta
+   - Variável maiAcum no JavaScript com o acumulado do mês atual (usar Venda Líquida)
+   - Timestamp "Dados coletados às" com data e hora atual
+3. NÃO altere CSS, estrutura HTML ou lógica do gráfico — apenas os dados
+4. Salve o arquivo
+
+## ETAPA 4 — RESUMO FINAL
+
+Informe o que foi coletado, os valores por loja e qualquer erro encontrado.

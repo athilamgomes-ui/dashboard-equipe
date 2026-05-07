@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Grupo A.M. Gomes</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --card2: #20243a;
+    --border: #2e334d;
+    --accent: #7c5cfc;
+    --accent2: #00d4aa;
+    --accent3: #ff6b6b;
+    --accent4: #ffb347;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #eab308;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  /* HEADER */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #1a1d27, #20243a);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+  .header-left h1 {
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #7c5cfc, #00d4aa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header-left p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .header-right { text-align: right; }
+  .last-update { font-size: 12px; color: var(--muted); }
+  .date-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  /* GRID */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  /* CARD */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title span { font-size: 14px; }
+  /* KPI CARDS */
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    border-radius: 14px 0 0 14px;
+  }
+  .kpi-card.rank1::after { background: #ffd700; }
+  .kpi-card.rank2::after { background: #c0c0c0; }
+  .kpi-card.rank3::after { background: #cd7f32; }
+  .kpi-card.rank4::after { background: var(--red); }
+  .kpi-store { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .kpi-value { font-size: 26px; font-weight: 700; margin: 6px 0 2px; }
+  .kpi-meta { font-size: 12px; color: var(--muted); }
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+  .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-yellow { background: rgba(234,179,8,0.15); color: var(--yellow); }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+  /* PROGRESS BAR */
+  .progress-wrap { margin-top: 10px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+  .progress-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+  /* METRICS ROW */
+  .metrics { display: flex; gap: 16px; margin-top: 12px; }
+  .metric { flex: 1; }
+  .metric-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .metric-value { font-size: 18px; font-weight: 700; }
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th {
+    background: var(--card2);
+    padding: 10px 12px;
+    text-align: right;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  thead th:first-child { text-align: left; }
+  tbody td { padding: 9px 12px; border-bottom: 1px solid rgba(46,51,77,0.5); text-align: right; }
+  tbody td:first-child { text-align: left; font-weight: 500; }
+  tbody tr:hover { background: rgba(124,92,252,0.05); }
+  .loja-header td {
+    background: var(--card2);
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 12px;
+  }
+  .total-row td { font-weight: 700; color: var(--accent2); border-top: 1px solid var(--border); background: rgba(0,212,170,0.05); }
+  .erp-col { color: var(--accent4); font-weight: 600; }
+  .plan-col { color: var(--accent2); font-weight: 600; }
+  .diff-col { color: var(--muted); }
+  /* SECTION */
+  .section { margin-bottom: 20px; }
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title .num {
+    background: var(--accent);
+    color: #fff;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800;
+    flex-shrink: 0;
+  }
+  /* CHART CONTAINER */
+  .chart-container { position: relative; height: 260px; }
+  .chart-container-sm { position: relative; height: 200px; }
+  /* ALERT PILLS */
+  .alerts { display: flex; flex-direction: column; gap: 8px; }
+  .alert-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .alert-item.critical { background: rgba(239,68,68,0.12); border-left: 3px solid var(--red); }
+  .alert-item.warning { background: rgba(234,179,8,0.12); border-left: 3px solid var(--yellow); }
+  .alert-item.info { background: rgba(124,92,252,0.12); border-left: 3px solid var(--accent); }
+  .alert-icon { font-size: 15px; flex-shrink: 0; }
+  .alert-text strong { display: block; font-size: 11px; font-weight: 700; margin-bottom: 2px; }
+  /* RESUMO */
+  .resumo { background: linear-gradient(135deg, rgba(124,92,252,0.12), rgba(0,212,170,0.08)); border: 1px solid var(--accent); border-radius: 14px; padding: 20px; }
+  .resumo p { font-size: 13px; line-height: 1.7; }
+  .resumo p + p { margin-top: 8px; border-top: 1px solid rgba(124,92,252,0.2); padding-top: 8px; }
+  /* FOOTER */
+  .footer { text-align: center; font-size: 11px; color: var(--muted); margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+  /* responsive */
+  @media (max-width: 1100px) {
+    .grid4 { grid-template-columns: repeat(2,1fr); }
+    .grid2 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 680px) {
+    .grid4, .grid3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>GRUPO A.M. GOMES — Dashboard de Gestão</h1>
+    <p>MissBeleza Altamira · MissBeleza Santarém · MissBeleza Itaituba · Casa da Beleza Altamira</p>
+  </div>
+  <div class="header-right">
+    <div class="date-badge">📅 01–07/05/2026 — Sex a Qui (Sem 1+2)</div>
+    <div class="last-update" id="lastUpdate">Atualizado em 07/05/2026 (atualização automática)</div>
+  </div>
+</div>
+
+<!-- ===== SEÇÃO 1: RANKING ===== -->
+<div class="section">
+  <div class="section-title"><div class="num">1</div> Ranking de Desempenho — 01–07/05/2026 (Sáb + Seg→Qui acumulado)</div>
+
+  <div class="grid4" style="margin-bottom:16px;">
+    <!-- L1 — 1º por % de meta (59,5%) — Fonte: Vendas por Lojas 01–07/mai (V. Líquida) -->
+    <div class="kpi-card rank1">
+      <div class="kpi-store">🥇 Casa Beleza Altamira</div>
+      <div class="kpi-value" style="color:#ffb347;">R$&nbsp;21.940</div>
+      <div class="kpi-meta">Meta período R$ 36.867 · <strong>59,5%</strong></div>
+      <span class="badge badge-yellow">⚠ Acompanhar</span>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Atingido</span><span>59,5%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:60%;background:#ffb347;"></div></div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">Qtde Peças</div><div class="metric-value" style="font-size:15px;">711</div></div>
+        <div class="metric"><div class="metric-label">V. Líquida</div><div class="metric-value" style="font-size:15px;color:#ffb347;">R$21.940</div></div>
+        <div class="metric"><div class="metric-label">Margem</div><div class="metric-value" style="font-size:15px;color:#22c55e;">49,0%</div></div>
+      </div>
+    </div>
+    <!-- L4 — 2º por % de meta (48,5%) — V. Líquida -->
+    <div class="kpi-card rank2">
+      <div class="kpi-store">🥈 MissBeleza Altamira</div>
+      <div class="kpi-value" style="color:#7c5cfc;">R$&nbsp;17.890</div>
+      <div class="kpi-meta">Meta período R$ 36.867 · <strong>48,5%</strong></div>
+      <span class="badge badge-red">✗ Crítico</span>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Atingido</span><span>48,5%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:49%;background:#7c5cfc;"></div></div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">Qtde Peças</div><div class="metric-value" style="font-size:15px;">625</div></div>
+        <div class="metric"><div class="metric-label">V. Líquida</div><div class="metric-value" style="font-size:15px;color:#7c5cfc;">R$17.890</div></div>
+        <div class="metric"><div class="metric-label">Margem</div><div class="metric-value" style="font-size:15px;color:#22c55e;">48,9%</div></div>
+      </div>
+    </div>
+    <!-- L3 — 3º por % de meta (41,6%) — V. Líquida -->
+    <div class="kpi-card rank3">
+      <div class="kpi-store">🥉 Casa Beleza Itaituba</div>
+      <div class="kpi-value" style="color:#00d4aa;">R$&nbsp;8.769</div>
+      <div class="kpi-meta">Meta período R$ 21.067 · <strong>41,6%</strong></div>
+      <span class="badge badge-red">✗ Crítico</span>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Atingido</span><span>41,6%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:42%;background:#00d4aa;"></div></div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">Qtde Peças</div><div class="metric-value" style="font-size:15px;">432</div></div>
+        <div class="metric"><div class="metric-label">V. Líquida</div><div class="metric-value" style="font-size:15px;color:#00d4aa;">R$8.769</div></div>
+        <div class="metric"><div class="metric-label">Margem</div><div class="metric-value" style="font-size:15px;color:#22c55e;">57,8%</div></div>
+      </div>
+    </div>
+    <!-- L5 — 4º por % de meta (36,5%) — V. Líquida -->
+    <div class="kpi-card rank4">
+      <div class="kpi-store">4º MissBeleza Santarém</div>
+      <div class="kpi-value" style="color:#ef4444;">R$&nbsp;8.654</div>
+      <div class="kpi-meta">Meta período R$ 23.700 · <strong>36,5%</strong></div>
+      <span class="badge badge-red">✗ Crítico</span>
+      <div class="progress-wrap">
+        <div class="progress-label"><span>Atingido</span><span>36,5%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:37%;background:#ef4444;"></div></div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">Qtde Peças</div><div class="metric-value" style="font-size:15px;">483</div></div>
+        <div class="metric"><div class="metric-label">V. Líquida</div><div class="metric-value" style="font-size:15px;color:#ef4444;">R$8.654</div></div>
+        <div class="metric"><div class="metric-label">Margem</div><div class="metric-value" style="font-size:15px;color:#22c55e;">51,3%</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart Row -->
+  <div class="card">
+    <div class="card-title"><span>📊</span> Abr/26 Real · Mai/26 Acum 01–07/mai · Meta Mai/26 — por Loja</div>
+    <div class="chart-container"><canvas id="chartFaturado"></canvas></div>
+  </div>
+</div>
+
+<!-- ===== SEÇÃO 2: CONTAS A PAGAR ===== -->
+<div class="section">
+  <div class="section-title"><div class="num">2</div> Contas a Pagar — Planilha (≠ Athila) × ERP Microvix</div>
+
+  <div class="card">
+    <div class="card-title"><span>📋</span> Contas a Pagar por Loja — Status do Pedido ≠ "Athila" &nbsp;·&nbsp; <span style="color:var(--accent2)">■ Planilha</span> &nbsp;·&nbsp; <span style="color:var(--accent4)">■ ERP</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:left;min-width:140px;">Loja / Marca</th>
+            <th>Fonte</th>
+            <th>Abr/26</th>
+            <th>Mai/26</th>
+            <th>Jun/26</th>
+            <th>Jul/26</th>
+            <th>Ago/26</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="cpTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ALERTAS + RESUMO ===== -->
+<div class="grid2">
+  <div class="card">
+    <div class="card-title"><span>🚨</span> Alertas de Atenção</div>
+    <div class="alerts">
+      <div class="alert-item critical">
+        <div class="alert-icon">🔴</div>
+        <div class="alert-text">
+          <strong>Itaituba — Brunna Wellen (TM R$35 · 7 tickets)</strong>
+          Performance 5× abaixo de Ana Mira. Risco de sábado vazio no pré-Dia das Mães.
+        </div>
+      </div>
+      <div class="alert-item critical">
+        <div class="alert-icon">🔴</div>
+        <div class="alert-text">
+          <strong>Grupo — Déficit R$5.397 entrando na semana do Dia das Mães</strong>
+          76% da meta do sábado. Próximos 6 dias são decisivos: meta R$427.500 restante em Maio.
+        </div>
+      </div>
+      <div class="alert-item warning">
+        <div class="alert-icon">🟠</div>
+        <div class="alert-text">
+          <strong>MB Altamira — PA 2,22 (91 tickets, cross-sell fraco)</strong>
+          Maior volume de atendimentos da rede, mas TM caiu R$18 vs Abril. Falta upsell.
+        </div>
+      </div>
+      <div class="alert-item warning">
+        <div class="alert-icon">🟠</div>
+        <div class="alert-text">
+          <strong>Casa Altamira — TM R$67 (vs R$92 de Abr · -27%)</strong>
+          Tatiane fez 18 tickets com TM R$56 — perfil de promoção, não de Dia das Mães.
+        </div>
+      </div>
+      <div class="alert-item warning">
+        <div class="alert-icon">🟠</div>
+        <div class="alert-text">
+          <strong>Compras — +20 marcas sem pedido em Maio na planilha</strong>
+          Probelle, Algodão, Mutari, La Bening e outros ainda sem status. Risco de ruptura.
+        </div>
+      </div>
+      <div class="alert-item info">
+        <div class="alert-icon">🟡</div>
+        <div class="alert-text">
+          <strong>Santarém — Volume baixo (43 tickets) apesar do TM excelente</strong>
+          PA 5,40 e TM R$101 são os melhores da rede. Gargalo é tráfego, não conversão.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="card">
+      <div class="card-title"><span>🎯</span> Ações Práticas (executar até 05/05)</div>
+      <div style="font-size:12px;line-height:1.7;display:flex;flex-direction:column;gap:10px;">
+        <div style="padding:10px;background:rgba(239,68,68,0.08);border-radius:8px;border-left:3px solid var(--red);">
+          <strong style="color:var(--red);">Itaituba 🔴</strong> — Reunião 1:1 com Brunna hoje. Meta: 12 tickets/dia, TM ≥ R$60. Se segunda não recuperar, realocar para apoio e acionar Naila ou Raimunda.
+        </div>
+        <div style="padding:10px;background:rgba(234,179,8,0.08);border-radius:8px;border-left:3px solid var(--yellow);">
+          <strong style="color:var(--yellow);">Casa Altamira 🟠</strong> — Briefing 8h segunda com Tatiane. Foco em kits Dia das Mães (TM-alvo R$100+). Subir produtos premium no PDV.
+        </div>
+        <div style="padding:10px;background:rgba(234,179,8,0.08);border-radius:8px;border-left:3px solid var(--yellow);">
+          <strong style="color:var(--yellow);">MB Altamira 🟠</strong> — Treino flash de cross-sell 7h30 segunda (15 min). Meta: PA 2,22 → 2,80 até quarta.
+        </div>
+        <div style="padding:10px;background:rgba(124,92,252,0.08);border-radius:8px;border-left:3px solid var(--accent);">
+          <strong style="color:var(--accent);">Santarém 🟡</strong> — Campanha WhatsApp + stories com Rayssa/Joyce. Investir R$200 em ads geo-localizados para o Dia das Mães.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  Dashboard Grupo A.M. Gomes · Dados: Microvix ERP + Drive (Gestão de Compras 2026) · Gerado em <span id="genDate"></span>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────
+const lojas = ['MB Santarém', 'MB Altamira', 'Casa ATM', 'MB Itaituba'];
+const faturado = [71864, 95585, 111738, 61181];   // Abr/2026 — mês completo
+const maiAcum  = [8654, 17890, 21940, 8769];    // Mai/2026 — acum 01–07/mai (V. Líquida — Vendas por Lojas)
+const metas    = [90000, 140000, 140000, 80000];   // Meta Mai/2026
+const colors = ['#00d4aa','#7c5cfc','#ffb347','#ef4444'];
+
+// Contas a Pagar (ERP - R$)
+const meses = ['Abr/26','Mai/26','Jun/26','Jul/26','Ago/26'];
+const erpL1  = [9382,  71504, 63496, 43952, 37064];
+const erpL3  = [23019, 52584, 30177, 24364, 24364];
+const erpL4  = [7696,  59792, 62955, 43606, 38830];
+const erpL5  = [16218, 61161, 55741, 44687, 44687];
+
+// Planilha (não-Athila, ALTAMIRA ÷ 2 entre L1 e L4)
+const planAtm   = [11023, 29730, 63313, 37539, 18327]; // total altamira (não-Athila)
+const planL1    = planAtm.map(v => +(v/2).toFixed(0));   // L1 = metade
+const planL4    = planAtm.map(v => +(v/2).toFixed(0));   // L4 = metade
+const planL3    = [0,     6856,  14233, 8788,  3648];
+const planL5    = [2078,  21760, 20024, 5826,  3670];
+
+// ─── CHART 1: FATURADO VS META ───────────────────────
+new Chart(document.getElementById('chartFaturado'), {
+  type: 'bar',
+  data: {
+    labels: lojas,
+    datasets: [
+      { label: 'Abr/26 Real', data: faturado, backgroundColor: colors, borderRadius: 6, barThickness: 26 },
+      { label: 'Mai/26 Acum (01–07)', data: maiAcum, backgroundColor: colors.map(c => c + '55'), borderRadius: 6, barThickness: 26, borderColor: colors, borderWidth: 1 },
+      { label: 'Meta Mai/26', data: metas, backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: 6, barThickness: 26, borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#8892a4', font: { size: 11 } } } },
+    scales: {
+      x: { ticks: { color: '#8892a4' }, grid: { color: '#2e334d' } },
+      y: { ticks: { color: '#8892a4', callback: v => 'R$' + (v/1000).toFixed(0) + 'k' }, grid: { color: '#2e334d' } }
+    }
+  }
+});
+
+// ─── TABLE: CONTAS A PAGAR — TOTAIS POR LOJA ─────────
+const fmt = v => v > 0 ? 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:0}) : '—';
+const sumRow = arr => arr.reduce((a,b) => a+b, 0);
+
+const lojaRows = [
+  { loja: 'Casa da Beleza Altamira (L1)', planVals: planL1, erpVals: erpL1 },
+  { loja: 'MissBeleza Altamira (L4)',     planVals: planL4, erpVals: erpL4 },
+  { loja: 'MissBeleza Itaituba (L3)',     planVals: planL3, erpVals: erpL3 },
+  { loja: 'MissBeleza Santarém (L5)',     planVals: planL5, erpVals: erpL5 },
+];
+
+const tbody = document.getElementById('cpTable');
+
+lojaRows.forEach(row => {
+  // loja header
+  const th = document.createElement('tr');
+  th.className = 'loja-header';
+  th.innerHTML = `<td colspan="8">${row.loja}</td>`;
+  tbody.appendChild(th);
+
+  // Planilha row
+  const trPlan = document.createElement('tr');
+  const planTotal = sumRow(row.planVals);
+  trPlan.innerHTML = `
+    <td style="padding-left:28px">Total Planilha (≠ Athila)</td>
+    <td class="plan-col" style="font-size:10px;">Planilha</td>
+    ${row.planVals.map(v => `<td class="plan-col">${fmt(v)}</td>`).join('')}
+    <td class="plan-col" style="font-weight:700;">${fmt(planTotal)}</td>
+  `;
+  tbody.appendChild(trPlan);
+
+  // ERP row
+  const trErp = document.createElement('tr');
+  trErp.style.background = 'rgba(255,179,71,0.04)';
+  const erpTotal = sumRow(row.erpVals);
+  trErp.innerHTML = `
+    <td style="padding-left:28px">Total ERP (todas faturas)</td>
+    <td class="erp-col" style="font-size:10px;">ERP</td>
+    ${row.erpVals.map(v => `<td class="erp-col">${fmt(v)}</td>`).join('')}
+    <td class="erp-col" style="font-weight:700;">${fmt(erpTotal)}</td>
+  `;
+  tbody.appendChild(trErp);
+
+  // Total mensal row
+  const totalVals = meses.map((_,i) => row.planVals[i] + row.erpVals[i]);
+  const trTot = document.createElement('tr');
+  trTot.className = 'total-row';
+  trTot.innerHTML = `
+    <td style="padding-left:28px;font-weight:800;">Total Mensal</td>
+    <td style="font-size:10px;color:var(--accent2);font-weight:700;">Plan+ERP</td>
+    ${totalVals.map(v => `<td style="font-weight:800;color:var(--text);">${fmt(v)}</td>`).join('')}
+    <td style="font-weight:800;color:var(--text);">${fmt(sumRow(totalVals))}</td>
+  `;
+  tbody.appendChild(trTot);
+});
+
+// Grand Totals
+const grandPlan = meses.map((_,i) => planL1[i]+planL3[i]+planL4[i]+planL5[i]);
+const grandErp  = meses.map((_,i) => erpL1[i]+erpL3[i]+erpL4[i]+erpL5[i]);
+[
+  { label: 'TOTAL GERAL — Planilha (≠ Athila)', vals: grandPlan, cls: 'plan-col' },
+  { label: 'TOTAL GERAL — ERP',                 vals: grandErp,  cls: 'erp-col'  },
+].forEach(row => {
+  const tr = document.createElement('tr');
+  tr.className = 'total-row';
+  tr.innerHTML = `<td colspan="2" style="font-size:12px;font-weight:800;">${row.label}</td>${row.vals.map(v=>`<td class="${row.cls}">${fmt(v)}</td>`).join('')}<td class="${row.cls}">${fmt(sumRow(row.vals))}</td>`;
+  tbody.appendChild(tr);
+});
+
+// ─── DATETIME ────────────────────────────────────────
+function updateTime() {
+  const now = new Date();
+  document.getElementById('lastUpdate').textContent =
+    'Coletado às ' + now.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  document.getElementById('genDate').textContent =
+    now.toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+updateTime();
+</script>
+</body>
+</html>
