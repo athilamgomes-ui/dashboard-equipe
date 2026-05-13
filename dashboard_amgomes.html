@@ -459,6 +459,8 @@ const vendedores = {
 // ─── RENDERIZA TABELAS DE VENDEDORES ─────────────────
 const lojaColors = {L1:'#ffb347',L3:'#00d4aa',L4:'#ef4444',L5:'#7c5cfc'};
 const lojaRgba   = {L1:'255,179,71',L3:'0,212,170',L4:'239,68,68',L5:'124,92,252'};
+// Total V.Líquida exato por loja (de Vendas por Lojas — fonte autoritativa)
+const lojaTotais = {L5: maiAcum[0], L4: maiAcum[1], L1: maiAcum[2], L3: maiAcum[3]};
 function renderVendorTables() {
   [{id:'vend_L1',loja:'L1'},{id:'vend_L3',loja:'L3'},{id:'vend_L4',loja:'L4'},{id:'vend_L5',loja:'L5'}]
   .forEach(({id,loja}) => {
@@ -467,7 +469,8 @@ function renderVendorTables() {
     const rows  = vendedores[loja];
     const color = lojaColors[loja];
     const rgba  = lojaRgba[loja];
-    const totalV = rows.reduce((a,r) => a+r.v, 0);
+    const somaV  = rows.reduce((a,r) => a+r.v, 0);
+    const totalV = lojaTotais[loja] || somaV;  // usa V.Líquida real do ERP
     const totalT = rows.reduce((a,r) => a+r.t, 0);
     const avgTM  = totalT > 0 ? Math.round(totalV/totalT) : 0;
     const fR = v => 'R$' + v.toLocaleString('pt-BR');
