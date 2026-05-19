@@ -117,6 +117,12 @@ input.mа-in:focus{outline:none;border-color:var(--blue)}
 .cond-a{background:rgba(34,197,94,.15);color:var(--green)}
 .cond-b{background:rgba(59,130,246,.15);color:var(--blue)}
 .cond-no{background:rgba(148,163,184,.1);color:var(--muted)}
+/* ── badges de vendedora (gerente/caixa/gestante/nova) ── */
+.vbadge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-left:5px;vertical-align:middle}
+.vb-gerente{background:rgba(124,92,252,.2);color:#a78bfa}
+.vb-caixa{background:rgba(148,163,184,.18);color:#cbd5e1}
+.vb-gestante{background:rgba(236,72,153,.18);color:#f9a8d4}
+.vb-nova{background:rgba(59,130,246,.18);color:#93c5fd}
 input[type=number]{-moz-appearance:textfield}
 input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
 /* ── sugestões ── */
@@ -305,6 +311,41 @@ const DADOS = {
   '2026-12': null,
 };
 
+// ─── METADADOS DAS VENDEDORAS ────────────────────────────────────────────────
+// Badges: gerente · caixa · gestante · nova
+// Regras:
+//   - caixa: vendas contam no total da loja, MAS não recebe prêmio individual nem entra na divisão do pool semanal
+//   - gestante: badge informativo, regras de prêmio inalteradas
+//   - gerente: cargo exige mais; sugestões focam em liderança + resultado pessoal
+//   - nova: vendedora em ramp-up; sugestões consideram aprendizado, pareamento, paciência
+
+const VENDEDORAS_META = {
+  'Tatiane':  {loja:'L1', badges:['gerente']},
+  'Rayra':    {loja:'L1', badges:[]},
+  'Alcione':  {loja:'L1', badges:[]},
+  'Sofia':    {loja:'L1', badges:['nova']},
+  'Ana Mira': {loja:'L3', badges:['gerente']},
+  'Raimunda': {loja:'L3', badges:[]},
+  'Brunna':   {loja:'L3', badges:[]},
+  'Naila':    {loja:'L3', badges:[]},
+  'Tanaia':   {loja:'L4', badges:['gerente','gestante']},
+  'Josilene': {loja:'L4', badges:[]},
+  'Bruna F.': {loja:'L4', badges:[]},
+  'Rosana':   {loja:'L4', badges:['nova']},
+  'Rayssa':   {loja:'L5', badges:[]},
+  'Joyce':    {loja:'L5', badges:[]},
+  'Rosiene':  {loja:'L5', badges:['gerente']},
+  'Karina':   {loja:'L5', badges:['nova']},
+  'Lucas':    {loja:'L5', badges:['caixa']},
+};
+
+function vBadges(nome) {
+  const m = VENDEDORAS_META[nome];
+  if (!m || !m.badges.length) return '';
+  return m.badges.map(b => `<span class="vbadge vb-${b}" title="${b}">${b==='caixa'?'caixa':b==='gestante'?'gestante':b==='nova'?'nova':'gerente'}</span>`).join('');
+}
+function isCaixa(nome) { return (VENDEDORAS_META[nome]?.badges||[]).includes('caixa'); }
+
 // ─── SUGESTÕES SEMANAIS ──────────────────────────────────────────────────────
 // Gerado pelo agente toda segunda-feira 9h. Estrutura: chave = ISO week ('2026-W21').
 // Cada sugestão: {id, escopo:'loja'|'vendedora'|'geral', loja, vendedora, tipo, meta_alvo, titulo, descricao}
@@ -321,38 +362,44 @@ const SUGESTOES = {
        titulo:'L1 — Subir marcas A de 20% para 30%',
        descricao:'L1 está em 20.6% Marcas A em S3 (precisa ≥30% para destravar bônus do pool semanal). Faça uma mini-vitrine na entrada com Truss + Marco Boni + Itallian. Brief de 5min com a equipe sábado de manhã: cada cliente que entrar tem que ouvir uma marca A na primeira sugestão.'},
       {id:'2026-W21-L1-03', escopo:'vendedora', loja:'L1', vendedora:'Tatiane', tipo:'cliente_recorrente', meta_alvo:'vendas_individuais',
-       titulo:'Tatiane (L1) — Ativar carteira de fiéis',
-       descricao:'Tatiane lidera (R$24.920 acumulado). Pedir para mandar áudio no WhatsApp para 15 clientes top que não voltam há 30+ dias com sugestão de combo capilar. Meta: trazer 5 de volta na semana.'},
+       titulo:'Tatiane (L1, gerente) — Ativar carteira + acelerar Sofia',
+       descricao:'Tatiane lidera (R$24.920 acumulado) e é gerente. (a) Mandar áudio WhatsApp para 15 clientes top que não voltam há 30+ dias. (b) Como gerente, dar shadow de 2 manhãs/sem pra Sofia (nova) acelerar ramp-up. Cobrança dupla: pessoal + coletivo.'},
+      {id:'2026-W21-L1-04', escopo:'vendedora', loja:'L1', vendedora:'Sofia', tipo:'treinamento', meta_alvo:'vendas_individuais',
+       titulo:'Sofia (L1, nova) — Ramp-up estruturado',
+       descricao:'Sofia é vendedora nova vinda da L4. Plano de 30 dias: semana 1-2 shadow com Tatiane, semana 3-4 fechamento próprio com revisão diária. Não cobrar meta individual ainda — focar em domínio das marcas A e técnica de abordagem.'},
 
       // ── L3 — CB Itaituba (semana mais fraca) ──
-      {id:'2026-W21-L3-01', escopo:'loja', loja:'L3', tipo:'meta', meta_alvo:'atingir_meta',
-       titulo:'L3 — Recuperar ritmo na semana',
-       descricao:'L3 saiu de R$21.894 em S1 para R$13.420 em S2 — queda de 39%. Verificar: (a) folga ou ausência de vendedora? (b) ruptura de marca-chave? (c) ação local de concorrente? Reunião de 15min com Ana Mira terça pela manhã.'},
+      {id:'2026-W21-L3-01', escopo:'vendedora', loja:'L3', vendedora:'Ana Mira', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'Ana Mira (L3, gerente) — Recuperar ritmo da loja',
+       descricao:'L3 saiu de R$21.894 (S1) para R$13.420 (S2) — queda de 39%. Como gerente, Ana Mira precisa: (a) diagnosticar (folga? ruptura? concorrente?), (b) reforçar escala de fim de semana, (c) reunião de 15min com toda equipe terça pela manhã. Cobrança pelo coletivo.'},
       {id:'2026-W21-L3-02', escopo:'vendedora', loja:'L3', vendedora:'Naila', tipo:'treinamento', meta_alvo:'vendas_individuais',
        titulo:'Naila (L3) — Acompanhamento pós-zero',
-       descricao:'Naila vendeu R$0 em S1, R$1.632 em S2, R$362 em S3. Está em ramp-up? Combinar com Ana Mira shadow de 3 dias + roteiro de abordagem escrito.'},
+       descricao:'Naila vendeu R$0 em S1, R$1.632 em S2, R$362 em S3. Está em ramp-up? Ana Mira (gerente) deve combinar shadow de 3 dias + roteiro de abordagem escrito.'},
       {id:'2026-W21-L3-03', escopo:'loja', loja:'L3', tipo:'ticket_medio', meta_alvo:'ticket_medio',
        titulo:'L3 — Combo finalizador',
        descricao:'Itaituba tem boa entrada de clientes mas ticket baixo. Criar combo "leve 3 pague 2" em finalizadores (creme + leave-in + óleo) de marcas A. Comunicar no caixa e na entrada.'},
 
       // ── L4 — MissBeleza Altamira (boa em Marcas A!) ──
-      {id:'2026-W21-L4-01', escopo:'loja', loja:'L4', tipo:'meta', meta_alvo:'atingir_meta',
-       titulo:'L4 — Acelerar S3 e S4',
-       descricao:'L4 fez R$35.660 em S1 mas só R$24.974 em S2 e tem R$3.180 em 2 dias de S3. Para fechar maio em 100% precisa fazer ~R$45k nas 2 últimas semanas (média semanal histórica). Reforçar escala fim de semana e push de marcas-bandeira.'},
-      {id:'2026-W21-L4-03', escopo:'loja', loja:'L4', tipo:'layout', meta_alvo:'marcas_a',
+      {id:'2026-W21-L4-01', escopo:'vendedora', loja:'L4', vendedora:'Tanaia', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'Tanaia (L4, gerente/gestante) — Delegar mais, liderar',
+       descricao:'Tanaia é gerente e está grávida; ritmo individual reduzido é esperado, mas como gerente o resultado da L4 ainda é cobrança dela. Foco: delegar fechamento pra Bruna F. e Josilene, organizar escala fim de semana, dar shadow pra Rosana (nova). Vendas pessoais menores OK.'},
+      {id:'2026-W21-L4-03', escopo:'vendedora', loja:'L4', vendedora:'Rosana', tipo:'treinamento', meta_alvo:'vendas_individuais',
+       titulo:'Rosana (L4, nova) — Plano de ramp-up',
+       descricao:'Rosana é vendedora nova vinda da L1. Fez R$5.161 em S1 (bom para inicial). Manter pareamento com Bruna F. (top da L4) por 2 manhãs/semana + roteiro de abordagem das marcas A da L4. Não cobrar meta individual nas primeiras 4 semanas.'},
+      {id:'2026-W21-L4-04', escopo:'loja', loja:'L4', tipo:'layout', meta_alvo:'marcas_a',
        titulo:'L4 — Manter liderança em Marcas A',
        descricao:'L4 já está em 22-30% Marcas A (melhor performance do grupo). Reforçar com cartaz no caixa "indique uma marca A e ganhe brinde" + manter exposição das marcas A no ponto extra da gôndola.'},
 
       // ── L5 — MissBeleza Santarém ──
-      {id:'2026-W21-L5-01', escopo:'vendedora', loja:'L5', vendedora:'Lucas', tipo:'treinamento', meta_alvo:'vendas_individuais',
-       titulo:'Lucas (L5) — Performance crítica',
-       descricao:'Lucas vendeu R$295/R$53/R$1 nas 3 semanas. Avaliar permanência ou plano de recuperação de 30 dias com metas diárias e acompanhamento 1:1 toda manhã.'},
+      {id:'2026-W21-L5-01', escopo:'vendedora', loja:'L5', vendedora:'Karina', tipo:'treinamento', meta_alvo:'vendas_individuais',
+       titulo:'Karina (L5, nova) — Plano de ramp-up',
+       descricao:'Karina é vendedora nova (em aprendizado). Tem feito ~R$2,6k/sem o que é razoável pro estágio. Parear com Joyce 2 manhãs por semana + roteiro escrito de abordagem + acompanhamento de Rosiene (gerente) no fechamento.'},
       {id:'2026-W21-L5-02', escopo:'loja', loja:'L5', tipo:'marca', meta_alvo:'marcas_a',
        titulo:'L5 — Empurrar Marcas A para 30%',
-       descricao:'L5 está em 19-26% (faltam 4-11pp para destravar bônus). Foco em Truss, Itallian e Santa Clara — combo profissional + finalizador. Treinar Rayssa e Joyce para sugerir marca A primeiro.'},
-      {id:'2026-W21-L5-03', escopo:'vendedora', loja:'L5', vendedora:'Rayssa', tipo:'cliente_recorrente', meta_alvo:'vendas_individuais',
-       titulo:'Rayssa (L5) — Manter ritmo',
-       descricao:'Rayssa lidera Santarém (R$14.021). Premiar publicamente em reunião de equipe + pedir para liderar treinamento informal de 30min com a equipe sexta sobre técnica de fechamento.'},
+       descricao:'L5 está em 19-26% (faltam 4-11pp para destravar bônus). Foco em Truss, Itallian e Santa Clara — combo profissional + finalizador. Rosiene (gerente) deve treinar Rayssa e Joyce para sugerir marca A primeiro.'},
+      {id:'2026-W21-L5-03', escopo:'vendedora', loja:'L5', vendedora:'Rosiene', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'Rosiene (L5, gerente) — Liderar fechamento de S3/S4',
+       descricao:'Rosiene como gerente: organizar escala do fim de semana, garantir que Rayssa e Joyce mantêm ritmo, dar shadow pra Karina (nova). Cobrança maior pelo coletivo da L5 fechar maio em 100%.'},
 
       // ── GERAL ──
       {id:'2026-W21-GE-01', escopo:'geral', tipo:'comunicacao', meta_alvo:'conversao',
@@ -439,6 +486,7 @@ function indivPrize(mesKey, lojaKey, v) {
   },0);
   const lojaEM = ld.meta_mensal > 0 ? lojaTot/ld.meta_mensal : 0;
   const vTot = ld.semanas.reduce((s,sem)=>s+((ld.vendas[sem.id]||{})[v]||0),0);
+  if (isCaixa(v)) return {prize:0, eligible:false, cond:'caixa', vTot, lojaEM};
   const vMA = (ld.marcasA_indiv||{})[v] || 0;
   const condA = lojaEM >= 0.9 && vTot >= 31000;
   const condB = lojaEM < 0.9 && vTot >= 40000;
@@ -479,16 +527,23 @@ function renderSemCard(mesKey, lojaKey, ld, semId, semAtual) {
   const tier = fTier(em_pct);
   const barW = Math.min(100, em_pct);
 
-  // Distribuição proporcional do pool
+  // Distribuição proporcional do pool (caixa não entra na divisão)
   let distrib = '';
   if (hasData && pool > 0) {
     const vends = LOJAS_BASE[lojaKey].vendedoras;
+    const totalDistrib = vends.reduce((s,v)=> s + (isCaixa(v)?0:(vendas[v]||0)), 0);
     const rows = vends.map(v => {
       const vv = vendas[v] || 0;
       if (!vv) return '';
-      const share = pool * (vv / total);
+      if (isCaixa(v)) {
+        return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+          <span style="color:var(--muted);font-size:11px">${v} ${vBadges(v)}</span>
+          <span style="font-size:11px;color:var(--muted)">—</span>
+        </div>`;
+      }
+      const share = totalDistrib > 0 ? pool * (vv / totalDistrib) : 0;
       return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">
-        <span style="color:var(--muted);font-size:11px">${v}</span>
+        <span style="color:var(--muted);font-size:11px">${v} ${vBadges(v)}</span>
         <span style="font-size:11px;font-weight:600;color:var(--green)">${fR(share)}</span>
       </div>`;
     }).join('');
@@ -573,34 +628,45 @@ function renderVendsTable(mesKey, lojaKey, ld) {
     const vTot = sems.reduce((s,sem)=>s+((ld.vendas[sem.id]||{})[v]||0),0);
 
     // Prêmios semanais (sems concluídas = sem atual excluída do "pago")
+    // Caixa não recebe prêmio individual
+    const caixa = isCaixa(v);
     let premSem = 0;
-    sems.forEach(s => {
-      if (s.id === semAtual) return; // em curso
-      const c = calcSemana(ld, s.id);
-      const vv = (ld.vendas[s.id]||{})[v] || 0;
-      if (vv > 0 && c.pool > 0 && c.total > 0) {
-        premSem += c.pool * (vv / c.total);
-      }
-    });
+    if (!caixa) {
+      sems.forEach(s => {
+        if (s.id === semAtual) return; // em curso
+        const c = calcSemana(ld, s.id);
+        const vv = (ld.vendas[s.id]||{})[v] || 0;
+        if (vv > 0 && c.pool > 0 && c.total > 0) {
+          const totalDistr = LOJAS_BASE[lojaKey].vendedoras
+            .reduce((acc,x)=> acc + (isCaixa(x)?0:((ld.vendas[s.id]||{})[x]||0)), 0);
+          if (totalDistr > 0) premSem += c.pool * (vv / totalDistr);
+        }
+      });
+    }
 
     const mi = indivPrize(mesKey, lojaKey, v);
 
     return `<div class="vt-row" style="${cols}">
-      <div class="vt-name">${v}</div>
+      <div class="vt-name">${v}${vBadges(v)}</div>
       ${semVals}
       <div class="cell-r">
         <div class="cell-amt">${vTot>0?fR(vTot):'—'}</div>
       </div>
       <div class="cell-r">
-        <div class="prize-cell" style="color:${premSem>0?'var(--green)':'var(--muted)'}">${premSem>0?fR(premSem):'—'}</div>
-        <div class="cell-sub">S1+S2 concluídas</div>
+        ${caixa
+          ? `<div class="cell-sub" style="color:var(--muted)">não recebe<br>(caixa)</div>`
+          : `<div class="prize-cell" style="color:${premSem>0?'var(--green)':'var(--muted)'}">${premSem>0?fR(premSem):'—'}</div>
+             <div class="cell-sub">sems concluídas</div>`
+        }
       </div>
       <div class="cell-r">
-        ${mi.eligible
-          ? `<div class="prize-cell" style="color:var(--yellow)">${fR(mi.prize)}</div>
-             <span class="cond-badge ${mi.cond==='A'?'cond-a':'cond-b'}">Cond. ${mi.cond}</span>
-             ${mi.vMA>=30?'<div class="cell-sub" style="color:var(--yellow)">bônus MA ✦</div>':''}`
-          : `<div class="cell-sub" style="color:var(--muted)">${projMensalNote(mi)}</div>`
+        ${caixa
+          ? `<div class="cell-sub" style="color:var(--muted)">não recebe<br>(caixa)</div>`
+          : mi.eligible
+            ? `<div class="prize-cell" style="color:var(--yellow)">${fR(mi.prize)}</div>
+               <span class="cond-badge ${mi.cond==='A'?'cond-a':'cond-b'}">Cond. ${mi.cond}</span>
+               ${mi.vMA>=30?'<div class="cell-sub" style="color:var(--yellow)">bônus MA ✦</div>':''}`
+            : `<div class="cell-sub" style="color:var(--muted)">${projMensalNote(mi)}</div>`
         }
       </div>
     </div>`;
