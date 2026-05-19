@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grupo A.M. Gomes — Central de Dashboards</title>
+<style>
+:root {
+  --bg:#0f172a; --bg2:#1e293b; --bg3:#334155;
+  --text:#f1f5f9; --muted:#94a3b8; --border:#334155;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+.hdr{background:var(--bg2);border-bottom:1px solid var(--border);padding:28px 40px}
+.hdr h1{font-size:22px;font-weight:700;background:linear-gradient(90deg,#7c5cfc,#00d4aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hdr p{color:var(--muted);font-size:13px;margin-top:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;padding:40px;max-width:1200px;width:100%}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;cursor:pointer;text-decoration:none;display:block;transition:all .18s;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;inset:0;border-radius:16px;opacity:0;transition:opacity .18s}
+.card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.card:hover::before{opacity:1}
+.card[data-color="purple"]::before{background:rgba(124,92,252,.07);border:1px solid rgba(124,92,252,.35)}
+.card[data-color="teal"]::before{background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.35)}
+.card[data-color="gold"]::before{background:rgba(255,179,71,.07);border:1px solid rgba(255,179,71,.35)}
+.card[data-color="blue"]::before{background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.35)}
+.card-icon{font-size:32px;margin-bottom:16px;display:block}
+.card-title{font-size:17px;font-weight:700;margin-bottom:6px}
+.card-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px}
+.card-chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--bg3);border-radius:5px;padding:3px 10px;font-size:11px;color:var(--muted)}
+.card-arrow{position:absolute;top:24px;right:24px;color:var(--muted);font-size:18px;transition:transform .18s}
+.card:hover .card-arrow{transform:translateX(3px);color:var(--text)}
+.badge-new{background:rgba(34,197,94,.2);color:#22c55e;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;position:absolute;top:24px;left:28px;transform:translateY(-28px)}
+.coming{opacity:.5;cursor:default}
+.coming:hover{transform:none;box-shadow:none}
+.soon-tag{position:absolute;top:14px;right:14px;background:var(--bg3);color:var(--muted);font-size:10px;font-weight:700;padding:3px 9px;border-radius:5px}
+footer{margin-top:auto;padding:20px 40px;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>Grupo A.M. Gomes</h1>
+  <p>Central de dashboards — clique para abrir</p>
+</div>
+
+<div class="grid">
+
+  <a href="dashboard_amgomes.html" class="card" data-color="purple">
+    <span class="card-icon">📊</span>
+    <div class="card-title">Dashboard Financeiro</div>
+    <div class="card-desc">Faturamento das 4 lojas, metas mensais, comparativo YoY e indicadores de desempenho.</div>
+    <div class="card-chips">
+      <span class="chip">L1 · L3 · L4 · L5</span>
+      <span class="chip">Faturamento</span>
+      <span class="chip">Metas</span>
+    </div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a href="dashboard_premiacao.html" class="card" data-color="gold">
+    <span class="card-icon">🏆</span>
+    <div class="card-title">Dashboard de Premiação</div>
+    <div class="card-desc">Prêmios semanais e mensais por loja e por vendedora. Acompanhamento do EM%, Marcas A e distribuição proporcional do pool.</div>
+    <div class="card-chips">
+      <span class="chip">Premiação 2026</span>
+      <span class="chip">Marcas A</span>
+      <span class="chip">Individual</span>
+    </div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a href="compras/dashboard_compras.html" class="card" data-color="teal">
+    <span class="card-icon">📦</span>
+    <div class="card-title">Dashboard de Compras</div>
+    <div class="card-desc">Estoque, cobertura em dias, sugestões de compra por marca e trânsito de NFs pendentes.</div>
+    <div class="card-chips">
+      <span class="chip">Curva S/A/B</span>
+      <span class="chip">NFes em trânsito</span>
+      <span class="chip">Sugestões</span>
+    </div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <!-- Adicione novos dashboards aqui -->
+
+</div>
+
+<footer>Grupo A.M. Gomes · Atualizado automaticamente via ERP Microvix</footer>
+
+</body>
+</html>

@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premiação 2026 — Grupo A.M. Gomes</title>
+<style>
+:root {
+  --bg:#0f172a; --bg2:#1e293b; --bg3:#334155;
+  --text:#f1f5f9; --muted:#94a3b8; --border:#334155;
+  --green:#22c55e; --yellow:#eab308; --red:#ef4444; --blue:#3b82f6; --orange:#f97316;
+  --L1:#ffb347; --L3:#00d4aa; --L4:#7c5cfc; --L5:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px}
+/* ── header ── */
+.hdr{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.hdr h1{font-size:17px;font-weight:700}
+.hdr-sub{color:var(--muted);font-size:12px;margin-top:1px}
+select.mes-sel{background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;margin-left:auto}
+select.mes-sel:focus{outline:none;border-color:var(--blue)}
+/* ── tabs ── */
+.tabs{display:flex;gap:6px;padding:14px 24px 0;overflow-x:auto}
+.tab{padding:7px 18px;border-radius:8px 8px 0 0;cursor:pointer;font-weight:600;font-size:12px;border:1px solid var(--border);border-bottom:none;background:var(--bg2);color:var(--muted);white-space:nowrap;transition:all .15s}
+.tab[data-k="L1"].on{background:rgba(255,179,71,.15);color:var(--L1);border-color:var(--L1)}
+.tab[data-k="L3"].on{background:rgba(0,212,170,.15);color:var(--L3);border-color:var(--L3)}
+.tab[data-k="L4"].on{background:rgba(124,92,252,.15);color:var(--L4);border-color:var(--L4)}
+.tab[data-k="L5"].on{background:rgba(239,68,68,.15);color:var(--L5);border-color:var(--L5)}
+.tab[data-k="anual"].on{background:rgba(59,130,246,.15);color:var(--blue);border-color:var(--blue)}
+/* ── content ── */
+.content{padding:0 24px 40px}
+.empty-mes{text-align:center;padding:60px 24px;color:var(--muted)}
+.empty-mes h2{font-size:18px;margin-bottom:8px;color:var(--text)}
+/* ── loja header ── */
+.loja-hdr{background:var(--bg2);border:1px solid var(--border);border-radius:0 12px 12px 12px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.loja-nm{font-size:15px;font-weight:700}
+.pill{background:var(--bg3);border-radius:6px;padding:3px 10px;font-size:12px;color:var(--muted)}
+.pill b{color:var(--text)}
+/* ── semanas grid ── */
+.sems-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:22px}
+.sem-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative}
+.sem-card.current{border-color:var(--blue)}
+.sem-card.current::before{content:'ATUAL';position:absolute;top:-9px;right:14px;background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px}
+.sem-card.future{opacity:.55}
+.sem-ttl{font-weight:700;font-size:13px;margin-bottom:2px}
+.sem-per{color:var(--muted);font-size:11px;margin-bottom:10px}
+.sem-nums{display:flex;gap:10px;margin-bottom:10px}
+.num-blk{flex:1}
+.num-blk label{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:1px}
+.num-blk .v{font-size:15px;font-weight:700}
+.num-blk .s{font-size:11px;color:var(--muted)}
+.prog{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:10px}
+.prog-fill{height:100%;border-radius:3px}
+.pool-row{display:flex;justify-content:space-between;align-items:center;background:var(--bg3);border-radius:7px;padding:7px 10px;margin-bottom:7px}
+.pool-lbl{font-size:11px;color:var(--muted)}
+.pool-val{font-size:14px;font-weight:700}
+.bonus-tag{font-size:10px;color:var(--yellow);margin-left:5px}
+.marcasa-row{display:flex;align-items:center;gap:6px;margin-top:8px;padding:6px 10px;background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.18);border-radius:7px}
+.marcasa-row label{font-size:11px;color:var(--yellow);flex:1}
+input.mа-in{width:54px;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:2px 7px;font-size:12px;text-align:right}
+input.mа-in:focus{outline:none;border-color:var(--blue)}
+.ma-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600}
+.ma-ok{background:rgba(34,197,94,.2);color:var(--green)}
+.ma-no{background:rgba(148,163,184,.1);color:var(--muted)}
+/* ── tier badge ── */
+.tier{display:inline-flex;align-items:center;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700}
+.t-none{background:rgba(148,163,184,.1);color:var(--muted)}
+.t-0{background:rgba(239,68,68,.15);color:var(--red)}
+.t-70{background:rgba(239,68,68,.15);color:var(--red)}
+.t-80{background:rgba(234,179,8,.15);color:var(--yellow)}
+.t-90{background:rgba(234,179,8,.15);color:var(--yellow)}
+.t-100{background:rgba(34,197,94,.15);color:var(--green)}
+.t-110{background:rgba(34,197,94,.2);color:var(--green)}
+.t-120{background:rgba(59,130,246,.2);color:var(--blue)}
+/* ── secao titulo ── */
+.sec-ttl{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+.sec-ttl::after{content:'';flex:1;height:1px;background:var(--border)}
+/* ── vendedoras table ── */
+.vt{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:22px}
+.vt-hdr,.vt-row{display:grid;gap:0;padding:9px 14px;align-items:center}
+.vt-hdr{background:var(--bg3);font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:600}
+.vt-row{border-top:1px solid var(--border);transition:background .12s}
+.vt-row:hover{background:rgba(255,255,255,.03)}
+.vt-name{font-weight:600;font-size:13px}
+.cell-r{text-align:right}
+.cell-amt{font-size:12px;font-weight:600}
+.cell-sub{font-size:10px;color:var(--muted)}
+.prize-cell{font-weight:700;font-size:13px}
+/* ── resumo mensal ── */
+.resumo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:8px}
+.resumo-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.rc-ttl{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.rc-val{font-size:22px;font-weight:700}
+.rc-sub{font-size:11px;color:var(--muted);margin-top:4px}
+/* ── marcas A individual (mes) ── */
+.indiv-ma-section{background:var(--bg2);border:1px solid rgba(234,179,8,.3);border-radius:10px;padding:14px;margin-bottom:22px}
+.ima-ttl{font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:10px}
+.ima-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.ima-row{display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:7px;padding:7px 10px}
+.ima-name{flex:1;font-size:12px}
+/* ── annual view ── */
+.annual-table-wrap{overflow-x:auto;margin-bottom:24px}
+.annual-table{border-collapse:collapse;width:100%;min-width:700px}
+.annual-table th,.annual-table td{padding:9px 12px;text-align:right;border-bottom:1px solid var(--border);font-size:12px;white-space:nowrap}
+.annual-table th{background:var(--bg3);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase}
+.annual-table td.loja-col{text-align:left;font-weight:700}
+.annual-table tr.subtotal td{background:rgba(255,255,255,.02);font-weight:700;color:var(--text)}
+.annual-table tr.grand td{background:rgba(59,130,246,.07);font-weight:700;color:var(--blue);font-size:13px}
+.cell-green{color:var(--green)}
+.cell-yellow{color:var(--yellow)}
+.cell-red{color:var(--red)}
+.cell-muted{color:var(--muted)}
+/* ── info nota ── */
+.nota{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:9px 13px;font-size:12px;color:#93c5fd;margin-bottom:16px;line-height:1.5}
+/* ── indiv prize condition ── */
+.cond-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700}
+.cond-a{background:rgba(34,197,94,.15);color:var(--green)}
+.cond-b{background:rgba(59,130,246,.15);color:var(--blue)}
+.cond-no{background:rgba(148,163,184,.1);color:var(--muted)}
+input[type=number]{-moz-appearance:textfield}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <h1>Dashboard de Premiação — Grupo A.M. Gomes</h1>
+    <div class="hdr-sub" id="hdr-sub">Maio 2026</div>
+  </div>
+  <select class="mes-sel" id="mes-sel" onchange="setMes(this.value)">
+    <option value="2026-05">Maio 2026</option>
+    <option value="2026-06">Junho 2026</option>
+    <option value="2026-07">Julho 2026</option>
+    <option value="2026-08">Agosto 2026</option>
+    <option value="2026-09">Setembro 2026</option>
+    <option value="2026-10">Outubro 2026</option>
+    <option value="2026-11">Novembro 2026</option>
+    <option value="2026-12">Dezembro 2026</option>
+  </select>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab on" data-k="L1" onclick="setTab('L1')">L1 · CB Altamira</div>
+  <div class="tab" data-k="L3" onclick="setTab('L3')">L3 · CB Itaituba</div>
+  <div class="tab" data-k="L4" onclick="setTab('L4')">L4 · MB Altamira</div>
+  <div class="tab" data-k="L5" onclick="setTab('L5')">L5 · MB Santarém</div>
+  <div class="tab" data-k="anual" onclick="setTab('anual')">Visão Anual</div>
+</div>
+
+<div class="content" id="content"></div>
+
+<script>
+// ─── BASE ────────────────────────────────────────────────────────────────────
+
+const LOJAS_BASE = {
+  L1: { nome:'Casa da Beleza Altamira', cor:'#ffb347',
+        vendedoras:['Tatiane','Rayra','Alcione','Sofia','Rosana'] },
+  L3: { nome:'Casa da Beleza Itaituba', cor:'#00d4aa',
+        vendedoras:['Ana Mira','Raimunda','Brunna','Naila'] },
+  L4: { nome:'MissBeleza Altamira', cor:'#7c5cfc',
+        vendedoras:['Tanaia','Josilene','Bruna F.','Rosana','Sofia'] },
+  L5: { nome:'MissBeleza Santarém', cor:'#ef4444',
+        vendedoras:['Rayssa','Joyce','Rosiene','Karina','Lucas'] },
+};
+
+// ─── DADOS ──────────────────────────────────────────────────────────────────
+
+const DADOS = {
+  '2026-05': {
+    semana_atual: 'S3',
+    L1: {
+      meta_mensal: 140000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'02/05–09/05', meta:45000},
+        {id:'S2', label:'Semana 2', periodo:'11/05–16/05', meta:35000},
+        {id:'S3', label:'Semana 3', periodo:'18/05–23/05', meta:30000, parcial:'2 de 6 dias'},
+        {id:'S4', label:'Semana 4', periodo:'25/05–30/05', meta:30000},
+      ],
+      vendas: {
+        S1:{Tatiane:14328,Rayra:13889,Alcione:8744,Sofia:4845,Rosana:780},
+        S2:{Tatiane:8513,Rayra:7841,Alcione:4803,Sofia:6015,Rosana:0},
+        S3:{Tatiane:2079,Rayra:893,Alcione:975,Sofia:818,Rosana:0},
+        S4:{},
+      },
+      marcasA_loja: {S1:19.2, S2:22.0, S3:20.6, S4:0},
+      marcasA_indiv: {},
+    },
+    L3: {
+      meta_mensal: 80000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'02/05–09/05', meta:25000},
+        {id:'S2', label:'Semana 2', periodo:'11/05–16/05', meta:20000},
+        {id:'S3', label:'Semana 3', periodo:'18/05–23/05', meta:15000, parcial:'2 de 6 dias'},
+        {id:'S4', label:'Semana 4', periodo:'25/05–30/05', meta:20000},
+      ],
+      vendas: {
+        S1:{'Ana Mira':9010,Raimunda:5930,Brunna:6954,Naila:0},
+        S2:{'Ana Mira':3651,Raimunda:4424,Brunna:3713,Naila:1632},
+        S3:{'Ana Mira':727,Raimunda:854,Brunna:691,Naila:362},
+        S4:{},
+      },
+      marcasA_loja: {S1:24.7, S2:23.0, S3:22.4, S4:0},
+      marcasA_indiv: {},
+    },
+    L4: {
+      meta_mensal: 140000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'02/05–09/05', meta:45000},
+        {id:'S2', label:'Semana 2', periodo:'11/05–16/05', meta:35000},
+        {id:'S3', label:'Semana 3', periodo:'18/05–23/05', meta:30000, parcial:'2 de 6 dias'},
+        {id:'S4', label:'Semana 4', periodo:'25/05–30/05', meta:30000},
+      ],
+      vendas: {
+        S1:{Tanaia:13431,Josilene:9183,'Bruna F.':6929,Rosana:5161,Sofia:1156},
+        S2:{Tanaia:4644,Josilene:5628,'Bruna F.':11627,Rosana:3075,Sofia:0},
+        S3:{Tanaia:648,Josilene:1119,'Bruna F.':704,Rosana:709,Sofia:0},
+        S4:{},
+      },
+      marcasA_loja: {S1:27.3, S2:22.2, S3:29.8, S4:0},
+      marcasA_indiv: {},
+    },
+    L5: {
+      meta_mensal: 90000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'02/05–09/05', meta:30000},
+        {id:'S2', label:'Semana 2', periodo:'11/05–16/05', meta:20000},
+        {id:'S3', label:'Semana 3', periodo:'18/05–23/05', meta:20000, parcial:'2 de 6 dias'},
+        {id:'S4', label:'Semana 4', periodo:'25/05–30/05', meta:20000},
+      ],
+      vendas: {
+        S1:{Rayssa:7651,Joyce:7037,Rosiene:5399,Karina:2611,Lucas:295},
+        S2:{Rayssa:4746,Joyce:4805,Rosiene:1098,Karina:4698,Lucas:53},
+        S3:{Rayssa:1624,Joyce:280,Rosiene:1007,Karina:600,Lucas:1},
+        S4:{},
+      },
+      marcasA_loja: {S1:21.1, S2:25.9, S3:19.4, S4:0},
+      marcasA_indiv: {},
+    },
+  },
+  // Meses futuros: adicionar dados ao longo do ano
+  '2026-06': null,
+  '2026-07': null,
+  '2026-08': null,
+  '2026-09': null,
+  '2026-10': null,
+  '2026-11': null,
+  '2026-12': null,
+};
+
+// Metas futuras (atualizar conforme planejamento)
+const METAS_FUTURAS = {
+  '2026-06': {L1:130000,L3:75000,L4:130000,L5:85000},
+  '2026-07': {L1:135000,L3:78000,L4:135000,L5:88000},
+  '2026-08': {L1:135000,L3:78000,L4:135000,L5:88000},
+  '2026-09': {L1:130000,L3:75000,L4:130000,L5:85000},
+  '2026-10': {L1:140000,L3:80000,L4:140000,L5:90000},
+  '2026-11': {L1:145000,L3:82000,L4:145000,L5:92000},
+  '2026-12': {L1:160000,L3:90000,L4:160000,L5:100000},
+};
+
+// ─── TABELAS DE PRÊMIO ───────────────────────────────────────────────────────
+
+// [%_minimo, pool_base, pool_com_marcasA]  — pool total dividido proporcional
+const SEMANAL_TABLE = [
+  [120, 420, 470],
+  [110, 350, 400],
+  [100, 280, 330],
+  [ 90, 180, 230],
+  [ 80, 100, 120],
+  [ 70,  80, 100],
+  [  0,   0,   0],
+];
+
+// [vendas_min, premio_base, premio_com_marcasA]  — individual por vendedora
+const MENSAL_TABLE = [
+  [55000, 600, 650],
+  [50000, 500, 550],
+  [45000, 400, 450],
+  [40000, 300, 350],
+  [35000, 200, 250],
+  [31000, 100, 150],
+  [    0,   0,   0],
+];
+
+// ─── CÁLCULO ─────────────────────────────────────────────────────────────────
+
+function getPool(em_pct, marcasA_pct) {
+  const bonus = marcasA_pct >= 30;
+  if (em_pct >= 120) {
+    const extra = Math.floor((em_pct - 120) / 10);
+    const base = 420 + extra * 70;
+    return bonus ? base + 50 : base;
+  }
+  for (const [min, b, bn] of SEMANAL_TABLE) {
+    if (em_pct >= min) return bonus ? bn : b;
+  }
+  return 0;
+}
+
+function calcSemana(ld, semId) {
+  const sem = ld.semanas.find(s => s.id === semId);
+  const vendas = ld.vendas[semId] || {};
+  const total = Object.values(vendas).reduce((s,v)=>s+(v||0),0);
+  const em_pct = sem.meta > 0 ? total/sem.meta*100 : 0;
+  const ma = ld.marcasA_loja[semId] || 0;
+  const pool = total > 0 ? getPool(em_pct, ma) : 0;
+  return {sem, total, em_pct, ma, pool, vendas};
+}
+
+function indivPrize(mesKey, lojaKey, v) {
+  const ld = DADOS[mesKey][lojaKey];
+  const lojaTot = ld.semanas.reduce((s,sem)=>{
+    return s + Object.values(ld.vendas[sem.id]||{}).reduce((a,x)=>a+(x||0),0);
+  },0);
+  const lojaEM = ld.meta_mensal > 0 ? lojaTot/ld.meta_mensal : 0;
+  const vTot = ld.semanas.reduce((s,sem)=>s+((ld.vendas[sem.id]||{})[v]||0),0);
+  const vMA = (ld.marcasA_indiv||{})[v] || 0;
+  const condA = lojaEM >= 0.9 && vTot >= 31000;
+  const condB = lojaEM < 0.9 && vTot >= 40000;
+  if (!condA && !condB) return {prize:0, eligible:false, cond:null, vTot, lojaEM};
+  for (const [min, b, bn] of MENSAL_TABLE) {
+    if (vTot >= min) {
+      return {prize: vMA>=30 ? bn : b, eligible:true, cond:condA?'A':'B', vTot, lojaEM, vMA};
+    }
+  }
+  return {prize:0, eligible:false, cond:null, vTot, lojaEM};
+}
+
+// ─── FORMATO ─────────────────────────────────────────────────────────────────
+
+function fR(v) { return v?'R$'+Math.round(v).toLocaleString('pt-BR'):'—' }
+function fP(v) { return v.toFixed(1)+'%' }
+function fTier(p) {
+  if(p<1) return {cls:'t-none',lbl:'—'};
+  if(p>=120) return {cls:'t-120',lbl:Math.floor(p/10)*10+'%+'};
+  if(p>=110) return {cls:'t-110',lbl:'110%'};
+  if(p>=100) return {cls:'t-100',lbl:'100%'};
+  if(p>=90)  return {cls:'t-90', lbl:'90%'};
+  if(p>=80)  return {cls:'t-80', lbl:'80%'};
+  if(p>=70)  return {cls:'t-70', lbl:'70%'};
+  return {cls:'t-0',lbl:'<70%'};
+}
+function barColor(p) {
+  return p>=100?'#22c55e':p>=80?'#eab308':p>=70?'#f97316':'#ef4444';
+}
+
+// ─── RENDER SEMANA CARD ───────────────────────────────────────────────────────
+
+function renderSemCard(mesKey, lojaKey, ld, semId, semAtual) {
+  const {sem, total, em_pct, ma, pool, vendas} = calcSemana(ld, semId);
+  const hasData = total > 0;
+  const isCurrent = semId === semAtual;
+  const isFuture = !hasData && !isCurrent;
+  const tier = fTier(em_pct);
+  const barW = Math.min(100, em_pct);
+
+  // Distribuição proporcional do pool
+  let distrib = '';
+  if (hasData && pool > 0) {
+    const vends = LOJAS_BASE[lojaKey].vendedoras;
+    const rows = vends.map(v => {
+      const vv = vendas[v] || 0;
+      if (!vv) return '';
+      const share = pool * (vv / total);
+      return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+        <span style="color:var(--muted);font-size:11px">${v}</span>
+        <span style="font-size:11px;font-weight:600;color:var(--green)">${fR(share)}</span>
+      </div>`;
+    }).join('');
+    distrib = `<div style="margin-top:8px;background:var(--bg3);border-radius:7px;padding:8px 10px">
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Distribuição do prêmio</div>
+      ${rows}
+      <div style="display:flex;justify-content:space-between;padding-top:5px;margin-top:2px">
+        <span style="font-size:10px;color:var(--muted)">Total pool</span>
+        <span style="font-size:11px;font-weight:700;color:var(--yellow)">${fR(pool)}</span>
+      </div>
+    </div>`;
+  }
+
+  return `<div class="sem-card ${isCurrent?'current':''} ${isFuture?'future':''}">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+      <div class="sem-ttl">${sem.label}</div>
+      ${hasData ? `<span class="tier ${tier.cls}">${tier.lbl}</span>` : ''}
+    </div>
+    <div class="sem-per">${sem.periodo}${sem.parcial?` · <em style="color:var(--blue);font-style:normal">${sem.parcial}</em>`:''}${isFuture?' · sem dados':''}</div>
+    <div class="sem-nums">
+      <div class="num-blk"><label>Meta loja</label><div class="v">${fR(sem.meta)}</div></div>
+      <div class="num-blk"><label>Real${isCurrent?' (parcial)':''}</label>
+        <div class="v" style="color:${hasData?(em_pct>=90?'#22c55e':em_pct>=70?'#eab308':'#ef4444'):'var(--muted)'}">${hasData?fR(total):'—'}</div>
+        ${hasData?`<div class="s">${fP(em_pct)} da meta</div>`:''}
+      </div>
+      <div class="num-blk"><label>EM%</label>
+        <div class="v">${hasData?fP(em_pct):'—'}</div>
+      </div>
+    </div>
+    ${hasData?`<div class="prog"><div class="prog-fill" style="width:${barW}%;background:${barColor(em_pct)}"></div></div>`:''}
+    <div class="pool-row">
+      <div class="pool-lbl">Pool semanal</div>
+      <div>${hasData && pool>0
+        ? `<span class="pool-val" style="color:var(--green)">${fR(pool)}</span>${ma>=30?'<span class="bonus-tag">✦ bônus Marcas A</span>':''}`
+        : `<span style="color:var(--muted);font-size:12px">sem dados</span>`}</div>
+    </div>
+    <div class="marcasa-row">
+      <label>% Marcas A da loja</label>
+      <input type="number" class="mа-in" min="0" max="100" step="0.1"
+        value="${ma}"
+        oninput="updateMA('${mesKey}','${lojaKey}','${semId}',this.value)">
+      <span class="ma-badge ${ma>=30?'ma-ok':'ma-no'}">${ma>=30?'≥30% ✓':'<30%'}</span>
+    </div>
+    ${distrib}
+  </div>`;
+}
+
+// ─── RENDER TABELA VENDEDORAS ─────────────────────────────────────────────────
+
+function renderVendsTable(mesKey, lojaKey, ld) {
+  const vends = LOJAS_BASE[lojaKey].vendedoras;
+  const sems = ld.semanas;
+  const semAtual = DADOS[mesKey].semana_atual;
+
+  // Colunas: nome | S1 | S2 | S3 | S4 | Total | Prêm.Sem | Prêm.Mensal
+  const cols = 'grid-template-columns:140px repeat(4,90px) 100px 110px 120px';
+
+  const semCols = sems.map(s => {
+    const c = calcSemana(ld, s.id);
+    return `<div style="text-align:right">${s.label}${s.id===semAtual?'<br><span style="font-size:9px;color:var(--blue)">parcial</span>':''}</div>`;
+  }).join('');
+
+  let header = `<div class="vt-hdr" style="${cols}">
+    <div>Vendedora</div>${semCols}
+    <div style="text-align:right">Total</div>
+    <div style="text-align:right">Prêm. Sem.</div>
+    <div style="text-align:right">Prêm. Mensal</div>
+  </div>`;
+
+  let rows = vends.map(v => {
+    const semVals = sems.map(s => {
+      const c = calcSemana(ld, s.id);
+      const vv = (ld.vendas[s.id]||{})[v] || 0;
+      const pct = c.total > 0 ? vv/c.total*100 : 0;
+      const isCur = s.id === semAtual;
+      return `<div class="cell-r">
+        <div class="cell-amt">${vv>0?fR(vv):'—'}</div>
+        ${vv>0?`<div class="cell-sub">${fP(pct)}</div>`:''}
+      </div>`;
+    }).join('');
+
+    const vTot = sems.reduce((s,sem)=>s+((ld.vendas[sem.id]||{})[v]||0),0);
+
+    // Prêmios semanais (sems concluídas = sem atual excluída do "pago")
+    let premSem = 0;
+    sems.forEach(s => {
+      if (s.id === semAtual) return; // em curso
+      const c = calcSemana(ld, s.id);
+      const vv = (ld.vendas[s.id]||{})[v] || 0;
+      if (vv > 0 && c.pool > 0 && c.total > 0) {
+        premSem += c.pool * (vv / c.total);
+      }
+    });
+
+    const mi = indivPrize(mesKey, lojaKey, v);
+
+    return `<div class="vt-row" style="${cols}">
+      <div class="vt-name">${v}</div>
+      ${semVals}
+      <div class="cell-r">
+        <div class="cell-amt">${vTot>0?fR(vTot):'—'}</div>
+      </div>
+      <div class="cell-r">
+        <div class="prize-cell" style="color:${premSem>0?'var(--green)':'var(--muted)'}">${premSem>0?fR(premSem):'—'}</div>
+        <div class="cell-sub">S1+S2 concluídas</div>
+      </div>
+      <div class="cell-r">
+        ${mi.eligible
+          ? `<div class="prize-cell" style="color:var(--yellow)">${fR(mi.prize)}</div>
+             <span class="cond-badge ${mi.cond==='A'?'cond-a':'cond-b'}">Cond. ${mi.cond}</span>
+             ${mi.vMA>=30?'<div class="cell-sub" style="color:var(--yellow)">bônus MA ✦</div>':''}`
+          : `<div class="cell-sub" style="color:var(--muted)">${projMensalNote(mi)}</div>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="vt">${header}${rows}</div>`;
+}
+
+function projMensalNote(mi) {
+  const {vTot, lojaEM} = mi;
+  if (lojaEM >= 0.9) {
+    const faltam = Math.max(0, 31000 - vTot);
+    return faltam > 0 ? `faltam ${fR(faltam)} p/ R$31k` : 'loja <90% da meta';
+  }
+  const faltam = Math.max(0, 40000 - vTot);
+  return faltam > 0 ? `faltam ${fR(faltam)} p/ R$40k` : 'verificar loja';
+}
+
+// ─── RENDER RESUMO MENSAL ─────────────────────────────────────────────────────
+
+function renderResumo(mesKey, lojaKey, ld) {
+  const semAtual = DADOS[mesKey].semana_atual;
+  const vends = LOJAS_BASE[lojaKey].vendedoras;
+
+  // Total prêmios semanais pagos (excluindo semana atual)
+  let totalPago = 0;
+  let totalProj = 0;
+  ld.semanas.forEach(s => {
+    const c = calcSemana(ld, s.id);
+    if (c.pool > 0 && c.total > 0) {
+      const nAtivas = Object.values(ld.vendas[s.id]||{}).filter(v=>v>0).length;
+      if (s.id !== semAtual) totalPago += c.pool;
+      totalProj += c.pool;
+    }
+  });
+
+  // Total prêmios mensais individuais projetados
+  let totalMensal = 0;
+  vends.forEach(v => {
+    const mi = indivPrize(mesKey, lojaKey, v);
+    totalMensal += mi.prize;
+  });
+
+  // Acumulado da loja
+  const acum = ld.semanas.reduce((s,sem)=>{
+    return s + Object.values(ld.vendas[sem.id]||{}).reduce((a,v)=>a+(v||0),0);
+  },0);
+  const acumEM = ld.meta_mensal > 0 ? acum/ld.meta_mensal*100 : 0;
+
+  return `<div class="resumo-grid">
+    <div class="resumo-card">
+      <div class="rc-ttl">Acumulado da loja</div>
+      <div class="rc-val" style="color:${acumEM>=90?'#22c55e':acumEM>=70?'#eab308':'#ef4444'}">${fR(acum)}</div>
+      <div class="rc-sub">${fP(acumEM)} da meta mensal (${fR(ld.meta_mensal)})</div>
+    </div>
+    <div class="resumo-card">
+      <div class="rc-ttl">Prêmios semanais (pagos)</div>
+      <div class="rc-val" style="color:var(--green)">${fR(totalPago)}</div>
+      <div class="rc-sub">pool dividido proporcionalmente nas sems concluídas</div>
+    </div>
+    <div class="resumo-card">
+      <div class="rc-ttl">Prêmio mensal individual (proj.)</div>
+      <div class="rc-val" style="color:var(--yellow)">${totalMensal>0?fR(totalMensal):'R$0'}</div>
+      <div class="rc-sub">soma de quem já qualificou (Cond. A ou B)</div>
+    </div>
+    <div class="resumo-card">
+      <div class="rc-ttl">Total prêmios projetado</div>
+      <div class="rc-val" style="color:var(--blue)">${fR(totalProj + totalMensal)}</div>
+      <div class="rc-sub">semanais (todas as sems) + mensais individuais</div>
+    </div>
+  </div>`;
+}
+
+// ─── RENDER MARCAS A INDIVIDUAL (fim do mês) ─────────────────────────────────
+
+function renderMAIndiv(mesKey, lojaKey, ld) {
+  const vends = LOJAS_BASE[lojaKey].vendedoras;
+  const rows = vends.map(v => {
+    const ma = (ld.marcasA_indiv||{})[v] || 0;
+    return `<div class="ima-row">
+      <span class="ima-name">${v}</span>
+      <input type="number" class="mа-in" min="0" max="100" step="0.1" value="${ma}"
+        oninput="updateMAIndiv('${mesKey}','${lojaKey}','${v}',this.value)" placeholder="0">
+      <span class="ma-badge ${ma>=30?'ma-ok':'ma-no'}">${ma>=30?'≥30%':'<30%'}</span>
+    </div>`;
+  }).join('');
+  return `<div class="indiv-ma-section">
+    <div class="ima-ttl">% Marcas A individual (preencher ao fechar o mês — ativa bônus no prêmio mensal)</div>
+    <div class="ima-grid">${rows}</div>
+  </div>`;
+}
+
+// ─── RENDER LOJA ─────────────────────────────────────────────────────────────
+
+function renderLoja(mesKey, lojaKey) {
+  const ld = DADOS[mesKey][lojaKey];
+  const base = LOJAS_BASE[lojaKey];
+  const semAtual = DADOS[mesKey].semana_atual;
+
+  const acum = ld.semanas.slice(0,3).reduce((s,sem)=>{
+    return s + Object.values(ld.vendas[sem.id]||{}).reduce((a,v)=>a+(v||0),0);
+  },0);
+  const acumEM = ld.meta_mensal > 0 ? acum/ld.meta_mensal*100 : 0;
+
+  const semCards = ld.semanas.map(s => renderSemCard(mesKey, lojaKey, ld, s.id, semAtual)).join('');
+
+  return `
+  <div class="loja-hdr">
+    <div class="loja-nm" style="color:${base.cor}">${base.nome}</div>
+    <div class="pill">Meta mensal: <b>${fR(ld.meta_mensal)}</b></div>
+    <div class="pill">Acumulado S1–S3: <b style="color:${acumEM>=90?'#22c55e':acumEM>=70?'#eab308':'#ef4444'}">${fR(acum)} (${fP(acumEM)})</b></div>
+  </div>
+
+  <div class="nota">
+    ℹ️ <b>Prêmio semanal:</b> pool calculado pelo EM% da loja, dividido proporcionalmente à contribuição de cada vendedora.
+    &nbsp;|&nbsp; <b>Bônus Marcas A:</b> se a loja ≥30% → pool semanal maior. Se vendedora ≥30% no mês → bônus individual.
+    &nbsp;|&nbsp; <b>Prêmio mensal (Cond. A):</b> loja ≥90% + vendedora ≥R$31k.
+    &nbsp;|&nbsp; <b>Prêmio mensal (Cond. B):</b> loja <90% mas vendedora ≥R$40k sozinha.
+  </div>
+
+  <div class="sec-ttl">Semanas</div>
+  <div class="sems-grid">${semCards}</div>
+
+  <div class="sec-ttl">Desempenho Individual</div>
+  ${renderVendsTable(mesKey, lojaKey, ld)}
+
+  <div class="sec-ttl">% Marcas A por vendedora (prêmio mensal)</div>
+  ${renderMAIndiv(mesKey, lojaKey, ld)}
+
+  <div class="sec-ttl">Resumo de Premiação</div>
+  ${renderResumo(mesKey, lojaKey, ld)}
+  `;
+}
+
+// ─── RENDER VISÃO ANUAL ───────────────────────────────────────────────────────
+
+function renderAnual() {
+  const meses = ['2026-05','2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12'];
+  const mesNomes = {
+    '2026-05':'Mai','2026-06':'Jun','2026-07':'Jul','2026-08':'Ago',
+    '2026-09':'Set','2026-10':'Out','2026-11':'Nov','2026-12':'Dez'
+  };
+  const lojas = ['L1','L3','L4','L5'];
+
+  // Tabela: loja × mês  → faturamento e prêmios
+  let thCols = meses.map(m=>`<th>${mesNomes[m]}</th>`).join('');
+  let rows = '';
+
+  lojas.forEach(lk => {
+    const base = LOJAS_BASE[lk];
+    let cells = meses.map(mk => {
+      const d = DADOS[mk];
+      if (!d || !d[lk]) {
+        const meta = METAS_FUTURAS[mk] ? METAS_FUTURAS[mk][lk] : '—';
+        return `<td class="cell-muted" title="Meta: ${typeof meta==='number'?fR(meta):'—'}">—</td>`;
+      }
+      const ld = d[lk];
+      const fat = ld.semanas.reduce((s,sem)=>{
+        return s + Object.values(ld.vendas[sem.id]||{}).reduce((a,v)=>a+(v||0),0);
+      },0);
+      const em = ld.meta_mensal > 0 ? fat/ld.meta_mensal*100 : 0;
+      const col = em>=100?'cell-green':em>=80?'cell-yellow':'cell-red';
+      return `<td class="${col}" title="${fP(em)} da meta">${fR(fat)}<br><small>${fP(em)}</small></td>`;
+    }).join('');
+    rows += `<tr><td class="loja-col" style="color:${base.cor}">${base.nome}</td>${cells}</tr>`;
+  });
+
+  // Totais por mês
+  let totCells = meses.map(mk => {
+    const d = DADOS[mk];
+    if (!d) return `<td class="cell-muted">—</td>`;
+    let tot = 0;
+    lojas.forEach(lk => {
+      if (!d[lk]) return;
+      d[lk].semanas.forEach(sem=>{
+        tot += Object.values(d[lk].vendas[sem.id]||{}).reduce((a,v)=>a+(v||0),0);
+      });
+    });
+    return `<td>${tot>0?fR(tot):'—'}</td>`;
+  }).join('');
+
+  // Ranking acumulado de vendedoras (maio)
+  let rankHtml = '';
+  const rankData = {};
+  lojas.forEach(lk => {
+    const d = DADOS['2026-05'];
+    if (!d || !d[lk]) return;
+    const ld = d[lk];
+    LOJAS_BASE[lk].vendedoras.forEach(v => {
+      const tot = ld.semanas.reduce((s,sem)=>s+((ld.vendas[sem.id]||{})[v]||0),0);
+      if (tot > 0) rankData[`${v} (${lk})`] = tot;
+    });
+  });
+  const ranked = Object.entries(rankData).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const maxVal = ranked[0]?.[1] || 1;
+  rankHtml = ranked.map(([name, val], i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span style="width:20px;text-align:right;color:var(--muted);font-size:12px">${i+1}</span>
+      <span style="flex:1;font-size:13px">${name}</span>
+      <div style="width:160px;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${val/maxVal*100}%;background:var(--green);border-radius:3px"></div>
+      </div>
+      <span style="width:90px;text-align:right;font-weight:700;color:var(--green)">${fR(val)}</span>
+    </div>`).join('');
+
+  return `
+  <div class="nota" style="margin-top:16px">Visão consolidada maio–dezembro 2026. Meses futuros serão preenchidos automaticamente via ERP. Clique em uma aba de loja para ver detalhes.</div>
+
+  <div class="sec-ttl">Faturamento por loja × mês</div>
+  <div class="annual-table-wrap">
+    <table class="annual-table">
+      <thead><tr><th style="text-align:left">Loja</th>${thCols}<th>Acumulado</th></tr></thead>
+      <tbody>
+        ${rows}
+        <tr class="grand"><td class="loja-col">TOTAL</td>${totCells}<td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sec-ttl">Top 10 vendedoras — Maio 2026</div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;max-width:640px">
+    ${rankHtml}
+  </div>
+
+  <div class="sec-ttl">Resumo de metas futuras configuradas</div>
+  <div class="annual-table-wrap">
+    <table class="annual-table">
+      <thead><tr><th style="text-align:left">Loja</th>${['2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12'].map(m=>`<th>${mesNomes[m]}</th>`).join('')}</tr></thead>
+      <tbody>
+        ${lojas.map(lk=>{
+          const cells2 = ['2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12'].map(mk=>{
+            const m = METAS_FUTURAS[mk];
+            return `<td class="cell-muted">${m?fR(m[lk]):'—'}</td>`;
+          }).join('');
+          return `<tr><td class="loja-col" style="color:${LOJAS_BASE[lk].cor}">${LOJAS_BASE[lk].nome}</td>${cells2}</tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>
+  `;
+}
+
+// ─── STATE & EVENTOS ─────────────────────────────────────────────────────────
+
+let curMes = '2026-05';
+let curTab = 'L1';
+
+function setMes(m) {
+  curMes = m;
+  document.getElementById('hdr-sub').textContent =
+    {'05':'Maio','06':'Junho','07':'Julho','08':'Agosto','09':'Setembro','10':'Outubro','11':'Novembro','12':'Dezembro'}[m.slice(5)] + ' 2026';
+  rerender();
+}
+
+function setTab(k) {
+  curTab = k;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.k===k));
+  rerender();
+}
+
+function updateMA(mesKey, lojaKey, semId, val) {
+  DADOS[mesKey][lojaKey].marcasA_loja[semId] = parseFloat(val)||0;
+  rerender();
+}
+
+function updateMAIndiv(mesKey, lojaKey, v, val) {
+  if (!DADOS[mesKey][lojaKey].marcasA_indiv) DADOS[mesKey][lojaKey].marcasA_indiv = {};
+  DADOS[mesKey][lojaKey].marcasA_indiv[v] = parseFloat(val)||0;
+  rerender();
+}
+
+function rerender() {
+  const el = document.getElementById('content');
+  if (curTab === 'anual') { el.innerHTML = renderAnual(); return; }
+  const d = DADOS[curMes];
+  if (!d || !d[curTab]) {
+    const metas = METAS_FUTURAS[curMes];
+    el.innerHTML = `<div class="empty-mes">
+      <h2>Sem dados — ${document.getElementById('hdr-sub').textContent}</h2>
+      <p style="margin-top:8px">Meta configurada: ${metas?fR(metas[curTab]):'—'}</p>
+      <p style="margin-top:6px;font-size:12px">Os dados serão preenchidos automaticamente ao rodar o agente ERP no início do mês.</p>
+    </div>`;
+    return;
+  }
+  el.innerHTML = renderLoja(curMes, curTab);
+}
+
+// Init
+rerender();
+</script>
+</body>
+</html>
