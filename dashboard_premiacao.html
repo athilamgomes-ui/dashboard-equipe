@@ -119,6 +119,61 @@ input.mа-in:focus{outline:none;border-color:var(--blue)}
 .cond-no{background:rgba(148,163,184,.1);color:var(--muted)}
 input[type=number]{-moz-appearance:textfield}
 input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+/* ── sugestões ── */
+.tab[data-k="sugestoes"].on{background:rgba(234,179,8,.15);color:var(--yellow);border-color:var(--yellow)}
+.tab[data-k="analise"].on{background:rgba(34,197,94,.15);color:var(--green);border-color:var(--green)}
+.sug-hdr{background:linear-gradient(135deg,rgba(234,179,8,.08),rgba(249,115,22,.05));border:1px solid rgba(234,179,8,.3);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sug-hdr h2{font-size:15px;color:var(--yellow);margin:0}
+.sug-hdr .pill{background:rgba(0,0,0,.25)}
+.sug-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px;margin-bottom:22px}
+.sug-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.sug-card[data-aval="funcionou"]{border-left:4px solid var(--green)}
+.sug-card[data-aval="indiferente"]{border-left:4px solid var(--muted)}
+.sug-card[data-aval="nao_funcionou"]{border-left:4px solid var(--red)}
+.sug-card[data-aval=""]{border-left:4px solid var(--yellow)}
+.sug-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11px}
+.sug-chip{padding:2px 8px;border-radius:5px;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.3px;background:var(--bg3);color:var(--muted)}
+.sug-chip.tipo{background:rgba(124,92,252,.15);color:#a78bfa}
+.sug-chip.alvo{background:rgba(59,130,246,.15);color:#60a5fa}
+.sug-chip.loja{background:rgba(0,0,0,.3);color:var(--text);font-weight:700}
+.sug-chip.vend{background:rgba(0,212,170,.12);color:var(--L3)}
+.sug-ttl{font-size:14px;font-weight:700;line-height:1.3}
+.sug-desc{font-size:12px;color:#cbd5e1;line-height:1.5;white-space:pre-wrap}
+.sug-actions{display:flex;gap:6px;margin-top:4px}
+.sug-btn{flex:1;padding:7px 8px;border:1px solid var(--border);border-radius:7px;background:var(--bg3);color:var(--muted);cursor:pointer;font-size:12px;font-weight:600;transition:all .12s;display:flex;align-items:center;justify-content:center;gap:5px}
+.sug-btn:hover{background:rgba(255,255,255,.06)}
+.sug-btn.on-funcionou{background:rgba(34,197,94,.2);color:var(--green);border-color:var(--green)}
+.sug-btn.on-indiferente{background:rgba(148,163,184,.15);color:#cbd5e1;border-color:var(--muted)}
+.sug-btn.on-nao_funcionou{background:rgba(239,68,68,.2);color:var(--red);border-color:var(--red)}
+.sug-comment{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:6px 9px;font-size:12px;font-family:inherit;resize:vertical;min-height:38px}
+.sug-comment:focus{outline:none;border-color:var(--blue)}
+.sug-saved{font-size:10px;color:var(--green);margin-top:2px}
+.sug-empty{text-align:center;padding:36px 24px;color:var(--muted);background:var(--bg2);border:1px dashed var(--border);border-radius:12px}
+/* ── análise ── */
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:14px;margin-bottom:22px}
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px}
+.chart-card h3{font-size:13px;font-weight:700;margin-bottom:14px;color:var(--text);display:flex;align-items:center;gap:8px}
+.chart-card .chart-sub{font-size:11px;color:var(--muted);margin-bottom:12px}
+.bar-row{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:12px}
+.bar-row .lbl{width:130px;color:#cbd5e1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;display:flex;height:18px;border-radius:5px;background:var(--bg3);overflow:hidden}
+.bar-seg{height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;transition:width .3s}
+.bar-seg.func{background:var(--green)}
+.bar-seg.indif{background:var(--muted)}
+.bar-seg.nao{background:var(--red)}
+.bar-row .tot{width:38px;text-align:right;color:var(--muted);font-size:11px}
+.score-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-weight:700;font-size:11px;margin-left:auto}
+.score-high{background:rgba(34,197,94,.2);color:var(--green)}
+.score-mid{background:rgba(234,179,8,.2);color:var(--yellow)}
+.score-low{background:rgba(239,68,68,.2);color:var(--red)}
+.analise-empty{text-align:center;padding:50px 24px;color:var(--muted)}
+.recents{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:14px}
+.recents h3{font-size:13px;margin-bottom:10px;color:var(--text)}
+.rec-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px}
+.rec-row:last-child{border-bottom:none}
+.rec-row .rec-aval{width:90px;font-weight:700;font-size:11px}
+.rec-row .rec-ttl{flex:1;color:#cbd5e1}
+.rec-row .rec-data{color:var(--muted);font-size:11px;width:80px;text-align:right}
 </style>
 </head>
 <body>
@@ -146,6 +201,8 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
   <div class="tab" data-k="L4" onclick="setTab('L4')">L4 · MB Altamira</div>
   <div class="tab" data-k="L5" onclick="setTab('L5')">L5 · MB Santarém</div>
   <div class="tab" data-k="anual" onclick="setTab('anual')">Visão Anual</div>
+  <div class="tab" data-k="sugestoes" onclick="setTab('sugestoes')">💡 Sugestões</div>
+  <div class="tab" data-k="analise" onclick="setTab('analise')">📊 Análise</div>
 </div>
 
 <div class="content" id="content"></div>
@@ -247,6 +304,79 @@ const DADOS = {
   '2026-11': null,
   '2026-12': null,
 };
+
+// ─── SUGESTÕES SEMANAIS ──────────────────────────────────────────────────────
+// Gerado pelo agente toda segunda-feira 9h. Estrutura: chave = ISO week ('2026-W21').
+// Cada sugestão: {id, escopo:'loja'|'vendedora'|'geral', loja, vendedora, tipo, meta_alvo, titulo, descricao}
+// Tipos: script_venda, treinamento, marca, layout, atendimento, ticket_medio, meta, comunicacao, cliente_recorrente
+// Metas: atingir_meta, marcas_a, ticket_medio, conversao, vendas_individuais
+
+const SUGESTOES = {
+  '2026-W21': {
+    semana_label: 'Semana 18/05 – 23/05',
+    geradas_em: '2026-05-18',
+    itens: [
+      // ── L1 — Casa da Beleza Altamira (S1+S2 ~ 91k de 80k = 113%) ──
+      {id:'2026-W21-L1-01', escopo:'loja', loja:'L1', tipo:'marca', meta_alvo:'marcas_a',
+       titulo:'L1 — Subir marcas A de 20% para 30%',
+       descricao:'L1 está em 20.6% Marcas A em S3 (precisa ≥30% para destravar bônus do pool semanal). Faça uma mini-vitrine na entrada com Truss + Marco Boni + Itallian. Brief de 5min com a equipe sábado de manhã: cada cliente que entrar tem que ouvir uma marca A na primeira sugestão.'},
+      {id:'2026-W21-L1-02', escopo:'vendedora', loja:'L1', vendedora:'Rosana', tipo:'atendimento', meta_alvo:'vendas_individuais',
+       titulo:'Rosana (L1) — Resgatar produtividade',
+       descricao:'Rosana vendeu R$780 em S1 e R$0 em S2/S3. Conversa 1:1 essa semana: entender se é horário/escala, motivação ou treinamento. Se for treinamento, parear com Tatiane por 2 dias para shadow.'},
+      {id:'2026-W21-L1-03', escopo:'vendedora', loja:'L1', vendedora:'Tatiane', tipo:'cliente_recorrente', meta_alvo:'vendas_individuais',
+       titulo:'Tatiane (L1) — Ativar carteira de fiéis',
+       descricao:'Tatiane lidera (R$24.920 acumulado). Pedir para mandar áudio no WhatsApp para 15 clientes top que não voltam há 30+ dias com sugestão de combo capilar. Meta: trazer 5 de volta na semana.'},
+
+      // ── L3 — CB Itaituba (semana mais fraca) ──
+      {id:'2026-W21-L3-01', escopo:'loja', loja:'L3', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'L3 — Recuperar ritmo na semana',
+       descricao:'L3 saiu de R$21.894 em S1 para R$13.420 em S2 — queda de 39%. Verificar: (a) folga ou ausência de vendedora? (b) ruptura de marca-chave? (c) ação local de concorrente? Reunião de 15min com Ana Mira terça pela manhã.'},
+      {id:'2026-W21-L3-02', escopo:'vendedora', loja:'L3', vendedora:'Naila', tipo:'treinamento', meta_alvo:'vendas_individuais',
+       titulo:'Naila (L3) — Acompanhamento pós-zero',
+       descricao:'Naila vendeu R$0 em S1, R$1.632 em S2, R$362 em S3. Está em ramp-up? Combinar com Ana Mira shadow de 3 dias + roteiro de abordagem escrito.'},
+      {id:'2026-W21-L3-03', escopo:'loja', loja:'L3', tipo:'ticket_medio', meta_alvo:'ticket_medio',
+       titulo:'L3 — Combo finalizador',
+       descricao:'Itaituba tem boa entrada de clientes mas ticket baixo. Criar combo "leve 3 pague 2" em finalizadores (creme + leave-in + óleo) de marcas A. Comunicar no caixa e na entrada.'},
+
+      // ── L4 — MissBeleza Altamira (boa em Marcas A!) ──
+      {id:'2026-W21-L4-01', escopo:'loja', loja:'L4', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'L4 — Acelerar S3 e S4',
+       descricao:'L4 fez R$35.660 em S1 mas só R$24.974 em S2 e tem R$3.180 em 2 dias de S3. Para fechar maio em 100% precisa fazer ~R$45k nas 2 últimas semanas (média semanal histórica). Reforçar escala fim de semana e push de marcas-bandeira.'},
+      {id:'2026-W21-L4-02', escopo:'vendedora', loja:'L4', vendedora:'Sofia', tipo:'atendimento', meta_alvo:'vendas_individuais',
+       titulo:'Sofia (L4) — Reativar',
+       descricao:'Sofia vendeu R$1.156 em S1 e R$0 em S2/S3. Mesma diagnóstico que Rosana de L1: 1:1 + parear com Bruna F. por 2 dias.'},
+      {id:'2026-W21-L4-03', escopo:'loja', loja:'L4', tipo:'layout', meta_alvo:'marcas_a',
+       titulo:'L4 — Manter liderança em Marcas A',
+       descricao:'L4 já está em 22-30% Marcas A (melhor performance do grupo). Reforçar com cartaz no caixa "indique uma marca A e ganhe brinde" + manter exposição das marcas A no ponto extra da gôndola.'},
+
+      // ── L5 — MissBeleza Santarém ──
+      {id:'2026-W21-L5-01', escopo:'vendedora', loja:'L5', vendedora:'Lucas', tipo:'treinamento', meta_alvo:'vendas_individuais',
+       titulo:'Lucas (L5) — Performance crítica',
+       descricao:'Lucas vendeu R$295/R$53/R$1 nas 3 semanas. Avaliar permanência ou plano de recuperação de 30 dias com metas diárias e acompanhamento 1:1 toda manhã.'},
+      {id:'2026-W21-L5-02', escopo:'loja', loja:'L5', tipo:'marca', meta_alvo:'marcas_a',
+       titulo:'L5 — Empurrar Marcas A para 30%',
+       descricao:'L5 está em 19-26% (faltam 4-11pp para destravar bônus). Foco em Truss, Itallian e Santa Clara — combo profissional + finalizador. Treinar Rayssa e Joyce para sugerir marca A primeiro.'},
+      {id:'2026-W21-L5-03', escopo:'vendedora', loja:'L5', vendedora:'Rayssa', tipo:'cliente_recorrente', meta_alvo:'vendas_individuais',
+       titulo:'Rayssa (L5) — Manter ritmo',
+       descricao:'Rayssa lidera Santarém (R$14.021). Premiar publicamente em reunião de equipe + pedir para liderar treinamento informal de 30min com a equipe sexta sobre técnica de fechamento.'},
+
+      // ── GERAL ──
+      {id:'2026-W21-GE-01', escopo:'geral', tipo:'comunicacao', meta_alvo:'conversao',
+       titulo:'Campanha de WhatsApp coordenada',
+       descricao:'Disparar áudio de 30s da gerente de cada loja para top-50 clientes nos 3 dias da semana mais fracos (geralmente Ter/Qua). Mensagem: novidades + 1 marca em destaque + chamada para vir até quinta.'},
+      {id:'2026-W21-GE-02', escopo:'geral', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'Painel diário da equipe',
+       descricao:'Imprimir e colar no caixa todo dia o "Acumulado vs Meta" do dia e da semana. Vendedoras precisam ver o número quando chegam. Quem virou o gap recebe reconhecimento na reunião de sábado.'},
+    ]
+  }
+};
+
+// ─── AVALIAÇÕES DE SUGESTÕES ─────────────────────────────────────────────────
+// Carregadas do arquivo canônico (avaliacoes_premiacao.json) — atualizado pelo agente.
+// Estrutura: array de {id_sugestao, resultado, comentario, avaliado_em}
+// resultado: 'funcionou' | 'indiferente' | 'nao_funcionou'
+
+const AVALIACOES = [];
 
 // Metas futuras (atualizar conforme planejamento)
 const METAS_FUTURAS = {
@@ -719,6 +849,245 @@ function renderAnual() {
   `;
 }
 
+// ─── SUGESTÕES ───────────────────────────────────────────────────────────────
+
+const TIPO_LABELS = {
+  script_venda:'Script de venda', treinamento:'Treinamento', marca:'Marca/Curva A',
+  layout:'Layout/Vitrine', atendimento:'Atendimento', ticket_medio:'Ticket médio',
+  meta:'Gestão de meta', comunicacao:'Comunicação', cliente_recorrente:'Cliente recorrente'
+};
+const ALVO_LABELS = {
+  atingir_meta:'Atingir meta', marcas_a:'% Marcas A', ticket_medio:'Ticket médio',
+  conversao:'Conversão', vendas_individuais:'Vendas individuais'
+};
+const RES_LABELS = {funcionou:'✓ Funcionou', indiferente:'➖ Indiferente', nao_funcionou:'✗ Não funcionou'};
+
+// Carrega avaliações persistidas no localStorage (mescladas com as do arquivo)
+function loadAvaliacoes() {
+  const local = JSON.parse(localStorage.getItem('avaliacoes_premiacao') || '[]');
+  const map = {};
+  AVALIACOES.forEach(a => map[a.id_sugestao] = a);
+  local.forEach(a => map[a.id_sugestao] = a); // local sobrescreve (mais recente)
+  return map;
+}
+
+function salvarAvaliacao(idSug, resultado, comentario) {
+  const local = JSON.parse(localStorage.getItem('avaliacoes_premiacao') || '[]');
+  const idx = local.findIndex(a => a.id_sugestao === idSug);
+  const reg = {
+    id_sugestao: idSug,
+    resultado,
+    comentario: comentario || '',
+    avaliado_em: new Date().toISOString().slice(0,10)
+  };
+  if (idx >= 0) local[idx] = reg; else local.push(reg);
+  localStorage.setItem('avaliacoes_premiacao', JSON.stringify(local));
+  const card = document.querySelector(`.sug-card[data-id="${idSug}"]`);
+  if (card) {
+    card.setAttribute('data-aval', resultado);
+    card.querySelectorAll('.sug-btn').forEach(b => {
+      b.classList.toggle(`on-${b.dataset.res}`, b.dataset.res === resultado);
+    });
+    const saved = card.querySelector('.sug-saved');
+    if (saved) saved.textContent = `✓ Avaliado em ${reg.avaliado_em} — sincroniza no próximo update do dashboard`;
+  }
+  if (curTab === 'analise') rerender();
+}
+
+function salvarComentario(idSug, texto) {
+  const local = JSON.parse(localStorage.getItem('avaliacoes_premiacao') || '[]');
+  const reg = local.find(a => a.id_sugestao === idSug);
+  if (!reg) return; // só salva comentário se já há avaliação
+  reg.comentario = texto;
+  reg.avaliado_em = new Date().toISOString().slice(0,10);
+  localStorage.setItem('avaliacoes_premiacao', JSON.stringify(local));
+}
+
+function getSemanaCorrente() {
+  // Retorna a chave 'YYYY-Www' mais recente disponível em SUGESTOES
+  const keys = Object.keys(SUGESTOES).sort();
+  return keys[keys.length - 1];
+}
+
+function renderSugestoes() {
+  const semKey = getSemanaCorrente();
+  const sem = SUGESTOES[semKey];
+  if (!sem || !sem.itens || sem.itens.length === 0) {
+    return `<div class="sug-empty">
+      <h2 style="color:var(--text);margin-bottom:8px">Sem sugestões para essa semana</h2>
+      <p>O agente gera novas sugestões toda segunda às 9h.</p>
+    </div>`;
+  }
+  const avalMap = loadAvaliacoes();
+  const itens = sem.itens.slice();
+  // Ordenar: não avaliadas primeiro, depois por loja
+  itens.sort((a,b) => {
+    const aA = avalMap[a.id]?1:0, bA = avalMap[b.id]?1:0;
+    if (aA !== bA) return aA - bA;
+    return (a.loja||'Z').localeCompare(b.loja||'Z');
+  });
+
+  const cards = itens.map(s => {
+    const a = avalMap[s.id];
+    const aval = a?.resultado || '';
+    const com = a?.comentario || '';
+    const chips = [
+      s.loja ? `<span class="sug-chip loja" style="color:${LOJAS_BASE[s.loja].cor}">${s.loja}</span>` : `<span class="sug-chip loja">GERAL</span>`,
+      s.vendedora ? `<span class="sug-chip vend">${s.vendedora}</span>` : '',
+      `<span class="sug-chip tipo">${TIPO_LABELS[s.tipo]||s.tipo}</span>`,
+      s.meta_alvo ? `<span class="sug-chip alvo">${ALVO_LABELS[s.meta_alvo]||s.meta_alvo}</span>` : '',
+    ].filter(Boolean).join('');
+
+    const btns = ['funcionou','indiferente','nao_funcionou'].map(r => `
+      <button class="sug-btn ${aval===r?'on-'+r:''}" data-res="${r}"
+        onclick="salvarAvaliacao('${s.id}','${r}', document.getElementById('com-${s.id}').value)">
+        ${RES_LABELS[r]}
+      </button>`).join('');
+
+    return `<div class="sug-card" data-id="${s.id}" data-aval="${aval}">
+      <div class="sug-meta">${chips}</div>
+      <div class="sug-ttl">${s.titulo}</div>
+      <div class="sug-desc">${s.descricao}</div>
+      <div class="sug-actions">${btns}</div>
+      <textarea id="com-${s.id}" class="sug-comment" placeholder="Comentário (opcional): o que aconteceu, resultado em R$, observações..."
+        oninput="salvarComentario('${s.id}', this.value)">${com}</textarea>
+      <div class="sug-saved">${a ? `✓ Avaliado em ${a.avaliado_em} — sincroniza no próximo update do dashboard` : ''}</div>
+    </div>`;
+  }).join('');
+
+  const totN = itens.length;
+  const avalN = itens.filter(i => avalMap[i.id]).length;
+  return `
+    <div class="sug-hdr">
+      <div>
+        <h2>💡 Sugestões da ${sem.semana_label}</h2>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Geradas em ${sem.geradas_em} · Atualizadas toda segunda-feira às 9h</div>
+      </div>
+      <div class="pill">Total: <b>${totN}</b></div>
+      <div class="pill">Avaliadas: <b style="color:${avalN===totN?'var(--green)':'var(--yellow)'}">${avalN} / ${totN}</b></div>
+    </div>
+    <div class="nota">
+      📝 Avalie cada sugestão depois de aplicar. <b>Funcionou</b> → mantém na próxima leva. <b>Indiferente</b> → reduz frequência. <b>Não funcionou</b> → não repete. As avaliações alimentam os 4 gráficos na aba <b>📊 Análise</b>.
+    </div>
+    <div class="sug-grid">${cards}</div>
+  `;
+}
+
+// ─── ANÁLISE (4 gráficos + recentes) ─────────────────────────────────────────
+
+function agruparPor(getKey) {
+  // Junta TODAS as sugestões já lançadas (de todas as semanas) com avaliação preenchida
+  const avalMap = loadAvaliacoes();
+  const buckets = {}; // key -> {func, indif, nao}
+  Object.values(SUGESTOES).forEach(sem => {
+    sem.itens.forEach(s => {
+      const a = avalMap[s.id];
+      if (!a) return;
+      const key = getKey(s);
+      if (!key) return;
+      const arr = Array.isArray(key) ? key : [key];
+      arr.forEach(k => {
+        if (!buckets[k]) buckets[k] = {func:0, indif:0, nao:0};
+        if (a.resultado === 'funcionou') buckets[k].func++;
+        else if (a.resultado === 'indiferente') buckets[k].indif++;
+        else if (a.resultado === 'nao_funcionou') buckets[k].nao++;
+      });
+    });
+  });
+  return buckets;
+}
+
+function renderChartCard(titulo, subtitulo, buckets, labelFn) {
+  const entries = Object.entries(buckets).map(([k,v]) => {
+    const tot = v.func + v.indif + v.nao;
+    const score = tot > 0 ? (v.func*100 + v.indif*50) / tot : 0; // 0-100
+    return [k, v, tot, score];
+  }).sort((a,b) => b[3] - a[3] || b[2] - a[2]);
+  if (entries.length === 0) {
+    return `<div class="chart-card"><h3>${titulo}</h3><div class="chart-sub">${subtitulo}</div>
+      <div style="color:var(--muted);text-align:center;padding:20px 0;font-size:12px">Ainda sem avaliações nessa categoria</div>
+    </div>`;
+  }
+  const maxTot = Math.max(...entries.map(e => e[2]));
+  const rows = entries.map(([k,v,tot,score]) => {
+    const fW = tot>0 ? v.func/tot*100 : 0;
+    const iW = tot>0 ? v.indif/tot*100 : 0;
+    const nW = tot>0 ? v.nao/tot*100 : 0;
+    const scoreCls = score>=70?'score-high':score>=40?'score-mid':'score-low';
+    const widthOuter = maxTot > 0 ? tot/maxTot*100 : 0;
+    return `<div class="bar-row">
+      <div class="lbl" title="${labelFn(k)}">${labelFn(k)}</div>
+      <div class="bar-track" style="max-width:${widthOuter}%">
+        ${fW>0?`<div class="bar-seg func" style="width:${fW}%" title="${v.func} funcionou">${v.func>0?v.func:''}</div>`:''}
+        ${iW>0?`<div class="bar-seg indif" style="width:${iW}%" title="${v.indif} indiferente">${v.indif>0?v.indif:''}</div>`:''}
+        ${nW>0?`<div class="bar-seg nao" style="width:${nW}%" title="${v.nao} não funcionou">${v.nao>0?v.nao:''}</div>`:''}
+      </div>
+      <span class="score-badge ${scoreCls}">${Math.round(score)}</span>
+      <div class="tot">${tot}</div>
+    </div>`;
+  }).join('');
+  return `<div class="chart-card">
+    <h3>${titulo}</h3>
+    <div class="chart-sub">${subtitulo}</div>
+    ${rows}
+  </div>`;
+}
+
+function renderAnalise() {
+  const avalMap = loadAvaliacoes();
+  const totAval = Object.keys(avalMap).length;
+
+  if (totAval === 0) {
+    return `<div class="analise-empty">
+      <h2 style="color:var(--text);margin-bottom:8px">📊 Nenhuma avaliação ainda</h2>
+      <p>Vá em <b>💡 Sugestões</b>, aplique algumas ações na semana e marque o resultado.<br>Os gráficos aparecem aqui assim que você avaliar a primeira sugestão.</p>
+    </div>`;
+  }
+
+  const porTipo  = agruparPor(s => s.tipo);
+  const porLoja  = agruparPor(s => s.loja || 'GERAL');
+  const porVend  = agruparPor(s => s.vendedora || null);
+  const porAlvo  = agruparPor(s => s.meta_alvo);
+
+  // Recentes (últimas 10)
+  const recents = [];
+  Object.values(SUGESTOES).forEach(sem => {
+    sem.itens.forEach(s => {
+      const a = avalMap[s.id];
+      if (a) recents.push({s, a});
+    });
+  });
+  recents.sort((a,b) => (b.a.avaliado_em||'').localeCompare(a.a.avaliado_em||''));
+  const recentsHtml = recents.slice(0, 10).map(({s,a}) => {
+    const cor = a.resultado==='funcionou'?'var(--green)':a.resultado==='indiferente'?'var(--muted)':'var(--red)';
+    return `<div class="rec-row">
+      <div class="rec-aval" style="color:${cor}">${RES_LABELS[a.resultado]}</div>
+      <div class="rec-ttl">${s.titulo}${a.comentario?` <span style="color:var(--muted);font-size:11px">— "${a.comentario.slice(0,80)}${a.comentario.length>80?'...':''}"</span>`:''}</div>
+      <div class="rec-data">${a.avaliado_em}</div>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="sug-hdr" style="background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(59,130,246,.05));border-color:rgba(34,197,94,.3)">
+      <div>
+        <h2 style="color:var(--green)">📊 Análise de Resultados</h2>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Score = (funcionou × 100 + indiferente × 50) ÷ total · barras mostram volume de avaliações</div>
+      </div>
+      <div class="pill">Total avaliado: <b>${totAval}</b></div>
+    </div>
+    <div class="chart-grid">
+      ${renderChartCard('Por tipo de ação', 'Que tipo de iniciativa gera mais resultado', porTipo, k => TIPO_LABELS[k]||k)}
+      ${renderChartCard('Por loja', 'Em qual loja as sugestões pegam mais', porLoja, k => k==='GERAL'?'GERAL':LOJAS_BASE[k]?.nome||k)}
+      ${renderChartCard('Por vendedora', 'Quais vendedoras respondem melhor a feedback', porVend, k => k)}
+      ${renderChartCard('Por KPI alvo', 'O que mexe em cada indicador', porAlvo, k => ALVO_LABELS[k]||k)}
+    </div>
+    <div class="recents">
+      <h3>🕐 Últimas avaliações</h3>
+      ${recentsHtml || '<div style="color:var(--muted);text-align:center;padding:14px 0;font-size:12px">—</div>'}
+    </div>
+  `;
+}
+
 // ─── STATE & EVENTOS ─────────────────────────────────────────────────────────
 
 let curMes = '2026-05';
@@ -751,6 +1120,8 @@ function updateMAIndiv(mesKey, lojaKey, v, val) {
 function rerender() {
   const el = document.getElementById('content');
   if (curTab === 'anual') { el.innerHTML = renderAnual(); return; }
+  if (curTab === 'sugestoes') { el.innerHTML = renderSugestoes(); return; }
+  if (curTab === 'analise') { el.innerHTML = renderAnalise(); return; }
   const d = DADOS[curMes];
   if (!d || !d[curTab]) {
     const metas = METAS_FUTURAS[curMes];
