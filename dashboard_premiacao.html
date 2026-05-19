@@ -212,7 +212,7 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 
 const LOJAS_BASE = {
   L1: { nome:'Casa da Beleza Altamira', cor:'#ffb347',
-        vendedoras:['Tatiane','Rayra','Alcione','Sofia','Rosana'] },
+        vendedoras:['Tatiane','Rayra','Alcione','Sofia'] },
   L3: { nome:'Casa da Beleza Itaituba', cor:'#00d4aa',
         vendedoras:['Ana Mira','Raimunda','Brunna','Naila'] },
   L4: { nome:'MissBeleza Altamira', cor:'#7c5cfc',
@@ -235,9 +235,9 @@ const DADOS = {
         {id:'S4', label:'Semana 4', periodo:'25/05–30/05', meta:30000},
       ],
       vendas: {
-        S1:{Tatiane:14328,Rayra:13889,Alcione:8744,Sofia:4845,Rosana:780},
-        S2:{Tatiane:8513,Rayra:7841,Alcione:4803,Sofia:6015,Rosana:0},
-        S3:{Tatiane:2079,Rayra:893,Alcione:975,Sofia:818,Rosana:0},
+        S1:{Tatiane:14328,Rayra:13889,Alcione:8744,Sofia:4845},
+        S2:{Tatiane:8513,Rayra:7841,Alcione:4803,Sofia:6015},
+        S3:{Tatiane:2079,Rayra:893,Alcione:975,Sofia:818},
         S4:{},
       },
       marcasA_loja: {S1:19.2, S2:22.0, S3:20.6, S4:0},
@@ -320,9 +320,6 @@ const SUGESTOES = {
       {id:'2026-W21-L1-01', escopo:'loja', loja:'L1', tipo:'marca', meta_alvo:'marcas_a',
        titulo:'L1 — Subir marcas A de 20% para 30%',
        descricao:'L1 está em 20.6% Marcas A em S3 (precisa ≥30% para destravar bônus do pool semanal). Faça uma mini-vitrine na entrada com Truss + Marco Boni + Itallian. Brief de 5min com a equipe sábado de manhã: cada cliente que entrar tem que ouvir uma marca A na primeira sugestão.'},
-      {id:'2026-W21-L1-02', escopo:'vendedora', loja:'L1', vendedora:'Rosana', tipo:'atendimento', meta_alvo:'vendas_individuais',
-       titulo:'Rosana (L1) — Resgatar produtividade',
-       descricao:'Rosana vendeu R$780 em S1 e R$0 em S2/S3. Conversa 1:1 essa semana: entender se é horário/escala, motivação ou treinamento. Se for treinamento, parear com Tatiane por 2 dias para shadow.'},
       {id:'2026-W21-L1-03', escopo:'vendedora', loja:'L1', vendedora:'Tatiane', tipo:'cliente_recorrente', meta_alvo:'vendas_individuais',
        titulo:'Tatiane (L1) — Ativar carteira de fiéis',
        descricao:'Tatiane lidera (R$24.920 acumulado). Pedir para mandar áudio no WhatsApp para 15 clientes top que não voltam há 30+ dias com sugestão de combo capilar. Meta: trazer 5 de volta na semana.'},
