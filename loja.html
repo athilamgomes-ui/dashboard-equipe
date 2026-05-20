@@ -374,18 +374,38 @@ const DADOS_LOJA = {
 
 // Histórico de prêmios já recebidos (semanas fechadas e quiz respondido)
 // Estrutura: {LOJA: {Vendedora: {S1: valor, S2: valor, ...}}}
+// Dados S1 reais extraídos do ERP em 2026-05-20 (período 02/05 a 10/05)
+// Sem bônus de Marcas A ainda (a buscar). Pool calculado pela faixa de meta atingida.
+// L1: 96% (pool R$180) | L3: 88% (R$100) | L4: 80% (R$100) | L5: 77% (R$80)
 const HISTORICO_PREMIOS = {
   L1: {
-    'Tatiane': {S1: 87}, 'Rayra': {S1: 80}, 'Alcione': {S1: 49}, 'Sofia': {S1: 62}
+    // Pool R$180, dividido por contribuição dos 4 vendedores atuais (total R$41.805)
+    'Tatiane': {S1: 62},  // 14.327 / 41.805 × 180
+    'Rayra':   {S1: 60},  // 13.888 / 41.805 × 180
+    'Alcione': {S1: 38},  //  8.744 / 41.805 × 180
+    'Sofia':   {S1: 21}   //  4.844 / 41.805 × 180
   },
   L3: {
-    'Ana Mira': {S1: 130}, 'Raimunda': {S1: 86}, 'Brunna': {S1: 100}, 'Naila': {S1: 0}
+    // Pool R$100, dividido entre 4 (Naila vendeu R$0)
+    'Ana Mira': {S1: 41}, // 9.010 / 21.893 × 100
+    'Raimunda': {S1: 27}, // 5.929 / 21.893 × 100
+    'Brunna':   {S1: 32}, // 6.954 / 21.893 × 100
+    'Naila':    {S1: 0}
   },
   L4: {
-    'Tanaia': {S1: 110}, 'Josilene': {S1: 75}, 'Bruna F.': {S1: 57}, 'Rosana': {S1: 42}
+    // Pool R$100, dividido entre 4 (Sofia não conta — está em L1 agora)
+    'Tanaia':   {S1: 39}, // 13.430 / 34.702 × 100
+    'Josilene': {S1: 26}, //  9.182 / 34.702 × 100
+    'Bruna F.': {S1: 20}, //  6.929 / 34.702 × 100
+    'Rosana':   {S1: 15}  //  5.161 / 34.702 × 100
   },
   L5: {
-    'Rayssa': {S1: 90}, 'Joyce': {S1: 83}, 'Rosiene': {S1: 64}, 'Karina': {S1: 31}, 'Lucas': {}
+    // Pool R$80, dividido entre 4 vendedoras (Lucas excluído por ser caixa)
+    'Rayssa':  {S1: 27},  // 7.651 / 22.696 × 80
+    'Joyce':   {S1: 25},  // 7.036 / 22.696 × 80
+    'Rosiene': {S1: 19},  // 5.398 / 22.696 × 80
+    'Karina':  {S1: 9},   // 2.611 / 22.696 × 80
+    'Lucas':   {}         // caixa - não recebe prêmio
   }
 };
 
