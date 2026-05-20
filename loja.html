@@ -531,18 +531,24 @@ function abrirAvatarCreator(){
 }
 
 function salvarAvatar() {
-  localStorage.setItem('avatar_config_' + LOJA_KEY + '_' + currentUser, JSON.stringify(avatarConfig));
-  // Envia pro Worker
-  fetch(`${WORKER_URL}/avatar`, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({loja: LOJA_KEY, vendedora: currentUser, config: avatarConfig, em: new Date().toISOString()})
-  }).catch(e => console.warn('[avatar] falha:', e));
+  const isDono = sessionStorage.getItem('modo_dono') === '1';
+  if (!isDono) {
+    // Vendedora real: persiste em localStorage e Worker
+    localStorage.setItem('avatar_config_' + LOJA_KEY + '_' + currentUser, JSON.stringify(avatarConfig));
+    fetch(`${WORKER_URL}/avatar`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({loja: LOJA_KEY, vendedora: currentUser, config: avatarConfig, em: new Date().toISOString()})
+    }).catch(e => console.warn('[avatar] falha:', e));
+  }
   document.getElementById('avatar-screen').classList.remove('show');
-  // Atualiza header
+  // Atualiza header visualmente
   const av = document.getElementById('hdr-av');
   if (av) {
-    av.innerHTML = `<img src="${buildAvatarUrl(avatarConfig)}" alt="Meu avatar">`;
+    av.innerHTML = `<img src="${buildAvatarUrl(avatarConfig)}" alt="Meu avatar" style="cursor:pointer" onclick="abrirAvatarCreator()" title="${isDono?'Testar de novo':'Trocar avatar'}">`;
+  }
+  if (isDono) {
+    alert('🧪 Modo teste: o avatar não foi salvo. Quando uma vendedora real criar o dela, vai funcionar e ficar salvo de verdade.');
   }
 }
 
@@ -1231,6 +1237,18 @@ function enterApp() {
       btnSair.textContent = '← Painel';
       btnSair.onclick = () => { sessionStorage.removeItem('modo_dono'); location.href = 'index.html'; };
     }
+    // Botão de teste do avatar creator (só dono)
+    setTimeout(() => {
+      const hdr = document.querySelector('.hdr-logado');
+      if (hdr && !hdr.querySelector('.btn-teste-avatar')) {
+        const btn = document.createElement('button');
+        btn.className = 'btn-teste-avatar';
+        btn.textContent = '🧪 Testar avatar';
+        btn.style.cssText = 'background:rgba(124,92,252,.2);color:#a78bfa;border:1px solid #a78bfa;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;margin-right:6px';
+        btn.onclick = () => abrirAvatarCreator();
+        hdr.insertBefore(btn, btnSair);
+      }
+    }, 100);
     // Adiciona "Trocar vendedora" no header pra ele ver com olhar de cada uma
     setTimeout(() => {
       const hdr = document.querySelector('.hdr-logado');
