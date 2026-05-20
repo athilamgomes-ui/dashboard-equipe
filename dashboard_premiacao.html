@@ -1624,5 +1624,31 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+<script>
+// Auto-update check: detecta mudanca via Last-Modified header (mais confiavel que SW)
+(function(){
+  let lastModified = null;
+  async function checkUpdate() {
+    try {
+      const r = await fetch(location.pathname + '?_=' + Date.now(), {method:'HEAD', cache:'no-store'});
+      const lm = r.headers.get('last-modified');
+      if (!lm) return;
+      if (lastModified === null) { lastModified = lm; return; }
+      if (lm !== lastModified) {
+        console.log('[auto-update] nova versao detectada');
+        location.reload();
+      }
+    } catch(e) {}
+  }
+  window.addEventListener('load', () => {
+    setTimeout(checkUpdate, 5000);
+    setInterval(checkUpdate, 30000);
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) checkUpdate();
+  });
+})();
+</script>
 </body>
 </html>
