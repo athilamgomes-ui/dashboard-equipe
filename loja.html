@@ -753,6 +753,22 @@ let quizConfirmado = false; // travou seleção da pergunta atual
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 
+// Detecta se acesso veio do painel do dono (index.html mesmo dominio) → libera sem PIN
+function acessoDoPainelDono() {
+  const ref = document.referrer || '';
+  if (!ref) return false;
+  try {
+    const u = new URL(ref);
+    // Mesmo origin E veio da index.html (ou raiz)
+    const sameOrigin = u.origin === location.origin;
+    const pathOk = u.pathname.endsWith('/index.html') || u.pathname.endsWith('/dashboard-equipe/') || u.pathname.endsWith('/dashboard-equipe');
+    return sameOrigin && pathOk;
+  } catch(e) { return false; }
+}
+
+// Mapeia gerente padrão de cada loja (login automático pro dono)
+const GERENTE_LOJA = {L1:'Tatiane', L3:'Ana Mira', L4:'Tanaia', L5:'Rosiene'};
+
 async function init() {
   // Modo reset: ?reset=1 limpa tudo (sessao + localStorage) - util pra athila testar
   if (PARAMS.get('reset') === '1') {
@@ -760,8 +776,17 @@ async function init() {
     sessionStorage.clear();
     history.replaceState({}, '', location.pathname + '?l=' + LOJA_KEY);
   }
-  // Banner de instalação PWA (iOS/Android adaptado)
-  mostrarPwaBannerSeAplicavel();
+
+  // Detecta se eh acesso do dono (vindo do index.html) → pula PIN e marca modo dono
+  if (acessoDoPainelDono()) {
+    sessionStorage.setItem('modo_dono', '1');
+    sessionStorage.setItem('loja_vend_' + LOJA_KEY, GERENTE_LOJA[LOJA_KEY] || Object.keys(VENDEDORAS_META).find(n => VENDEDORAS_META[n].loja === LOJA_KEY));
+  }
+
+  // Banner de instalação PWA (iOS/Android adaptado) — não mostra pro dono (ele já instala o painel)
+  if (sessionStorage.getItem('modo_dono') !== '1') {
+    mostrarPwaBannerSeAplicavel();
+  }
 
   const loja = LOJAS_INFO[LOJA_KEY];
   if (!loja) {
@@ -862,8 +887,31 @@ function enterApp() {
   const initials = currentUser.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
   document.getElementById('hdr-av').textContent = initials;
   document.getElementById('hdr-nome').textContent = currentUser;
-  document.getElementById('hdr-loja').textContent = LOJAS_INFO[LOJA_KEY].nome;
-
+  const isDono = sessionStorage.getItem('modo_dono') === '1';
+  document.getElementById('hdr-loja').innerHTML = LOJAS_INFO[LOJA_KEY].nome + (isDono ? ' <span style="background:rgba(124,92,252,.3);color:#a78bfa;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:5px;letter-spacing:.4px">MODO VISUALIZAÇÃO</span>' : '');
+  if (isDono) {
+    // Esconde botão "Sair" (não faz sentido pro dono) e adiciona "Trocar loja"
+    const btnSair = document.querySelector('.btn-sair');
+    if (btnSair) {
+      btnSair.textContent = '← Painel';
+      btnSair.onclick = () => { sessionStorage.removeItem('modo_dono'); location.href = 'index.html'; };
+    }
+    // Adiciona "Trocar vendedora" no header pra ele ver com olhar de cada uma
+    setTimeout(() => {
+      const hdr = document.querySelector('.hdr-logado');
+      if (!hdr || hdr.querySelector('.dono-troca')) return;
+      const vends = Object.entries(VENDEDORAS_META).filter(([n,m]) => m.loja === LOJA_KEY).map(([n]) => n);
+      const sel = document.createElement('select');
+      sel.className = 'dono-troca';
+      sel.style.cssText = 'background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 8px;font-size:12px;cursor:pointer;margin-right:8px';
+      sel.innerHTML = vends.map(v => `<option value="${v}" ${v===currentUser?'selected':''}>${v}</option>`).join('');
+      sel.onchange = () => {
+        sessionStorage.setItem('loja_vend_' + LOJA_KEY, sel.value);
+        location.reload();
+      };
+      hdr.insertBefore(sel, btnSair);
+    }, 50);
+  }
   setTabV('hoje');
 }
 
@@ -1035,6 +1083,11 @@ async function enviarFeedbackWorker(reg) {
 }
 
 function marcarFeedback(idSug, acao) {
+  // Modo dono: só visualiza, não envia feedback
+  if (sessionStorage.getItem('modo_dono') === '1') {
+    alert('Você está em modo visualização (acesso pelo painel). Pra deixar feedback, a vendedora precisa entrar pelo link dela.');
+    return;
+  }
   const all = JSON.parse(localStorage.getItem('feedbacks_vendedoras') || '[]');
   const idx = all.findIndex(f => f.id_sugestao === idSug && f.vendedora === currentUser && f.loja === LOJA_KEY);
   const reg = {
@@ -1217,6 +1270,8 @@ function quizJaPassou(semanaId) {
 }
 
 function marcarQuizPassou(semanaId, acertos) {
+  // Modo dono: não persiste nem envia (só simula localmente pra visualização)
+  if (sessionStorage.getItem('modo_dono') === '1') return;
   localStorage.setItem('quiz_ok_' + LOJA_KEY + '_' + currentUser + '_' + semanaId, 'true');
   const pending = JSON.parse(localStorage.getItem('quiz_respostas') || '[]');
   pending.push({loja: LOJA_KEY, vendedora: currentUser, semana: semanaId, em: new Date().toISOString()});
