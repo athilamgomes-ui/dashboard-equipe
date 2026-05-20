@@ -322,6 +322,14 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 // ─── AVATAR CREATOR (DiceBear Avataaars) ─────────────────────────────────────
 
 const AVATAR_OPCOES = {
+  genero: {
+    label: 'Você é',
+    tipo: 'opt-big',
+    opts: [
+      {v:'feminino', label:'👩 Mulher'},
+      {v:'masculino', label:'👨 Homem'}
+    ]
+  },
   skinColor: {
     label: 'Cor de pele',
     tipo: 'color',
@@ -339,17 +347,36 @@ const AVATAR_OPCOES = {
     label: 'Cabelo',
     tipo: 'opt',
     opts: [
-      {v:'shortHair', label:'Curto'},
-      {v:'longHair', label:'Longo liso'},
-      {v:'shortHairTheCaesar', label:'Bem curto'},
-      {v:'shortHairFrizzle', label:'Crespo curto'},
-      {v:'longHairCurly', label:'Cacheado'},
-      {v:'longHairBigHair', label:'Volumoso'},
-      {v:'longHairBob', label:'Chanel'},
-      {v:'longHairFro', label:'Black power'},
-      {v:'longHairStraight2', label:'Liso comprido'},
-      {v:'hat', label:'Boné'},
-      {v:'hijab', label:'Hijab'}
+      // Femininos
+      {v:'longHair', label:'Longo liso', genero:'feminino'},
+      {v:'longHairCurly', label:'Cacheado', genero:'feminino'},
+      {v:'longHairBigHair', label:'Volumoso', genero:'feminino'},
+      {v:'longHairBob', label:'Chanel', genero:'feminino'},
+      {v:'longHairFro', label:'Black power', genero:'feminino'},
+      {v:'longHairStraight2', label:'Liso comprido', genero:'feminino'},
+      {v:'hijab', label:'Hijab', genero:'feminino'},
+      // Masculinos
+      {v:'shortHair', label:'Curto', genero:'masculino'},
+      {v:'shortHairTheCaesar', label:'Bem curto', genero:'masculino'},
+      {v:'shortHairFrizzle', label:'Crespo curto', genero:'masculino'},
+      {v:'shortHairShortCurly', label:'Cacho curto', genero:'masculino'},
+      {v:'shortHairDreads01', label:'Dreads', genero:'masculino'},
+      {v:'noHair', label:'Careca', genero:'masculino'},
+      // Unisex
+      {v:'hat', label:'Boné'}
+    ]
+  },
+  facialHair: {
+    label: 'Barba / Bigode',
+    tipo: 'opt',
+    apenasGenero: 'masculino',
+    opts: [
+      {v:'blank', label:'Sem'},
+      {v:'beardLight', label:'Barba leve'},
+      {v:'beardMedium', label:'Barba média'},
+      {v:'beardMajestic', label:'Barba cheia'},
+      {v:'moustacheFancy', label:'Bigode'},
+      {v:'moustacheMagnum', label:'Bigode magnum'}
     ]
   },
   hairColor: {
@@ -436,9 +463,11 @@ const AVATAR_OPCOES = {
 };
 
 let avatarConfig = {
+  genero: 'feminino',
   skinColor: 'EDB98A',
   top: 'longHair',
   hairColor: '4a312c',
+  facialHair: 'blank',
   eyes: 'happy',
   mouth: 'smile',
   accessories: 'blank',
@@ -449,13 +478,10 @@ let avatarConfig = {
 function buildAvatarUrl(cfg, seed) {
   const params = new URLSearchParams();
   params.set('seed', seed || currentUser || 'random');
-  // Cores
   if (cfg.skinColor) params.set('skinColor', cfg.skinColor);
   if (cfg.hairColor) params.set('hairColor', cfg.hairColor);
   if (cfg.clothesColor) params.set('clothesColor', cfg.clothesColor);
-  // Top: cabelo OU acessório (hat/hijab)
   if (cfg.top) params.set('top', cfg.top);
-  // Features singulares - DiceBear v9 espera arrays como CSV
   if (cfg.eyes) params.set('eyes', cfg.eyes);
   if (cfg.mouth) params.set('mouth', cfg.mouth);
   if (cfg.accessories && cfg.accessories !== 'blank') {
@@ -463,6 +489,13 @@ function buildAvatarUrl(cfg, seed) {
     params.set('accessoriesProbability', '100');
   } else {
     params.set('accessoriesProbability', '0');
+  }
+  // Barba só pra masculino
+  if (cfg.genero === 'masculino' && cfg.facialHair && cfg.facialHair !== 'blank') {
+    params.set('facialHair', cfg.facialHair);
+    params.set('facialHairProbability', '100');
+  } else {
+    params.set('facialHairProbability', '0');
   }
   if (cfg.clothing) params.set('clothing', cfg.clothing);
   return 'https://api.dicebear.com/9.x/avataaars/svg?' + params.toString();
@@ -498,9 +531,14 @@ function selecionarOpcao(grupo, valor) {
 }
 
 function randomizarAvatar() {
+  const genero = avatarConfig.genero || 'feminino';
   for (const grupo of Object.keys(AVATAR_OPCOES)) {
-    const opts = AVATAR_OPCOES[grupo].opts;
-    avatarConfig[grupo] = opts[Math.floor(Math.random()*opts.length)].v;
+    const info = AVATAR_OPCOES[grupo];
+    if (grupo === 'genero') continue; // mantém o gênero escolhido
+    if (info.apenasGenero && info.apenasGenero !== genero) continue;
+    const optsValidas = info.opts.filter(o => !o.genero || o.genero === genero);
+    if (optsValidas.length === 0) continue;
+    avatarConfig[grupo] = optsValidas[Math.floor(Math.random()*optsValidas.length)].v;
   }
   renderControles();
   atualizarPreview();
@@ -509,11 +547,19 @@ function randomizarAvatar() {
 function renderControles() {
   const cont = document.getElementById('avatar-controls');
   if (!cont) return;
+  const genero = avatarConfig.genero || 'feminino';
   cont.innerHTML = Object.entries(AVATAR_OPCOES).map(([grupo, info]) => {
-    const opts = info.opts.map(o => {
+    // Esconde grupos que dependem de genero específico
+    if (info.apenasGenero && info.apenasGenero !== genero) return '';
+    // Filtra opções por genero (cabelo)
+    const optsFiltradas = info.opts.filter(o => !o.genero || o.genero === genero || !genero);
+    const opts = optsFiltradas.map(o => {
       const sel = avatarConfig[grupo] === o.v ? 'selected' : '';
       if (info.tipo === 'color') {
         return `<button class="av-color ${sel}" data-v="${o.v}" style="background:${o.label}" title="${o.label}" onclick="selecionarOpcao('${grupo}','${o.v}')"></button>`;
+      }
+      if (info.tipo === 'opt-big') {
+        return `<button class="av-opt ${sel}" data-v="${o.v}" style="flex:1;padding:14px 16px;font-size:14px;font-weight:700" onclick="selecionarGenero('${o.v}')">${o.label}</button>`;
       }
       return `<button class="av-opt ${sel}" data-v="${o.v}" onclick="selecionarOpcao('${grupo}','${o.v}')">${o.label}</button>`;
     }).join('');
@@ -522,6 +568,21 @@ function renderControles() {
       <div class="av-opts">${opts}</div>
     </div>`;
   }).join('');
+}
+
+function selecionarGenero(g) {
+  avatarConfig.genero = g;
+  // Se mudar pra masculino e cabelo atual é feminino, troca pro primeiro masculino
+  const grupoTop = AVATAR_OPCOES.top;
+  const topAtualOk = grupoTop.opts.find(o => o.v === avatarConfig.top && (!o.genero || o.genero === g));
+  if (!topAtualOk) {
+    const primeiroDoGenero = grupoTop.opts.find(o => o.genero === g);
+    if (primeiroDoGenero) avatarConfig.top = primeiroDoGenero.v;
+  }
+  // Default da barba: blank
+  if (g === 'feminino') avatarConfig.facialHair = 'blank';
+  renderControles();
+  atualizarPreview();
 }
 
 function abrirAvatarCreator(){
