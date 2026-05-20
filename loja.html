@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f172a">
+<title>Minha Loja - Premiação</title>
+<style>
+:root {
+  --bg:#0f172a; --bg2:#1e293b; --bg3:#334155;
+  --text:#f1f5f9; --muted:#94a3b8; --border:#334155;
+  --green:#22c55e; --yellow:#eab308; --red:#ef4444; --blue:#3b82f6; --orange:#f97316;
+  --L1:#ffb347; --L3:#00d4aa; --L4:#7c5cfc; --L5:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;min-height:100vh}
+
+/* ── login ── */
+.login-screen{padding:32px 20px;max-width:420px;margin:0 auto}
+.login-logo{text-align:center;margin-bottom:24px}
+.login-logo h1{font-size:18px;font-weight:700;margin-bottom:4px}
+.login-logo .sub{color:var(--muted);font-size:13px}
+.login-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
+.login-card h2{font-size:14px;font-weight:600;margin-bottom:14px;color:var(--muted)}
+.vend-list{display:flex;flex-direction:column;gap:8px}
+.vend-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:14px 16px;border-radius:10px;font-size:15px;font-weight:600;text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px}
+.vend-btn:active{background:var(--bg2)}
+.vend-btn.selected{border-color:var(--blue);background:rgba(59,130,246,.15)}
+.vend-btn .avatar{width:32px;height:32px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--blue)}
+.pin-section{margin-top:14px}
+.pin-section label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
+.pin-input{width:100%;background:var(--bg3);border:2px solid var(--border);color:var(--text);padding:14px;border-radius:10px;font-size:24px;text-align:center;letter-spacing:8px;font-weight:700}
+.pin-input:focus{outline:none;border-color:var(--blue)}
+.pin-error{color:var(--red);font-size:12px;text-align:center;margin-top:8px;min-height:16px}
+.btn-entrar{width:100%;background:var(--blue);color:#fff;border:none;padding:14px;border-radius:10px;font-size:16px;font-weight:700;margin-top:14px;cursor:pointer}
+.btn-entrar:disabled{opacity:.4}
+.btn-entrar:active{transform:scale(.98)}
+
+/* ── header logado ── */
+.hdr-logado{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.hdr-info{display:flex;align-items:center;gap:10px}
+.hdr-info .av{width:36px;height:36px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.hdr-info h2{font-size:14px;font-weight:700}
+.hdr-info .loja{font-size:11px;color:var(--muted)}
+.btn-sair{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer}
+
+/* ── tabs ── */
+.tabs-vend{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;position:sticky;top:57px;z-index:9}
+.tab-vend{padding:12px 16px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;flex-shrink:0}
+.tab-vend.active{color:var(--text);border-color:var(--blue)}
+
+/* ── content ── */
+.content{padding:14px;max-width:600px;margin:0 auto}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.card h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:600}
+.card .big{font-size:26px;font-weight:700;line-height:1.1}
+.card .big.green{color:var(--green)}
+.card .big.yellow{color:var(--yellow)}
+.card .big.red{color:var(--red)}
+.card .sub{color:var(--muted);font-size:12px;margin-top:4px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.prog{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-top:10px}
+.prog-fill{height:100%;border-radius:4px;transition:width .4s}
+.divider{height:1px;background:var(--border);margin:14px 0}
+
+/* ── ranking ── */
+.rank-list{display:flex;flex-direction:column;gap:8px}
+.rank-row{display:flex;align-items:center;gap:10px;padding:8px;background:var(--bg3);border-radius:8px}
+.rank-row.me{background:rgba(59,130,246,.15);border:1px solid var(--blue)}
+.rank-pos{font-size:14px;font-weight:700;width:24px;text-align:center}
+.rank-pos.p1{color:#fbbf24}
+.rank-name{flex:1;font-size:13px;font-weight:600}
+.rank-name .meu{color:var(--blue);font-size:10px;font-weight:600;margin-left:4px}
+.rank-val{font-size:13px;font-weight:700;color:var(--green)}
+
+/* ── mensagem da gerente ── */
+.msg-gerente{background:linear-gradient(135deg,rgba(124,92,252,.12),rgba(59,130,246,.08));border:1px solid rgba(124,92,252,.3);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.msg-gerente h3{color:#a78bfa;font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.msg-gerente p{font-size:14px;line-height:1.45;color:#cbd5e1}
+.msg-gerente .assinatura{margin-top:6px;font-size:11px;color:var(--muted)}
+
+/* ── faixa premio ── */
+.faixa-card{background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(59,130,246,.06));border:1px solid rgba(34,197,94,.3);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.faixa-card h3{color:var(--green);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.faixa-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px}
+.faixa-row.atual{font-weight:700;color:var(--green)}
+.faixa-row.proxima{font-weight:700;color:var(--yellow)}
+.faixa-row .pct{color:var(--muted)}
+.falta-meta{margin-top:10px;padding:10px;background:var(--bg3);border-radius:8px;font-size:13px;text-align:center}
+.falta-meta b{color:var(--yellow)}
+
+/* ── progresso individual ── */
+.metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.metric-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.metric-row:last-child{border-bottom:none}
+.metric-row .lbl{color:var(--muted)}
+.metric-row .val{font-weight:700}
+.melhoria-bloco{background:linear-gradient(135deg,rgba(234,179,8,.08),rgba(249,115,22,.05));border:1px solid rgba(234,179,8,.3);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.melhoria-bloco h3{color:var(--yellow);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.melhoria-bloco p{font-size:14px;line-height:1.5;color:#cbd5e1;margin-bottom:8px}
+.melhoria-bloco p:last-child{margin-bottom:0}
+
+/* ── premio aba ── */
+.premio-locked{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px 18px;text-align:center;margin-bottom:14px}
+.premio-locked .lock-emoji{font-size:36px;margin-bottom:10px}
+.premio-locked h2{font-size:17px;margin-bottom:6px}
+.premio-locked p{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:14px}
+.btn-ler{background:var(--blue);color:#fff;border:none;padding:14px 18px;border-radius:10px;font-size:14px;font-weight:700;width:100%;cursor:pointer}
+.btn-ler:active{transform:scale(.98)}
+.leitura-bloco{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:12px}
+.leitura-bloco h3{color:var(--orange);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.leitura-bloco p{font-size:14px;line-height:1.55;color:#cbd5e1;margin-bottom:10px}
+.leitura-bloco p:last-child{margin-bottom:0}
+.btn-li-tudo{background:var(--green);color:#fff;border:none;padding:14px;border-radius:10px;font-size:16px;font-weight:700;width:100%;margin-top:10px;cursor:pointer}
+.btn-li-tudo:active{transform:scale(.98)}
+.premio-revelado{text-align:center;padding:36px 18px;background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(59,130,246,.08));border:2px solid var(--green);border-radius:18px;margin-bottom:14px}
+.premio-revelado .label{color:var(--muted);font-size:13px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.premio-revelado .valor{font-size:54px;font-weight:800;color:var(--green);line-height:1}
+.premio-revelado .nota{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.5}
+
+@media (max-width: 380px) {
+  .card .big{font-size:22px}
+  .premio-revelado .valor{font-size:42px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── TELA DE LOGIN ── -->
+<div id="login" class="login-screen">
+  <div class="login-logo">
+    <h1 id="login-nomeloja">Loja</h1>
+    <div class="sub">Painel da equipe</div>
+  </div>
+
+  <div class="login-card">
+    <h2>1. Toque no seu nome</h2>
+    <div class="vend-list" id="vend-list"></div>
+  </div>
+
+  <div class="login-card pin-section" id="pin-section" style="display:none">
+    <h2>2. Digite seu PIN (4 últimos dígitos do seu celular)</h2>
+    <input id="pin-input" type="tel" inputmode="numeric" maxlength="4" class="pin-input" placeholder="• • • •" autocomplete="off">
+    <div class="pin-error" id="pin-error"></div>
+    <button id="btn-entrar" class="btn-entrar" disabled>Entrar</button>
+  </div>
+</div>
+
+<!-- ── APP LOGADO ── -->
+<div id="app" style="display:none">
+  <div class="hdr-logado">
+    <div class="hdr-info">
+      <div class="av" id="hdr-av"></div>
+      <div>
+        <h2 id="hdr-nome"></h2>
+        <div class="loja" id="hdr-loja"></div>
+      </div>
+    </div>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+
+  <div class="tabs-vend">
+    <div class="tab-vend active" data-t="hoje" onclick="setTabV('hoje')">📊 Hoje</div>
+    <div class="tab-vend" data-t="progresso" onclick="setTabV('progresso')">🎯 Meu Progresso</div>
+    <div class="tab-vend" data-t="metas" onclick="setTabV('metas')">📈 Metas</div>
+    <div class="tab-vend" data-t="premio" onclick="setTabV('premio')">💰 Prêmio</div>
+  </div>
+
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+
+const PARAMS = new URLSearchParams(window.location.search);
+const LOJA_KEY = (PARAMS.get('l') || 'L1').toUpperCase();
+
+const LOJAS_INFO = {
+  L1: {nome:'Casa da Beleza Altamira', cor:'#ffb347', tema:'#ffb347'},
+  L3: {nome:'Miss Beleza Itaituba', cor:'#00d4aa', tema:'#00d4aa'},
+  L4: {nome:'MissBeleza Altamira', cor:'#7c5cfc', tema:'#7c5cfc'},
+  L5: {nome:'MissBeleza Santarém', cor:'#ef4444', tema:'#ef4444'},
+};
+
+const VENDEDORAS_META = {
+  'Tatiane':  {loja:'L1', badges:['gerente']},
+  'Rayra':    {loja:'L1', badges:[]},
+  'Alcione':  {loja:'L1', badges:[]},
+  'Sofia':    {loja:'L1', badges:['nova']},
+  'Ana Mira': {loja:'L3', badges:['gerente']},
+  'Raimunda': {loja:'L3', badges:[]},
+  'Brunna':   {loja:'L3', badges:[]},
+  'Naila':    {loja:'L3', badges:[]},
+  'Tanaia':   {loja:'L4', badges:['gerente','gestante']},
+  'Josilene': {loja:'L4', badges:[]},
+  'Bruna F.': {loja:'L4', badges:[]},
+  'Rosana':   {loja:'L4', badges:['nova']},
+  'Rayssa':   {loja:'L5', badges:[]},
+  'Joyce':    {loja:'L5', badges:[]},
+  'Rosiene':  {loja:'L5', badges:['gerente']},
+  'Karina':   {loja:'L5', badges:['nova']},
+  'Lucas':    {loja:'L5', badges:['caixa']},
+};
+
+// MOCK DATA — substituir depois pelo carregamento de dados_premiacao.json gerado pelo agente
+// Por enquanto pra demonstrar o app, dados fixos de maio/2026 S3 (semana atual)
+const DADOS_LOJA = {
+  L1: {
+    nome_loja: 'Casa da Beleza Altamira',
+    meta_mensal: 140000,
+    meta_semana: 35000,
+    vendido_semana: 4765,  // S3 parcial
+    vendido_mes: 75382,
+    posicao_loja: 2, // 1-4
+    ma_pct_loja_sem: 22,
+    ma_pct_loja_mes: 22,
+    semana_atual: 'S3',
+    semana_label: 'Semana 18 a 23/05',
+    vendedoras: {
+      'Tatiane':  {sem:2079, mes:24920, ma_sem:22, ma_mes:22, melhorias:['Marcas A em 22% - você consegue chegar em 30%. Foca em Truss e Marco Boni.', 'Como gerente, sua presença influencia o time. Vamos celebrar Marcas A nas reuniões.']},
+      'Rayra':    {sem:893,  mes:22622, ma_sem:19, ma_mes:21, melhorias:['Suas Marcas A caíram um pouco essa semana (19% vs 21% no mês). Volta a oferecer combo capilar.','Você tem boa carteira - mande mensagem pros clientes que não voltam há 30 dias.']},
+      'Alcione':  {sem:975,  mes:14522, ma_sem:25, ma_mes:24, melhorias:['Você é a melhor em Marcas A da loja, mas o volume tá baixo. Vamos aumentar o número de atendimentos.', 'Sugira combo de 3 produtos sempre que possível - você sabe o porquê.']},
+      'Sofia':    {sem:818,  mes:10860, ma_sem:20, ma_mes:22, melhorias:['Você é nova e está aprendendo - parabéns por crescer 24% na semana 2!', 'Foca em fechar a venda. Quando o cliente tá olhando, ofereça pra ele levar agora.']},
+    }
+  },
+  L3: {
+    nome_loja: 'Miss Beleza Itaituba',
+    meta_mensal: 80000,
+    meta_semana: 23000,
+    vendido_semana: 2634,
+    vendido_mes: 38063,
+    posicao_loja: 4,
+    ma_pct_loja_sem: 22,
+    ma_pct_loja_mes: 23,
+    semana_atual: 'S3',
+    semana_label: 'Semana 18 a 23/05',
+    vendedoras: {
+      'Ana Mira': {sem:727,  mes:13388, ma_sem:22, ma_mes:23, melhorias:['Como gerente, sua loja caiu 39% na semana 2 - precisa retomar.', 'Reúne a equipe terça pra entender o que está acontecendo.']},
+      'Raimunda': {sem:854,  mes:11208, ma_sem:20, ma_mes:21, melhorias:['Mantenha a consistência - quem vende todos os dias chega no topo.', 'Marcas A em 20% - tente oferecer uma marca A pra cada cliente novo.']},
+      'Brunna':   {sem:691,  mes:11358, ma_sem:24, ma_mes:24, melhorias:['Boa em Marcas A! Continue assim.', 'Aumenta o número de atendimentos - você converte bem.']},
+      'Naila':    {sem:362,  mes:2109,  ma_sem:18, ma_mes:18, melhorias:['Você está em ramp-up - parceria com Ana Mira nessa semana.', 'Roteiro de abordagem: vem comigo, vou te ajudar a treinar.']},
+    }
+  },
+  L4: {
+    nome_loja: 'MissBeleza Altamira',
+    meta_mensal: 140000,
+    meta_semana: 40000,
+    vendido_semana: 3180,
+    vendido_mes: 63814,
+    posicao_loja: 1,
+    ma_pct_loja_sem: 29,
+    ma_pct_loja_mes: 26,
+    semana_atual: 'S3',
+    semana_label: 'Semana 18 a 23/05',
+    vendedoras: {
+      'Tanaia':   {sem:648,  mes:18723, ma_sem:27, ma_mes:25, melhorias:['Foca em liderar e delegar - sua equipe precisa do seu direcionamento.','Treine Rosana esta semana (ela é nova).']},
+      'Josilene': {sem:1119, mes:15930, ma_sem:24, ma_mes:23, melhorias:['Você cresceu na semana 2! Mantenha o ritmo.','Suas Marcas A subiram - continue sugerindo combo capilar.']},
+      'Bruna F.': {sem:704,  mes:19260, ma_sem:30, ma_mes:28, melhorias:['Top em Marcas A da loja - você é referência! 🎉','Compartilha sua técnica nas reuniões: como sugerir uma marca A com naturalidade.']},
+      'Rosana':   {sem:709,  mes:9945,  ma_sem:25, ma_mes:24, melhorias:['Você é nova - parceria com Bruna F. essa semana.','Roteiro de abordagem das marcas A do MB Altamira: te passo no privado.']},
+    }
+  },
+  L5: {
+    nome_loja: 'MissBeleza Santarém',
+    meta_mensal: 90000,
+    meta_semana: 26000,
+    vendido_semana: 3512,
+    vendido_mes: 38891,
+    posicao_loja: 3,
+    ma_pct_loja_sem: 19,
+    ma_pct_loja_mes: 22,
+    semana_atual: 'S3',
+    semana_label: 'Semana 18 a 23/05',
+    vendedoras: {
+      'Rayssa':   {sem:1624, mes:14021, ma_sem:23, ma_mes:23, melhorias:['Você lidera Santarém! Premiação merecida.','Lidera um treinamento de 30min sexta sobre fechamento.']},
+      'Joyce':    {sem:280,  mes:12122, ma_sem:18, ma_mes:21, melhorias:['Você caiu essa semana - vamos retomar.','Marcas A em 18% - foca em Truss e Itallian.']},
+      'Rosiene':  {sem:1007, mes:7504,  ma_sem:24, ma_mes:24, melhorias:['Como gerente, organize a escala do fim de semana.','Treine Karina (ela é nova) - meio período juntas.']},
+      'Karina':   {sem:600,  mes:7909,  ma_sem:21, ma_mes:22, melhorias:['Você é nova - parceria com Joyce 2 manhãs por semana.','Foca em apresentar marcas A primeiro - melhora 5pp em 2 semanas se conseguir.']},
+      'Lucas':    {sem:1, mes:349, ma_sem:0, ma_mes:0, melhorias:['Você é caixa, não vendedora - foco em agilidade no atendimento e cobrar bonzinho 😊']},
+    }
+  }
+};
+
+const PRZ_FAIXAS = [
+  {pct:70,  base:80,  bonus:100},
+  {pct:80,  base:100, bonus:120},
+  {pct:90,  base:180, bonus:230},
+  {pct:100, base:280, bonus:330},
+  {pct:110, base:350, bonus:400},
+  {pct:120, base:420, bonus:470},
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+
+let pinsDB = null;
+let mensagensDB = null;
+let selectedVend = null;
+let currentUser = null;
+let currentTab = 'hoje';
+let leuTudo = false;
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+
+async function init() {
+  const loja = LOJAS_INFO[LOJA_KEY];
+  if (!loja) {
+    document.body.innerHTML = '<div class="login-screen"><div class="login-card"><h2>Loja não encontrada</h2><p>Verifique o link.</p></div></div>';
+    return;
+  }
+  document.getElementById('login-nomeloja').textContent = loja.nome;
+  document.documentElement.style.setProperty('--theme-color', loja.cor);
+
+  // Tenta carregar PINs e mensagens
+  try {
+    pinsDB = await fetch('./vendedoras_pins.json?t=' + Date.now()).then(r=>r.json());
+  } catch(e) { pinsDB = {}; }
+  try {
+    mensagensDB = await fetch('./mensagem_gerente.json?t=' + Date.now()).then(r=>r.json());
+  } catch(e) { mensagensDB = {}; }
+
+  // Sessão salva?
+  const saved = sessionStorage.getItem('loja_vend_' + LOJA_KEY);
+  if (saved) {
+    currentUser = saved;
+    leuTudo = sessionStorage.getItem('leu_' + LOJA_KEY + '_' + saved + '_' + DADOS_LOJA[LOJA_KEY].semana_atual) === 'true';
+    enterApp();
+    return;
+  }
+
+  renderVendList();
+  document.getElementById('pin-input').addEventListener('input', onPinChange);
+  document.getElementById('btn-entrar').addEventListener('click', tryLogin);
+}
+
+function renderVendList() {
+  const vends = Object.entries(VENDEDORAS_META)
+    .filter(([n,m]) => m.loja === LOJA_KEY)
+    .map(([n]) => n);
+  const html = vends.map(v => {
+    const init = v.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+    return `<button class="vend-btn" data-v="${v}" onclick="pickVend('${v}')">
+      <span class="avatar">${init}</span><span>${v}</span>
+    </button>`;
+  }).join('');
+  document.getElementById('vend-list').innerHTML = html;
+}
+
+function pickVend(v) {
+  selectedVend = v;
+  document.querySelectorAll('.vend-btn').forEach(b => b.classList.toggle('selected', b.dataset.v === v));
+  document.getElementById('pin-section').style.display = '';
+  document.getElementById('pin-input').focus();
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-error').textContent = '';
+}
+
+function onPinChange(e) {
+  const val = e.target.value.replace(/\D/g, '').slice(0,4);
+  e.target.value = val;
+  document.getElementById('btn-entrar').disabled = val.length !== 4;
+  document.getElementById('pin-error').textContent = '';
+}
+
+function tryLogin() {
+  const pin = document.getElementById('pin-input').value;
+  if (!selectedVend) return;
+  const expected = (pinsDB[LOJA_KEY] || {})[selectedVend];
+  if (expected && expected !== '0000' && pin !== expected) {
+    document.getElementById('pin-error').textContent = 'PIN incorreto. Tente de novo ou peça pra Athila.';
+    document.getElementById('pin-input').value = '';
+    return;
+  }
+  if (!expected || expected === '0000') {
+    // PIN ainda não cadastrado - aceita qualquer PIN nesse modo, mas registra
+    console.log('[loja] PIN não cadastrado pra', selectedVend, '- aceitando provisoriamente');
+  }
+  currentUser = selectedVend;
+  sessionStorage.setItem('loja_vend_' + LOJA_KEY, selectedVend);
+  enterApp();
+}
+
+function sair() {
+  sessionStorage.removeItem('loja_vend_' + LOJA_KEY);
+  location.reload();
+}
+
+function enterApp() {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = '';
+
+  const initials = currentUser.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('hdr-av').textContent = initials;
+  document.getElementById('hdr-nome').textContent = currentUser;
+  document.getElementById('hdr-loja').textContent = LOJAS_INFO[LOJA_KEY].nome;
+
+  setTabV('hoje');
+}
+
+// ─── UI ──────────────────────────────────────────────────────────────────────
+
+function setTabV(t) {
+  currentTab = t;
+  document.querySelectorAll('.tab-vend').forEach(b => b.classList.toggle('active', b.dataset.t === t));
+  renderContent();
+}
+
+function fR(v) { return v ? 'R$ ' + Math.round(v).toLocaleString('pt-BR') : 'R$ 0' }
+function fP(v) { return (v||0).toFixed(0) + '%' }
+
+function calcPoolFaixa(em_pct, bonusMA) {
+  for (let i = PRZ_FAIXAS.length - 1; i >= 0; i--) {
+    if (em_pct >= PRZ_FAIXAS[i].pct) {
+      return {faixa: PRZ_FAIXAS[i].pct, pool: bonusMA ? PRZ_FAIXAS[i].bonus : PRZ_FAIXAS[i].base};
+    }
+  }
+  return {faixa: 0, pool: 0};
+}
+
+function calcMeuPremio() {
+  const ld = DADOS_LOJA[LOJA_KEY];
+  const me = ld.vendedoras[currentUser];
+  if (!me || (VENDEDORAS_META[currentUser]?.badges||[]).includes('caixa')) {
+    return {premio:0, motivo:'caixa'};
+  }
+  const em_pct = ld.meta_semana > 0 ? ld.vendido_semana / ld.meta_semana * 100 : 0;
+  const bonusMA = ld.ma_pct_loja_sem >= 30;
+  const {pool} = calcPoolFaixa(em_pct, bonusMA);
+  if (pool === 0) return {premio:0, motivo:'meta_nao_atingida', em_pct, pool};
+
+  // Soma vendas dos não-caixa
+  const totalDistr = Object.entries(ld.vendedoras)
+    .filter(([n]) => !(VENDEDORAS_META[n]?.badges||[]).includes('caixa'))
+    .reduce((s,[n,d]) => s + (d.sem||0), 0);
+  const contrib = totalDistr > 0 ? me.sem / totalDistr : 0;
+  return {premio: Math.round(pool * contrib), pool, em_pct, contrib: contrib*100};
+}
+
+function renderContent() {
+  const el = document.getElementById('content');
+  if (currentTab === 'hoje') el.innerHTML = renderHoje();
+  else if (currentTab === 'progresso') el.innerHTML = renderProgresso();
+  else if (currentTab === 'metas') el.innerHTML = renderMetas();
+  else if (currentTab === 'premio') el.innerHTML = renderPremio();
+}
+
+// ─── HOJE ────────────────────────────────────────────────────────────────────
+
+function renderHoje() {
+  const ld = DADOS_LOJA[LOJA_KEY];
+  const me = ld.vendedoras[currentUser] || {sem:0, mes:0, ma_sem:0, ma_mes:0};
+  const isCaixa = (VENDEDORAS_META[currentUser]?.badges||[]).includes('caixa');
+
+  // ranking
+  const ranking = Object.entries(ld.vendedoras)
+    .filter(([n]) => !(VENDEDORAS_META[n]?.badges||[]).includes('caixa'))
+    .sort((a,b) => (b[1].sem||0) - (a[1].sem||0));
+
+  const msgGer = (mensagensDB && mensagensDB[LOJA_KEY]) || {};
+
+  return `
+    ${msgGer.mensagem ? `<div class="msg-gerente">
+      <h3>💬 Mensagem da gerente</h3>
+      <p>${msgGer.mensagem}</p>
+      <div class="assinatura">— ${msgGer.por||'gerente'} · ${msgGer.atualizado_em||''}</div>
+    </div>` : ''}
+
+    <div class="card">
+      <h3>Minhas vendas</h3>
+      <div class="row2">
+        <div>
+          <div class="big green">${fR(me.sem)}</div>
+          <div class="sub">na semana</div>
+        </div>
+        <div>
+          <div class="big">${fR(me.mes)}</div>
+          <div class="sub">no mês</div>
+        </div>
+      </div>
+    </div>
+
+    ${!isCaixa ? `<div class="card">
+      <h3>Minhas Marcas A</h3>
+      <div class="row2">
+        <div>
+          <div class="big ${me.ma_sem>=30?'green':me.ma_sem>=20?'yellow':'red'}">${fP(me.ma_sem)}</div>
+          <div class="sub">na semana</div>
+        </div>
+        <div>
+          <div class="big ${me.ma_mes>=30?'green':me.ma_mes>=20?'yellow':'red'}">${fP(me.ma_mes)}</div>
+          <div class="sub">no mês</div>
+        </div>
+      </div>
+      <div class="sub" style="margin-top:10px">${me.ma_sem>=30 ? '🎉 Você está no bônus!' : `Faltam ${(30-me.ma_sem).toFixed(0)} pontos pro bônus`}</div>
+    </div>` : ''}
+
+    <div class="card">
+      <h3>Ranking da semana - ${ld.nome_loja}</h3>
+      <div class="rank-list">
+        ${ranking.map(([n,d], i) => `
+          <div class="rank-row ${n===currentUser?'me':''}">
+            <div class="rank-pos ${i===0?'p1':''}">${i+1}º</div>
+            <div class="rank-name">${n}${n===currentUser?'<span class="meu">EU</span>':''}</div>
+            <div class="rank-val">${fR(d.sem)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Loja entre as 4</h3>
+      <div class="big" style="color:${ld.posicao_loja===1?'#fbbf24':ld.posicao_loja===2?'#cbd5e1':ld.posicao_loja===3?'#cd7f32':'#94a3b8'}">${ld.posicao_loja}º lugar</div>
+      <div class="sub">posição da loja em vendas dessa semana</div>
+    </div>
+  `;
+}
+
+// ─── PROGRESSO ───────────────────────────────────────────────────────────────
+
+function renderProgresso() {
+  const ld = DADOS_LOJA[LOJA_KEY];
+  const me = ld.vendedoras[currentUser];
+  if (!me) return '<div class="card">Sem dados.</div>';
+
+  return `
+    <div class="metric-card">
+      <h3 style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Resumo</h3>
+      <div class="metric-row">
+        <span class="lbl">Vendas semana</span>
+        <span class="val">${fR(me.sem)}</span>
+      </div>
+      <div class="metric-row">
+        <span class="lbl">Vendas mês</span>
+        <span class="val">${fR(me.mes)}</span>
+      </div>
+      <div class="metric-row">
+        <span class="lbl">% Marcas A semana</span>
+        <span class="val">${fP(me.ma_sem)}</span>
+      </div>
+      <div class="metric-row">
+        <span class="lbl">% Marcas A mês</span>
+        <span class="val">${fP(me.ma_mes)}</span>
+      </div>
+    </div>
+
+    <div class="melhoria-bloco">
+      <h3>💡 O que você precisa melhorar essa semana</h3>
+      ${(me.melhorias||[]).map(m=>`<p>• ${m}</p>`).join('')}
+    </div>
+  `;
+}
+
+// ─── METAS DA LOJA ───────────────────────────────────────────────────────────
+
+function renderMetas() {
+  const ld = DADOS_LOJA[LOJA_KEY];
+  const em_pct = ld.meta_semana > 0 ? ld.vendido_semana / ld.meta_semana * 100 : 0;
+  const bonusMA = ld.ma_pct_loja_sem >= 30;
+
+  // Acha faixa atual e próxima
+  let faixaAtual = null;
+  let proxFaixa = null;
+  for (let i = PRZ_FAIXAS.length - 1; i >= 0; i--) {
+    if (em_pct >= PRZ_FAIXAS[i].pct) { faixaAtual = PRZ_FAIXAS[i]; break; }
+  }
+  for (const f of PRZ_FAIXAS) {
+    if (f.pct > em_pct) { proxFaixa = f; break; }
+  }
+
+  const valorAtual = faixaAtual ? (bonusMA ? faixaAtual.bonus : faixaAtual.base) : 0;
+  const valorProx = proxFaixa ? (bonusMA ? proxFaixa.bonus : proxFaixa.base) : null;
+  const faltaParaProx = proxFaixa ? Math.max(0, ld.meta_semana * proxFaixa.pct / 100 - ld.vendido_semana) : 0;
+
+  return `
+    <div class="card">
+      <h3>Meta dessa semana</h3>
+      <div class="big">${fR(ld.meta_semana)}</div>
+      <div class="sub">vendido: ${fR(ld.vendido_semana)} (${fP(em_pct)})</div>
+      <div class="prog">
+        <div class="prog-fill" style="width:${Math.min(em_pct,100)}%;background:${em_pct>=100?'var(--green)':em_pct>=80?'var(--yellow)':em_pct>=70?'var(--orange)':'var(--red)'}"></div>
+      </div>
+    </div>
+
+    <div class="faixa-card">
+      <h3>Tabela de prêmio da semana</h3>
+      ${PRZ_FAIXAS.map(f => {
+        const v = bonusMA ? f.bonus : f.base;
+        const isAtual = faixaAtual && f.pct === faixaAtual.pct;
+        const isProx = proxFaixa && f.pct === proxFaixa.pct;
+        return `<div class="faixa-row ${isAtual?'atual':isProx?'proxima':''}">
+          <span>${f.pct}% da meta</span>
+          <span>${fR(v)}${isAtual?' ← VOCÊS ESTÃO AQUI':''}${isProx?' ← PRÓXIMA':''}</span>
+        </div>`;
+      }).join('')}
+      ${proxFaixa && faltaParaProx > 0 ? `<div class="falta-meta">
+        Faltam <b>${fR(faltaParaProx)}</b> pra subir de <b>${fR(valorAtual)}</b> pra <b>${fR(valorProx)}</b>
+      </div>` : ''}
+      ${!bonusMA ? `<div class="sub" style="margin-top:10px">💡 Marcas A da loja em ${fP(ld.ma_pct_loja_sem)} - chegando em 30% o prêmio sobe mais ainda!</div>` : ''}
+    </div>
+
+    <div class="card">
+      <h3>Acumulado do mês</h3>
+      <div class="big">${fR(ld.vendido_mes)} <span style="font-size:14px;color:var(--muted);font-weight:500">de ${fR(ld.meta_mensal)}</span></div>
+      <div class="sub">${fP(ld.vendido_mes / ld.meta_mensal * 100)} da meta mensal</div>
+      <div class="prog">
+        <div class="prog-fill" style="width:${Math.min(ld.vendido_mes / ld.meta_mensal * 100,100)}%;background:var(--blue)"></div>
+      </div>
+    </div>
+  `;
+}
+
+// ─── PRÊMIO (gated) ──────────────────────────────────────────────────────────
+
+function renderPremio() {
+  const ld = DADOS_LOJA[LOJA_KEY];
+  const isCaixa = (VENDEDORAS_META[currentUser]?.badges||[]).includes('caixa');
+  if (isCaixa) {
+    return `<div class="premio-locked">
+      <div class="lock-emoji">💼</div>
+      <h2>Você é caixa</h2>
+      <p>Caixa não entra no prêmio semanal das vendedoras, mas seu trabalho é fundamental pro time bater meta. Obrigado! 🙏</p>
+    </div>`;
+  }
+
+  const calc = calcMeuPremio();
+
+  // É segunda? bloqueio só na segunda. Outros dias mostra prêmio direto (caso já fechou a semana anterior)
+  const hoje = new Date();
+  const isSegunda = hoje.getDay() === 1;
+
+  if (isSegunda && !leuTudo) {
+    return `<div class="premio-locked">
+      <div class="lock-emoji">🔒</div>
+      <h2>Antes de ver seu prêmio...</h2>
+      <p>É segunda-feira - dia de virar a chave pra nova semana.<br>Leia o resumo abaixo pra desbloquear seu prêmio dessa semana que passou.</p>
+      <button class="btn-ler" onclick="mostrarLeitura()">📖 Quero ler agora</button>
+    </div>
+    <div id="leitura-content" style="display:none">
+      ${renderLeituraSegunda()}
+    </div>`;
+  }
+
+  return renderPremioRevelado(calc);
+}
+
+function mostrarLeitura() {
+  document.querySelector('.premio-locked').style.display = 'none';
+  document.getElementById('leitura-content').style.display = '';
+  window.scrollTo({top: document.getElementById('leitura-content').offsetTop - 80, behavior:'smooth'});
+}
+
+function renderLeituraSegunda() {
+  const ld = DADOS_LOJA[LOJA_KEY];
+  const me = ld.vendedoras[currentUser];
+  const msgGer = (mensagensDB && mensagensDB[LOJA_KEY]) || {};
+
+  return `
+    <div class="leitura-bloco">
+      <h3>📖 Foco da semana</h3>
+      <p><b>${ld.ma_pct_loja_sem < 30 ? `Marcas A da loja em ${ld.ma_pct_loja_sem}% - vamos chegar em 30%!` : 'Manter Marcas A acima de 30%'}</b></p>
+      <p>Se chegarmos em 30%, o prêmio da semana sobe automaticamente. Hoje é R$${calcPoolFaixa(ld.vendido_semana/ld.meta_semana*100, false).pool || 0}, com bônus chegaria a R$${calcPoolFaixa(ld.vendido_semana/ld.meta_semana*100, true).pool || 0}.</p>
+    </div>
+
+    <div class="leitura-bloco">
+      <h3>💡 Como fazer</h3>
+      <p>1. Mesa de destaque na entrada com Truss, Marco Boni, Itallian</p>
+      <p>2. Pra todo cliente novo, primeira sugestão é uma marca A</p>
+      <p>3. Use o argumento que aprendeu: qualidade, durabilidade, indicação profissional</p>
+    </div>
+
+    <div class="leitura-bloco">
+      <h3>💪 Pra você especificamente, ${currentUser}</h3>
+      ${(me.melhorias||[]).map(m=>`<p>• ${m}</p>`).join('')}
+    </div>
+
+    ${msgGer.mensagem ? `<div class="leitura-bloco">
+      <h3>💬 Mensagem da gerente</h3>
+      <p>${msgGer.mensagem}</p>
+      <p style="color:var(--muted);font-size:12px">— ${msgGer.por||'gerente'}</p>
+    </div>` : ''}
+
+    <button class="btn-li-tudo" onclick="liberarPremio()">✓ LI TUDO, MOSTRAR MEU PRÊMIO</button>
+  `;
+}
+
+function liberarPremio() {
+  leuTudo = true;
+  const semana = DADOS_LOJA[LOJA_KEY].semana_atual;
+  sessionStorage.setItem('leu_' + LOJA_KEY + '_' + currentUser + '_' + semana, 'true');
+  // Marca pra sincronização: athila vê quem leu
+  const pending = JSON.parse(localStorage.getItem('leituras_pendentes') || '[]');
+  pending.push({loja: LOJA_KEY, vendedora: currentUser, semana, lido_em: new Date().toISOString()});
+  localStorage.setItem('leituras_pendentes', JSON.stringify(pending));
+  renderContent();
+}
+
+function renderPremioRevelado(calc) {
+  const ld = DADOS_LOJA[LOJA_KEY];
+  if (calc.motivo === 'meta_nao_atingida') {
+    return `<div class="premio-revelado">
+      <div class="label">SEU PRÊMIO</div>
+      <div class="valor" style="color:var(--red);font-size:32px">R$ 0</div>
+      <div class="nota">A loja fez ${calc.em_pct.toFixed(0)}% da meta — abaixo de 70%, ninguém ganha prêmio essa semana.<br>Bora pra cima na próxima!</div>
+    </div>`;
+  }
+  return `<div class="premio-revelado">
+    <div class="label">SEU PRÊMIO DESSA SEMANA</div>
+    <div class="valor">R$ ${calc.premio}</div>
+    <div class="nota">
+      Loja em ${calc.em_pct.toFixed(0)}% da meta = pool R$${calc.pool}<br>
+      Sua contribuição: ${calc.contrib.toFixed(0)}% das vendas da loja<br><br>
+      ${leuTudo ? '✓ Você liberou esse prêmio lendo as recomendações' : ''}
+    </div>
+  </div>
+  <div class="card">
+    <h3>Quer aumentar seu prêmio na próxima semana?</h3>
+    <p style="font-size:13px;color:#cbd5e1;line-height:1.5">Veja a aba <b>🎯 Meu Progresso</b> com o que você precisa melhorar individualmente, e a aba <b>📈 Metas</b> com quanto falta pra subir de faixa.</p>
+  </div>`;
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
