@@ -160,6 +160,25 @@ export default {
         return jsonResponse(request, { items });
       }
 
+      // === AVATAR DA VENDEDORA ===
+      if (method === 'POST' && url.pathname === '/avatar') {
+        const body = await request.json();
+        const { loja, vendedora, config } = body;
+        if (!loja || !vendedora || !config) {
+          return jsonResponse(request, { error: 'Campos obrigatorios: loja, vendedora, config' }, 400);
+        }
+        const key = `avatar:${loja}:${vendedora}`;
+        await KV.put(key, JSON.stringify({
+          loja, vendedora, config, em: new Date().toISOString()
+        }));
+        return jsonResponse(request, { ok: true });
+      }
+
+      if (method === 'GET' && url.pathname === '/avatars') {
+        const items = await listAll(KV, 'avatar:');
+        return jsonResponse(request, { items });
+      }
+
       // === HEALTH CHECK ===
       if (url.pathname === '/' || url.pathname === '/health') {
         return jsonResponse(request, { ok: true, msg: 'Premiacao Worker AMGomes' });

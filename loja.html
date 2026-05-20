@@ -40,6 +40,29 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;min-height:100vh}
 
+/* ── avatar creator ── */
+.avatar-screen{position:fixed;inset:0;background:var(--bg);z-index:2000;overflow-y:auto;display:none}
+.avatar-screen.show{display:block}
+.avatar-screen .ac-hdr{padding:18px;text-align:center;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:5}
+.avatar-screen .ac-hdr h2{font-size:17px;margin-bottom:3px}
+.avatar-screen .ac-hdr p{font-size:12px;color:var(--muted)}
+.avatar-preview{padding:20px;display:flex;justify-content:center;background:linear-gradient(135deg,rgba(124,92,252,.15),rgba(59,130,246,.08))}
+.avatar-preview svg, .avatar-preview img{width:180px;height:180px;border-radius:50%;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.3)}
+.avatar-controls{padding:16px 16px 80px}
+.av-section{margin-bottom:18px}
+.av-section h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:600}
+.av-opts{display:flex;flex-wrap:wrap;gap:6px}
+.av-opt{background:var(--bg3);border:2px solid var(--border);color:var(--text);padding:7px 11px;border-radius:7px;font-size:12px;cursor:pointer;transition:all .12s}
+.av-opt:active{transform:scale(.95)}
+.av-opt.selected{border-color:var(--blue);background:rgba(59,130,246,.2)}
+.av-color{width:32px;height:32px;border-radius:50%;border:3px solid var(--border);cursor:pointer;padding:0}
+.av-color.selected{border-color:var(--blue);transform:scale(1.1)}
+.av-bottombar{position:fixed;bottom:0;left:0;right:0;padding:14px 16px;background:var(--bg2);border-top:1px solid var(--border);display:flex;gap:10px;z-index:10}
+.av-bottombar button{flex:1;padding:13px;border-radius:9px;border:none;font-size:14px;font-weight:700;cursor:pointer}
+.btn-aleatorio{background:var(--bg3);color:var(--text)}
+.btn-salvar-av{background:var(--green);color:#fff}
+.btn-salvar-av:disabled{opacity:.5}
+.hdr-info .av img{width:36px;height:36px;border-radius:50%;background:#fff}
 /* ── pwa install banner ── */
 .pwa-banner{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#7c5cfc,#3b82f6);color:#fff;padding:14px 16px;z-index:1000;box-shadow:0 -2px 14px rgba(0,0,0,.3);display:none}
 .pwa-banner.show{display:block}
@@ -202,6 +225,22 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </head>
 <body>
 
+<!-- ── TELA DE CRIAÇÃO DE AVATAR ── -->
+<div id="avatar-screen" class="avatar-screen">
+  <div class="ac-hdr">
+    <h2>Crie seu boneco!</h2>
+    <p>Personalize do seu jeito — pode mudar quando quiser</p>
+  </div>
+  <div class="avatar-preview">
+    <img id="avatar-preview-img" alt="Preview">
+  </div>
+  <div class="avatar-controls" id="avatar-controls"></div>
+  <div class="av-bottombar">
+    <button class="btn-aleatorio" onclick="randomizarAvatar()">🎲 Aleatório</button>
+    <button class="btn-salvar-av" onclick="salvarAvatar()">✓ Salvar meu boneco</button>
+  </div>
+</div>
+
 <!-- ── BANNER DE INSTALACAO PWA ── -->
 <div id="pwa-banner" class="pwa-banner">
   <button class="pwa-close" onclick="fecharPwaBanner(true)">×</button>
@@ -257,6 +296,233 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 
 <script>
+// ─── AVATAR CREATOR (DiceBear Avataaars) ─────────────────────────────────────
+
+const AVATAR_OPCOES = {
+  skinColor: {
+    label: 'Cor de pele',
+    tipo: 'color',
+    opts: [
+      {v:'614335', label:'#614335'},   // marrom escuro
+      {v:'AE5D29', label:'#AE5D29'},   // marrom medio
+      {v:'D08B5B', label:'#D08B5B'},   // bronzeado
+      {v:'EDB98A', label:'#EDB98A'},   // claro
+      {v:'F8D25C', label:'#F8D25C'},   // amarelado
+      {v:'FD9841', label:'#FD9841'},   // dourado
+      {v:'FFDBB4', label:'#FFDBB4'}    // muito claro
+    ]
+  },
+  top: {
+    label: 'Cabelo',
+    tipo: 'opt',
+    opts: [
+      {v:'shortHair', label:'Curto'},
+      {v:'longHair', label:'Longo liso'},
+      {v:'shortHairTheCaesar', label:'Bem curto'},
+      {v:'shortHairFrizzle', label:'Crespo curto'},
+      {v:'longHairCurly', label:'Cacheado'},
+      {v:'longHairBigHair', label:'Volumoso'},
+      {v:'longHairBob', label:'Chanel'},
+      {v:'longHairFro', label:'Black power'},
+      {v:'longHairStraight2', label:'Liso comprido'},
+      {v:'hat', label:'Boné'},
+      {v:'hijab', label:'Hijab'}
+    ]
+  },
+  hairColor: {
+    label: 'Cor do cabelo',
+    tipo: 'color',
+    opts: [
+      {v:'2c1b18', label:'#2c1b18'},   // preto
+      {v:'4a312c', label:'#4a312c'},   // castanho escuro
+      {v:'724133', label:'#724133'},   // castanho
+      {v:'a55728', label:'#a55728'},   // ruivo
+      {v:'b58143', label:'#b58143'},   // loiro escuro
+      {v:'d6b370', label:'#d6b370'},   // loiro
+      {v:'e8e1e1', label:'#e8e1e1'},   // platinado
+      {v:'ecdcbf', label:'#ecdcbf'},   // loiro claro
+      {v:'f59797', label:'#f59797'}    // rosa
+    ]
+  },
+  eyes: {
+    label: 'Olhos',
+    tipo: 'opt',
+    opts: [
+      {v:'default', label:'Normal'},
+      {v:'happy', label:'Feliz'},
+      {v:'wink', label:'Piscando'},
+      {v:'squint', label:'Curioso'},
+      {v:'hearts', label:'Coração'},
+      {v:'side', label:'De lado'},
+      {v:'surprised', label:'Surpreso'},
+      {v:'closed', label:'Fechado'}
+    ]
+  },
+  mouth: {
+    label: 'Boca',
+    tipo: 'opt',
+    opts: [
+      {v:'smile', label:'Sorriso'},
+      {v:'default', label:'Normal'},
+      {v:'twinkle', label:'Sorrisão'},
+      {v:'serious', label:'Sério'},
+      {v:'tongue', label:'Língua'},
+      {v:'eating', label:'Comendo'}
+    ]
+  },
+  accessories: {
+    label: 'Óculos',
+    tipo: 'opt',
+    opts: [
+      {v:'blank', label:'Sem óculos'},
+      {v:'round', label:'Redondo'},
+      {v:'sunglasses', label:'Sol'},
+      {v:'wayfarers', label:'Wayfarer'},
+      {v:'prescription02', label:'Receitado'}
+    ]
+  },
+  clothing: {
+    label: 'Roupa',
+    tipo: 'opt',
+    opts: [
+      {v:'blazerAndShirt', label:'Blazer'},
+      {v:'collarAndSweater', label:'Suéter'},
+      {v:'shirtCrewNeck', label:'Camiseta'},
+      {v:'shirtVNeck', label:'Camisa V'},
+      {v:'hoodie', label:'Moletom'},
+      {v:'graphicShirt', label:'Estampada'}
+    ]
+  },
+  clothesColor: {
+    label: 'Cor da roupa',
+    tipo: 'color',
+    opts: [
+      {v:'262e33', label:'#262e33'},   // preto
+      {v:'929598', label:'#929598'},   // cinza
+      {v:'3c4f5c', label:'#3c4f5c'},   // azul escuro
+      {v:'25557c', label:'#25557c'},   // azul
+      {v:'5199e4', label:'#5199e4'},   // azul claro
+      {v:'a7ffc4', label:'#a7ffc4'},   // verde menta
+      {v:'ff488e', label:'#ff488e'},   // rosa
+      {v:'ff5c5c', label:'#ff5c5c'},   // vermelho
+      {v:'ffafb9', label:'#ffafb9'},   // rosa claro
+      {v:'ffffb1', label:'#ffffb1'},   // amarelo
+      {v:'ffeb00', label:'#ffeb00'}    // amarelo forte
+    ]
+  }
+};
+
+let avatarConfig = {
+  skinColor: 'EDB98A',
+  top: 'longHair',
+  hairColor: '4a312c',
+  eyes: 'happy',
+  mouth: 'smile',
+  accessories: 'blank',
+  clothing: 'shirtCrewNeck',
+  clothesColor: 'ff488e'
+};
+
+function buildAvatarUrl(cfg, seed) {
+  const params = new URLSearchParams();
+  params.set('seed', seed || currentUser || 'random');
+  // Cores
+  if (cfg.skinColor) params.set('skinColor', cfg.skinColor);
+  if (cfg.hairColor) params.set('hairColor', cfg.hairColor);
+  if (cfg.clothesColor) params.set('clothesColor', cfg.clothesColor);
+  // Top: cabelo OU acessório (hat/hijab)
+  if (cfg.top) params.set('top', cfg.top);
+  // Features singulares - DiceBear v9 espera arrays como CSV
+  if (cfg.eyes) params.set('eyes', cfg.eyes);
+  if (cfg.mouth) params.set('mouth', cfg.mouth);
+  if (cfg.accessories && cfg.accessories !== 'blank') {
+    params.set('accessories', cfg.accessories);
+    params.set('accessoriesProbability', '100');
+  } else {
+    params.set('accessoriesProbability', '0');
+  }
+  if (cfg.clothing) params.set('clothing', cfg.clothing);
+  return 'https://api.dicebear.com/9.x/avataaars/svg?' + params.toString();
+}
+
+function carregarAvatarSalvo() {
+  try {
+    const saved = localStorage.getItem('avatar_config_' + LOJA_KEY + '_' + currentUser);
+    if (saved) {
+      avatarConfig = JSON.parse(saved);
+      return true;
+    }
+  } catch(e){}
+  return false;
+}
+
+function atualizarPreview() {
+  const url = buildAvatarUrl(avatarConfig);
+  const img = document.getElementById('avatar-preview-img');
+  if (img) img.src = url;
+}
+
+function selecionarOpcao(grupo, valor) {
+  avatarConfig[grupo] = valor;
+  // Re-render controles desse grupo
+  const sec = document.querySelector(`.av-section[data-grupo="${grupo}"]`);
+  if (sec) {
+    sec.querySelectorAll('.av-opt, .av-color').forEach(el => {
+      el.classList.toggle('selected', el.dataset.v === valor);
+    });
+  }
+  atualizarPreview();
+}
+
+function randomizarAvatar() {
+  for (const grupo of Object.keys(AVATAR_OPCOES)) {
+    const opts = AVATAR_OPCOES[grupo].opts;
+    avatarConfig[grupo] = opts[Math.floor(Math.random()*opts.length)].v;
+  }
+  renderControles();
+  atualizarPreview();
+}
+
+function renderControles() {
+  const cont = document.getElementById('avatar-controls');
+  if (!cont) return;
+  cont.innerHTML = Object.entries(AVATAR_OPCOES).map(([grupo, info]) => {
+    const opts = info.opts.map(o => {
+      const sel = avatarConfig[grupo] === o.v ? 'selected' : '';
+      if (info.tipo === 'color') {
+        return `<button class="av-color ${sel}" data-v="${o.v}" style="background:${o.label}" title="${o.label}" onclick="selecionarOpcao('${grupo}','${o.v}')"></button>`;
+      }
+      return `<button class="av-opt ${sel}" data-v="${o.v}" onclick="selecionarOpcao('${grupo}','${o.v}')">${o.label}</button>`;
+    }).join('');
+    return `<div class="av-section" data-grupo="${grupo}">
+      <h3>${info.label}</h3>
+      <div class="av-opts">${opts}</div>
+    </div>`;
+  }).join('');
+}
+
+function abrirAvatarCreator(){
+  renderControles();
+  atualizarPreview();
+  document.getElementById('avatar-screen').classList.add('show');
+}
+
+function salvarAvatar() {
+  localStorage.setItem('avatar_config_' + LOJA_KEY + '_' + currentUser, JSON.stringify(avatarConfig));
+  // Envia pro Worker
+  fetch(`${WORKER_URL}/avatar`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({loja: LOJA_KEY, vendedora: currentUser, config: avatarConfig, em: new Date().toISOString()})
+  }).catch(e => console.warn('[avatar] falha:', e));
+  document.getElementById('avatar-screen').classList.remove('show');
+  // Atualiza header
+  const av = document.getElementById('hdr-av');
+  if (av) {
+    av.innerHTML = `<img src="${buildAvatarUrl(avatarConfig)}" alt="Meu avatar">`;
+  }
+}
+
 // ─── PWA INSTALL (iOS + Android) ─────────────────────────────────────────────
 
 let deferredInstallPrompt = null;
@@ -900,8 +1166,22 @@ function enterApp() {
   document.getElementById('login').style.display = 'none';
   document.getElementById('app').style.display = '';
 
-  const initials = currentUser.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('hdr-av').textContent = initials;
+  // Avatar: carrega salvo ou usa iniciais
+  const temAvatarSalvo = carregarAvatarSalvo();
+  const avEl = document.getElementById('hdr-av');
+  if (temAvatarSalvo) {
+    avEl.innerHTML = `<img src="${buildAvatarUrl(avatarConfig)}" alt="Meu avatar" style="cursor:pointer" onclick="abrirAvatarCreator()" title="Trocar avatar">`;
+  } else {
+    const initials = currentUser.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+    avEl.textContent = initials;
+    avEl.style.cursor = 'pointer';
+    avEl.title = 'Criar meu avatar';
+    avEl.onclick = abrirAvatarCreator;
+    // Abre criador automaticamente na primeira vez (só vendedora, não dono)
+    if (sessionStorage.getItem('modo_dono') !== '1') {
+      setTimeout(() => abrirAvatarCreator(), 800);
+    }
+  }
   document.getElementById('hdr-nome').textContent = currentUser;
   const isDono = sessionStorage.getItem('modo_dono') === '1';
   document.getElementById('hdr-loja').innerHTML = LOJAS_INFO[LOJA_KEY].nome + (isDono ? ' <span style="background:rgba(124,92,252,.3);color:#a78bfa;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:5px;letter-spacing:.4px">MODO VISUALIZAÇÃO</span>' : '');
