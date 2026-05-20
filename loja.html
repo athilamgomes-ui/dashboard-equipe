@@ -3,8 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0f172a">
-<title>Minha Loja - Premiação</title>
+<meta name="theme-color" content="#7c5cfc">
+<title>Premiação A.M. Gomes</title>
+
+<!-- PWA: permite "Adicionar à tela inicial" -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/app-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Premiação">
+<meta name="mobile-web-app-capable" content="yes">
 <style>
 :root {
   --bg:#0f172a; --bg2:#1e293b; --bg3:#334155;
@@ -15,6 +24,15 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;min-height:100vh}
 
+/* ── pwa install banner ── */
+.pwa-banner{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#7c5cfc,#3b82f6);color:#fff;padding:14px 16px;z-index:1000;box-shadow:0 -2px 14px rgba(0,0,0,.3);display:none}
+.pwa-banner.show{display:block}
+.pwa-banner h4{font-size:14px;font-weight:700;margin-bottom:4px}
+.pwa-banner p{font-size:12px;opacity:.92;line-height:1.4}
+.pwa-banner .pwa-actions{display:flex;gap:8px;margin-top:10px}
+.pwa-banner .pwa-btn{flex:1;background:#fff;color:#7c5cfc;border:none;padding:9px 12px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer}
+.pwa-banner .pwa-btn.secondary{background:rgba(255,255,255,.15);color:#fff;flex:0 0 auto;padding:9px 14px}
+.pwa-banner .pwa-close{position:absolute;top:8px;right:10px;background:transparent;border:none;color:rgba(255,255,255,.7);font-size:18px;cursor:pointer}
 /* ── login ── */
 .login-screen{padding:32px 20px;max-width:420px;margin:0 auto}
 .login-logo{text-align:center;margin-bottom:24px}
@@ -168,6 +186,17 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </head>
 <body>
 
+<!-- ── BANNER DE INSTALACAO PWA ── -->
+<div id="pwa-banner" class="pwa-banner">
+  <button class="pwa-close" onclick="fecharPwaBanner(true)">×</button>
+  <h4>📱 Instala o app no celular!</h4>
+  <p id="pwa-instrucao">Toque em "Adicionar à tela inicial" pra abrir como app, sem precisar do navegador.</p>
+  <div class="pwa-actions">
+    <button class="pwa-btn" id="pwa-install-btn" onclick="instalarPwa()">📲 Instalar agora</button>
+    <button class="pwa-btn secondary" onclick="fecharPwaBanner(true)">Depois</button>
+  </div>
+</div>
+
 <!-- ── TELA DE LOGIN ── -->
 <div id="login" class="login-screen">
   <div class="login-logo">
@@ -212,6 +241,95 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 
 <script>
+// ─── PWA INSTALL (iOS + Android) ─────────────────────────────────────────────
+
+let deferredInstallPrompt = null;
+
+// Android Chrome: dispara antes do prompt nativo
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+});
+
+function detectPlatform() {
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/i.test(ua) && !window.MSStream;
+  const isAndroid = /Android/i.test(ua);
+  const isSafari = /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS/i.test(ua);
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  return { isIOS, isAndroid, isSafari, isStandalone };
+}
+
+function fecharPwaBanner(persistir) {
+  const el = document.getElementById('pwa-banner');
+  if (el) el.classList.remove('show');
+  if (persistir) localStorage.setItem('pwa_banner_fechado', new Date().toISOString());
+}
+
+async function instalarPwa() {
+  const p = detectPlatform();
+  if (p.isIOS) {
+    // iOS não tem prompt — mostra instrução visual
+    document.getElementById('pwa-instrucao').innerHTML = `
+      <b>No iPhone:</b><br>
+      1️⃣ Toque no botão <b>Compartilhar</b> <span style="background:#fff;color:#7c5cfc;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:700">⬆</span> (parte de baixo da tela do Safari)<br>
+      2️⃣ Role pra baixo e toque em <b>"Adicionar à Tela de Início"</b><br>
+      3️⃣ Toque em <b>"Adicionar"</b> no canto superior direito<br><br>
+      Pronto, o app vira ícone na sua tela!
+    `;
+    document.getElementById('pwa-install-btn').style.display = 'none';
+    return;
+  }
+  if (deferredInstallPrompt) {
+    // Android Chrome: dispara prompt nativo
+    deferredInstallPrompt.prompt();
+    const r = await deferredInstallPrompt.userChoice;
+    if (r.outcome === 'accepted') {
+      fecharPwaBanner(true);
+    }
+    deferredInstallPrompt = null;
+  } else {
+    // Genérico: navegador não suporta prompt, mostra instrução
+    document.getElementById('pwa-instrucao').innerHTML = `
+      <b>No seu celular:</b><br>
+      Toque no menu do navegador (3 pontinhos) e escolha <b>"Adicionar à tela inicial"</b> ou <b>"Instalar app"</b>.
+    `;
+    document.getElementById('pwa-install-btn').style.display = 'none';
+  }
+}
+
+function mostrarPwaBannerSeAplicavel() {
+  const p = detectPlatform();
+  // Já instalado → não mostra
+  if (p.isStandalone) return;
+  // Já fechou nos últimos 7 dias → não mostra de novo
+  const fechado = localStorage.getItem('pwa_banner_fechado');
+  if (fechado) {
+    const diasFechado = (Date.now() - new Date(fechado).getTime()) / (1000*60*60*24);
+    if (diasFechado < 7) return;
+  }
+  // iOS Safari → mostra com instrução iOS
+  // iOS outros navegadores → mostra avisando que precisa Safari
+  // Android → mostra (vai funcionar com prompt nativo se disponível)
+  const banner = document.getElementById('pwa-banner');
+  if (!banner) return;
+
+  if (p.isIOS && !p.isSafari) {
+    document.getElementById('pwa-instrucao').innerHTML = `
+      Pra instalar o app no iPhone, abra esse link no <b>Safari</b> (não no Chrome). Depois é só "Adicionar à Tela de Início".
+    `;
+    document.getElementById('pwa-install-btn').style.display = 'none';
+  } else if (p.isIOS) {
+    // Safari iOS: instrução de Share
+    document.getElementById('pwa-instrucao').innerHTML = `
+      Toque em "Instalar agora" pra ver como adicionar o app na sua tela.
+    `;
+  }
+
+  // Mostra depois de 3s pra não sobrepor login
+  setTimeout(() => banner.classList.add('show'), 3000);
+}
+
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 
 const WORKER_URL = 'https://premiacao-amgomes.nhf6t85hdk.workers.dev';
@@ -642,6 +760,9 @@ async function init() {
     sessionStorage.clear();
     history.replaceState({}, '', location.pathname + '?l=' + LOJA_KEY);
   }
+  // Banner de instalação PWA (iOS/Android adaptado)
+  mostrarPwaBannerSeAplicavel();
+
   const loja = LOJAS_INFO[LOJA_KEY];
   if (!loja) {
     document.body.innerHTML = '<div class="login-screen"><div class="login-card"><h2>Loja não encontrada</h2><p>Verifique o link.</p></div></div>';
