@@ -1604,5 +1604,25 @@ initDashboard();
 @media (max-width:600px){.btn-volta-painel{font-size:11px;padding:7px 12px;top:8px;left:8px}}
 </style>
 <a href="index.html" class="btn-volta-painel" title="Voltar ao painel">← Painel</a>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      setInterval(() => reg.update(), 60000);
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            console.log('[SW] versao nova detectada, atualizando...');
+            setTimeout(() => location.reload(), 1500);
+          }
+        });
+      });
+    }).catch(e => console.warn('[SW] falha registro:', e));
+  });
+}
+</script>
 </body>
 </html>
