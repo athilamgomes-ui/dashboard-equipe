@@ -921,9 +921,21 @@ function renderProgresso() {
   function renderSugCard(s) {
     const meuFb = getMeuFeedback(s.id);
     const acao = meuFb?.acao || '';
+    // Faixa do prazo - quando vai ser avaliado
+    const prazo = s.prazo || 'curto';
+    const mesAtualNome = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][new Date().getMonth()];
+    const prazoTextos = {
+      curto: {emoji:'🟢', cor:'rgba(34,197,94,.15)', bd:'var(--green)', txt:`Essa recomendação vai ser avaliada pela gestão em 1 semana. <b>Foco nessa semana!</b>`},
+      medio: {emoji:'🟡', cor:'rgba(234,179,8,.15)', bd:'var(--yellow)', txt:`Essa recomendação vai ser avaliada pela gestão daqui 1 mês. <b>Foco em construir isso ao longo de ${mesAtualNome}.</b>`},
+      longo: {emoji:'🔵', cor:'rgba(59,130,246,.15)', bd:'var(--blue)', txt:`Essa recomendação vai ser avaliada pela gestão daqui 3 meses. <b>Não é coisa de 1 semana — é construir um hábito ao longo dos próximos meses.</b>`}
+    };
+    const pt = prazoTextos[prazo] || prazoTextos.curto;
+    const prazoBanner = `<div style="background:${pt.cor};border-left:3px solid ${pt.bd};border-radius:4px;padding:8px 10px;margin:8px 0;font-size:12px;line-height:1.45">${pt.emoji} ${pt.txt}</div>`;
+
     return `<div style="background:rgba(0,0,0,.15);border-radius:8px;padding:10px 12px;margin-bottom:10px">
       <p><b>${s.titulo}</b></p>
-      <p style="margin-top:4px;margin-bottom:10px">${s.descricao}</p>
+      <p style="margin-top:4px;margin-bottom:6px">${s.descricao}</p>
+      ${prazoBanner}
       <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:6px">💬 Como foi pra você?</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
         <button onclick="marcarFeedback('${s.id}','apliquei')" style="flex:1;min-width:90px;background:${acao==='apliquei'?'var(--green)':'rgba(34,197,94,.15)'};color:${acao==='apliquei'?'#fff':'var(--green)'};border:1px solid var(--green);border-radius:6px;padding:7px 8px;font-size:11px;font-weight:600;cursor:pointer">✓ Apliquei</button>
