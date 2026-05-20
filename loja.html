@@ -431,7 +431,7 @@ const QUIZ_SEMANA = {
   L1: {
     S2: [
       {
-        p: 'Qual era o foco da Casa da Beleza Altamira na semana passada?',
+        p: 'Qual o foco da Casa da Beleza Altamira essa semana?',
         opcoes: ['Reduzir custo', 'Vender mais Marcas A', 'Treinar novatas', 'Atender mais rápido'],
         correta: 1
       },
@@ -460,7 +460,7 @@ const QUIZ_SEMANA = {
   L3: {
     S2: [
       {
-        p: 'Qual era o foco da Miss Beleza Itaituba na semana passada?',
+        p: 'Qual o foco da Miss Beleza Itaituba essa semana?',
         opcoes: ['Treinar caixa', 'Vender mais óleos', 'Recuperar o ritmo da semana', 'Reduzir descontos'],
         correta: 2
       },
@@ -489,13 +489,13 @@ const QUIZ_SEMANA = {
   L4: {
     S2: [
       {
-        p: 'Qual era o foco do MissBeleza Altamira na semana passada?',
+        p: 'Qual o foco do MissBeleza Altamira essa semana?',
         opcoes: ['Reduzir devolução', 'Acelerar Semana 3 e 4 pra fechar maio em 100%', 'Treinar caixa', 'Vender mais óleo'],
         correta: 1
       },
       {
-        p: 'Em qual indicador o MissBeleza Altamira já lidera entre as 4 lojas do grupo?',
-        opcoes: ['Volume total de vendas', '% Marcas A (22% a 30%)', 'Ticket médio', 'Quantidade de vendedoras'],
+        p: 'Em qual indicador o MissBeleza Altamira lidera entre as 4 lojas do grupo?',
+        opcoes: ['Volume total de vendas', '% Marcas A (28% atualmente)', 'Ticket médio', 'Quantidade de vendedoras'],
         correta: 1
       },
       {
@@ -518,7 +518,7 @@ const QUIZ_SEMANA = {
   L5: {
     S2: [
       {
-        p: 'Qual era o foco do MissBeleza Santarém na semana passada?',
+        p: 'Qual o foco do MissBeleza Santarém essa semana?',
         opcoes: ['Aumentar ticket médio', 'Vender mais Beauty Color', 'Empurrar Marcas A para 30%', 'Reduzir devolução'],
         correta: 2
       },
@@ -938,7 +938,13 @@ function renderHistoricoPremios() {
   let rows = '';
   let totalRecebido = 0;
 
-  SEMANAS_MES.forEach(s => {
+  // Determina índice da semana atual para classificar passadas vs futuras
+  const idxAtual = SEMANAS_MES.findIndex(s => s.id === ld.semana_atual);
+
+  SEMANAS_MES.forEach((s, idx) => {
+    const pendente = ((PREMIOS_PENDENTES[LOJA_KEY] || {})[s.id] || {})[currentUser];
+    const isPendente = pendente !== undefined && !quizJaPassou(s.id);
+
     if (s.id === ld.semana_atual) {
       // Semana atual em andamento - mostra projeção
       const txtVal = calc.motivo === 'meta_nao_atingida'
@@ -950,6 +956,18 @@ function renderHistoricoPremios() {
           <div class="hist-data">${s.periodo}</div>
         </div>
         <div style="text-align:right">${txtVal}</div>
+      </div>`;
+    } else if (isPendente) {
+      // Semana fechada mas vendedora ainda não respondeu o quiz
+      rows += `<div class="hist-row pendente">
+        <div>
+          <div class="hist-label">${s.label} 🎁 PRÊMIO PRONTO</div>
+          <div class="hist-data">${s.periodo}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="hist-valor pendente">R$ ?</div>
+          <div class="hist-status" style="color:var(--yellow)">responda o quiz pra ver</div>
+        </div>
       </div>`;
     } else if (historico[s.id] !== undefined) {
       // Semana já recebida
@@ -964,7 +982,7 @@ function renderHistoricoPremios() {
           <div class="hist-status">recebido</div>
         </div>
       </div>`;
-    } else {
+    } else if (idx > idxAtual) {
       // Semana futura
       rows += `<div class="hist-row" style="opacity:.5">
         <div>
@@ -974,6 +992,18 @@ function renderHistoricoPremios() {
         <div style="text-align:right">
           <div class="hist-valor" style="color:var(--muted);font-size:14px">—</div>
           <div class="hist-status">ainda não começou</div>
+        </div>
+      </div>`;
+    } else {
+      // Semana passada sem prêmio (loja não bateu 70%, ou Lucas caixa)
+      rows += `<div class="hist-row" style="opacity:.6">
+        <div>
+          <div class="hist-label">${s.label}</div>
+          <div class="hist-data">${s.periodo}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="hist-valor" style="color:var(--muted);font-size:14px">R$ 0</div>
+          <div class="hist-status">sem prêmio</div>
         </div>
       </div>`;
     }
@@ -1021,8 +1051,8 @@ function renderGateQuiz(semanaId) {
     <div class="quiz-intro">
       <div class="icon">🎁</div>
       <h2>Seu prêmio da ${semana.label} está pronto!</h2>
-      <p>Antes de ver o valor, responda 5 perguntinhas: sobre o foco da semana e sobre as Marcas A da nossa loja.<br><br>
-      Não tem pegadinha — tudo está nas recomendações dessa semana. Você precisa acertar pelo menos 3 das 5 pra desbloquear.</p>
+      <p>Antes de ver o valor, responda 5 perguntinhas sobre o foco DESSA semana que está começando e sobre as Marcas A da loja.<br><br>
+      Não tem pegadinha — tudo está nas recomendações aqui no dashboard. Você precisa acertar pelo menos 3 das 5 pra desbloquear.</p>
       <button class="btn-iniciar-quiz" onclick="iniciarQuiz('${semanaId}')">▶️ Começar perguntas</button>
     </div>
 
