@@ -117,6 +117,48 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .premio-revelado .label{color:var(--muted);font-size:13px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
 .premio-revelado .valor{font-size:54px;font-weight:800;color:var(--green);line-height:1}
 .premio-revelado .nota{color:var(--muted);font-size:12px;margin-top:14px;line-height:1.5}
+/* ── histórico de prêmios ── */
+.historico-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.historico-card h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;font-weight:600}
+.hist-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.hist-row:last-child{border-bottom:none}
+.hist-row.atual{background:rgba(59,130,246,.06);margin:0 -16px;padding:10px 16px}
+.hist-row.pendente{background:rgba(234,179,8,.06);margin:0 -16px;padding:10px 16px}
+.hist-label{font-size:13px;font-weight:600}
+.hist-data{font-size:11px;color:var(--muted);margin-top:2px}
+.hist-valor{font-size:18px;font-weight:700;color:var(--green)}
+.hist-valor.pendente{color:var(--yellow)}
+.hist-valor.projecao{color:var(--blue);font-size:15px}
+.hist-status{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-top:2px}
+.hist-total{margin-top:10px;padding:12px;background:var(--bg3);border-radius:8px;text-align:center}
+.hist-total .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.hist-total .val{font-size:24px;font-weight:700;color:var(--green);margin-top:4px}
+/* ── quiz ── */
+.quiz-intro{background:linear-gradient(135deg,rgba(249,115,22,.1),rgba(234,179,8,.05));border:1px solid rgba(249,115,22,.3);border-radius:14px;padding:18px;margin-bottom:14px;text-align:center}
+.quiz-intro .icon{font-size:42px;margin-bottom:10px}
+.quiz-intro h2{font-size:17px;margin-bottom:8px}
+.quiz-intro p{color:#cbd5e1;font-size:13px;line-height:1.5;margin-bottom:14px}
+.quiz-intro .btn-iniciar-quiz{background:var(--orange);color:#fff;border:none;padding:14px 18px;border-radius:10px;font-size:15px;font-weight:700;width:100%;cursor:pointer}
+.quiz-intro .btn-iniciar-quiz:active{transform:scale(.98)}
+.quiz-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
+.quiz-progresso{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;text-align:center}
+.quiz-pergunta{font-size:16px;font-weight:600;line-height:1.4;margin-bottom:16px}
+.quiz-opcoes{display:flex;flex-direction:column;gap:8px}
+.quiz-opcao{background:var(--bg3);border:2px solid var(--border);color:var(--text);padding:14px 16px;border-radius:10px;font-size:14px;text-align:left;cursor:pointer;line-height:1.4}
+.quiz-opcao:active{transform:scale(.98)}
+.quiz-opcao.selected{border-color:var(--blue);background:rgba(59,130,246,.15)}
+.quiz-opcao.correta{border-color:var(--green);background:rgba(34,197,94,.15)}
+.quiz-opcao.errada{border-color:var(--red);background:rgba(239,68,68,.15)}
+.quiz-feedback{margin-top:12px;padding:10px;border-radius:8px;font-size:13px;text-align:center}
+.quiz-feedback.ok{background:rgba(34,197,94,.12);color:var(--green)}
+.quiz-feedback.erro{background:rgba(239,68,68,.12);color:var(--red)}
+.btn-quiz-prox{background:var(--blue);color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;width:100%;margin-top:12px;cursor:pointer;display:none}
+.btn-quiz-prox.show{display:block}
+.quiz-resultado{text-align:center;padding:30px 18px}
+.quiz-resultado .icon{font-size:48px;margin-bottom:8px}
+.quiz-resultado h2{font-size:18px;margin-bottom:6px}
+.quiz-resultado p{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px}
+.btn-rever-leitura{background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:12px;border-radius:10px;font-size:14px;font-weight:600;width:100%;cursor:pointer;margin-bottom:8px}
 
 @media (max-width: 380px) {
   .card .big{font-size:22px}
@@ -280,6 +322,120 @@ const DADOS_LOJA = {
   }
 };
 
+// Histórico de prêmios já recebidos (semanas fechadas e quiz respondido)
+// Estrutura: {LOJA: {Vendedora: {S1: valor, S2: valor, ...}}}
+const HISTORICO_PREMIOS = {
+  L1: {
+    'Tatiane': {S1: 87}, 'Rayra': {S1: 80}, 'Alcione': {S1: 49}, 'Sofia': {S1: 62}
+  },
+  L3: {
+    'Ana Mira': {S1: 130}, 'Raimunda': {S1: 86}, 'Brunna': {S1: 100}, 'Naila': {S1: 0}
+  },
+  L4: {
+    'Tanaia': {S1: 110}, 'Josilene': {S1: 75}, 'Bruna F.': {S1: 57}, 'Rosana': {S1: 42}
+  },
+  L5: {
+    'Rayssa': {S1: 90}, 'Joyce': {S1: 83}, 'Rosiene': {S1: 64}, 'Karina': {S1: 31}, 'Lucas': {}
+  }
+};
+
+// Semanas do mês corrente
+const SEMANAS_MES = [
+  {id:'S1', label:'Semana 1', periodo:'02/05 a 10/05'},
+  {id:'S2', label:'Semana 2', periodo:'11/05 a 16/05'},
+  {id:'S3', label:'Semana 3', periodo:'18/05 a 23/05'},
+  {id:'S4', label:'Semana 4', periodo:'25/05 a 30/05'},
+];
+
+// Prêmios pendentes de desbloqueio via quiz
+// Estrutura: {LOJA: {semana_id: {vendedora: valor_premio}}}
+const PREMIOS_PENDENTES = {
+  L1: {S2: {'Tatiane': 31, 'Rayra': 29, 'Alcione': 18, 'Sofia': 22}},
+  L3: {S2: {'Ana Mira': 0, 'Raimunda': 0, 'Brunna': 0, 'Naila': 0}}, // L3 não bateu 70%, ninguém ganha
+  L4: {S2: {'Tanaia': 19, 'Josilene': 23, 'Bruna F.': 48, 'Rosana': 13}},
+  L5: {S2: {'Rayssa': 41, 'Joyce': 41, 'Rosiene': 10, 'Karina': 41}},
+};
+
+// Quiz de desbloqueio (3 perguntas por loja, baseado nas recomendações da semana fechada)
+const QUIZ_SEMANA = {
+  L1: {
+    S2: [
+      {
+        p: 'Qual era o foco da Casa da Beleza Altamira na semana passada?',
+        opcoes: ['Reduzir custo', 'Vender mais Marcas A', 'Treinar novatas', 'Atender mais rápido'],
+        correta: 1
+      },
+      {
+        p: 'Quais marcas devem ser oferecidas primeiro pro cliente que entra?',
+        opcoes: ['Truss, Marco Boni e Itallian', 'Cadiveu, Natum e Felps', 'Schwarzkopf e L\'Oréal', 'Yama e Beauty Color'],
+        correta: 0
+      },
+      {
+        p: 'Quanto sobe o prêmio da loja se chegarmos em 30% de Marcas A?',
+        opcoes: ['Sobe R$10', 'Sobe R$20 (de R$100 para R$120)', 'Sobe R$50', 'Não sobe'],
+        correta: 1
+      }
+    ]
+  },
+  L3: {
+    S2: [
+      {
+        p: 'Qual era o foco da Miss Beleza Itaituba na semana passada?',
+        opcoes: ['Treinar caixa', 'Vender mais óleos', 'Recuperar o ritmo da semana', 'Reduzir descontos'],
+        correta: 2
+      },
+      {
+        p: 'O que estava sendo trabalhado pra subir o ticket médio?',
+        opcoes: ['Combo leve 3 pague 2 em finalizadores', 'Brinde por compra acima de R$200', 'Cashback nas vendas', 'Liquidação de fim de estoque'],
+        correta: 0
+      },
+      {
+        p: 'Quem deve dar acompanhamento (shadow) pra Naila?',
+        opcoes: ['Brunna', 'Ana Mira (gerente)', 'Raimunda', 'Sofia'],
+        correta: 1
+      }
+    ]
+  },
+  L4: {
+    S2: [
+      {
+        p: 'Qual era o foco do MissBeleza Altamira na semana passada?',
+        opcoes: ['Reduzir devolução', 'Acelerar S3 e S4 pra fechar maio em 100%', 'Treinar caixa', 'Vender mais óleo'],
+        correta: 1
+      },
+      {
+        p: 'Em qual indicador o MissBeleza Altamira já lidera entre as 4 lojas?',
+        opcoes: ['Volume de vendas', '% Marcas A (22-30%)', 'Ticket médio', 'Número de vendedoras'],
+        correta: 1
+      },
+      {
+        p: 'Quem deve dar shadow pra Rosana (vendedora nova)?',
+        opcoes: ['Bruna F. (top da loja)', 'Sofia', 'Josilene', 'Tanaia'],
+        correta: 0
+      }
+    ]
+  },
+  L5: {
+    S2: [
+      {
+        p: 'Qual era o foco do MissBeleza Santarém na semana passada?',
+        opcoes: ['Aumentar ticket médio', 'Vender mais Beauty Color', 'Empurrar Marcas A para 30%', 'Reduzir devolução'],
+        correta: 2
+      },
+      {
+        p: 'Quais marcas devem ser oferecidas primeiro?',
+        opcoes: ['Yama e Marco Boni', 'Schwarzkopf e Wella', 'Cadiveu e Felps', 'Truss, Itallian e Santa Clara'],
+        correta: 3
+      },
+      {
+        p: 'Quem deve liderar um treinamento informal de 30 min na sexta?',
+        opcoes: ['Joyce', 'Rayssa (top vendedora)', 'Karina (nova)', 'Lucas (caixa)'],
+        correta: 1
+      }
+    ]
+  }
+};
+
 const PRZ_FAIXAS = [
   {pct:70,  base:80,  bonus:100},
   {pct:80,  base:100, bonus:120},
@@ -297,6 +453,11 @@ let selectedVend = null;
 let currentUser = null;
 let currentTab = 'hoje';
 let leuTudo = false;
+// Quiz state
+let quizSemana = null;     // ID da semana em quiz (ex: 'S2')
+let quizPerguntaIdx = 0;
+let quizRespostas = [];    // array de índices selecionados
+let quizConfirmado = false; // travou seleção da pergunta atual
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 
@@ -607,7 +768,19 @@ function renderMetas() {
   `;
 }
 
-// ─── PRÊMIO (gated) ──────────────────────────────────────────────────────────
+// ─── PRÊMIO ──────────────────────────────────────────────────────────────────
+
+function quizJaPassou(semanaId) {
+  return localStorage.getItem('quiz_ok_' + LOJA_KEY + '_' + currentUser + '_' + semanaId) === 'true';
+}
+
+function marcarQuizPassou(semanaId) {
+  localStorage.setItem('quiz_ok_' + LOJA_KEY + '_' + currentUser + '_' + semanaId, 'true');
+  // Sincroniza pro athila ver quem respondeu (skill coleta no próximo run)
+  const pending = JSON.parse(localStorage.getItem('quiz_respostas') || '[]');
+  pending.push({loja: LOJA_KEY, vendedora: currentUser, semana: semanaId, em: new Date().toISOString()});
+  localStorage.setItem('quiz_respostas', JSON.stringify(pending));
+}
 
 function renderPremio() {
   const ld = DADOS_LOJA[LOJA_KEY];
@@ -615,39 +788,154 @@ function renderPremio() {
   if (isCaixa) {
     return `<div class="premio-locked">
       <div class="lock-emoji">💼</div>
-      <h2>Você é caixa</h2>
-      <p>Caixa não entra no prêmio semanal das vendedoras, mas seu trabalho é fundamental pro time bater meta. Obrigado! 🙏</p>
+      <h2>Você é do caixa</h2>
+      <p>Quem está no caixa não ganha prêmio semanal das vendedoras, mas seu trabalho é fundamental pra todo mundo bater meta. Obrigado pelo apoio! 🙏</p>
     </div>`;
   }
 
+  // 1. Encontrar semanas com prêmio pendente de quiz (semanas fechadas mas vendedora ainda não respondeu)
+  const semanaAtualId = ld.semana_atual;
+  const pendentes = [];
+  Object.keys(PREMIOS_PENDENTES[LOJA_KEY] || {}).forEach(semId => {
+    if (semId !== semanaAtualId && !quizJaPassou(semId)) {
+      pendentes.push(semId);
+    }
+  });
+
+  // Se existe quiz aberto agora, render o quiz
+  if (quizSemana) {
+    return renderQuizAtivo();
+  }
+
+  // Se existe semana pendente, render gate (intro do quiz)
+  if (pendentes.length > 0) {
+    return renderGateQuiz(pendentes[0]);
+  }
+
+  // Caso normal: histórico + projeção da semana atual
+  return renderHistoricoPremios();
+}
+
+function renderHistoricoPremios() {
+  const ld = DADOS_LOJA[LOJA_KEY];
+  const me = ld.vendedoras[currentUser];
+  const historico = (HISTORICO_PREMIOS[LOJA_KEY] || {})[currentUser] || {};
+
+  // Projeção da semana atual (não definitiva)
   const calc = calcMeuPremio();
+  const semanaAtual = SEMANAS_MES.find(s => s.id === ld.semana_atual);
 
-  // É segunda? bloqueio só na segunda. Outros dias mostra prêmio direto (caso já fechou a semana anterior)
-  const hoje = new Date();
-  const isSegunda = hoje.getDay() === 1;
+  let rows = '';
+  let totalRecebido = 0;
 
-  if (isSegunda && !leuTudo) {
-    return `<div class="premio-locked">
-      <div class="lock-emoji">🔒</div>
-      <h2>Antes de ver seu prêmio...</h2>
-      <p>É segunda-feira - dia de virar a chave pra nova semana.<br>Leia o resumo abaixo pra desbloquear seu prêmio dessa semana que passou.</p>
-      <button class="btn-ler" onclick="mostrarLeitura()">📖 Quero ler agora</button>
+  SEMANAS_MES.forEach(s => {
+    if (s.id === ld.semana_atual) {
+      // Semana atual em andamento - mostra projeção
+      const txtVal = calc.motivo === 'meta_nao_atingida'
+        ? `<div class="hist-valor projecao" style="color:var(--muted)">R$ 0</div><div class="hist-status">projeção</div>`
+        : `<div class="hist-valor projecao">~R$ ${calc.premio}</div><div class="hist-status">projeção, muda até sábado</div>`;
+      rows += `<div class="hist-row atual">
+        <div>
+          <div class="hist-label">${s.label} 🔵 EM ANDAMENTO</div>
+          <div class="hist-data">${s.periodo}</div>
+        </div>
+        <div style="text-align:right">${txtVal}</div>
+      </div>`;
+    } else if (historico[s.id] !== undefined) {
+      // Semana já recebida
+      totalRecebido += historico[s.id];
+      rows += `<div class="hist-row">
+        <div>
+          <div class="hist-label">${s.label} ✅</div>
+          <div class="hist-data">${s.periodo}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="hist-valor">R$ ${historico[s.id]}</div>
+          <div class="hist-status">recebido</div>
+        </div>
+      </div>`;
+    } else {
+      // Semana futura
+      rows += `<div class="hist-row" style="opacity:.5">
+        <div>
+          <div class="hist-label">${s.label}</div>
+          <div class="hist-data">${s.periodo}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="hist-valor" style="color:var(--muted);font-size:14px">—</div>
+          <div class="hist-status">ainda não começou</div>
+        </div>
+      </div>`;
+    }
+  });
+
+  return `
+    <div class="historico-card">
+      <h3>💰 Seu histórico de prêmios em maio</h3>
+      ${rows}
+      <div class="hist-total">
+        <div class="lbl">Total recebido em maio</div>
+        <div class="val">R$ ${totalRecebido}</div>
+      </div>
     </div>
-    <div id="leitura-content" style="display:none">
-      ${renderLeituraSegunda()}
-    </div>`;
+
+    ${calc.motivo === 'meta_nao_atingida' && ld.vendido_semana / ld.meta_semana < 0.7 ? `
+    <div class="card" style="border-color:rgba(239,68,68,.3)">
+      <h3 style="color:var(--red)">⚠️ Atenção</h3>
+      <p style="font-size:14px;line-height:1.5;color:#cbd5e1">A loja está em ${(ld.vendido_semana/ld.meta_semana*100).toFixed(0)}% da meta dessa semana - precisa chegar em pelo menos 70% pra todo mundo ganhar prêmio. Vamos pra cima nos próximos dias!</p>
+    </div>` : `
+    <div class="card">
+      <h3>📊 Sua semana até agora</h3>
+      <p style="font-size:14px;line-height:1.6;color:#cbd5e1">
+        Você vendeu <b style="color:var(--green)">R$ ${me.sem.toLocaleString('pt-BR')}</b> essa semana.<br>
+        A loja está em <b>${(ld.vendido_semana/ld.meta_semana*100).toFixed(0)}% da meta</b>.<br><br>
+        ${calc.premio > 0 ? `Pelo ritmo de hoje, seu prêmio dessa semana pode ficar perto de <b style="color:var(--blue)">R$ ${calc.premio}</b> — mas isso ainda pode subir até sábado.` : 'A loja ainda não atingiu a faixa de prêmio. Bora vender!'}
+      </p>
+    </div>`}
+
+    <div class="card">
+      <h3>💡 Quer ver como subir seu prêmio?</h3>
+      <p style="font-size:13px;line-height:1.5;color:#cbd5e1">
+        • <b>🎯 Meu Progresso</b> mostra o que você precisa melhorar pessoalmente<br>
+        • <b>📈 Metas</b> mostra quanto falta pra loja subir de faixa de prêmio
+      </p>
+    </div>
+  `;
+}
+
+function renderGateQuiz(semanaId) {
+  const semana = SEMANAS_MES.find(s => s.id === semanaId);
+  const premioVend = ((PREMIOS_PENDENTES[LOJA_KEY] || {})[semanaId] || {})[currentUser] || 0;
+
+  return `
+    <div class="quiz-intro">
+      <div class="icon">🎁</div>
+      <h2>Seu prêmio da ${semana.label} está pronto!</h2>
+      <p>Antes de ver o valor, responda 3 perguntinhas sobre as recomendações dessa semana.<br><br>
+      Isso ajuda a gente a saber que você leu os focos. Não tem pegadinha — tudo está no que a gerente te passou.</p>
+      <button class="btn-iniciar-quiz" onclick="iniciarQuiz('${semanaId}')">▶️ Começar perguntas</button>
+    </div>
+
+    <div class="card" style="text-align:center">
+      <p style="font-size:12px;color:var(--muted)">Não lembra das recomendações?</p>
+      <button class="btn-rever-leitura" onclick="reverLeitura('${semanaId}')" style="margin-top:8px">📖 Rever recomendações da semana</button>
+    </div>
+
+    <div id="leitura-rever" style="display:none;margin-top:14px">
+      ${renderLeituraSemana(semanaId)}
+    </div>
+  `;
+}
+
+function reverLeitura(semanaId) {
+  const el = document.getElementById('leitura-rever');
+  el.style.display = el.style.display === 'none' ? '' : 'none';
+  if (el.style.display === '') {
+    window.scrollTo({top: el.offsetTop - 80, behavior:'smooth'});
   }
-
-  return renderPremioRevelado(calc);
 }
 
-function mostrarLeitura() {
-  document.querySelector('.premio-locked').style.display = 'none';
-  document.getElementById('leitura-content').style.display = '';
-  window.scrollTo({top: document.getElementById('leitura-content').offsetTop - 80, behavior:'smooth'});
-}
-
-function renderLeituraSegunda() {
+function renderLeituraSemana(semanaId) {
   const ld = DADOS_LOJA[LOJA_KEY];
   const me = ld.vendedoras[currentUser];
   const msgGer = (mensagensDB && mensagensDB[LOJA_KEY]) || {};
@@ -655,65 +943,140 @@ function renderLeituraSegunda() {
   return `
     <div class="leitura-bloco">
       <h3>📖 Foco da semana</h3>
-      <p><b>${ld.ma_pct_loja_sem < 30 ? `Marcas A da loja em ${ld.ma_pct_loja_sem}% - vamos chegar em 30%!` : 'Manter Marcas A acima de 30%'}</b></p>
-      <p>Se chegarmos em 30%, o prêmio da semana sobe automaticamente. Hoje é R$${calcPoolFaixa(ld.vendido_semana/ld.meta_semana*100, false).pool || 0}, com bônus chegaria a R$${calcPoolFaixa(ld.vendido_semana/ld.meta_semana*100, true).pool || 0}.</p>
+      <p><b>Vender mais Marcas A: subir de ${ld.ma_pct_loja_mes}% pra 30%</b></p>
+      <p>Se a loja chegasse em 30%, o prêmio da semana subia automaticamente.</p>
     </div>
-
     <div class="leitura-bloco">
       <h3>💡 Como fazer</h3>
       <p>1. Mesa de destaque na entrada com Truss, Marco Boni, Itallian</p>
-      <p>2. Pra todo cliente novo, primeira sugestão é uma marca A</p>
+      <p>2. Pra cada cliente novo, primeira sugestão é uma marca A</p>
       <p>3. Use o argumento que aprendeu: qualidade, durabilidade, indicação profissional</p>
     </div>
-
     <div class="leitura-bloco">
-      <h3>💪 Pra você especificamente, ${currentUser}</h3>
+      <h3>💪 Pra você, ${currentUser}</h3>
       ${(me.melhorias||[]).map(m=>`<p>• ${m}</p>`).join('')}
     </div>
-
     ${msgGer.mensagem ? `<div class="leitura-bloco">
       <h3>💬 Mensagem da gerente</h3>
       <p>${msgGer.mensagem}</p>
-      <p style="color:var(--muted);font-size:12px">— ${msgGer.por||'gerente'}</p>
     </div>` : ''}
-
-    <button class="btn-li-tudo" onclick="liberarPremio()">✓ LI TUDO, MOSTRAR MEU PRÊMIO</button>
   `;
 }
 
-function liberarPremio() {
-  leuTudo = true;
-  const semana = DADOS_LOJA[LOJA_KEY].semana_atual;
-  sessionStorage.setItem('leu_' + LOJA_KEY + '_' + currentUser + '_' + semana, 'true');
-  // Marca pra sincronização: athila vê quem leu
-  const pending = JSON.parse(localStorage.getItem('leituras_pendentes') || '[]');
-  pending.push({loja: LOJA_KEY, vendedora: currentUser, semana, lido_em: new Date().toISOString()});
-  localStorage.setItem('leituras_pendentes', JSON.stringify(pending));
+function iniciarQuiz(semanaId) {
+  quizSemana = semanaId;
+  quizPerguntaIdx = 0;
+  quizRespostas = [];
+  quizConfirmado = false;
+  renderContent();
+  window.scrollTo({top: 0, behavior:'smooth'});
+}
+
+function renderQuizAtivo() {
+  const quiz = (QUIZ_SEMANA[LOJA_KEY] || {})[quizSemana];
+  if (!quiz) return '<div class="card">Quiz indisponível.</div>';
+
+  // Já respondeu todas?
+  if (quizPerguntaIdx >= quiz.length) {
+    return renderQuizResultado(quiz);
+  }
+
+  const pergunta = quiz[quizPerguntaIdx];
+  const minhaResposta = quizRespostas[quizPerguntaIdx];
+
+  const opcoesHtml = pergunta.opcoes.map((opc, idx) => {
+    let cls = 'quiz-opcao';
+    if (quizConfirmado) {
+      if (idx === pergunta.correta) cls += ' correta';
+      else if (idx === minhaResposta) cls += ' errada';
+    } else if (idx === minhaResposta) {
+      cls += ' selected';
+    }
+    return `<button class="${cls}" onclick="selecionarOpcao(${idx})">${opc}</button>`;
+  }).join('');
+
+  const acertou = quizConfirmado && minhaResposta === pergunta.correta;
+  const errou = quizConfirmado && minhaResposta !== pergunta.correta;
+
+  return `
+    <div class="quiz-card">
+      <div class="quiz-progresso">Pergunta ${quizPerguntaIdx + 1} de ${quiz.length}</div>
+      <div class="quiz-pergunta">${pergunta.p}</div>
+      <div class="quiz-opcoes">${opcoesHtml}</div>
+      ${acertou ? `<div class="quiz-feedback ok">✓ Acertou!</div>` : ''}
+      ${errou ? `<div class="quiz-feedback erro">A resposta certa é: ${pergunta.opcoes[pergunta.correta]}</div>` : ''}
+      ${minhaResposta !== undefined && !quizConfirmado ? `<button class="btn-quiz-prox show" onclick="confirmarResposta()">Confirmar</button>` : ''}
+      ${quizConfirmado ? `<button class="btn-quiz-prox show" onclick="proxPergunta()">${quizPerguntaIdx + 1 === quiz.length ? 'Ver resultado' : 'Próxima pergunta'}</button>` : ''}
+    </div>
+  `;
+}
+
+function selecionarOpcao(idx) {
+  if (quizConfirmado) return;
+  quizRespostas[quizPerguntaIdx] = idx;
   renderContent();
 }
 
-function renderPremioRevelado(calc) {
-  const ld = DADOS_LOJA[LOJA_KEY];
-  if (calc.motivo === 'meta_nao_atingida') {
-    return `<div class="premio-revelado">
-      <div class="label">SEU PRÊMIO</div>
-      <div class="valor" style="color:var(--red);font-size:32px">R$ 0</div>
-      <div class="nota">A loja fez ${calc.em_pct.toFixed(0)}% da meta — abaixo de 70%, ninguém ganha prêmio essa semana.<br>Bora pra cima na próxima!</div>
-    </div>`;
+function confirmarResposta() {
+  if (quizRespostas[quizPerguntaIdx] === undefined) return;
+  quizConfirmado = true;
+  renderContent();
+}
+
+function proxPergunta() {
+  quizPerguntaIdx++;
+  quizConfirmado = false;
+  renderContent();
+}
+
+function renderQuizResultado(quiz) {
+  const acertos = quizRespostas.filter((r, i) => r === quiz[i].correta).length;
+  const total = quiz.length;
+  const passou = acertos >= Math.ceil(total * 0.66); // 2 de 3
+
+  if (passou) {
+    marcarQuizPassou(quizSemana);
+    const semanaId = quizSemana;
+    const premio = ((PREMIOS_PENDENTES[LOJA_KEY] || {})[semanaId] || {})[currentUser] || 0;
+    const semana = SEMANAS_MES.find(s => s.id === semanaId);
+    quizSemana = null; // limpa
+
+    return `
+      <div class="quiz-resultado">
+        <div class="icon">🎉</div>
+        <h2>Boa! Você acertou ${acertos} de ${total}</h2>
+        <p>Prêmio da ${semana.label} desbloqueado!</p>
+      </div>
+      <div class="premio-revelado">
+        <div class="label">SEU PRÊMIO DA ${semana.label.toUpperCase()}</div>
+        <div class="valor">R$ ${premio}</div>
+        <div class="nota">${premio > 0 ? '✓ Desbloqueado em ' + new Date().toLocaleString('pt-BR') : 'A loja não atingiu 70% da meta'}</div>
+      </div>
+      <button class="btn-li-tudo" onclick="renderContent()">📊 Ver meu histórico de prêmios</button>
+    `;
   }
-  return `<div class="premio-revelado">
-    <div class="label">SEU PRÊMIO DESSA SEMANA</div>
-    <div class="valor">R$ ${calc.premio}</div>
-    <div class="nota">
-      Loja em ${calc.em_pct.toFixed(0)}% da meta = pool R$${calc.pool}<br>
-      Sua contribuição: ${calc.contrib.toFixed(0)}% das vendas da loja<br><br>
-      ${leuTudo ? '✓ Você liberou esse prêmio lendo as recomendações' : ''}
+
+  // Não passou
+  return `
+    <div class="quiz-resultado">
+      <div class="icon">😅</div>
+      <h2>Você acertou ${acertos} de ${total}</h2>
+      <p>Precisa acertar pelo menos 2 pra desbloquear o prêmio.<br>Releia as recomendações e tenta de novo - sem pressa!</p>
+      <button class="btn-rever-leitura" onclick="resetQuiz()">📖 Rever recomendações</button>
+      <button class="btn-iniciar-quiz" onclick="iniciarQuiz('${quizSemana}')" style="background:var(--orange);color:#fff;border:none;padding:14px 18px;border-radius:10px;font-size:15px;font-weight:700;width:100%;margin-top:10px">▶️ Tentar de novo</button>
     </div>
-  </div>
-  <div class="card">
-    <h3>Quer aumentar seu prêmio na próxima semana?</h3>
-    <p style="font-size:13px;color:#cbd5e1;line-height:1.5">Veja a aba <b>🎯 Meu Progresso</b> com o que você precisa melhorar individualmente, e a aba <b>📈 Metas</b> com quanto falta pra subir de faixa.</p>
-  </div>`;
+  `;
+}
+
+function resetQuiz() {
+  const semId = quizSemana;
+  quizSemana = null;
+  quizPerguntaIdx = 0;
+  quizRespostas = [];
+  quizConfirmado = false;
+  // Mostra a tela de gate com leitura aberta
+  renderContent();
+  setTimeout(() => reverLeitura(semId), 100);
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────

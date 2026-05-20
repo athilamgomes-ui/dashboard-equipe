@@ -1,30 +1,29 @@
 {
-  "_descricao": "PINs das vendedoras (últimos 4 dígitos do celular). Athila vai preencher.",
+  "_descricao": "PINs das vendedoras = últimos 4 dígitos do celular.",
   "_atualizado_em": "2026-05-20",
-  "_aviso": "Esses dados ficam públicos no GitHub Pages. Como PIN é só 4 dígitos do celular dela (que ela mesma sabe), e os números das vendedoras não estão expostos publicamente, o risco é baixo. Mas se preocupar, podemos trocar pra hash SHA-256 no futuro.",
   "L1": {
-    "Tatiane": "0000",
-    "Rayra": "0000",
-    "Alcione": "0000",
-    "Sofia": "0000"
+    "Tatiane": "9491",
+    "Rayra": "5411",
+    "Alcione": "8223",
+    "Sofia": "0496"
   },
   "L3": {
-    "Ana Mira": "0000",
-    "Raimunda": "0000",
-    "Brunna": "0000",
-    "Naila": "0000"
+    "Ana Mira": "1873",
+    "Raimunda": "5233",
+    "Brunna": "9638",
+    "Naila": "5723"
   },
   "L4": {
-    "Tanaia": "0000",
-    "Josilene": "0000",
-    "Bruna F.": "0000",
-    "Rosana": "0000"
+    "Tanaia": "7291",
+    "Josilene": "8851",
+    "Bruna F.": "2782",
+    "Rosana": "7936"
   },
   "L5": {
-    "Rayssa": "0000",
-    "Joyce": "0000",
-    "Rosiene": "0000",
-    "Karina": "0000",
-    "Lucas": "0000"
+    "Rayssa": "8133",
+    "Joyce": "8986",
+    "Rosiene": "9996",
+    "Karina": "9344",
+    "Lucas": "3264"
   }
 }
