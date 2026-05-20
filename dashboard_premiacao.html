@@ -180,6 +180,23 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .rec-row .rec-aval{width:90px;font-weight:700;font-size:11px}
 .rec-row .rec-ttl{flex:1;color:#cbd5e1}
 .rec-row .rec-data{color:var(--muted);font-size:11px;width:80px;text-align:right}
+/* ── ajuste de meta ── */
+.ajuste-meta{background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(34,197,94,.05));border:1px solid rgba(59,130,246,.3);border-radius:12px;padding:14px 18px;margin-bottom:18px}
+.ajuste-meta h3{font-size:14px;color:var(--blue);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.ajuste-meta .ajuste-status{font-size:12px;color:#cbd5e1;margin-bottom:10px}
+.ajuste-tabela{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
+.ajuste-tabela th{text-align:right;padding:6px 8px;color:var(--muted);font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.ajuste-tabela td{text-align:right;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04)}
+.ajuste-tabela td:first-child,.ajuste-tabela th:first-child{text-align:left;font-weight:600}
+.ajuste-tabela .delta-pos{color:var(--green);font-weight:700}
+.ajuste-tabela .delta-neg{color:var(--red);font-weight:700}
+.ajuste-tabela .delta-zero{color:var(--muted)}
+.ajuste-btns{display:flex;gap:8px;margin-top:10px}
+.ajuste-btn{padding:7px 14px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:600}
+.ajuste-btn.aplicar{background:var(--green);color:#fff}
+.ajuste-btn.aplicar:hover{background:#16a34a}
+.ajuste-btn.cancelar{background:var(--bg3);color:var(--muted)}
+.ajuste-aplicado{font-size:11px;color:var(--green);margin-top:6px}
 </style>
 </head>
 <body>
@@ -203,7 +220,7 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 
 <div class="tabs" id="tabs">
   <div class="tab on" data-k="L1" onclick="setTab('L1')">L1 · CB Altamira</div>
-  <div class="tab" data-k="L3" onclick="setTab('L3')">L3 · CB Itaituba</div>
+  <div class="tab" data-k="L3" onclick="setTab('L3')">L3 · MB Itaituba</div>
   <div class="tab" data-k="L4" onclick="setTab('L4')">L4 · MB Altamira</div>
   <div class="tab" data-k="L5" onclick="setTab('L5')">L5 · MB Santarém</div>
   <div class="tab" data-k="anual" onclick="setTab('anual')">Visão Anual</div>
@@ -219,7 +236,7 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 const LOJAS_BASE = {
   L1: { nome:'Casa da Beleza Altamira', cor:'#ffb347',
         vendedoras:['Tatiane','Rayra','Alcione','Sofia'] },
-  L3: { nome:'Casa da Beleza Itaituba', cor:'#00d4aa',
+  L3: { nome:'Miss Beleza Itaituba', cor:'#00d4aa',
         vendedoras:['Ana Mira','Raimunda','Brunna','Naila'] },
   L4: { nome:'MissBeleza Altamira', cor:'#7c5cfc',
         vendedoras:['Tanaia','Josilene','Bruna F.','Rosana'] },
@@ -236,9 +253,9 @@ const DADOS = {
       meta_mensal: 140000,
       semanas: [
         {id:'S1', label:'Semana 1', periodo:'02/05–09/05', meta:45000},
-        {id:'S2', label:'Semana 2', periodo:'11/05–16/05', meta:35000},
-        {id:'S3', label:'Semana 3', periodo:'18/05–23/05', meta:30000, parcial:'2 de 6 dias'},
-        {id:'S4', label:'Semana 4', periodo:'25/05–30/05', meta:30000},
+        {id:'S2', label:'Semana 2', periodo:'11/05–16/05', meta:32000},
+        {id:'S3', label:'Semana 3', periodo:'18/05–23/05', meta:35000, parcial:'2 de 6 dias'},
+        {id:'S4', label:'Semana 4', periodo:'25/05–30/05', meta:35000},
       ],
       vendas: {
         S1:{Tatiane:14328,Rayra:13889,Alcione:8744,Sofia:4845},
@@ -254,8 +271,8 @@ const DADOS = {
       semanas: [
         {id:'S1', label:'Semana 1', periodo:'02/05–09/05', meta:25000},
         {id:'S2', label:'Semana 2', periodo:'11/05–16/05', meta:20000},
-        {id:'S3', label:'Semana 3', periodo:'18/05–23/05', meta:15000, parcial:'2 de 6 dias'},
-        {id:'S4', label:'Semana 4', periodo:'25/05–30/05', meta:20000},
+        {id:'S3', label:'Semana 3', periodo:'18/05–23/05', meta:23000, parcial:'2 de 6 dias'},
+        {id:'S4', label:'Semana 4', periodo:'25/05–30/05', meta:23000},
       ],
       vendas: {
         S1:{'Ana Mira':9010,Raimunda:5930,Brunna:6954,Naila:0},
@@ -271,8 +288,8 @@ const DADOS = {
       semanas: [
         {id:'S1', label:'Semana 1', periodo:'02/05–09/05', meta:45000},
         {id:'S2', label:'Semana 2', periodo:'11/05–16/05', meta:35000},
-        {id:'S3', label:'Semana 3', periodo:'18/05–23/05', meta:30000, parcial:'2 de 6 dias'},
-        {id:'S4', label:'Semana 4', periodo:'25/05–30/05', meta:30000},
+        {id:'S3', label:'Semana 3', periodo:'18/05–23/05', meta:40000, parcial:'2 de 6 dias'},
+        {id:'S4', label:'Semana 4', periodo:'25/05–30/05', meta:40000},
       ],
       vendas: {
         S1:{Tanaia:13431,Josilene:9183,'Bruna F.':6929,Rosana:5161},
@@ -287,9 +304,9 @@ const DADOS = {
       meta_mensal: 90000,
       semanas: [
         {id:'S1', label:'Semana 1', periodo:'02/05–09/05', meta:30000},
-        {id:'S2', label:'Semana 2', periodo:'11/05–16/05', meta:20000},
-        {id:'S3', label:'Semana 3', periodo:'18/05–23/05', meta:20000, parcial:'2 de 6 dias'},
-        {id:'S4', label:'Semana 4', periodo:'25/05–30/05', meta:20000},
+        {id:'S2', label:'Semana 2', periodo:'11/05–16/05', meta:22336},
+        {id:'S3', label:'Semana 3', periodo:'18/05–23/05', meta:26000, parcial:'2 de 6 dias'},
+        {id:'S4', label:'Semana 4', periodo:'25/05–30/05', meta:26000},
       ],
       vendas: {
         S1:{Rayssa:7651,Joyce:7037,Rosiene:5399,Karina:2611,Lucas:295},
@@ -368,7 +385,7 @@ const SUGESTOES = {
        titulo:'Sofia (L1, nova) — Ramp-up estruturado',
        descricao:'Sofia é vendedora nova vinda da L4. Plano de 30 dias: semana 1-2 shadow com Tatiane, semana 3-4 fechamento próprio com revisão diária. Não cobrar meta individual ainda — focar em domínio das marcas A e técnica de abordagem.'},
 
-      // ── L3 — CB Itaituba (semana mais fraca) ──
+      // ── L3 — MB Itaituba (semana mais fraca) ──
       {id:'2026-W21-L3-01', escopo:'vendedora', loja:'L3', vendedora:'Ana Mira', tipo:'meta', meta_alvo:'atingir_meta',
        titulo:'Ana Mira (L3, gerente) — Recuperar ritmo da loja',
        descricao:'L3 saiu de R$21.894 (S1) para R$13.420 (S2) — queda de 39%. Como gerente, Ana Mira precisa: (a) diagnosticar (folga? ruptura? concorrente?), (b) reforçar escala de fim de semana, (c) reunião de 15min com toda equipe terça pela manhã. Cobrança pelo coletivo.'},
@@ -740,6 +757,135 @@ function renderResumo(mesKey, lojaKey, ld) {
   </div>`;
 }
 
+// ─── AJUSTE DINÂMICO DE META ─────────────────────────────────────────────────
+// Regra: meta mensal fixa. Se uma semana terminou abaixo da meta, o gap é
+// redistribuído nas semanas seguintes (proporcional ao peso original). Se passou
+// da meta, o excedente reduz as seguintes.
+
+function calcularAjusteMeta(ld, semAtual) {
+  const sems = ld.semanas;
+  const idxAtual = sems.findIndex(s => s.id === semAtual);
+  if (idxAtual < 1) return null; // S1 ainda em curso, nada a redistribuir
+
+  // Semanas já concluídas (até semana atual exclusiva)
+  const concluidas = sems.slice(0, idxAtual);
+  const restantes = sems.slice(idxAtual); // semana atual + futuras
+
+  // Gap acumulado nas concluídas
+  let gapTotal = 0;
+  const gapPorSemana = concluidas.map(s => {
+    const vendas = ld.vendas[s.id] || {};
+    const total = Object.values(vendas).reduce((a,v)=>a+(v||0),0);
+    const gap = s.meta - total; // positivo = não bateu, negativo = passou
+    gapTotal += gap;
+    return {sem:s, total, gap};
+  });
+
+  if (Math.abs(gapTotal) < 100) return null; // diferença irrelevante <R$100
+
+  // Redistribuição proporcional ao peso atual de cada semana restante
+  const pesoTotal = restantes.reduce((s,sm)=>s+sm.meta, 0);
+  const sugestao = restantes.map(s => {
+    const peso = pesoTotal > 0 ? s.meta / pesoTotal : 1/restantes.length;
+    const delta = Math.round(gapTotal * peso / 100) * 100; // arredonda em R$100
+    return {sem:s, atual:s.meta, nova:s.meta + delta, delta};
+  });
+
+  // Ajuste de arredondamento na última semana para fechar o total
+  const totalNovo = sugestao.reduce((s,x)=>s+x.nova, 0);
+  const totalAlvo = restantes.reduce((s,sm)=>s+sm.meta, 0) + gapTotal;
+  const ajusteFinal = totalAlvo - totalNovo;
+  if (ajusteFinal !== 0) {
+    sugestao[sugestao.length-1].nova += ajusteFinal;
+    sugestao[sugestao.length-1].delta += ajusteFinal;
+  }
+
+  return {gapTotal, gapPorSemana, sugestao};
+}
+
+function renderAjusteMeta(mesKey, lojaKey, ld) {
+  const semAtual = DADOS[mesKey].semana_atual;
+  const aj = calcularAjusteMeta(ld, semAtual);
+  if (!aj) return '';
+
+  const {gapTotal, gapPorSemana, sugestao} = aj;
+  const isFalta = gapTotal > 0;
+  const statusText = isFalta
+    ? `Faltaram <b>${fR(gapTotal)}</b> nas semanas já fechadas. Sugiro redistribuir esse valor nas semanas que vêm pra manter a meta mensal.`
+    : `Passamos da meta em <b>${fR(-gapTotal)}</b>. Sugiro reduzir as próximas semanas mantendo a meta mensal.`;
+
+  const rowsConcl = gapPorSemana.map(g => {
+    const gapCls = g.gap > 100 ? 'delta-neg' : g.gap < -100 ? 'delta-pos' : 'delta-zero';
+    const gapTxt = g.gap > 0 ? `−${fR(g.gap)}` : g.gap < 0 ? `+${fR(-g.gap)}` : '—';
+    return `<tr>
+      <td>${g.sem.label}</td>
+      <td>${fR(g.sem.meta)}</td>
+      <td>${fR(g.total)}</td>
+      <td class="${gapCls}">${gapTxt}</td>
+      <td>—</td>
+    </tr>`;
+  }).join('');
+
+  const rowsSug = sugestao.map(s => {
+    const dCls = s.delta > 0 ? 'delta-pos' : s.delta < 0 ? 'delta-neg' : 'delta-zero';
+    const dTxt = s.delta === 0 ? '—' : (s.delta > 0 ? `+${fR(s.delta)}` : `−${fR(-s.delta)}`);
+    return `<tr>
+      <td>${s.sem.label}${s.sem.id===semAtual?' <span style="color:var(--blue);font-size:10px">(atual)</span>':''}</td>
+      <td>${fR(s.atual)}</td>
+      <td>—</td>
+      <td class="${dCls}">${dTxt}</td>
+      <td><b>${fR(s.nova)}</b></td>
+    </tr>`;
+  }).join('');
+
+  const dadosAplicar = JSON.stringify(sugestao.map(s=>({id:s.sem.id, nova:s.nova}))).replace(/"/g,'&quot;');
+
+  return `<div class="ajuste-meta">
+    <h3>📊 Sugestão de ajuste de meta</h3>
+    <div class="ajuste-status">${statusText}</div>
+    <table class="ajuste-tabela">
+      <thead>
+        <tr>
+          <th>Semana</th>
+          <th>Meta atual</th>
+          <th>Vendido</th>
+          <th>Diferença</th>
+          <th>Nova meta</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rowsConcl}
+        <tr style="border-top:2px solid var(--border)"><td colspan="5" style="padding-top:8px;color:var(--muted);font-size:11px;text-align:left">Sugestão para semanas restantes:</td></tr>
+        ${rowsSug}
+      </tbody>
+    </table>
+    <div class="ajuste-btns">
+      <button class="ajuste-btn aplicar" onclick="aplicarAjusteMeta('${mesKey}','${lojaKey}', '${dadosAplicar}')">
+        ✓ Aplicar nova distribuição
+      </button>
+      <button class="ajuste-btn cancelar" onclick="this.parentElement.parentElement.style.display='none'">
+        Ignorar essa sugestão
+      </button>
+    </div>
+    <div class="ajuste-aplicado" id="aplicado-${lojaKey}"></div>
+  </div>`;
+}
+
+function aplicarAjusteMeta(mesKey, lojaKey, dadosStr) {
+  const dados = JSON.parse(dadosStr.replace(/&quot;/g, '"'));
+  const ld = DADOS[mesKey][lojaKey];
+  dados.forEach(d => {
+    const sem = ld.semanas.find(s => s.id === d.id);
+    if (sem) sem.meta = d.nova;
+  });
+  // Persiste em localStorage pra skill sincronizar no próximo run
+  const pending = JSON.parse(localStorage.getItem('ajustes_meta_pendentes') || '[]');
+  pending.push({mesKey, lojaKey, dados, aplicado_em: new Date().toISOString()});
+  localStorage.setItem('ajustes_meta_pendentes', JSON.stringify(pending));
+  document.getElementById('aplicado-'+lojaKey).innerHTML = '✓ Aplicado! Sincroniza no próximo update do dashboard (próximo cron).';
+  rerender();
+}
+
 // ─── RENDER MARCAS A INDIVIDUAL (fim do mês) ─────────────────────────────────
 
 function renderMAIndiv(mesKey, lojaKey, ld) {
@@ -786,6 +932,8 @@ function renderLoja(mesKey, lojaKey) {
     &nbsp;|&nbsp; <b>Prêmio mensal (Cond. A):</b> loja ≥90% + vendedora ≥R$31k.
     &nbsp;|&nbsp; <b>Prêmio mensal (Cond. B):</b> loja <90% mas vendedora ≥R$40k sozinha.
   </div>
+
+  ${renderAjusteMeta(mesKey, lojaKey, ld)}
 
   <div class="sec-ttl">Semanas</div>
   <div class="sems-grid">${semCards}</div>
