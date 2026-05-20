@@ -944,6 +944,7 @@ function renderHistoricoPremios() {
   SEMANAS_MES.forEach((s, idx) => {
     const pendente = ((PREMIOS_PENDENTES[LOJA_KEY] || {})[s.id] || {})[currentUser];
     const isPendente = pendente !== undefined && !quizJaPassou(s.id);
+    const jaRecebeuViaQuiz = pendente !== undefined && quizJaPassou(s.id);
 
     if (s.id === ld.semana_atual) {
       // Semana atual em andamento - mostra projeção
@@ -956,6 +957,19 @@ function renderHistoricoPremios() {
           <div class="hist-data">${s.periodo}</div>
         </div>
         <div style="text-align:right">${txtVal}</div>
+      </div>`;
+    } else if (jaRecebeuViaQuiz) {
+      // Vendedora ja passou no quiz dessa semana - mostra como recebido
+      totalRecebido += pendente;
+      rows += `<div class="hist-row">
+        <div>
+          <div class="hist-label">${s.label} ✅</div>
+          <div class="hist-data">${s.periodo}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="hist-valor">R$ ${pendente}</div>
+          <div class="hist-status">recebido (quiz feito)</div>
+        </div>
       </div>`;
     } else if (isPendente) {
       // Semana fechada mas vendedora ainda não respondeu o quiz
