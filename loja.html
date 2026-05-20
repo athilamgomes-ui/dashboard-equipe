@@ -9,24 +9,43 @@
 <!-- PWA: permite "Adicionar à tela inicial" — manifest dinâmico por loja -->
 <script>
 (function(){
-  // Aponta pro manifest específico da loja baseado na URL (?l=L1, L3, L4, L5)
   var l = (new URLSearchParams(location.search).get('l') || 'L1').toUpperCase();
   var validas = ['L1','L3','L4','L5'];
   if (!validas.includes(l)) l = 'L1';
-  var link = document.createElement('link');
-  link.rel = 'manifest';
-  link.href = 'manifest-' + l.toLowerCase() + '.json';
-  document.head.appendChild(link);
-  // Titulo apple touch tambem por loja
+  // Marca por loja: L1=casa-beleza, demais=miss-beleza
+  var brand = l === 'L1' ? 'casa-beleza' : 'miss-beleza';
+  // Manifest
+  var linkM = document.createElement('link');
+  linkM.rel = 'manifest';
+  linkM.href = 'manifest-' + l.toLowerCase() + '.json';
+  document.head.appendChild(linkM);
+  // Apple touch icon (por brand)
+  var linkApple = document.createElement('link');
+  linkApple.rel = 'apple-touch-icon';
+  linkApple.sizes = '180x180';
+  linkApple.href = 'icons/' + brand + '-180.png';
+  document.head.appendChild(linkApple);
+  // Favicon
+  var linkIcon = document.createElement('link');
+  linkIcon.rel = 'icon';
+  linkIcon.type = 'image/png';
+  linkIcon.sizes = '192x192';
+  linkIcon.href = 'icons/' + brand + '-192.png';
+  document.head.appendChild(linkIcon);
+  // Titulo apple
   var nomes = {L1:'CB Altamira', L3:'MB Itaituba', L4:'MB Altamira', L5:'MB Santarém'};
   var meta = document.createElement('meta');
   meta.name = 'apple-mobile-web-app-title';
   meta.content = nomes[l] || 'Premiação';
   document.head.appendChild(meta);
+  // Theme color por brand
+  var themeColors = {'casa-beleza':'#fdd835', 'miss-beleza':'#c2185b'};
+  var tc = document.querySelector('meta[name="theme-color"]');
+  if (tc) tc.content = themeColors[brand];
+  // Expoe brand pra usar no resto do app
+  window.__BRAND__ = brand;
 })();
 </script>
-<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/app-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
@@ -73,10 +92,12 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .pwa-banner .pwa-btn.secondary{background:rgba(255,255,255,.15);color:#fff;flex:0 0 auto;padding:9px 14px}
 .pwa-banner .pwa-close{position:absolute;top:8px;right:10px;background:transparent;border:none;color:rgba(255,255,255,.7);font-size:18px;cursor:pointer}
 /* ── login ── */
-.login-screen{padding:32px 20px;max-width:420px;margin:0 auto}
-.login-logo{text-align:center;margin-bottom:24px}
+.login-screen{padding:24px 20px 60px;max-width:420px;margin:0 auto}
+.login-logo{text-align:center;margin-bottom:18px}
+.login-logo .logo-img{width:140px;height:140px;border-radius:24px;object-fit:contain;margin-bottom:12px;box-shadow:0 8px 28px rgba(0,0,0,.35)}
 .login-logo h1{font-size:18px;font-weight:700;margin-bottom:4px}
 .login-logo .sub{color:var(--muted);font-size:13px}
+.hdr-logo{width:30px;height:30px;border-radius:6px;object-fit:contain;margin-right:8px}
 .login-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
 .login-card h2{font-size:14px;font-weight:600;margin-bottom:14px;color:var(--muted)}
 .vend-list{display:flex;flex-direction:column;gap:8px}
@@ -255,6 +276,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <!-- ── TELA DE LOGIN ── -->
 <div id="login" class="login-screen">
   <div class="login-logo">
+    <img id="login-logo-img" class="logo-img" alt="Logo">
     <h1 id="login-nomeloja">Loja</h1>
     <div class="sub">Painel da equipe</div>
   </div>
@@ -276,6 +298,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div id="app" style="display:none">
   <div class="hdr-logado">
     <div class="hdr-info">
+      <img id="hdr-logo" class="hdr-logo" alt="Logo">
       <div class="av" id="hdr-av"></div>
       <div>
         <h2 id="hdr-nome"></h2>
@@ -1087,6 +1110,14 @@ async function init() {
   }
   document.getElementById('login-nomeloja').textContent = loja.nome;
   document.documentElement.style.setProperty('--theme-color', loja.cor);
+  // Logo da marca (Casa da Beleza pra L1, Miss Beleza pras outras)
+  const brand = window.__BRAND__ || (LOJA_KEY === 'L1' ? 'casa-beleza' : 'miss-beleza');
+  const logoImg = document.getElementById('login-logo-img');
+  if (logoImg) {
+    logoImg.src = 'icons/' + brand + '-512.png';
+    // bg condizente
+    logoImg.style.background = brand === 'casa-beleza' ? '#fdd835' : '#ffffff';
+  }
 
   // Tenta carregar PINs e mensagens
   try {
@@ -1165,6 +1196,14 @@ function sair() {
 function enterApp() {
   document.getElementById('login').style.display = 'none';
   document.getElementById('app').style.display = '';
+
+  // Logo da marca no header
+  const brand = window.__BRAND__ || (LOJA_KEY === 'L1' ? 'casa-beleza' : 'miss-beleza');
+  const hdrLogo = document.getElementById('hdr-logo');
+  if (hdrLogo) {
+    hdrLogo.src = 'icons/' + brand + '-192.png';
+    hdrLogo.style.background = brand === 'casa-beleza' ? '#fdd835' : '#ffffff';
+  }
 
   // Avatar: carrega salvo ou usa iniciais
   const temAvatarSalvo = carregarAvatarSalvo();
