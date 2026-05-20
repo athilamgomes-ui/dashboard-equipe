@@ -17,8 +17,12 @@ Variáveis em `{{...}}`. Listar vendedoras em ordem do maior pro menor faturamen
 📅 Semana {{dt_ini_sem}} a {{dt_fim_sem}}
 
 🏆 RANKING DA SEMANA
+
 {{#each vendedoras_ranked}}
-{{posicao}}º {{nome}} - R${{venda_semana}} (mês: R${{venda_mes}})
+{{posicao}}º {{nome}}
+Semana: R${{venda_semana}} | Marcas A: {{ma_pct_sem_indiv}}%
+Mês: R${{venda_mes}} | Marcas A: {{ma_pct_mes_indiv}}%
+
 {{/each}}
 
 📊 LOJA
@@ -26,7 +30,7 @@ Semana: R${{vendido_sem}} de R${{meta_sem}} ({{pct_sem}}% {{emoji_pct}})
 Mês: R${{vendido_mes}} de R${{meta_mes}} ({{pct_mes}}%)
 {{emoji_rank_loja}} Ficamos em {{rank_loja}}º lugar entre as lojas
 
-🎯 MARCAS A
+🎯 MARCAS A DA LOJA
 Semana: {{ma_pct_sem}}% | Mês: {{ma_pct_mes}}%
 {{texto_bonus_ma}}
 
