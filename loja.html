@@ -78,6 +78,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .av-color.selected{border-color:var(--blue);transform:scale(1.1)}
 .av-bottombar{position:fixed;bottom:0;left:0;right:0;padding:14px 16px;background:var(--bg2);border-top:1px solid var(--border);display:flex;gap:10px;z-index:10}
 .av-bottombar button{flex:1;padding:13px;border-radius:9px;border:none;font-size:14px;font-weight:700;cursor:pointer}
+.btn-pular{background:transparent;color:var(--muted);border:1px solid var(--border) !important;flex:0 0 auto !important;padding:13px 16px !important;font-size:12px !important;font-weight:500 !important}
 .btn-aleatorio{background:var(--bg3);color:var(--text)}
 .btn-salvar-av{background:var(--green);color:#fff}
 .btn-salvar-av:disabled{opacity:.5}
@@ -257,8 +258,9 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   </div>
   <div class="avatar-controls" id="avatar-controls"></div>
   <div class="av-bottombar">
+    <button class="btn-pular" onclick="pularAvatar()">Pular</button>
     <button class="btn-aleatorio" onclick="randomizarAvatar()">🎲 Aleatório</button>
-    <button class="btn-salvar-av" onclick="salvarAvatar()">✓ Salvar meu boneco</button>
+    <button class="btn-salvar-av" onclick="salvarAvatar()">✓ Salvar</button>
   </div>
 </div>
 
@@ -485,7 +487,10 @@ let avatarConfig = {
 
 function buildAvatarUrl(cfg, seed) {
   const params = new URLSearchParams();
-  params.set('seed', seed || currentUser || 'random');
+  // Seed muda com genero pra base do avatar acompanhar (rosto, proporcao)
+  const baseSeed = seed || currentUser || 'random';
+  const generoSuffix = cfg.genero === 'masculino' ? '_M' : '_F';
+  params.set('seed', baseSeed + generoSuffix);
   if (cfg.skinColor) params.set('skinColor', cfg.skinColor);
   if (cfg.hairColor) params.set('hairColor', cfg.hairColor);
   if (cfg.clothesColor) params.set('clothesColor', cfg.clothesColor);
@@ -523,7 +528,15 @@ function carregarAvatarSalvo() {
 function atualizarPreview() {
   const url = buildAvatarUrl(avatarConfig);
   const img = document.getElementById('avatar-preview-img');
-  if (img) img.src = url;
+  if (!img) return;
+  // Feedback visual de carregamento
+  img.style.opacity = '0.5';
+  img.onload = () => { img.style.opacity = '1'; };
+  img.onerror = () => {
+    img.style.opacity = '1';
+    console.warn('[avatar] falha ao carregar:', url);
+  };
+  img.src = url;
 }
 
 function selecionarOpcao(grupo, valor) {
@@ -597,6 +610,14 @@ function abrirAvatarCreator(){
   renderControles();
   atualizarPreview();
   document.getElementById('avatar-screen').classList.add('show');
+}
+
+function pularAvatar() {
+  document.getElementById('avatar-screen').classList.remove('show');
+  // Marca como pulado pra nao abrir automaticamente toda vez (so vendedora real)
+  if (sessionStorage.getItem('modo_dono') !== '1') {
+    localStorage.setItem('avatar_pulado_' + LOJA_KEY + '_' + currentUser, 'true');
+  }
 }
 
 function salvarAvatar() {
@@ -1282,6 +1303,7 @@ function enterApp() {
 
   // Avatar: carrega salvo ou usa iniciais
   const temAvatarSalvo = carregarAvatarSalvo();
+  const avPulado = localStorage.getItem('avatar_pulado_' + LOJA_KEY + '_' + currentUser) === 'true';
   const avEl = document.getElementById('hdr-av');
   if (temAvatarSalvo) {
     avEl.innerHTML = `<img src="${buildAvatarUrl(avatarConfig)}" alt="Meu avatar" style="cursor:pointer" onclick="abrirAvatarCreator()" title="Trocar avatar">`;
@@ -1289,10 +1311,10 @@ function enterApp() {
     const initials = currentUser.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
     avEl.textContent = initials;
     avEl.style.cursor = 'pointer';
-    avEl.title = 'Criar meu avatar';
+    avEl.title = 'Criar meu boneco';
     avEl.onclick = abrirAvatarCreator;
-    // Abre criador automaticamente na primeira vez (só vendedora, não dono)
-    if (sessionStorage.getItem('modo_dono') !== '1') {
+    // Abre criador automaticamente APENAS na 1a vez (se nao pulado e nao for dono)
+    if (sessionStorage.getItem('modo_dono') !== '1' && !avPulado) {
       setTimeout(() => abrirAvatarCreator(), 800);
     }
   }
