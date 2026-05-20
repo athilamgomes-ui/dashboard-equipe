@@ -347,23 +347,31 @@ const AVATAR_OPCOES = {
     label: 'Cabelo',
     tipo: 'opt',
     opts: [
-      // Femininos
-      {v:'longHair', label:'Longo liso', genero:'feminino'},
-      {v:'longHairCurly', label:'Cacheado', genero:'feminino'},
-      {v:'longHairBigHair', label:'Volumoso', genero:'feminino'},
-      {v:'longHairBob', label:'Chanel', genero:'feminino'},
-      {v:'longHairFro', label:'Black power', genero:'feminino'},
-      {v:'longHairStraight2', label:'Liso comprido', genero:'feminino'},
+      // Femininos (longos / volume)
+      {v:'straight01', label:'Longo liso', genero:'feminino'},
+      {v:'straight02', label:'Liso comprido', genero:'feminino'},
+      {v:'curly', label:'Cacheado', genero:'feminino'},
+      {v:'curvy', label:'Ondulado', genero:'feminino'},
+      {v:'bigHair', label:'Volumoso', genero:'feminino'},
+      {v:'bob', label:'Chanel', genero:'feminino'},
+      {v:'fro', label:'Black power', genero:'feminino'},
+      {v:'bun', label:'Coque', genero:'feminino'},
+      {v:'miaWallace', label:'Franjado', genero:'feminino'},
       {v:'hijab', label:'Hijab', genero:'feminino'},
-      // Masculinos
-      {v:'shortHair', label:'Curto', genero:'masculino'},
-      {v:'shortHairTheCaesar', label:'Bem curto', genero:'masculino'},
-      {v:'shortHairFrizzle', label:'Crespo curto', genero:'masculino'},
-      {v:'shortHairShortCurly', label:'Cacho curto', genero:'masculino'},
-      {v:'shortHairDreads01', label:'Dreads', genero:'masculino'},
+      // Masculinos (curtos)
+      {v:'shortFlat', label:'Curto liso', genero:'masculino'},
+      {v:'shortWaved', label:'Curto ondulado', genero:'masculino'},
+      {v:'shortCurly', label:'Cacho curto', genero:'masculino'},
+      {v:'shortRound', label:'Bem curto', genero:'masculino'},
+      {v:'theCaesar', label:'Estilo César', genero:'masculino'},
+      {v:'frizzle', label:'Crespo curto', genero:'masculino'},
+      {v:'dreads01', label:'Dreads', genero:'masculino'},
+      {v:'sides', label:'Lateral raspada', genero:'masculino'},
+      {v:'shavedSides', label:'Raspado dos lados', genero:'masculino'},
       {v:'noHair', label:'Careca', genero:'masculino'},
       // Unisex
-      {v:'hat', label:'Boné'}
+      {v:'hat', label:'Boné'},
+      {v:'turban', label:'Turbante'}
     ]
   },
   facialHair: {
@@ -374,7 +382,7 @@ const AVATAR_OPCOES = {
       {v:'blank', label:'Sem'},
       {v:'beardLight', label:'Barba leve'},
       {v:'beardMedium', label:'Barba média'},
-      {v:'beardMajestic', label:'Barba cheia'},
+      {v:'beardMagestic', label:'Barba cheia'},
       {v:'moustacheFancy', label:'Bigode'},
       {v:'moustacheMagnum', label:'Bigode magnum'}
     ]
@@ -465,7 +473,7 @@ const AVATAR_OPCOES = {
 let avatarConfig = {
   genero: 'feminino',
   skinColor: 'EDB98A',
-  top: 'longHair',
+  top: 'straight01',
   hairColor: '4a312c',
   facialHair: 'blank',
   eyes: 'happy',
