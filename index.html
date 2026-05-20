@@ -2,91 +2,227 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grupo A.M. Gomes — Central de Dashboards</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#7c5cfc">
+<title>Painel A.M. Gomes</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest-painel.json">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/app-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="A.M. Gomes">
+<meta name="mobile-web-app-capable" content="yes">
+
 <style>
 :root {
   --bg:#0f172a; --bg2:#1e293b; --bg3:#334155;
   --text:#f1f5f9; --muted:#94a3b8; --border:#334155;
+  --purple:#7c5cfc; --teal:#00d4aa; --gold:#ffb347; --blue:#3b82f6;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
-.hdr{background:var(--bg2);border-bottom:1px solid var(--border);padding:28px 40px}
-.hdr h1{font-size:22px;font-weight:700;background:linear-gradient(90deg,#7c5cfc,#00d4aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hdr p{color:var(--muted);font-size:13px;margin-top:4px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;padding:40px;max-width:1200px;width:100%}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;cursor:pointer;text-decoration:none;display:block;transition:all .18s;position:relative;overflow:hidden}
-.card::before{content:'';position:absolute;inset:0;border-radius:16px;opacity:0;transition:opacity .18s}
-.card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.4)}
-.card:hover::before{opacity:1}
-.card[data-color="purple"]::before{background:rgba(124,92,252,.07);border:1px solid rgba(124,92,252,.35)}
-.card[data-color="teal"]::before{background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.35)}
-.card[data-color="gold"]::before{background:rgba(255,179,71,.07);border:1px solid rgba(255,179,71,.35)}
-.card[data-color="blue"]::before{background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.35)}
-.card-icon{font-size:32px;margin-bottom:16px;display:block}
-.card-title{font-size:17px;font-weight:700;margin-bottom:6px}
-.card-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px}
-.card-chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{background:var(--bg3);border-radius:5px;padding:3px 10px;font-size:11px;color:var(--muted)}
-.card-arrow{position:absolute;top:24px;right:24px;color:var(--muted);font-size:18px;transition:transform .18s}
-.card:hover .card-arrow{transform:translateX(3px);color:var(--text)}
-.badge-new{background:rgba(34,197,94,.2);color:#22c55e;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;position:absolute;top:24px;left:28px;transform:translateY(-28px)}
-.coming{opacity:.5;cursor:default}
-.coming:hover{transform:none;box-shadow:none}
-.soon-tag{position:absolute;top:14px;right:14px;background:var(--bg3);color:var(--muted);font-size:10px;font-weight:700;padding:3px 9px;border-radius:5px}
-footer{margin-top:auto;padding:20px 40px;color:var(--muted);font-size:12px;border-top:1px solid var(--border)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;font-size:15px}
+
+/* ── header ── */
+.hdr{background:var(--bg2);border-bottom:1px solid var(--border);padding:20px 18px}
+.hdr h1{font-size:20px;font-weight:700;background:linear-gradient(90deg,var(--purple),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.hdr p{color:var(--muted);font-size:12px}
+
+/* ── grid de cards mobile-first ── */
+.grid{display:flex;flex-direction:column;gap:14px;padding:18px;max-width:520px;margin:0 auto;width:100%}
+@media (min-width: 600px){.grid{max-width:880px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}}
+@media (min-width: 1024px){.grid{padding:30px}}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px 20px;text-decoration:none;display:block;position:relative;overflow:hidden;transition:transform .15s}
+.card:active{transform:scale(.97)}
+.card.purple{border-left:4px solid var(--purple)}
+.card.teal{border-left:4px solid var(--teal)}
+.card.gold{border-left:4px solid var(--gold)}
+.card.blue{border-left:4px solid var(--blue)}
+.card-icon{font-size:32px;margin-bottom:10px;display:block}
+.card-title{font-size:16px;font-weight:700;margin-bottom:4px;color:var(--text)}
+.card-desc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.card-chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{background:var(--bg3);border-radius:5px;padding:2px 8px;font-size:10px;color:var(--muted);font-weight:500}
+.card-arrow{position:absolute;top:18px;right:18px;color:var(--muted);font-size:18px}
+
+/* ── secao mini (lojas) ── */
+.lojas-section{padding:18px;max-width:880px;margin:0 auto;width:100%}
+.section-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:10px}
+.lojas-mini{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media (min-width: 600px){.lojas-mini{grid-template-columns:repeat(4,1fr)}}
+.loja-mini{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px;text-decoration:none;text-align:center;color:var(--text);transition:transform .15s}
+.loja-mini:active{transform:scale(.96)}
+.loja-mini[data-l="L1"]{border-top:3px solid var(--gold)}
+.loja-mini[data-l="L3"]{border-top:3px solid var(--teal)}
+.loja-mini[data-l="L4"]{border-top:3px solid var(--purple)}
+.loja-mini[data-l="L5"]{border-top:3px solid #ef4444}
+.loja-mini-cod{font-size:14px;font-weight:700;margin-bottom:3px}
+.loja-mini-nome{font-size:10px;color:var(--muted);line-height:1.3}
+
+footer{padding:20px 18px;color:var(--muted);font-size:11px;text-align:center;border-top:1px solid var(--border);margin-top:30px}
+
+/* ── pwa install banner ── */
+.pwa-banner{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#7c5cfc,#3b82f6);color:#fff;padding:14px 16px;z-index:1000;box-shadow:0 -2px 14px rgba(0,0,0,.3);display:none}
+.pwa-banner.show{display:block}
+.pwa-banner h4{font-size:14px;font-weight:700;margin-bottom:4px}
+.pwa-banner p{font-size:12px;opacity:.92;line-height:1.4}
+.pwa-banner .pwa-actions{display:flex;gap:8px;margin-top:10px}
+.pwa-banner .pwa-btn{flex:1;background:#fff;color:#7c5cfc;border:none;padding:9px 12px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer}
+.pwa-banner .pwa-btn.secondary{background:rgba(255,255,255,.15);color:#fff;flex:0 0 auto;padding:9px 14px}
+.pwa-banner .pwa-close{position:absolute;top:8px;right:10px;background:transparent;border:none;color:rgba(255,255,255,.7);font-size:18px;cursor:pointer}
 </style>
 </head>
 <body>
 
+<!-- PWA install banner -->
+<div id="pwa-banner" class="pwa-banner">
+  <button class="pwa-close" onclick="fecharBanner(true)">×</button>
+  <h4>📱 Instale o painel no celular</h4>
+  <p id="pwa-instrucao">Toque em "Instalar agora" pra adicionar como ícone no seu celular — abre como app, sem precisar do navegador.</p>
+  <div class="pwa-actions">
+    <button class="pwa-btn" id="pwa-install-btn" onclick="instalarPwa()">📲 Instalar agora</button>
+    <button class="pwa-btn secondary" onclick="fecharBanner(true)">Depois</button>
+  </div>
+</div>
+
 <div class="hdr">
-  <h1>Grupo A.M. Gomes</h1>
-  <p>Central de dashboards — clique para abrir</p>
+  <h1>Painel A.M. Gomes</h1>
+  <p>Central de dashboards do grupo</p>
 </div>
 
 <div class="grid">
 
-  <a href="dashboard_amgomes.html" class="card" data-color="purple">
-    <span class="card-icon">📊</span>
-    <div class="card-title">Dashboard Financeiro</div>
-    <div class="card-desc">Faturamento das 4 lojas, metas mensais, comparativo YoY e indicadores de desempenho.</div>
-    <div class="card-chips">
-      <span class="chip">L1 · L3 · L4 · L5</span>
-      <span class="chip">Faturamento</span>
-      <span class="chip">Metas</span>
-    </div>
-    <span class="card-arrow">→</span>
-  </a>
-
-  <a href="dashboard_premiacao.html" class="card" data-color="gold">
+  <a href="dashboard_premiacao.html" class="card gold">
     <span class="card-icon">🏆</span>
-    <div class="card-title">Dashboard de Premiação</div>
-    <div class="card-desc">Prêmios semanais e mensais por loja e por vendedora. Acompanhamento do EM%, Marcas A e distribuição proporcional do pool.</div>
+    <div class="card-title">Premiação</div>
+    <div class="card-desc">Aprovação de sugestões, avaliação semanal, análise de feedback da equipe.</div>
     <div class="card-chips">
-      <span class="chip">Premiação 2026</span>
-      <span class="chip">Marcas A</span>
-      <span class="chip">Individual</span>
+      <span class="chip">Sugestões</span>
+      <span class="chip">Análise</span>
+      <span class="chip">Equipe</span>
     </div>
     <span class="card-arrow">→</span>
   </a>
 
-  <a href="compras/dashboard_compras.html" class="card" data-color="teal">
+  <a href="dashboard_amgomes.html" class="card purple">
+    <span class="card-icon">📊</span>
+    <div class="card-title">Vendas</div>
+    <div class="card-desc">Faturamento das 4 lojas, metas mensais, comparativo com 2025 e indicadores de desempenho.</div>
+    <div class="card-chips">
+      <span class="chip">Ranking</span>
+      <span class="chip">Metas</span>
+      <span class="chip">Margem</span>
+    </div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a href="dashboard_compras.html" class="card teal">
     <span class="card-icon">📦</span>
-    <div class="card-title">Dashboard de Compras</div>
-    <div class="card-desc">Estoque, cobertura em dias, sugestões de compra por marca e trânsito de NFs pendentes.</div>
+    <div class="card-title">Compras</div>
+    <div class="card-desc">Estoque, cobertura em dias, sugestões de compra por marca e trânsito de NFs.</div>
     <div class="card-chips">
       <span class="chip">Curva S/A/B</span>
-      <span class="chip">NFes em trânsito</span>
+      <span class="chip">NFes</span>
       <span class="chip">Sugestões</span>
     </div>
     <span class="card-arrow">→</span>
   </a>
 
-  <!-- Adicione novos dashboards aqui -->
+</div>
 
+<div class="lojas-section">
+  <div class="section-title">📱 Espiar app da equipe</div>
+  <div class="lojas-mini">
+    <a href="loja.html?l=L1" class="loja-mini" data-l="L1">
+      <div class="loja-mini-cod">L1</div>
+      <div class="loja-mini-nome">Casa da Beleza Altamira</div>
+    </a>
+    <a href="loja.html?l=L3" class="loja-mini" data-l="L3">
+      <div class="loja-mini-cod">L3</div>
+      <div class="loja-mini-nome">Miss Beleza Itaituba</div>
+    </a>
+    <a href="loja.html?l=L4" class="loja-mini" data-l="L4">
+      <div class="loja-mini-cod">L4</div>
+      <div class="loja-mini-nome">MissBeleza Altamira</div>
+    </a>
+    <a href="loja.html?l=L5" class="loja-mini" data-l="L5">
+      <div class="loja-mini-cod">L5</div>
+      <div class="loja-mini-nome">MissBeleza Santarém</div>
+    </a>
+  </div>
 </div>
 
 <footer>Grupo A.M. Gomes · Atualizado automaticamente via ERP Microvix</footer>
+
+<script>
+// ─── PWA Install (iOS + Android adaptivo) ───────────────────────────────────
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+function detectPlatform() {
+  const ua = navigator.userAgent;
+  return {
+    isIOS: /iPhone|iPad|iPod/i.test(ua) && !window.MSStream,
+    isAndroid: /Android/i.test(ua),
+    isSafari: /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS/i.test(ua),
+    isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
+  };
+}
+
+function fecharBanner(persistir) {
+  document.getElementById('pwa-banner').classList.remove('show');
+  if (persistir) localStorage.setItem('painel_pwa_fechado', new Date().toISOString());
+}
+
+async function instalarPwa() {
+  const p = detectPlatform();
+  if (p.isIOS) {
+    document.getElementById('pwa-instrucao').innerHTML = `
+      <b>No iPhone:</b><br>
+      1️⃣ Toque no botão <b>Compartilhar</b> <span style="background:#fff;color:#7c5cfc;padding:2px 6px;border-radius:4px;font-size:13px;font-weight:700">⬆</span> (parte de baixo da tela do Safari)<br>
+      2️⃣ Role pra baixo e toque em <b>"Adicionar à Tela de Início"</b><br>
+      3️⃣ Toque em <b>"Adicionar"</b> no canto superior direito<br><br>
+      Pronto, o painel vira ícone no celular!
+    `;
+    document.getElementById('pwa-install-btn').style.display = 'none';
+    return;
+  }
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const r = await deferredPrompt.userChoice;
+    if (r.outcome === 'accepted') fecharBanner(true);
+    deferredPrompt = null;
+  } else {
+    document.getElementById('pwa-instrucao').innerHTML = `
+      <b>No seu celular:</b><br>
+      Toque no menu do navegador (3 pontinhos) e escolha <b>"Adicionar à tela inicial"</b> ou <b>"Instalar app"</b>.
+    `;
+    document.getElementById('pwa-install-btn').style.display = 'none';
+  }
+}
+
+function mostrarBannerSeAplicavel() {
+  const p = detectPlatform();
+  if (p.isStandalone) return;
+  const f = localStorage.getItem('painel_pwa_fechado');
+  if (f) {
+    const dias = (Date.now() - new Date(f).getTime()) / (1000*60*60*24);
+    if (dias < 7) return;
+  }
+  if (p.isIOS && !p.isSafari) {
+    document.getElementById('pwa-instrucao').innerHTML = `Pra instalar no iPhone, abra esse link no <b>Safari</b> (não Chrome). Depois é só "Adicionar à Tela de Início".`;
+    document.getElementById('pwa-install-btn').style.display = 'none';
+  }
+  setTimeout(() => document.getElementById('pwa-banner').classList.add('show'), 2500);
+}
+
+mostrarBannerSeAplicavel();
+</script>
 
 </body>
 </html>
