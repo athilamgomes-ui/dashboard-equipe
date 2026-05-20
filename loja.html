@@ -6,13 +6,29 @@
 <meta name="theme-color" content="#7c5cfc">
 <title>Premiação A.M. Gomes</title>
 
-<!-- PWA: permite "Adicionar à tela inicial" -->
-<link rel="manifest" href="manifest.json">
+<!-- PWA: permite "Adicionar à tela inicial" — manifest dinâmico por loja -->
+<script>
+(function(){
+  // Aponta pro manifest específico da loja baseado na URL (?l=L1, L3, L4, L5)
+  var l = (new URLSearchParams(location.search).get('l') || 'L1').toUpperCase();
+  var validas = ['L1','L3','L4','L5'];
+  if (!validas.includes(l)) l = 'L1';
+  var link = document.createElement('link');
+  link.rel = 'manifest';
+  link.href = 'manifest-' + l.toLowerCase() + '.json';
+  document.head.appendChild(link);
+  // Titulo apple touch tambem por loja
+  var nomes = {L1:'CB Altamira', L3:'MB Itaituba', L4:'MB Altamira', L5:'MB Santarém'};
+  var meta = document.createElement('meta');
+  meta.name = 'apple-mobile-web-app-title';
+  meta.content = nomes[l] || 'Premiação';
+  document.head.appendChild(meta);
+})();
+</script>
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/app-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Premiação">
 <meta name="mobile-web-app-capable" content="yes">
 <style>
 :root {
