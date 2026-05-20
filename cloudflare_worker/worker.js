@@ -179,6 +179,29 @@ export default {
         return jsonResponse(request, { items });
       }
 
+      // === FOTO DE PERFIL DA VENDEDORA (base64) ===
+      if (method === 'POST' && url.pathname === '/foto') {
+        const body = await request.json();
+        const { loja, vendedora, foto } = body;
+        if (!loja || !vendedora || !foto) {
+          return jsonResponse(request, { error: 'Campos obrigatorios: loja, vendedora, foto' }, 400);
+        }
+        // Limita tamanho da foto pra nao estourar KV (~25KB max)
+        if (foto.length > 100000) {
+          return jsonResponse(request, { error: 'Foto muito grande - reduza a qualidade' }, 413);
+        }
+        const key = `foto:${loja}:${vendedora}`;
+        await KV.put(key, JSON.stringify({
+          loja, vendedora, foto, em: new Date().toISOString()
+        }));
+        return jsonResponse(request, { ok: true });
+      }
+
+      if (method === 'GET' && url.pathname === '/fotos') {
+        const items = await listAll(KV, 'foto:');
+        return jsonResponse(request, { items });
+      }
+
       // === HEALTH CHECK ===
       if (url.pathname === '/' || url.pathname === '/health') {
         return jsonResponse(request, { ok: true, msg: 'Premiacao Worker AMGomes' });

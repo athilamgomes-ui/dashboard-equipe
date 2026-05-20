@@ -59,6 +59,20 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;min-height:100vh}
 
+/* ── welcome / escolha de foto ou boneco ── */
+.welcome-screen{position:fixed;inset:0;background:var(--bg);z-index:2100;overflow-y:auto;display:none;align-items:center;justify-content:center;padding:30px 20px}
+.welcome-screen.show{display:flex}
+.welcome-content{max-width:380px;width:100%;text-align:center}
+.welcome-content h2{font-size:20px;margin-bottom:8px}
+.welcome-content p{color:var(--muted);font-size:14px;margin-bottom:26px;line-height:1.5}
+.welcome-btn{width:100%;padding:18px;border-radius:12px;border:none;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:10px}
+.welcome-btn.primary{background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff}
+.welcome-btn.secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border)}
+.welcome-btn.ghost{background:transparent;color:var(--muted);font-weight:500}
+/* ── preview de foto (recortar) ── */
+.foto-preview-screen{position:fixed;inset:0;background:var(--bg);z-index:2100;overflow-y:auto;display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px}
+.foto-preview-screen.show{display:flex}
+.foto-preview-img{width:240px;height:240px;border-radius:50%;object-fit:cover;border:4px solid var(--bg3);box-shadow:0 8px 30px rgba(0,0,0,.4);margin-bottom:24px}
 /* ── avatar creator ── */
 .avatar-screen{position:fixed;inset:0;background:var(--bg);z-index:2000;overflow-y:auto;display:none}
 .avatar-screen.show{display:block}
@@ -247,6 +261,30 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </head>
 <body>
 
+<!-- ── TELA DE BOAS-VINDAS (escolha) ── -->
+<div id="welcome-screen" class="welcome-screen">
+  <div class="welcome-content">
+    <h2>Vamos colocar seu rosto no app! 👋</h2>
+    <p>Escolha como você quer aparecer pras suas colegas e no painel.</p>
+    <button class="welcome-btn primary" onclick="abrirFotoPicker()">📸 Adicionar minha foto</button>
+    <button class="welcome-btn secondary" onclick="iniciarBoneco()">🎨 Criar um boneco</button>
+    <button class="welcome-btn ghost" onclick="pularPerfil()">Depois eu faço</button>
+  </div>
+</div>
+
+<!-- ── PREVIEW DA FOTO ESCOLHIDA ── -->
+<div id="foto-preview-screen" class="foto-preview-screen">
+  <h2 style="font-size:18px;margin-bottom:14px">Ficou bem assim?</h2>
+  <img id="foto-preview-img" class="foto-preview-img" alt="Sua foto">
+  <div style="display:flex;gap:10px;width:100%;max-width:340px">
+    <button class="welcome-btn secondary" onclick="abrirFotoPicker()" style="margin:0">🔄 Trocar</button>
+    <button class="welcome-btn primary" onclick="confirmarFoto()" style="margin:0">✓ Usar essa</button>
+  </div>
+</div>
+
+<!-- input invisivel pra selecao de arquivo (foto) -->
+<input type="file" id="foto-picker" accept="image/*" capture="user" style="display:none">
+
 <!-- ── TELA DE CRIAÇÃO DE AVATAR ── -->
 <div id="avatar-screen" class="avatar-screen">
   <div class="ac-hdr">
@@ -321,6 +359,88 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 
 <script>
+// ─── FOTO DE PERFIL ──────────────────────────────────────────────────────────
+
+let fotoPreviewBase64 = null;
+
+function abrirWelcome() {
+  document.getElementById('welcome-screen').classList.add('show');
+}
+function fecharWelcome() {
+  document.getElementById('welcome-screen').classList.remove('show');
+}
+function abrirFotoPicker() {
+  document.getElementById('foto-picker').click();
+}
+function iniciarBoneco() {
+  fecharWelcome();
+  abrirAvatarCreator();
+}
+function pularPerfil() {
+  fecharWelcome();
+  if (sessionStorage.getItem('modo_dono') !== '1') {
+    localStorage.setItem('avatar_pulado_' + LOJA_KEY + '_' + currentUser, 'true');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const picker = document.getElementById('foto-picker');
+  if (picker) picker.addEventListener('change', onFotoSelected);
+});
+
+function onFotoSelected(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      // Redimensiona pra 256x256 (crop centralizado)
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      const size = Math.min(img.width, img.height);
+      const sx = (img.width - size) / 2;
+      const sy = (img.height - size) / 2;
+      ctx.drawImage(img, sx, sy, size, size, 0, 0, 256, 256);
+      fotoPreviewBase64 = canvas.toDataURL('image/jpeg', 0.85);
+      // Mostra preview
+      document.getElementById('foto-preview-img').src = fotoPreviewBase64;
+      fecharWelcome();
+      document.getElementById('foto-preview-screen').classList.add('show');
+    };
+    img.onerror = () => alert('Não consegui abrir essa foto. Tenta outra?');
+    img.src = ev.target.result;
+  };
+  reader.onerror = () => alert('Erro lendo o arquivo. Tenta de novo?');
+  reader.readAsDataURL(file);
+  // limpa input pra mesma foto poder ser selecionada de novo
+  e.target.value = '';
+}
+
+function confirmarFoto() {
+  if (!fotoPreviewBase64) return;
+  const isDono = sessionStorage.getItem('modo_dono') === '1';
+  if (!isDono) {
+    localStorage.setItem('foto_perfil_' + LOJA_KEY + '_' + currentUser, fotoPreviewBase64);
+    // Tenta enviar pro Worker (best effort - foto pode ser grande)
+    fetch(`${WORKER_URL}/foto`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({loja: LOJA_KEY, vendedora: currentUser, foto: fotoPreviewBase64, em: new Date().toISOString()})
+    }).catch(e => console.warn('[foto] worker falha:', e));
+  }
+  // Atualiza header
+  const av = document.getElementById('hdr-av');
+  if (av) {
+    av.innerHTML = `<img src="${fotoPreviewBase64}" alt="Minha foto" style="width:100%;height:100%;object-fit:cover;border-radius:50%;cursor:pointer" onclick="abrirWelcome()" title="Trocar foto">`;
+  }
+  document.getElementById('foto-preview-screen').classList.remove('show');
+  if (isDono) {
+    setTimeout(() => alert('🧪 Modo teste: a foto não foi salva. Quando uma vendedora real adicionar a dela, fica salva de verdade.'), 100);
+  }
+}
+
 // ─── AVATAR CREATOR (DiceBear Avataaars) ─────────────────────────────────────
 
 const AVATAR_OPCOES = {
@@ -1325,21 +1445,24 @@ function enterApp() {
     hdrLogo.style.background = brand === 'casa-beleza' ? '#fdd835' : '#ffffff';
   }
 
-  // Avatar: carrega salvo ou usa iniciais
+  // Perfil: 1) tem foto? 2) tem boneco? 3) senao mostra welcome
+  const fotoSalva = localStorage.getItem('foto_perfil_' + LOJA_KEY + '_' + currentUser);
   const temAvatarSalvo = carregarAvatarSalvo();
   const avPulado = localStorage.getItem('avatar_pulado_' + LOJA_KEY + '_' + currentUser) === 'true';
   const avEl = document.getElementById('hdr-av');
-  if (temAvatarSalvo) {
-    avEl.innerHTML = `<img src="${buildAvatarUrl(avatarConfig)}" alt="Meu avatar" style="cursor:pointer" onclick="abrirAvatarCreator()" title="Trocar avatar">`;
+  if (fotoSalva) {
+    avEl.innerHTML = `<img src="${fotoSalva}" alt="Minha foto" style="width:100%;height:100%;object-fit:cover;border-radius:50%;cursor:pointer" onclick="abrirWelcome()" title="Trocar perfil">`;
+  } else if (temAvatarSalvo) {
+    avEl.innerHTML = `<img src="${buildAvatarUrl(avatarConfig)}" alt="Meu boneco" style="cursor:pointer" onclick="abrirWelcome()" title="Trocar perfil">`;
   } else {
     const initials = currentUser.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
     avEl.textContent = initials;
     avEl.style.cursor = 'pointer';
-    avEl.title = 'Criar meu boneco';
-    avEl.onclick = abrirAvatarCreator;
-    // Abre criador automaticamente APENAS na 1a vez (se nao pulado e nao for dono)
+    avEl.title = 'Adicionar foto ou boneco';
+    avEl.onclick = abrirWelcome;
+    // Abre tela de boas-vindas automaticamente APENAS na 1a vez (se nao pulou e nao eh dono)
     if (sessionStorage.getItem('modo_dono') !== '1' && !avPulado) {
-      setTimeout(() => abrirAvatarCreator(), 800);
+      setTimeout(() => abrirWelcome(), 800);
     }
   }
   document.getElementById('hdr-nome').textContent = currentUser;
