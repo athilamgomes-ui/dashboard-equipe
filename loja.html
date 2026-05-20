@@ -529,14 +529,21 @@ function atualizarPreview() {
   const url = buildAvatarUrl(avatarConfig);
   const img = document.getElementById('avatar-preview-img');
   if (!img) return;
-  // Feedback visual de carregamento
-  img.style.opacity = '0.5';
-  img.onload = () => { img.style.opacity = '1'; };
-  img.onerror = () => {
+  // Se URL é a mesma, não recarrega
+  if (img.dataset.lastUrl === url) return;
+  img.dataset.lastUrl = url;
+  img.style.opacity = '0.4';
+  // Pré-carrega via Image() antes de trocar src do preview - mais confiavel
+  const pre = new Image();
+  pre.onload = () => {
+    img.src = url;
     img.style.opacity = '1';
-    console.warn('[avatar] falha ao carregar:', url);
   };
-  img.src = url;
+  pre.onerror = () => {
+    img.style.opacity = '1';
+    console.warn('[avatar] falha:', url);
+  };
+  pre.src = url;
 }
 
 function selecionarOpcao(grupo, valor) {
@@ -570,25 +577,42 @@ function renderControles() {
   if (!cont) return;
   const genero = avatarConfig.genero || 'feminino';
   cont.innerHTML = Object.entries(AVATAR_OPCOES).map(([grupo, info]) => {
-    // Esconde grupos que dependem de genero específico
     if (info.apenasGenero && info.apenasGenero !== genero) return '';
-    // Filtra opções por genero (cabelo)
     const optsFiltradas = info.opts.filter(o => !o.genero || o.genero === genero || !genero);
     const opts = optsFiltradas.map(o => {
       const sel = avatarConfig[grupo] === o.v ? 'selected' : '';
       if (info.tipo === 'color') {
-        return `<button class="av-color ${sel}" data-v="${o.v}" style="background:${o.label}" title="${o.label}" onclick="selecionarOpcao('${grupo}','${o.v}')"></button>`;
+        return `<button class="av-color ${sel}" data-v="${o.v}" style="background:${o.label}" title="${o.label}" type="button"></button>`;
       }
       if (info.tipo === 'opt-big') {
-        return `<button class="av-opt ${sel}" data-v="${o.v}" style="flex:1;padding:14px 16px;font-size:14px;font-weight:700" onclick="selecionarGenero('${o.v}')">${o.label}</button>`;
+        return `<button class="av-opt ${sel}" data-v="${o.v}" style="flex:1;padding:14px 16px;font-size:14px;font-weight:700" type="button">${o.label}</button>`;
       }
-      return `<button class="av-opt ${sel}" data-v="${o.v}" onclick="selecionarOpcao('${grupo}','${o.v}')">${o.label}</button>`;
+      return `<button class="av-opt ${sel}" data-v="${o.v}" type="button">${o.label}</button>`;
     }).join('');
     return `<div class="av-section" data-grupo="${grupo}">
       <h3>${info.label}</h3>
       <div class="av-opts">${opts}</div>
     </div>`;
   }).join('');
+  // Setup delegation (idempotente — só anexa 1 vez)
+  if (!cont.dataset.delegated) {
+    cont.addEventListener('click', handleControlClick);
+    cont.dataset.delegated = '1';
+  }
+}
+
+function handleControlClick(e) {
+  const btn = e.target.closest('button[data-v]');
+  if (!btn) return;
+  const section = btn.closest('.av-section[data-grupo]');
+  if (!section) return;
+  const grupo = section.dataset.grupo;
+  const valor = btn.dataset.v;
+  if (grupo === 'genero') {
+    selecionarGenero(valor);
+  } else {
+    selecionarOpcao(grupo, valor);
+  }
 }
 
 function selecionarGenero(g) {
