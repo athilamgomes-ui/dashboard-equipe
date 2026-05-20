@@ -345,13 +345,14 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
         <div class="loja" id="hdr-loja"></div>
       </div>
     </div>
+    <button class="btn-sair" onclick="atualizarApp()" style="margin-right:6px" title="Atualizar app">🔄</button>
     <button class="btn-sair" onclick="sair()">Sair</button>
   </div>
 
   <div class="tabs-vend">
-    <div class="tab-vend active" data-t="hoje" onclick="setTabV('hoje')">📊 Hoje</div>
+    <div class="tab-vend active" data-t="hoje" onclick="setTabV('hoje')">📈 Hoje</div>
     <div class="tab-vend" data-t="progresso" onclick="setTabV('progresso')">🎯 Meu Progresso</div>
-    <div class="tab-vend" data-t="metas" onclick="setTabV('metas')">📈 Metas</div>
+    <div class="tab-vend" data-t="metas" onclick="setTabV('metas')">🎯 Metas</div>
     <div class="tab-vend" data-t="premio" onclick="setTabV('premio')">💰 Prêmio</div>
   </div>
 
@@ -1430,6 +1431,17 @@ function tryLogin() {
 
 function sair() {
   sessionStorage.removeItem('loja_vend_' + LOJA_KEY);
+  location.reload();
+}
+
+async function atualizarApp() {
+  // Forca recarga ignorando cache + atualiza service worker
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const reg of regs) await reg.update();
+    }
+  } catch(e) {}
   location.reload();
 }
 
