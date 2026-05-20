@@ -1090,6 +1090,12 @@ function salvarAvaliacao(idSug, resultado, comentario) {
   };
   if (idx >= 0) local[idx] = reg; else local.push(reg);
   localStorage.setItem('avaliacoes_premiacao', JSON.stringify(local));
+  // Envia pro Worker
+  fetch(`${WORKER_URL}/avaliacao`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(reg)
+  }).catch(e => console.warn('[avaliacao] falha de envio:', e));
   const card = document.querySelector(`.sug-card[data-id="${idSug}"]`);
   if (card) {
     card.setAttribute('data-aval', resultado);
@@ -1119,20 +1125,36 @@ function getSemanaCorrente() {
 
 // ─── APROVAÇÃO DE SUGESTÕES ──────────────────────────────────────────────────
 
+const WORKER_URL = 'https://premiacao-amgomes.nhf6t85hdk.workers.dev';
+
 function loadSugestoesOverrides() {
   // {id: {status, texto_editado, em}} salvo no localStorage do athila
   return JSON.parse(localStorage.getItem('sugestoes_overrides') || '{}');
 }
 
+async function enviarOverrideWorker(idSug, reg) {
+  try {
+    await fetch(`${WORKER_URL}/override`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id_sugestao: idSug, ...reg})
+    });
+  } catch (e) {
+    console.warn('[override] falha de envio - fica em localStorage:', e);
+  }
+}
+
 function aprovarSugestao(idSug, textoEditado, prazo) {
   const ov = loadSugestoesOverrides();
-  ov[idSug] = {
+  const reg = {
     status: 'aprovada',
     texto_editado: textoEditado || null,
     prazo: prazo || null,
     em: new Date().toISOString()
   };
+  ov[idSug] = reg;
   localStorage.setItem('sugestoes_overrides', JSON.stringify(ov));
+  enviarOverrideWorker(idSug, reg);
   rerender();
 }
 
@@ -1157,8 +1179,10 @@ function toggleFeedbacks(idSug) {
 
 function rejeitarSugestao(idSug) {
   const ov = loadSugestoesOverrides();
-  ov[idSug] = {status: 'rejeitada', em: new Date().toISOString()};
+  const reg = {status: 'rejeitada', em: new Date().toISOString()};
+  ov[idSug] = reg;
   localStorage.setItem('sugestoes_overrides', JSON.stringify(ov));
+  enviarOverrideWorker(idSug, reg);
   rerender();
 }
 
@@ -1166,6 +1190,8 @@ function voltarSugestaoPendente(idSug) {
   const ov = loadSugestoesOverrides();
   delete ov[idSug];
   localStorage.setItem('sugestoes_overrides', JSON.stringify(ov));
+  // No Worker, manda status pendente
+  enviarOverrideWorker(idSug, {status: 'pendente', em: new Date().toISOString()});
   rerender();
 }
 
@@ -1517,8 +1543,52 @@ function rerender() {
   el.innerHTML = renderLoja(curMes, curTab);
 }
 
-// Init
-rerender();
+// Init — carrega dados do Worker primeiro, depois renderiza
+async function initDashboard() {
+  rerender(); // primeiro render com dados inline
+  // Em paralelo busca tudo do Worker
+  try {
+    const [oR, aR, fR] = await Promise.all([
+      fetch(`${WORKER_URL}/overrides`, {cache: 'no-store'}),
+      fetch(`${WORKER_URL}/avaliacoes`, {cache: 'no-store'}),
+      fetch(`${WORKER_URL}/feedbacks`, {cache: 'no-store'}),
+    ]);
+    const overrides = (await oR.json()).items || [];
+    const avaliacoes = (await aR.json()).items || [];
+    const feedbacks = (await fR.json()).items || [];
+
+    // Mescla overrides no localStorage (mantém também o que ele fez localmente)
+    const localOv = JSON.parse(localStorage.getItem('sugestoes_overrides') || '{}');
+    for (const o of overrides) {
+      if (!localOv[o.id_sugestao] || new Date(o.em) > new Date(localOv[o.id_sugestao].em||0)) {
+        localOv[o.id_sugestao] = {status:o.status, texto_editado:o.texto_editado, prazo:o.prazo, em:o.em};
+      }
+    }
+    localStorage.setItem('sugestoes_overrides', JSON.stringify(localOv));
+
+    // Mescla avaliações
+    const localAv = JSON.parse(localStorage.getItem('avaliacoes_premiacao') || '[]');
+    for (const a of avaliacoes) {
+      const idx = localAv.findIndex(x => x.id_sugestao === a.id_sugestao);
+      if (idx < 0) localAv.push(a); else if (new Date(a.em||0) > new Date(localAv[idx].em||localAv[idx].avaliado_em||0)) localAv[idx] = {...a, avaliado_em: (a.em||'').slice(0,10)};
+    }
+    localStorage.setItem('avaliacoes_premiacao', JSON.stringify(localAv));
+
+    // Anexa feedbacks por sugestão (em memória, pra render mostrar)
+    for (const sem of Object.values(SUGESTOES)) {
+      if (!sem.itens) continue;
+      for (const item of sem.itens) {
+        item.feedbacks = feedbacks.filter(f => f.id_sugestao === item.id);
+      }
+    }
+
+    rerender(); // re-render com dados frescos
+  } catch (e) {
+    console.warn('[init] worker fetch falhou - usando dados inline/localStorage:', e);
+  }
+}
+
+initDashboard();
 </script>
 </body>
 </html>
