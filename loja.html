@@ -572,6 +572,13 @@ let quizConfirmado = false; // travou seleção da pergunta atual
 // ─── INIT ────────────────────────────────────────────────────────────────────
 
 async function init() {
+  // Modo reset: ?reset=1 limpa tudo (sessao + localStorage) - util pra athila testar
+  if (PARAMS.get('reset') === '1') {
+    localStorage.clear();
+    sessionStorage.clear();
+    // remove o reset da URL pra nao limpar de novo
+    history.replaceState({}, '', location.pathname + '?l=' + LOJA_KEY);
+  }
   const loja = LOJAS_INFO[LOJA_KEY];
   if (!loja) {
     document.body.innerHTML = '<div class="login-screen"><div class="login-card"><h2>Loja não encontrada</h2><p>Verifique o link.</p></div></div>';
