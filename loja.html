@@ -1085,19 +1085,63 @@ const SEMANAS_MES = [
 
 // Prêmios pendentes de desbloqueio via quiz
 // Estrutura: {LOJA: {semana_id: {vendedora: valor_premio}}}
-// ⚠️ Estes valores DEVEM bater EXATAMENTE com o cálculo dinâmico do painel
-// (dashboard_premiacao.html → calcSemana + getPool + distribuição proporcional).
-// Recalculado em 2026-05-22 após bug reportado pelo Athila (Josilene aparecia 23 no app vs 18 no painel).
-// Fórmula: pool_tier × (venda_vend / total_venda_loja_sem_caixa), arredondado.
-const PREMIOS_PENDENTES = {
-  // L1 S2: vendas 27172, meta 32000, em_pct 84.9% → tier 80% pool=100 (ma 22% sem bonus)
-  L1: {S2: {'Tatiane': 31, 'Rayra': 29, 'Alcione': 18, 'Sofia': 22}},
-  // L3 S2: vendas 13420, meta 20000, em_pct 67.1% → abaixo de 70%, pool=0
-  L3: {S2: {'Ana Mira': 0, 'Raimunda': 0, 'Brunna': 0, 'Naila': 0}},
-  // L4 S2: vendas 25034, meta 35000, em_pct 71.5% → tier 70% pool=80 (ma 22.2% sem bonus)
-  L4: {S2: {'Tanaia': 15, 'Josilene': 18, 'Bruna F.': 37, 'Rosana': 10}},
-  // L5 S2: vendas 15347 (s/ Lucas), meta 22336, em_pct 68.7% → abaixo de 70%, pool=0
-  L5: {S2: {'Rayssa': 0, 'Joyce': 0, 'Rosiene': 0, 'Karina': 0}},
+// ─── HISTÓRICO DE VENDAS POR SEMANA ──────────────────────────────────────────
+// Espelha a estrutura DADOS do painel athila. Necessário pra calcular prêmio
+// pendente das semanas fechadas dinâmicamente (em vez de hardcoded).
+// O cron atualiza esses dados toda execução (Etapa 1, junto com DADOS no painel).
+const VENDAS_HIST = {
+  L1: {
+    semanas: [
+      {id:'S1', meta:45000}, {id:'S2', meta:32000},
+      {id:'S3', meta:35000}, {id:'S4', meta:35000},
+    ],
+    vendas: {
+      S1:{Tatiane:14328,Rayra:13889,Alcione:8744,Sofia:4845,Outros:1371},
+      S2:{Tatiane:8513,Rayra:7841,Alcione:4803,Sofia:6015},
+      S3:{Tatiane:5581,Rayra:4865,Alcione:2552,Sofia:2736},
+      S4:{},
+    },
+    marcasA_loja: {S1:19.2, S2:22.0, S3:20.6, S4:0},
+  },
+  L3: {
+    semanas: [
+      {id:'S1', meta:25000}, {id:'S2', meta:20000},
+      {id:'S3', meta:23000}, {id:'S4', meta:23000},
+    ],
+    vendas: {
+      S1:{'Ana Mira':9010,Raimunda:5930,Brunna:6954,Naila:0,Outros:12},
+      S2:{'Ana Mira':3651,Raimunda:4424,Brunna:3713,Naila:1632},
+      S3:{'Ana Mira':2068,Raimunda:2347,Brunna:1822,Naila:1864},
+      S4:{},
+    },
+    marcasA_loja: {S1:24.7, S2:23.0, S3:22.4, S4:0},
+  },
+  L4: {
+    semanas: [
+      {id:'S1', meta:45000}, {id:'S2', meta:35000},
+      {id:'S3', meta:40000}, {id:'S4', meta:40000},
+    ],
+    vendas: {
+      S1:{Tanaia:13431,Josilene:9183,'Bruna F.':6929,Rosana:5161,Outros:1156},
+      S2:{Tanaia:4644,Josilene:5628,'Bruna F.':11627,Rosana:3075},
+      S3:{Tanaia:3880,Josilene:3452,'Bruna F.':5237,Rosana:1650,Outros:44},
+      S4:{},
+    },
+    marcasA_loja: {S1:27.3, S2:22.2, S3:29.8, S4:0},
+  },
+  L5: {
+    semanas: [
+      {id:'S1', meta:30000}, {id:'S2', meta:22336},
+      {id:'S3', meta:26000}, {id:'S4', meta:26000},
+    ],
+    vendas: {
+      S1:{Rayssa:7651,Joyce:7037,Rosiene:5399,Karina:2611,Lucas:295},
+      S2:{Rayssa:4746,Joyce:4805,Rosiene:1098,Karina:4698,Lucas:53},
+      S3:{Rayssa:2346,Joyce:3096,Rosiene:2301,Karina:2438,Lucas:239},
+      S4:{},
+    },
+    marcasA_loja: {S1:21.1, S2:25.9, S3:19.4, S4:0},
+  },
 };
 
 // Quiz de desbloqueio (5 perguntas: mescla foco da semana + conhecimento de marcas A)
@@ -1546,6 +1590,63 @@ function calcPoolFaixa(em_pct, bonusMA) {
   return {faixa: 0, pool: 0};
 }
 
+// ─── CÁLCULO DINÂMICO DE PRÊMIO PENDENTE (semana fechada) ─────────────────────
+// Substitui o antigo PREMIOS_PENDENTES hardcoded. Espelha exatamente a lógica
+// do painel athila (dashboard_premiacao.html → calcSemana + distribuição).
+
+function _isCaixa(vendedora) {
+  return (VENDEDORAS_META[vendedora]?.badges || []).includes('caixa');
+}
+
+// Retorna {pool, total, em_pct, ma, vendas} pra uma semana de uma loja,
+// ou null se não há dados / loja inexistente.
+function calcSemFechada(lojaKey, semId) {
+  const hist = VENDAS_HIST[lojaKey];
+  if (!hist) return null;
+  const sem = (hist.semanas || []).find(s => s.id === semId);
+  if (!sem) return null;
+  const vendas = (hist.vendas || {})[semId] || {};
+  const total = Object.values(vendas).reduce((s, v) => s + (v || 0), 0);
+  if (total === 0) return null;
+  const em_pct = sem.meta > 0 ? total / sem.meta * 100 : 0;
+  const ma = (hist.marcasA_loja || {})[semId] || 0;
+  const {pool} = calcPoolFaixa(em_pct, ma >= 30);
+  return {sem, total, em_pct, ma, pool, vendas};
+}
+
+// Retorna o prêmio (R$) de uma vendedora numa semana fechada. 0 se não bateu meta,
+// é caixa, ou sem venda. Usa distribuição proporcional do pool, excluindo caixa
+// e a entrada "Outros" da divisão (mas Outros conta no total pra em_pct).
+function calcPremioPendente(lojaKey, semId, vendedora) {
+  if (_isCaixa(vendedora)) return 0;
+  const c = calcSemFechada(lojaKey, semId);
+  if (!c || c.pool <= 0) return 0;
+  let totalDistr = 0;
+  for (const [v, val] of Object.entries(c.vendas)) {
+    if (v === 'Outros') continue;
+    if (_isCaixa(v)) continue;
+    totalDistr += val || 0;
+  }
+  if (totalDistr === 0) return 0;
+  const vv = c.vendas[vendedora] || 0;
+  return Math.round(c.pool * vv / totalDistr);
+}
+
+// Lista de semanas FECHADAS (anteriores à atual) que têm pool > 0 — i.e., merecem
+// gate de quiz pra desbloquear o prêmio. Substitui Object.keys(PREMIOS_PENDENTES).
+function listarSemanasFechadasComPremio(lojaKey) {
+  const ld = DADOS_LOJA[lojaKey];
+  if (!ld) return [];
+  const idxAtual = SEMANAS_MES.findIndex(s => s.id === ld.semana_atual);
+  if (idxAtual < 0) return [];
+  return SEMANAS_MES.slice(0, idxAtual)
+    .filter(s => {
+      const c = calcSemFechada(lojaKey, s.id);
+      return c && c.pool > 0;
+    })
+    .map(s => s.id);
+}
+
 function calcMeuPremio() {
   const ld = DADOS_LOJA[LOJA_KEY];
   const me = ld.vendedoras[currentUser];
@@ -1906,14 +2007,9 @@ function renderPremio() {
     </div>`;
   }
 
-  // 1. Encontrar semanas com prêmio pendente de quiz (semanas fechadas mas vendedora ainda não respondeu)
-  const semanaAtualId = ld.semana_atual;
-  const pendentes = [];
-  Object.keys(PREMIOS_PENDENTES[LOJA_KEY] || {}).forEach(semId => {
-    if (semId !== semanaAtualId && !quizJaPassou(semId)) {
-      pendentes.push(semId);
-    }
-  });
+  // 1. Encontrar semanas com prêmio pendente de quiz (semanas fechadas, loja bateu pool, vendedora ainda não respondeu)
+  const semanasComPremio = listarSemanasFechadasComPremio(LOJA_KEY);
+  const pendentes = semanasComPremio.filter(semId => !quizJaPassou(semId));
 
   // Se existe quiz aberto agora, render o quiz
   if (quizSemana) {
@@ -1945,7 +2041,10 @@ function renderHistoricoPremios() {
   const idxAtual = SEMANAS_MES.findIndex(s => s.id === ld.semana_atual);
 
   SEMANAS_MES.forEach((s, idx) => {
-    const pendente = ((PREMIOS_PENDENTES[LOJA_KEY] || {})[s.id] || {})[currentUser];
+    // Calcula prêmio dinamicamente da semana (idêntico ao painel). undefined = semana sem dados ou futura.
+    const c = (idx < idxAtual) ? calcSemFechada(LOJA_KEY, s.id) : null;
+    const temPremioSemana = c && c.pool > 0;
+    const pendente = temPremioSemana ? calcPremioPendente(LOJA_KEY, s.id, currentUser) : undefined;
     const isPendente = pendente !== undefined && !quizJaPassou(s.id);
     const jaRecebeuViaQuiz = pendente !== undefined && quizJaPassou(s.id);
 
@@ -2062,7 +2161,7 @@ function renderHistoricoPremios() {
 
 function renderGateQuiz(semanaId) {
   const semana = SEMANAS_MES.find(s => s.id === semanaId);
-  const premioVend = ((PREMIOS_PENDENTES[LOJA_KEY] || {})[semanaId] || {})[currentUser] || 0;
+  const premioVend = calcPremioPendente(LOJA_KEY, semanaId, currentUser);
 
   return `
     <div class="quiz-intro">
@@ -2199,7 +2298,7 @@ function renderQuizResultado(quiz) {
   if (passou) {
     marcarQuizPassou(quizSemana);
     const semanaId = quizSemana;
-    const premio = ((PREMIOS_PENDENTES[LOJA_KEY] || {})[semanaId] || {})[currentUser] || 0;
+    const premio = calcPremioPendente(LOJA_KEY, semanaId, currentUser);
     const semana = SEMANAS_MES.find(s => s.id === semanaId);
     quizSemana = null; // limpa
 
