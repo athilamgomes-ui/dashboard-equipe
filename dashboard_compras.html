@@ -370,20 +370,28 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-// Auto-update check: detecta mudanca via Last-Modified header (mais confiavel que SW)
+// Auto-update check: detecta mudanca no HTML OU em dados.js (que é o que mais muda)
 (function(){
-  let lastModified = null;
-  async function checkUpdate() {
+  const alvos = [location.pathname, 'dados.js', 'dados.json'];
+  const lastMod = {};
+  async function checkOne(url) {
     try {
-      const r = await fetch(location.pathname + '?_=' + Date.now(), {method:'HEAD', cache:'no-store'});
+      const r = await fetch(url + '?_=' + Date.now(), {method:'HEAD', cache:'no-store'});
       const lm = r.headers.get('last-modified');
-      if (!lm) return;
-      if (lastModified === null) { lastModified = lm; return; }
-      if (lm !== lastModified) {
-        console.log('[auto-update] nova versao detectada');
+      if (!lm) return false;
+      if (lastMod[url] === undefined) { lastMod[url] = lm; return false; }
+      if (lm !== lastMod[url]) { lastMod[url] = lm; return true; }
+      return false;
+    } catch(e) { return false; }
+  }
+  async function checkUpdate() {
+    for (const u of alvos) {
+      if (await checkOne(u)) {
+        console.log('[auto-update] mudou:', u);
         location.reload();
+        return;
       }
-    } catch(e) {}
+    }
   }
   window.addEventListener('load', () => {
     setTimeout(checkUpdate, 5000);

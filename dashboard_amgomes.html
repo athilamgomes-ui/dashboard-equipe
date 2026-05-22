@@ -214,9 +214,14 @@
   @media (max-width: 680px) {
     .grid4, .grid3 { grid-template-columns: 1fr; }
   }
+  .btn-volta-painel{position:fixed;top:14px;left:14px;z-index:9999;background:rgba(124,92,252,.95);color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}
+  .btn-volta-painel:hover{background:rgba(124,92,252,1)}
+  .btn-volta-painel:active{transform:scale(.96)}
+  @media (max-width:600px){.btn-volta-painel{font-size:11px;padding:7px 12px;top:8px;left:8px}}
 </style>
 </head>
 <body>
+<a href="index.html" class="btn-volta-painel" title="Voltar ao painel">← Painel</a>
 
 <!-- HEADER -->
 <div class="header">
@@ -622,6 +627,32 @@ function updateTime() {
     now.toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
 }
 updateTime();
+</script>
+
+<script>
+// Auto-update: detecta mudanca via Last-Modified header
+(function(){
+  let lastModified = null;
+  async function checkUpdate() {
+    try {
+      const r = await fetch(location.pathname + '?_=' + Date.now(), {method:'HEAD', cache:'no-store'});
+      const lm = r.headers.get('last-modified');
+      if (!lm) return;
+      if (lastModified === null) { lastModified = lm; return; }
+      if (lm !== lastModified) {
+        console.log('[auto-update] nova versao detectada');
+        location.reload();
+      }
+    } catch(e) {}
+  }
+  window.addEventListener('load', () => {
+    setTimeout(checkUpdate, 5000);
+    setInterval(checkUpdate, 30000);
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) checkUpdate();
+  });
+})();
 </script>
 </body>
 </html>

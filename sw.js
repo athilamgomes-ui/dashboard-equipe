@@ -3,7 +3,7 @@
 // Cache-first pra icones/imagens (raramente mudam).
 // Fallback pro cache se internet cair.
 
-const CACHE = 'amgomes-v3';
+const CACHE = 'amgomes-v4';
 
 // Instala: ativa logo, nao espera tabs antigas fecharem
 self.addEventListener('install', (event) => {
