@@ -1,0 +1,6 @@
+# Dependências do Node (Playwright para o cron headless)
+scripts/node_modules/
+scripts/package-lock.json
+# Debug scripts (temporários)
+scripts/_debug_*.mjs
+scripts/_check_*.mjs
