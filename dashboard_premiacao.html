@@ -775,37 +775,41 @@ function calcularAjusteMeta(ld, semAtual) {
   // Semanas já concluídas (até semana atual exclusiva)
   const concluidas = sems.slice(0, idxAtual);
   const restantes = sems.slice(idxAtual); // semana atual + futuras
+  if (restantes.length === 0) return null;
 
-  // Gap acumulado nas concluídas
-  let gapTotal = 0;
+  // Vendido acumulado nas semanas concluídas (real, do ERP)
+  let vendidoAcum = 0;
   const gapPorSemana = concluidas.map(s => {
     const vendas = ld.vendas[s.id] || {};
     const total = Object.values(vendas).reduce((a,v)=>a+(v||0),0);
-    const gap = s.meta - total; // positivo = não bateu, negativo = passou
-    gapTotal += gap;
-    return {sem:s, total, gap};
+    vendidoAcum += total;
+    return {sem:s, total, gap: s.meta - total};
   });
 
-  if (Math.abs(gapTotal) < 100) return null; // diferença irrelevante <R$100
+  // O que importa: meta MENSAL. Falta = meta_mensal − vendido_acumulado.
+  // Esse valor é redistribuído entre as semanas restantes.
+  const faltaMensal = ld.meta_mensal - vendidoAcum;
+  const somaRestantesOrig = restantes.reduce((a,s)=>a+s.meta, 0);
+  const gapTotal = faltaMensal - somaRestantesOrig; // delta a aplicar nas restantes
 
-  // Redistribuição proporcional ao peso atual de cada semana restante
-  const pesoTotal = restantes.reduce((s,sm)=>s+sm.meta, 0);
+  if (Math.abs(gapTotal) < 100) return null; // diferença irrelevante
+
+  // Distribui o gap entre as semanas restantes, proporcional ao peso original
   const sugestao = restantes.map(s => {
-    const peso = pesoTotal > 0 ? s.meta / pesoTotal : 1/restantes.length;
+    const peso = somaRestantesOrig > 0 ? s.meta / somaRestantesOrig : 1/restantes.length;
     const delta = Math.round(gapTotal * peso / 100) * 100; // arredonda em R$100
     return {sem:s, atual:s.meta, nova:s.meta + delta, delta};
   });
 
-  // Ajuste de arredondamento na última semana para fechar o total
+  // Ajuste de arredondamento na última semana para fechar a meta mensal exata
   const totalNovo = sugestao.reduce((s,x)=>s+x.nova, 0);
-  const totalAlvo = restantes.reduce((s,sm)=>s+sm.meta, 0) + gapTotal;
-  const ajusteFinal = totalAlvo - totalNovo;
+  const ajusteFinal = faltaMensal - totalNovo;
   if (ajusteFinal !== 0) {
     sugestao[sugestao.length-1].nova += ajusteFinal;
     sugestao[sugestao.length-1].delta += ajusteFinal;
   }
 
-  return {gapTotal, gapPorSemana, sugestao};
+  return {gapTotal, gapPorSemana, sugestao, faltaMensal, vendidoAcum};
 }
 
 function renderAjusteMeta(mesKey, lojaKey, ld) {
@@ -813,11 +817,14 @@ function renderAjusteMeta(mesKey, lojaKey, ld) {
   const aj = calcularAjusteMeta(ld, semAtual);
   if (!aj) return '';
 
-  const {gapTotal, gapPorSemana, sugestao} = aj;
+  const {gapTotal, gapPorSemana, sugestao, faltaMensal, vendidoAcum} = aj;
   const isFalta = gapTotal > 0;
-  const statusText = isFalta
-    ? `Faltaram <b>${fR(gapTotal)}</b> nas semanas já fechadas. Sugiro redistribuir esse valor nas semanas que vêm pra manter a meta mensal.`
-    : `Passamos da meta em <b>${fR(-gapTotal)}</b>. Sugiro reduzir as próximas semanas mantendo a meta mensal.`;
+  const statusText =
+    `Vendido nas semanas fechadas: <b>${fR(vendidoAcum)}</b>. ` +
+    `Falta <b>${fR(faltaMensal)}</b> pra bater a meta mensal de <b>${fR(ld.meta_mensal)}</b>. ` +
+    (isFalta
+      ? `Esse valor está acima da soma das metas restantes (<b>+${fR(gapTotal)}</b>) — precisa correr nas próximas semanas.`
+      : `Esse valor está abaixo da soma das metas restantes (<b>−${fR(-gapTotal)}</b>) — dá pra aliviar as próximas semanas.`);
 
   const rowsConcl = gapPorSemana.map(g => {
     const gapCls = g.gap > 100 ? 'delta-neg' : g.gap < -100 ? 'delta-pos' : 'delta-zero';
