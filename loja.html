@@ -1085,11 +1085,19 @@ const SEMANAS_MES = [
 
 // Prêmios pendentes de desbloqueio via quiz
 // Estrutura: {LOJA: {semana_id: {vendedora: valor_premio}}}
+// ⚠️ Estes valores DEVEM bater EXATAMENTE com o cálculo dinâmico do painel
+// (dashboard_premiacao.html → calcSemana + getPool + distribuição proporcional).
+// Recalculado em 2026-05-22 após bug reportado pelo Athila (Josilene aparecia 23 no app vs 18 no painel).
+// Fórmula: pool_tier × (venda_vend / total_venda_loja_sem_caixa), arredondado.
 const PREMIOS_PENDENTES = {
+  // L1 S2: vendas 27172, meta 32000, em_pct 84.9% → tier 80% pool=100 (ma 22% sem bonus)
   L1: {S2: {'Tatiane': 31, 'Rayra': 29, 'Alcione': 18, 'Sofia': 22}},
-  L3: {S2: {'Ana Mira': 0, 'Raimunda': 0, 'Brunna': 0, 'Naila': 0}}, // L3 não bateu 70%, ninguém ganha
-  L4: {S2: {'Tanaia': 19, 'Josilene': 23, 'Bruna F.': 48, 'Rosana': 13}},
-  L5: {S2: {'Rayssa': 41, 'Joyce': 41, 'Rosiene': 10, 'Karina': 41}},
+  // L3 S2: vendas 13420, meta 20000, em_pct 67.1% → abaixo de 70%, pool=0
+  L3: {S2: {'Ana Mira': 0, 'Raimunda': 0, 'Brunna': 0, 'Naila': 0}},
+  // L4 S2: vendas 25034, meta 35000, em_pct 71.5% → tier 70% pool=80 (ma 22.2% sem bonus)
+  L4: {S2: {'Tanaia': 15, 'Josilene': 18, 'Bruna F.': 37, 'Rosana': 10}},
+  // L5 S2: vendas 15347 (s/ Lucas), meta 22336, em_pct 68.7% → abaixo de 70%, pool=0
+  L5: {S2: {'Rayssa': 0, 'Joyce': 0, 'Rosiene': 0, 'Karina': 0}},
 };
 
 // Quiz de desbloqueio (5 perguntas: mescla foco da semana + conhecimento de marcas A)
