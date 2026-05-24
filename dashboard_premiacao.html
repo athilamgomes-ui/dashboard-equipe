@@ -1110,6 +1110,179 @@ const ALVO_LABELS = {
 };
 const RES_LABELS = {funcionou:'✓ Funcionou', indiferente:'➖ Indiferente', nao_funcionou:'✗ Não funcionou'};
 
+// ─── AVALIAÇÃO OBJETIVA (baseline → resultado) ───────────────────────────────
+// Pra cada sugestão calcula auto: baseline (sem anterior à publicação), resultado_real
+// (sem em que foi avaliada) e status_objetivo (🟢 funcionou / 🟡 parcial / 🔴 não).
+// Funciona pra meta_alvo ∈ {vendas_individuais, atingir_meta, marcas_a}.
+// ticket_medio e conversao retornam null (não rastreáveis automaticamente — falta KPI).
+//
+// Thresholds default (podem ser overrideados em sug.threshold):
+//   vendas_individuais → relativo_pct +15%
+//   atingir_meta       → meta_pct  ≥100% (bateu meta da loja)
+//   marcas_a           → absoluto_pp +5pp
+
+const DEFAULT_THRESHOLDS = {
+  vendas_individuais: {tipo:'relativo_pct', funcionou:15, parcial:5},      // +15% funcionou, +5% parcial
+  atingir_meta:       {tipo:'meta_pct',     funcionou:100, parcial:90},    // ≥100% funcionou, ≥90% parcial
+  marcas_a:           {tipo:'absoluto_pp',  funcionou:5,  parcial:2},      // +5pp / +2pp
+};
+
+// Da semana ISO da sug (ex '2026-W21'), descobre quais Sx do MES_KEY correspondem:
+// W21 = 18-23/05 = S3. W22 = 25-30 = S4. Retorna {semBaselineId, semAvalId}.
+function _semIdsDaSugestao(idSug) {
+  // ID formato '2026-W21-Lx-NN'. A semana da SUG é a semana em que ela foi PUBLICADA —
+  // ou seja, baseline = semana ANTERIOR (S2 pra W21) e resultado = semana ATUAL (S3 pra W21).
+  // Hardcode simples por enquanto (mês de mai/2026):
+  const mapa = {
+    'W21': {baseline:'S2', avaliada:'S3'},
+    'W22': {baseline:'S3', avaliada:'S4'},
+    'W19': {baseline:'',   avaliada:'S1'},
+    'W20': {baseline:'S1', avaliada:'S2'},
+  };
+  const m = idSug.match(/-W(\d+)-/);
+  if (!m) return null;
+  const k = 'W' + m[1].padStart(2,'0');
+  return mapa[k] || null;
+}
+
+function _getMA(ld, semId, vendOuLoja) {
+  if (!ld || !semId) return null;
+  if (vendOuLoja === '__loja__') {
+    return ld.marcasA_loja?.[semId] ?? null;
+  }
+  // por vendedora: só temos média do mês (marcasA_indiv) — não dá pra detalhar por semana
+  // Usar como aproximação a média do mês (limitação documentada na UI)
+  return ld.marcasA_indiv?.[vendOuLoja] ?? null;
+}
+
+function _getVendasIndiv(ld, semId, vend) {
+  return ld?.vendas?.[semId]?.[vend] ?? 0;
+}
+
+function _getVendasLoja(ld, semId) {
+  const v = ld?.vendas?.[semId] || {};
+  return Object.values(v).reduce((s,x) => s+(x||0), 0);
+}
+
+function _getMetaSem(ld, semId) {
+  return (ld?.semanas||[]).find(s => s.id === semId)?.meta || 0;
+}
+
+function calcAutoMetrics(sug) {
+  if (!sug || !sug.meta_alvo) return null;
+  if (!['vendas_individuais','atingir_meta','marcas_a'].includes(sug.meta_alvo)) {
+    return {tipo:'nao_rastreavel', meta_alvo:sug.meta_alvo};
+  }
+  const ids = _semIdsDaSugestao(sug.id);
+  if (!ids) return null;
+  const mesKey = '2026-05'; // ⚠️ futuro: derivar de ids
+  const ld = DADOS[mesKey]?.[sug.loja];
+  if (!ld) return null;
+
+  const th = sug.threshold || DEFAULT_THRESHOLDS[sug.meta_alvo];
+  let baseline = null, resultado = null, status = null, deltaStr = '', unidade = '';
+
+  if (sug.meta_alvo === 'vendas_individuais') {
+    if (!sug.vendedora) return null;
+    baseline = _getVendasIndiv(ld, ids.baseline, sug.vendedora);
+    resultado = _getVendasIndiv(ld, ids.avaliada, sug.vendedora);
+    unidade = 'R$';
+    if (baseline > 0 && resultado > 0) {
+      const variacao = (resultado - baseline) / baseline * 100;
+      deltaStr = (variacao >= 0 ? '+' : '') + variacao.toFixed(0) + '%';
+      if (variacao >= th.funcionou) status = 'funcionou';
+      else if (variacao >= th.parcial) status = 'parcial';
+      else status = 'nao_funcionou';
+    } else if (resultado === 0 || resultado === null) {
+      status = null; // semana ainda não fechou
+    }
+  }
+  else if (sug.meta_alvo === 'atingir_meta') {
+    if (sug.escopo === 'vendedora') {
+      // Pra vendedora: bateu meta semanal proporcional dela? simplificado: usar % loja
+      // (a vendedora não tem meta individual no schema)
+    }
+    const vendido = _getVendasLoja(ld, ids.avaliada);
+    const meta = _getMetaSem(ld, ids.avaliada);
+    baseline = meta;
+    resultado = vendido;
+    unidade = 'R$';
+    if (meta > 0 && vendido > 0) {
+      const pctBatido = vendido / meta * 100;
+      deltaStr = pctBatido.toFixed(0) + '% da meta';
+      if (pctBatido >= th.funcionou) status = 'funcionou';
+      else if (pctBatido >= th.parcial) status = 'parcial';
+      else status = 'nao_funcionou';
+    }
+  }
+  else if (sug.meta_alvo === 'marcas_a') {
+    const alvo = sug.escopo === 'vendedora' && sug.vendedora ? sug.vendedora : '__loja__';
+    if (alvo === '__loja__') {
+      baseline = _getMA(ld, ids.baseline, '__loja__');
+      resultado = _getMA(ld, ids.avaliada, '__loja__');
+    } else {
+      // Vendedora: marcasA_indiv é média do mês — não tem versão por semana.
+      // Usar como aproximação único valor disponível.
+      baseline = _getMA(ld, null, alvo);
+      resultado = _getMA(ld, null, alvo);
+      return {tipo:'estimativa_individual', meta_alvo:'marcas_a', vendedora:sug.vendedora, valor_medio_mes:baseline};
+    }
+    unidade = '%';
+    if (baseline !== null && resultado !== null) {
+      const deltaPP = resultado - baseline;
+      deltaStr = (deltaPP >= 0 ? '+' : '') + deltaPP.toFixed(1) + 'pp';
+      if (deltaPP >= th.funcionou) status = 'funcionou';
+      else if (deltaPP >= th.parcial) status = 'parcial';
+      else status = 'nao_funcionou';
+    }
+  }
+
+  return {
+    tipo:'calculado',
+    meta_alvo: sug.meta_alvo,
+    baseline, resultado, status, deltaStr, unidade,
+    threshold: th,
+    sem_baseline: ids.baseline,
+    sem_avaliada: ids.avaliada,
+  };
+}
+
+function renderStatusObjetivo(sug) {
+  const m = calcAutoMetrics(sug);
+  if (!m) return '';
+  if (m.tipo === 'nao_rastreavel') {
+    return `<div style="margin-top:10px;padding:8px 10px;background:rgba(148,163,184,.08);border-radius:6px;font-size:11px;color:var(--muted)">
+      ⚪ <b>${ALVO_LABELS[m.meta_alvo]||m.meta_alvo}</b> — métrica não rastreada automaticamente. Depende da avaliação manual abaixo.
+    </div>`;
+  }
+  if (m.tipo === 'estimativa_individual') {
+    return `<div style="margin-top:10px;padding:8px 10px;background:rgba(148,163,184,.08);border-radius:6px;font-size:11px;color:var(--muted)">
+      📊 <b>Marcas A da ${m.vendedora}</b>: ${m.valor_medio_mes!=null?m.valor_medio_mes.toFixed(0)+'%':'—'} (média do mês — não temos histórico semanal por vendedora).
+    </div>`;
+  }
+  // tipo calculado
+  if (m.status === null) {
+    return `<div style="margin-top:10px;padding:8px 10px;background:rgba(148,163,184,.08);border-radius:6px;font-size:11px;color:var(--muted)">
+      ⏳ Aguardando dados da semana avaliada (${m.sem_avaliada}). Status objetivo aparece após semana fechar.
+    </div>`;
+  }
+  const cor = m.status === 'funcionou' ? 'var(--green)' : m.status === 'parcial' ? 'var(--yellow)' : 'var(--red)';
+  const emoji = m.status === 'funcionou' ? '🟢' : m.status === 'parcial' ? '🟡' : '🔴';
+  const lbl = m.status === 'funcionou' ? 'FUNCIONOU' : m.status === 'parcial' ? 'PARCIAL' : 'NÃO FUNCIONOU';
+  const fmtV = (v) => m.unidade === 'R$' ? 'R$ ' + Math.round(v||0).toLocaleString('pt-BR') : (v||0).toFixed(1) + '%';
+  return `<div style="margin-top:10px;padding:10px 12px;border-radius:8px;background:${cor==='var(--green)'?'rgba(34,197,94,.08)':cor==='var(--yellow)'?'rgba(234,179,8,.08)':'rgba(239,68,68,.08)'};border-left:3px solid ${cor}">
+    <div style="font-size:11px;font-weight:700;color:${cor};margin-bottom:6px">${emoji} STATUS OBJETIVO: ${lbl}</div>
+    <div style="font-size:12px;color:var(--text)">
+      <b>${ALVO_LABELS[m.meta_alvo]}</b>:
+      ${m.sem_baseline} = ${fmtV(m.baseline)} → ${m.sem_avaliada} = ${fmtV(m.resultado)}
+      <span style="color:${cor};font-weight:700">(${m.deltaStr})</span>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:4px">
+      Critério: ≥${m.threshold.funcionou}${m.threshold.tipo==='absoluto_pp'?'pp':m.threshold.tipo==='meta_pct'?'%':'%'} = funcionou · ≥${m.threshold.parcial}${m.threshold.tipo==='absoluto_pp'?'pp':'%'} = parcial · &lt; = não funcionou
+    </div>
+  </div>`;
+}
+
 // Carrega avaliações persistidas no localStorage (mescladas com as do arquivo)
 function loadAvaliacoes() {
   const local = JSON.parse(localStorage.getItem('avaliacoes_premiacao') || '[]');
@@ -1146,6 +1319,41 @@ function salvarAvaliacao(idSug, resultado, comentario) {
     if (saved) saved.textContent = `✓ Avaliado em ${reg.avaliado_em} — sincroniza no próximo update do dashboard`;
   }
   if (curTab === 'analise') rerender();
+}
+
+function salvarRetornoFeedback(idSug, loja, vendedora) {
+  const statusSel = document.getElementById(`ret-status-${idSug}-${vendedora}`);
+  const txtSel = document.getElementById(`ret-txt-${idSug}-${vendedora}`);
+  if (!statusSel || !txtSel) return;
+  const status = statusSel.value;
+  const texto = txtSel.value;
+  if (!status) {
+    alert('Escolha um status (Excelente / Reconhecida / Precisa melhorar) antes de salvar.');
+    return;
+  }
+  const reg = {id_sugestao: idSug, loja, vendedora, status, texto, em: new Date().toISOString()};
+  // Atualiza cache local
+  window.__FEEDBACK_RETORNOS = window.__FEEDBACK_RETORNOS || [];
+  const cache = window.__FEEDBACK_RETORNOS;
+  const idx = cache.findIndex(r => r.id_sugestao === idSug && r.loja === loja && r.vendedora === vendedora);
+  if (idx >= 0) cache[idx] = reg; else cache.push(reg);
+  // Envia ao Worker
+  fetch(`${WORKER_URL}/feedback-retorno`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(reg)
+  }).then(r => {
+    if (r.ok) {
+      const btn = event.target;
+      btn.textContent = '✓ Salvo';
+      setTimeout(() => { btn.textContent = '💾 Salvar retorno'; rerender(); }, 1500);
+    } else {
+      alert('Falha ao salvar. Tente de novo.');
+    }
+  }).catch(e => {
+    console.warn('[retorno] falha:', e);
+    alert('Sem conexão. Será reenviado quando voltar.');
+  });
 }
 
 function salvarComentario(idSug, texto) {
@@ -1330,6 +1538,7 @@ function renderSugestoes() {
 
     // Feedbacks das vendedoras
     const totFb = s._feedbacks.length;
+    const retornos = window.__FEEDBACK_RETORNOS || [];
     const fbBlock = totFb > 0 ? `
       <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
         <button class="sug-btn" style="background:transparent;color:var(--blue);border-color:var(--blue);padding:5px 10px;font-size:11px;cursor:pointer" onclick="toggleFeedbacks('${s.id}')">
@@ -1339,10 +1548,28 @@ function renderSugestoes() {
           ${s._feedbacks.map(fb => {
             const cls = fb.acao==='apliquei'?'color:var(--green)':fb.acao==='tentei'?'color:var(--yellow)':'color:var(--red)';
             const lbl = fb.acao==='apliquei'?'✓ Apliquei':fb.acao==='tentei'?'🟡 Tentei mas tá difícil':'❌ Não consegui aplicar';
+            // Retorno do dono pra esse feedback (se já existir)
+            const ret = retornos.find(r => r.id_sugestao === fb.id_sugestao && r.loja === fb.loja && r.vendedora === fb.vendedora);
+            const retornoUI = `
+              <div style="margin-top:8px;padding:8px;background:rgba(124,92,252,.08);border-radius:6px;border-left:2px solid rgba(124,92,252,.6)">
+                <div style="font-size:10px;font-weight:700;color:#9d8aff;letter-spacing:.4px;margin-bottom:6px">📨 SEU RETORNO PRA ${fb.vendedora.toUpperCase()}</div>
+                <select id="ret-status-${fb.id_sugestao}-${fb.vendedora}" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:4px 6px;font-size:11px;width:100%;margin-bottom:6px">
+                  <option value="">— escolha um status —</option>
+                  <option value="excelente" ${ret?.status==='excelente'?'selected':''}>⭐ Excelente — exemplo pra equipe</option>
+                  <option value="reconhecida" ${ret?.status==='reconhecida'?'selected':''}>👏 Reconhecida — bom trabalho</option>
+                  <option value="precisa_melhorar" ${ret?.status==='precisa_melhorar'?'selected':''}>⚠️ Precisa melhorar — não vi resultado</option>
+                </select>
+                <textarea id="ret-txt-${fb.id_sugestao}-${fb.vendedora}" class="sug-comment" placeholder="Mensagem pra ela (opcional): o que você viu, o que espera..." style="min-height:50px;font-size:11px">${ret?.texto||''}</textarea>
+                <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+                  <button class="sug-btn" style="background:rgba(124,92,252,.2);color:#9d8aff;border-color:rgba(124,92,252,.5);font-size:11px;padding:5px 10px" onclick="salvarRetornoFeedback('${fb.id_sugestao}','${fb.loja}','${fb.vendedora}')">💾 Salvar retorno</button>
+                  ${ret ? `<span style="font-size:10px;color:var(--muted)">salvo em ${(ret.em||'').slice(0,16).replace('T',' ')}</span>` : ''}
+                </div>
+              </div>`;
             return `<div style="background:var(--bg3);border-radius:7px;padding:8px 10px;margin-bottom:6px">
               <div style="font-size:11px;display:flex;justify-content:space-between"><span style="font-weight:700">${fb.vendedora}</span><span style="${cls};font-weight:600">${lbl}</span></div>
               ${fb.comentario ? `<div style="font-size:12px;color:#cbd5e1;margin-top:4px">"${fb.comentario}"</div>` : ''}
               <div style="font-size:10px;color:var(--muted);margin-top:4px">${fb.em ? fb.em.slice(0,10) : ''}</div>
+              ${retornoUI}
             </div>`;
           }).join('')}
         </div>
@@ -1372,8 +1599,9 @@ function renderSugestoes() {
       const prazoLabel = s._prazo==='curto'?'🟢 Curto (avalia em 1 sem)':s._prazo==='medio'?'🟡 Médio (avalia em 1 mês)':'🔵 Longo (avalia em 3 meses)';
       actions = `
         <div style="font-size:11px;color:var(--muted);margin-top:4px">✓ Aprovada${s._statusEm?` em ${s._statusEm.slice(0,10)}`:''} · visível pras vendedoras · ${prazoLabel}</div>
+        ${renderStatusObjetivo(s)}
         ${fbBlock}
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:10px;border-top:1px solid var(--border);padding-top:8px">📊 Resultado (avaliação athila)</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:10px;border-top:1px solid var(--border);padding-top:8px">📊 Sua avaliação (subjetiva)</div>
         <div class="sug-actions" style="gap:6px;margin-top:6px">${btnsAval}</div>
         <textarea id="com-${s.id}" class="sug-comment" placeholder="Comentário (opcional): o que aconteceu, resultado em R$..." oninput="salvarComentario('${s.id}', this.value)">${com}</textarea>
         <button class="sug-btn" style="background:transparent;color:var(--muted);border-color:var(--border);margin-top:6px;width:auto;padding:4px 10px;font-size:11px" onclick="voltarSugestaoPendente('${s.id}')">↩️ Voltar pra pendente</button>`;
@@ -1588,14 +1816,17 @@ async function initDashboard() {
   rerender(); // primeiro render com dados inline
   // Em paralelo busca tudo do Worker
   try {
-    const [oR, aR, fR] = await Promise.all([
+    const [oR, aR, fR, rR] = await Promise.all([
       fetch(`${WORKER_URL}/overrides`, {cache: 'no-store'}),
       fetch(`${WORKER_URL}/avaliacoes`, {cache: 'no-store'}),
       fetch(`${WORKER_URL}/feedbacks`, {cache: 'no-store'}),
+      fetch(`${WORKER_URL}/feedback-retornos`, {cache: 'no-store'}).catch(() => ({json: async () => ({items:[]})})),
     ]);
     const overrides = (await oR.json()).items || [];
     const avaliacoes = (await aR.json()).items || [];
     const feedbacks = (await fR.json()).items || [];
+    const retornos = (await rR.json()).items || [];
+    window.__FEEDBACK_RETORNOS = retornos; // cache pra UI
 
     // Mescla overrides no localStorage (mantém também o que ele fez localmente)
     const localOv = JSON.parse(localStorage.getItem('sugestoes_overrides') || '{}');

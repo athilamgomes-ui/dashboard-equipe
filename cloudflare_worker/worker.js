@@ -140,6 +140,30 @@ export default {
         return jsonResponse(request, { items });
       }
 
+      // === RETORNO DO DONO PRO FEEDBACK DA VENDEDORA ===
+      // Athila escreve um retorno sobre um feedback específico (id_feedback inclui
+      // id_sugestao+loja+vendedora). Vendedora vê esse retorno no app dela.
+      if (method === 'POST' && url.pathname === '/feedback-retorno') {
+        const body = await request.json();
+        const { id_sugestao, loja, vendedora, status, texto } = body;
+        if (!id_sugestao || !loja || !vendedora || !status) {
+          return jsonResponse(request, { error: 'Campos obrigatorios: id_sugestao, loja, vendedora, status' }, 400);
+        }
+        const key = `feedback_retorno:${id_sugestao}:${loja}:${vendedora}`;
+        const reg = {
+          id_sugestao, loja, vendedora, status,
+          texto: texto || '',
+          em: new Date().toISOString()
+        };
+        await KV.put(key, JSON.stringify(reg));
+        return jsonResponse(request, { ok: true, salvo: reg });
+      }
+
+      if (method === 'GET' && url.pathname === '/feedback-retornos') {
+        const items = await listAll(KV, 'feedback_retorno:');
+        return jsonResponse(request, { items });
+      }
+
       // === LEITURA DO QUIZ (vendedora respondeu) ===
       if (method === 'POST' && url.pathname === '/quiz') {
         const body = await request.json();
