@@ -350,7 +350,8 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   </div>
 
   <div class="tabs-vend">
-    <div class="tab-vend active" data-t="hoje" onclick="setTabV('hoje')">📊 Hoje</div>
+    <div class="tab-vend active" data-t="meu_dia" onclick="setTabV('meu_dia')">☀️ Meu Dia</div>
+    <div class="tab-vend" data-t="hoje" onclick="setTabV('hoje')">📊 Hoje</div>
     <div class="tab-vend" data-t="progresso" onclick="setTabV('progresso')">🎯 Meu Progresso</div>
     <div class="tab-vend" data-t="metas" onclick="setTabV('metas')">📈 Metas</div>
     <div class="tab-vend" data-t="premio" onclick="setTabV('premio')">💰 Prêmio</div>
@@ -1102,6 +1103,7 @@ const VENDAS_HIST = {
       S4:{},
     },
     marcasA_loja: {S1:20.9, S2:20.5, S3:16.3, S4:0},
+    ontem: {data:'23/05/2026', dia_semana:'sábado', vendas:{Tatiane:908,Rayra:1454,Alcione:621,Sofia:573}},
   },
   L3: {
     semanas: [
@@ -1115,6 +1117,7 @@ const VENDAS_HIST = {
       S4:{},
     },
     marcasA_loja: {S1:26.5, S2:21.3, S3:21.6, S4:0},
+    ontem: {data:'23/05/2026', dia_semana:'sábado', vendas:{'Ana Mira':261,Raimunda:875,Brunna:257,Naila:501}},
   },
   L4: {
     semanas: [
@@ -1128,6 +1131,7 @@ const VENDAS_HIST = {
       S4:{},
     },
     marcasA_loja: {S1:28.9, S2:21.9, S3:12.6, S4:0},
+    ontem: {data:'23/05/2026', dia_semana:'sábado', vendas:{Tanaia:203,Josilene:672,'Bruna F.':1210,Rosana:587}},
   },
   L5: {
     semanas: [
@@ -1141,6 +1145,7 @@ const VENDAS_HIST = {
       S4:{},
     },
     marcasA_loja: {S1:21.0, S2:25.9, S3:19.3, S4:0},
+    ontem: {data:'23/05/2026', dia_semana:'sábado', vendas:{Rayssa:1417,Joyce:964,Rosiene:990,Karina:688,Lucas:0}},
   },
 };
 
@@ -1341,7 +1346,7 @@ let pinsDB = null;
 let mensagensDB = null;
 let selectedVend = null;
 let currentUser = null;
-let currentTab = 'hoje';
+let currentTab = 'meu_dia';
 let leuTudo = false;
 // Quiz state
 let quizSemana = null;     // ID da semana em quiz (ex: 'S2')
@@ -1668,10 +1673,181 @@ function calcMeuPremio() {
 
 function renderContent() {
   const el = document.getElementById('content');
-  if (currentTab === 'hoje') el.innerHTML = renderHoje();
+  if (currentTab === 'meu_dia') el.innerHTML = renderMeuDia();
+  else if (currentTab === 'hoje') el.innerHTML = renderHoje();
   else if (currentTab === 'progresso') el.innerHTML = renderProgresso();
   else if (currentTab === 'metas') el.innerHTML = renderMetas();
   else if (currentTab === 'premio') el.innerHTML = renderPremio();
+}
+
+// ─── MEU DIA ─────────────────────────────────────────────────────────────────
+// Aba que abre por padrão: vendas de ontem + acumulado semana/mês + meta do dia
+// individual (quanto a vendedora precisa vender HOJE pra ficar no ritmo).
+//
+// Toda lógica numérica usa VENDAS_HIST (espelhado do painel via cron 8h).
+
+function _semFechadasAteAtual(lojaKey) {
+  const hist = VENDAS_HIST[lojaKey];
+  if (!hist) return [];
+  const ld = DADOS_LOJA[lojaKey];
+  const semAtual = ld?.semana_atual || 'S1';
+  const idx = (hist.semanas||[]).findIndex(s => s.id === semAtual);
+  // inclui a semana atual também (pra somar acumulado)
+  return (hist.semanas||[]).slice(0, idx + 1).map(s => s.id);
+}
+
+function _acumuladoMes(lojaKey, vendedora) {
+  const hist = VENDAS_HIST[lojaKey];
+  if (!hist) return {minha:0, loja:0};
+  let minha = 0, loja = 0;
+  for (const semId of _semFechadasAteAtual(lojaKey)) {
+    const v = (hist.vendas||{})[semId] || {};
+    minha += v[vendedora] || 0;
+    for (const val of Object.values(v)) loja += val || 0;
+  }
+  return {minha, loja};
+}
+
+function _metaMensalLoja(lojaKey) {
+  const hist = VENDAS_HIST[lojaKey];
+  if (!hist) return 0;
+  return (hist.semanas||[]).reduce((s, x) => s + (x.meta||0), 0);
+}
+
+function renderMeuDia() {
+  const lojaKey = LOJA_KEY;
+  const hist = VENDAS_HIST[lojaKey];
+  const ld = DADOS_LOJA[lojaKey];
+  const me = ld.vendedoras[currentUser];
+  const isCaixa = (VENDEDORAS_META[currentUser]?.badges || []).includes('caixa');
+  const primeiroNome = currentUser.split(' ')[0];
+
+  // Ontem (espelhado do cron 8h)
+  const ontem = hist?.ontem || {};
+  const ontemVendas = ontem.vendas || {};
+  const meuOntem = ontemVendas[currentUser] || 0;
+  const lojaOntem = Object.values(ontemVendas).reduce((s, v) => s + (v||0), 0);
+  const minhaPartOntem = lojaOntem > 0 ? (meuOntem / lojaOntem * 100) : 0;
+
+  // Acumulado mês (semanas até a atual, inclusive)
+  const acum = _acumuladoMes(lojaKey, currentUser);
+  const metaMensal = _metaMensalLoja(lojaKey);
+
+  // Semana atual
+  const semAtualId = ld?.semana_atual || 'S1';
+  const semAtualObj = (hist?.semanas||[]).find(s => s.id === semAtualId) || {meta:0};
+  const vendasSemAtual = (hist?.vendas||{})[semAtualId] || {};
+  const meSemAtual = vendasSemAtual[currentUser] || 0;
+  const lojaSemAtual = Object.values(vendasSemAtual).reduce((s, v) => s + (v||0), 0);
+  const metaSem = semAtualObj.meta || 0;
+  const pctSem = metaSem > 0 ? (lojaSemAtual / metaSem * 100) : 0;
+  const pctMes = metaMensal > 0 ? (acum.loja / metaMensal * 100) : 0;
+
+  // Meta de hoje
+  const hoje = new Date();
+  const diaSemana = hoje.getDay(); // 0=dom 1=seg ... 6=sáb
+  const NOMES_DIA = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+  const nomeHoje = NOMES_DIA[diaSemana];
+  let metaHojeLoja = 0, metaHojeIndiv = 0, msgHoje = '', diaFechado = false;
+
+  if (diaSemana === 0) {
+    diaFechado = true;
+    msgHoje = 'Lojas fechadas hoje (domingo). Aproveita pra descansar — segunda começa forte!';
+  } else {
+    // dias úteis restantes incluindo hoje: seg=6, ter=5, qua=4, qui=3, sex=2, sáb=1
+    const diasUteisRestantes = 6 - diaSemana + 1;
+    const faltaLoja = Math.max(0, metaSem - lojaSemAtual);
+    metaHojeLoja = diasUteisRestantes > 0 ? Math.round(faltaLoja / diasUteisRestantes) : 0;
+
+    if (!isCaixa) {
+      // Distribuição individual: proporcional à contribuição da vendedora na semana atual
+      const totalNonCaixa = Object.entries(vendasSemAtual)
+        .filter(([n]) => !(VENDEDORAS_META[n]?.badges||[]).includes('caixa') && n !== 'Outros')
+        .reduce((s, [,v]) => s + (v||0), 0);
+      if (totalNonCaixa > 0) {
+        metaHojeIndiv = Math.round(metaHojeLoja * (meSemAtual / totalNonCaixa));
+      } else {
+        // Semana ainda vazia (S4 segunda de manhã) → divisão igual
+        const numV = Object.keys(ld.vendedoras||{})
+          .filter(n => !(VENDEDORAS_META[n]?.badges||[]).includes('caixa')).length;
+        metaHojeIndiv = numV > 0 ? Math.round(metaHojeLoja / numV) : 0;
+      }
+    }
+
+    if (faltaLoja === 0) {
+      msgHoje = '🎉 Loja já bateu a meta da semana! Tudo daqui pra frente é bônus pra subir o prêmio.';
+    } else if (metaHojeIndiv === 0) {
+      msgHoje = 'Tranquilo — ritmo do dia normal.';
+    } else if (metaHojeIndiv < 1500) {
+      msgHoje = '✨ Dia tranquilo. Mantém o ritmo, sem pressa.';
+    } else if (metaHojeIndiv < 3000) {
+      msgHoje = '⚡ Dia médio — atendimento focado, marca A na primeira oferta.';
+    } else {
+      msgHoje = '🔥 Dia decisivo — meta apertada, cada cliente conta.';
+    }
+  }
+
+  return `
+    <div class="card" style="border-left:4px solid #6366f1;background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(139,92,246,.04))">
+      <h3 style="margin-bottom:4px">☀️ Bom dia, ${primeiroNome}!</h3>
+      <div class="sub">${diaFechado ? 'Hoje é domingo.' : `Hoje é ${nomeHoje}.`} ${ontem.data ? `Aqui está o resumo do seu ${ontem.dia_semana||'dia anterior'} (${ontem.data}).` : ''}</div>
+    </div>
+
+    <div class="card">
+      <h3>📅 Ontem</h3>
+      <div class="row2">
+        <div>
+          <div class="big green">${fR(meuOntem)}</div>
+          <div class="sub">você vendeu</div>
+        </div>
+        <div>
+          <div class="big">${fR(lojaOntem)}</div>
+          <div class="sub">total da loja</div>
+        </div>
+      </div>
+      ${meuOntem > 0 && lojaOntem > 0 ? `<div class="sub" style="margin-top:10px;padding-top:10px;border-top:1px solid #e5e7eb">Sua parte: <strong>${minhaPartOntem.toFixed(0)}%</strong> das vendas da loja</div>` : ''}
+    </div>
+
+    <div class="card">
+      <h3>📊 Acumulado</h3>
+      <div class="row2">
+        <div>
+          <div class="big">${fR(meSemAtual)}</div>
+          <div class="sub">você na semana</div>
+        </div>
+        <div>
+          <div class="big">${fR(acum.minha)}</div>
+          <div class="sub">você no mês</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid #e5e7eb">
+        <div class="sub" style="margin-bottom:6px">Loja na semana: <strong>${fR(lojaSemAtual)}</strong> de ${fR(metaSem)} <span style="color:${pctSem>=100?'#10b981':pctSem>=70?'#f59e0b':'#ef4444'}">(${pctSem.toFixed(0)}%)</span></div>
+        <div class="sub">Loja no mês: <strong>${fR(acum.loja)}</strong> de ${fR(metaMensal)} <span style="color:${pctMes>=100?'#10b981':pctMes>=70?'#f59e0b':'#ef4444'}">(${pctMes.toFixed(0)}%)</span></div>
+      </div>
+    </div>
+
+    ${isCaixa ? `
+    <div class="card">
+      <h3>🎯 Hoje</h3>
+      <div class="sub">Você é caixa — sem meta individual. Bom trabalho recebendo as clientes!</div>
+    </div>
+    ` : `
+    <div class="card" style="border:2px solid ${diaFechado?'#94a3b8':metaHojeIndiv>=3000?'#ef4444':metaHojeIndiv>=1500?'#f59e0b':'#10b981'}">
+      <h3>🎯 Meta de hoje</h3>
+      ${diaFechado ? `
+        <div class="big" style="font-size:22px">😴 Loja fechada</div>
+        <div class="sub" style="margin-top:8px">${msgHoje}</div>
+      ` : `
+        <div class="big" style="color:${metaHojeIndiv>=3000?'#ef4444':metaHojeIndiv>=1500?'#f59e0b':'#10b981'}">${fR(metaHojeIndiv)}</div>
+        <div class="sub">o que você precisa vender hoje pra ficar no ritmo da meta semanal</div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e5e7eb">
+          <div class="sub">Loja precisa vender hoje: <strong>${fR(metaHojeLoja)}</strong></div>
+          <div class="sub" style="margin-top:8px">${msgHoje}</div>
+        </div>
+      `}
+    </div>
+    `}
+  `;
 }
 
 // ─── HOJE ────────────────────────────────────────────────────────────────────
