@@ -1,5 +1,19 @@
 {
   "_descricao": "Arquivo canônico de avaliações de sugestões do dashboard de premiação. Atualizado pelo agente dashboard-premiacao-update a cada execução (lê o localStorage do navegador, mescla aqui e regrava AVALIACOES no HTML).",
-  "atualizado_em": "2026-05-25T12:10:00",
-  "avaliacoes": []
+  "atualizado_em": "2026-05-26T15:30:00",
+  "avaliacoes": [
+    {"id_sugestao":"2026-W21-L1-01","resultado":"funcionou","comentario":"Loja teve lift real do app (+58% qui-sáb vs P75 histórico de +35%).","avaliado_em":"2026-05-26"},
+    {"id_sugestao":"2026-W21-L1-03","resultado":"funcionou","comentario":"Tatiane +47% individual, manteve liderança como gerente.","avaliado_em":"2026-05-26"},
+    {"id_sugestao":"2026-W21-L1-04","resultado":"funcionou","comentario":"Sofia (nova) +62% — ramp-up forte.","avaliado_em":"2026-05-26"},
+    {"id_sugestao":"2026-W21-L3-01","resultado":"funcionou","comentario":"L3 +45% qui-sáb vs P75 +31%. Lift real.","avaliado_em":"2026-05-26"},
+    {"id_sugestao":"2026-W21-L3-02","resultado":"funcionou","comentario":"Naila +521% — recuperação forte.","avaliado_em":"2026-05-26"},
+    {"id_sugestao":"2026-W21-L3-03","resultado":"indiferente","comentario":"Ticket médio não medido por semana — sem como avaliar objetivamente nessa S3.","avaliado_em":"2026-05-26"},
+    {"id_sugestao":"2026-W21-L4-01","resultado":"funcionou","comentario":"Tanaia +106% S3 mesmo gestante, equipe entregou +54%.","avaliado_em":"2026-05-26"},
+    {"id_sugestao":"2026-W21-L4-03","resultado":"funcionou","comentario":"Rosana (nova) +60%, pareada com Bruna F. funcionou.","avaliado_em":"2026-05-26"},
+    {"id_sugestao":"2026-W21-L4-04","resultado":"funcionou","comentario":"L4 +54% qui-sáb vs P75 +38%. Marcas A continuaram fortes na S4 (34,5%).","avaliado_em":"2026-05-26"},
+    {"id_sugestao":"2026-W21-L5-01","resultado":"indiferente","comentario":"Karina (nova) +68% mas L5 dentro variação natural — não dá pra cravar efeito do app.","avaliado_em":"2026-05-26"},
+    {"id_sugestao":"2026-W21-L5-02","resultado":"indiferente","comentario":"Lift L5 (+47%) dentro do P25-P75 histórico (+8% a +61%). Inconclusivo.","avaliado_em":"2026-05-26"},
+    {"id_sugestao":"2026-W21-L5-03","resultado":"funcionou","comentario":"Rosiene +20% individual, liderou bem.","avaliado_em":"2026-05-26"},
+    {"id_sugestao":"2026-W21-GE-01","resultado":"funcionou","comentario":"Campanha WhatsApp coordenada teve aderência.","avaliado_em":"2026-05-26"}
+  ]
 }
