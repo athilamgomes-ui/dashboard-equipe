@@ -1150,35 +1150,12 @@ const VENDAS_HIST = {
 };
 
 // Quiz de desbloqueio (5 perguntas: mescla foco da semana + conhecimento de marcas A)
+// ⚠️ Conteúdo do quiz da semana N = perguntas sobre os FOCOS DA SEMANA N+1.
+// Ex: QUIZ_SEMANA.L1.S2 reforça focos da S3 (semana atual quando o quiz aparece).
+// Em maio/2026, S1 não tem quiz (ver SEMANAS_SEM_QUIZ_POR_MES abaixo) —
+// vendedoras só começaram a usar o app na quinta 21/05.
 const QUIZ_SEMANA = {
   L1: {
-    S1: [
-      {
-        p: 'Quais são as 3 Marcas A prioridade da Casa da Beleza Altamira?',
-        opcoes: ['Schwarzkopf, Wella, L\'Oréal', 'Truss, Marco Boni e Itallian', 'Bio Extratus, Salon Line, Embelleze', 'Cadiveu, Felps, Skala'],
-        correta: 1
-      },
-      {
-        p: 'A Truss é especializada em qual tipo de produto?',
-        opcoes: ['Reconstrução e tratamento capilar profissional', 'Maquiagem', 'Esmaltes', 'Perfumaria'],
-        correta: 0
-      },
-      {
-        p: 'A Marco Boni é conhecida principalmente por qual categoria?',
-        opcoes: ['Cremes hidratantes', 'Acessórios capilares (escovas, pranchas, secadores)', 'Esmaltes', 'Tintura'],
-        correta: 1
-      },
-      {
-        p: 'Em quanto sobe o prêmio quando a loja chega em 30% de Marcas A?',
-        opcoes: ['R$10 a mais', 'R$20 a mais', 'R$50 a mais para a equipe', 'Não sobe nada'],
-        correta: 2
-      },
-      {
-        p: 'Qual a forma certa de oferecer marca A pra subir o %?',
-        opcoes: ['Esperar o cliente perguntar', 'Para todo cliente novo, primeira sugestão é uma marca A', 'Vender só pra quem já comprou antes', 'Dar desconto na marca A'],
-        correta: 1
-      }
-    ],
     S2: [
       {
         p: 'Qual o foco da Casa da Beleza Altamira essa semana?',
@@ -1205,63 +1182,9 @@ const QUIZ_SEMANA = {
         opcoes: ['Sobe R$10', 'Sobe R$20', 'Sobe R$50 a mais para a equipe', 'Não sobe'],
         correta: 2
       }
-    ],
-    S3: [
-      {
-        p: 'Qual foi o foco da Casa da Beleza Altamira na semana 3 (18-23/05)?',
-        opcoes: ['Vender mais perfumes', 'Subir Marcas A de 22% para 30%', 'Treinar caixa', 'Reduzir devolução'],
-        correta: 1
-      },
-      {
-        p: 'Quais são as 3 Marcas A prioridade da Casa da Beleza Altamira?',
-        opcoes: ['Schwarzkopf, Wella, L\'Oréal', 'Truss, Marco Boni e Itallian', 'Bio Extratus, Salon Line, Embelleze', 'Cadiveu, Felps, Skala'],
-        correta: 1
-      },
-      {
-        p: 'Tatiane, como gerente, tinha qual missão extra essa semana?',
-        opcoes: ['Treinar caixa', 'Atender mais clientes', 'Acompanhar a Sofia 2 manhãs (vendedora nova em ramp-up)', 'Vender mais perfume'],
-        correta: 2
-      },
-      {
-        p: 'Qual a melhor abordagem com cliente parado na vitrine?',
-        opcoes: ['Esperar ele entrar', 'Perguntar só "posso ajudar?"', 'Ir até ele, sorrir e oferecer uma novidade da marca A', 'Falar do desconto'],
-        correta: 2
-      },
-      {
-        p: 'Em quanto sobe o prêmio da equipe quando a loja chega em 30% de Marcas A?',
-        opcoes: ['R$10 a mais', 'R$20 a mais', 'R$50 a mais para a equipe inteira', 'Não sobe'],
-        correta: 2
-      }
     ]
   },
   L3: {
-    S1: [
-      {
-        p: 'Quais são as Marcas A prioridade da Miss Beleza Itaituba?',
-        opcoes: ['Schwarzkopf e Wella', 'Truss, Itallian e Natum', 'Cadiveu e Felps', 'Bio Extratus e Salon Line'],
-        correta: 1
-      },
-      {
-        p: 'A Itallian Hairtech é conhecida por qual tipo de produto?',
-        opcoes: ['Tratamentos capilares profissionais', 'Coloração', 'Acessórios', 'Maquiagem'],
-        correta: 0
-      },
-      {
-        p: 'A Natum se diferencia por qual característica?',
-        opcoes: ['Marca importada', 'Especializada em fios coloridos', 'É natural e vegana', 'Só produtos infantis'],
-        correta: 2
-      },
-      {
-        p: 'Qual a melhor frase pra abordar cliente novo?',
-        opcoes: ['"Posso ajudar?"', '"Quer ver essa marca que está fazendo sucesso?"', '"Tá procurando o quê?"', '"Fica à vontade"'],
-        correta: 1
-      },
-      {
-        p: 'Em quanto sobe o prêmio quando a loja chega em 30% de Marcas A?',
-        opcoes: ['R$10', 'R$20', 'R$50 a mais para a equipe', 'Não sobe'],
-        correta: 2
-      }
-    ],
     S2: [
       {
         p: 'Qual o foco da Miss Beleza Itaituba essa semana?',
@@ -1291,33 +1214,6 @@ const QUIZ_SEMANA = {
     ]
   },
   L4: {
-    S1: [
-      {
-        p: 'Em qual indicador o MissBeleza Altamira lidera entre as 4 lojas?',
-        opcoes: ['Volume total de vendas', '% Marcas A', 'Ticket médio', 'Quantidade de vendedoras'],
-        correta: 1
-      },
-      {
-        p: 'A Truss é especializada em qual tipo de produto?',
-        opcoes: ['Reconstrução e tratamento capilar profissional', 'Coloração permanente', 'Esmaltes em gel', 'Maquiagem'],
-        correta: 0
-      },
-      {
-        p: 'A Marco Boni vende principalmente o quê?',
-        opcoes: ['Shampoos profissionais', 'Cremes hidratantes', 'Acessórios capilares (escovas, pranchas, secadores)', 'Coloração'],
-        correta: 2
-      },
-      {
-        p: 'Por que vender combo de 3 produtos da mesma marca aumenta seu prêmio?',
-        opcoes: ['Porque o cliente paga mais barato', 'Porque o cliente gasta 3x mais (R$150-300 em vez de R$50-100)', 'Porque a loja ganha desconto do fornecedor', 'Não aumenta'],
-        correta: 1
-      },
-      {
-        p: 'Em quanto sobe o prêmio quando a loja chega em 30% de Marcas A?',
-        opcoes: ['R$10', 'R$20', 'R$50 a mais para a equipe', 'Não sobe'],
-        correta: 2
-      }
-    ],
     S2: [
       {
         p: 'Qual o foco do MissBeleza Altamira essa semana?',
@@ -1347,33 +1243,6 @@ const QUIZ_SEMANA = {
     ]
   },
   L5: {
-    S1: [
-      {
-        p: 'Quais Marcas A são prioridade pra oferecer no MissBeleza Santarém?',
-        opcoes: ['Yama e Marco Boni', 'Schwarzkopf e Wella', 'Cadiveu e Felps', 'Truss, Itallian e Santa Clara'],
-        correta: 3
-      },
-      {
-        p: 'A Truss é especializada em qual tipo de produto?',
-        opcoes: ['Tratamento de fios coloridos', 'Reconstrução e tratamento capilar profissional', 'Esmaltes', 'Maquiagem'],
-        correta: 1
-      },
-      {
-        p: 'A Santa Clara é uma marca tradicional brasileira. Vende principalmente o quê?',
-        opcoes: ['Só tintura', 'Só esmalte', 'Ampla linha de cosméticos (cremes, óleos, hidratantes capilares)', 'Só perfume'],
-        correta: 2
-      },
-      {
-        p: 'Pra subir Marcas A de 19% pra 30%, qual a estratégia mais eficaz?',
-        opcoes: ['Dar desconto nas Marcas A', 'Pra cada cliente novo, primeira sugestão é uma Marca A (Truss, Itallian ou Santa Clara)', 'Esconder as outras marcas', 'Vender só pra clientes antigos'],
-        correta: 1
-      },
-      {
-        p: 'Em quanto sobe o prêmio quando a loja chega em 30% de Marcas A?',
-        opcoes: ['R$10', 'R$20', 'R$50 a mais para a equipe', 'Não sobe'],
-        correta: 2
-      }
-    ],
     S2: [
       {
         p: 'Qual o foco do MissBeleza Santarém essa semana?',
@@ -1782,6 +1651,14 @@ function calcPremioPendente(lojaKey, semId, vendedora) {
   return Math.round(c.pool * vv / totalDistr);
 }
 
+// Semanas que NÃO exigem quiz por exceção (ex: app não existia ainda).
+// Chave = mês 'YYYY-MM' corrente; valor = lista de semanas a pular.
+// Regra padrão: TODA semana fechada com pool>0 exige quiz. Só adicionar aqui se houver
+// motivo histórico claro. Em junho/2026, esse objeto pode ficar vazio.
+const SEMANAS_SEM_QUIZ_POR_MES = {
+  '2026-05': ['S1'], // App lançado quinta 21/05/2026, no meio da S3. S1 foi entregue direto via HISTORICO_PREMIOS.
+};
+
 // Lista de semanas FECHADAS (anteriores à atual) que têm pool > 0 — i.e., merecem
 // gate de quiz pra desbloquear o prêmio. Substitui Object.keys(PREMIOS_PENDENTES).
 function listarSemanasFechadasComPremio(lojaKey) {
@@ -1789,8 +1666,12 @@ function listarSemanasFechadasComPremio(lojaKey) {
   if (!ld) return [];
   const idxAtual = SEMANAS_MES.findIndex(s => s.id === ld.semana_atual);
   if (idxAtual < 0) return [];
+  const hoje = new Date();
+  const mesKey = hoje.getFullYear() + '-' + String(hoje.getMonth()+1).padStart(2,'0');
+  const skip = SEMANAS_SEM_QUIZ_POR_MES[mesKey] || [];
   return SEMANAS_MES.slice(0, idxAtual)
     .filter(s => {
+      if (skip.includes(s.id)) return false;
       const c = calcSemFechada(lojaKey, s.id);
       return c && c.pool > 0;
     })
@@ -2379,12 +2260,18 @@ function renderHistoricoPremios() {
   // Determina índice da semana atual para classificar passadas vs futuras
   const idxAtual = SEMANAS_MES.findIndex(s => s.id === ld.semana_atual);
 
+  // Semanas que NÃO exigem quiz nesse mês (ex: S1 em maio/2026)
+  const _hojeM = new Date();
+  const _mesKey = _hojeM.getFullYear() + '-' + String(_hojeM.getMonth()+1).padStart(2,'0');
+  const _skipSemQuiz = SEMANAS_SEM_QUIZ_POR_MES[_mesKey] || [];
+
   SEMANAS_MES.forEach((s, idx) => {
     // Calcula prêmio dinamicamente da semana (idêntico ao painel). undefined = semana sem dados ou futura.
     const c = (idx < idxAtual) ? calcSemFechada(LOJA_KEY, s.id) : null;
     const temPremioSemana = c && c.pool > 0;
     const pendente = temPremioSemana ? calcPremioPendente(LOJA_KEY, s.id, currentUser) : undefined;
-    const isPendente = pendente !== undefined && !quizJaPassou(s.id);
+    const ehSkipQuiz = _skipSemQuiz.includes(s.id); // S1 em maio/2026 → mostra direto do HISTORICO_PREMIOS
+    const isPendente = pendente !== undefined && !quizJaPassou(s.id) && !ehSkipQuiz;
     const jaRecebeuViaQuiz = pendente !== undefined && quizJaPassou(s.id);
 
     if (s.id === ld.semana_atual) {
