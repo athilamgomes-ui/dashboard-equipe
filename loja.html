@@ -918,8 +918,8 @@ const DADOS_LOJA = {
     nome_loja: 'Casa da Beleza Altamira',
     meta_mensal: 140000,
     meta_semana: 35000,
-    vendido_semana: 3167,  // S4 parcial (24-25/05)
-    vendido_mes: 97017,
+    vendido_semana: 3268,  // S4 parcial (até 25/05 — segunda)
+    vendido_mes: 97118,
     posicao_loja: 1, // 1-4
     ma_pct_loja_sem: 16.3,
     ma_pct_loja_mes: 19.2,
@@ -934,7 +934,7 @@ const DADOS_LOJA = {
         'Suas Marcas A caíram de 21% (média do mês) pra 19% essa semana. Pra subir de novo: ofereça shampoo + condicionador + máscara da mesma marca como combo. Vendendo combo, suas Marcas A sobem e o valor do atendimento também.',
         'Quando um cliente que já comprou com você vem de novo, ele compra mais. Pegue o celular dos seus 10 melhores clientes e mande uma mensagem assim: "Oi fulana, chegou uma novidade da marca X que você vai amar". Mensagens assim trazem cliente pra loja.'
       ]},
-      'Alcione':  {sem:265,  mes:17549, ma_sem:17, ma_mes:21, melhorias:[
+      'Alcione':  {sem:366,  mes:17650, ma_sem:17, ma_mes:21, melhorias:[
         'Você é a melhor da loja em vender Marcas A (25%), mas vendeu menos que as colegas em volume total. O caminho pra subir: atender mais clientes. Quando o cliente entrar, vá nele com sorriso, ofereça uma marca A primeiro. Quanto mais clientes você atender, mais venda fecha.',
         'Estratégia que vai te fazer crescer: vender combo de 3 produtos da mesma marca A (shampoo + condicionador + máscara). Por que isso funciona? Porque o cliente que leva combo gasta R$150 a R$300 no atendimento, em vez de R$50 a R$100 que gasta levando produto solto. Você já sabe vender Marca A - agora venda em combo.'
       ]},
@@ -948,15 +948,15 @@ const DADOS_LOJA = {
     nome_loja: 'Miss Beleza Itaituba',
     meta_mensal: 80000,
     meta_semana: 23000,
-    vendido_semana: 3838,
-    vendido_mes: 52078,
+    vendido_semana: 4052,
+    vendido_mes: 52292,
     posicao_loja: 4,
     ma_pct_loja_sem: 21.6,
     ma_pct_loja_mes: 23.1,
     semana_atual: 'S4',
     semana_label: 'Semana 25 a 30/05',
     vendedoras: {
-      'Ana Mira': {sem:1171,  mes:16675, ma_sem:20, ma_mes:25, melhorias:[
+      'Ana Mira': {sem:1293,  mes:16797, ma_sem:20, ma_mes:25, melhorias:[
         'A loja vendeu 39% menos na semana 2 do que na semana 1. Precisamos retomar o ritmo. Olhe os números: o que mudou entre uma semana e outra? Faltou alguma marca importante? Algum dia ficou com pouca gente atendendo?',
         'Como gerente, sua maior ferramenta é a equipe. Conversa rápida individual com cada uma no início da semana: o que ela vai focar? Quanto ela quer vender? Quando cada uma tem uma meta clara, todo mundo bate mais.'
       ]},
@@ -964,7 +964,7 @@ const DADOS_LOJA = {
         'Manter consistência é o segredo de quem chega no topo. Vendedora que vende todo dia, mesmo que seja pouco, bate mais meta do que quem vende muito num dia e zero no outro. Olhe seu número de hoje - se está em zero, vá em busca de cliente agora.',
         'Suas Marcas A estão em 20%. Pequena mudança que vai te fazer crescer: pra cada cliente novo que entrar, primeira sugestão sua é uma marca A (Truss, Itallian ou Natum). Se ele recusar, aí oferece outras marcas. Mas a primeira tem que ser A.'
       ]},
-      'Brunna':   {sem:298,  mes:14078, ma_sem:22, ma_mes:18, melhorias:[
+      'Brunna':   {sem:390,  mes:14170, ma_sem:22, ma_mes:18, melhorias:[
         'Você está bem em Marcas A (24%) - continue assim. Pra subir ainda mais, foque em combo: ofereça produto pra antes do banho (shampoo + condicionador) e depois do banho (máscara ou finalizador). Esse combo de 3 leva sua porcentagem pra cima.',
         'Você converte bem o que oferece - quando o cliente para com você, fecha. O que falta é volume. Pegue os clientes que estão parados na vitrine ou olhando outras prateleiras - vá até eles, sorria, ofereça uma novidade.'
       ]},
@@ -1100,10 +1100,10 @@ const VENDAS_HIST = {
       S1:{Tatiane:12754,Rayra:13467,Alcione:8744,Sofia:4845},
       S2:{Tatiane:10086,Rayra:8263,Alcione:4803,Sofia:6015},
       S3:{Tatiane:9468,Rayra:7307,Alcione:3737,Sofia:4361},
-      S4:{Tatiane:949,Rayra:769,Alcione:265,Sofia:1184},
+      S4:{Tatiane:949,Rayra:769,Alcione:366,Sofia:1184},
     },
     marcasA_loja: {S1:20.9, S2:20.5, S3:16.3, S4:0},
-    ontem: {data:'23/05/2026', dia_semana:'sábado', vendas:{Tatiane:908,Rayra:1454,Alcione:621,Sofia:573}},
+    ontem: {data:'25/05/2026', dia_semana:'segunda', vendas:{Tatiane:949,Rayra:769,Alcione:366,Sofia:1184}},
   },
   L3: {
     semanas: [
@@ -1114,10 +1114,10 @@ const VENDAS_HIST = {
       S1:{'Ana Mira':7939,Raimunda:5930,Brunna:6954,Naila:0},
       S2:{'Ana Mira':4722,Raimunda:4424,Brunna:3713,Naila:1632},
       S3:{'Ana Mira':2843,Raimunda:3892,Brunna:3113,Naila:3078},
-      S4:{'Ana Mira':1171,Raimunda:2027,Brunna:298,Naila:342},
+      S4:{'Ana Mira':1293,Raimunda:2027,Brunna:390,Naila:342},
     },
     marcasA_loja: {S1:26.5, S2:21.3, S3:21.6, S4:0},
-    ontem: {data:'23/05/2026', dia_semana:'sábado', vendas:{'Ana Mira':261,Raimunda:875,Brunna:257,Naila:501}},
+    ontem: {data:'25/05/2026', dia_semana:'segunda', vendas:{'Ana Mira':1293,Raimunda:2027,Brunna:390,Naila:342}},
   },
   L4: {
     semanas: [
@@ -1131,7 +1131,7 @@ const VENDAS_HIST = {
       S4:{Tanaia:682,Josilene:88,'Bruna F.':1962,Rosana:289},
     },
     marcasA_loja: {S1:28.9, S2:21.9, S3:12.6, S4:0},
-    ontem: {data:'23/05/2026', dia_semana:'sábado', vendas:{Tanaia:203,Josilene:672,'Bruna F.':1210,Rosana:587}},
+    ontem: {data:'25/05/2026', dia_semana:'segunda', vendas:{Tanaia:682,Josilene:88,'Bruna F.':1962,Rosana:289}},
   },
   L5: {
     semanas: [
@@ -1145,7 +1145,7 @@ const VENDAS_HIST = {
       S4:{Rayssa:698,Joyce:656,Rosiene:372,Karina:525,Lucas:0},
     },
     marcasA_loja: {S1:21.0, S2:25.9, S3:19.3, S4:0},
-    ontem: {data:'23/05/2026', dia_semana:'sábado', vendas:{Rayssa:1417,Joyce:964,Rosiene:990,Karina:688,Lucas:0}},
+    ontem: {data:'25/05/2026', dia_semana:'segunda', vendas:{Rayssa:698,Joyce:656,Rosiene:372,Karina:525,Lucas:0}},
   },
 };
 
