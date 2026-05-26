@@ -1045,11 +1045,14 @@ const DADOS_LOJA = {
 // L1: 96% (pool R$180) | L3: 88% (R$100) | L4: 80% (R$100) | L5: 77% (R$80)
 const HISTORICO_PREMIOS = {
   L1: {
-    // Pool R$180, dividido por contribuição dos 4 vendedores atuais (total R$41.805)
-    'Tatiane': {S1: 62},  // 14.327 / 41.805 × 180
-    'Rayra':   {S1: 60},  // 13.888 / 41.805 × 180
-    'Alcione': {S1: 38},  //  8.744 / 41.805 × 180
-    'Sofia':   {S1: 21}   //  4.844 / 41.805 × 180
+    // Pool R$230 — CONCESSÃO da gestão. A loja fechou em 96% da meta de R$45k
+    // (R$43.177 com 10/05 incluso). A gestão decidiu reconhecer o esforço
+    // pagando o equivalente proporcional ao patamar de 96%, mesmo sem chegar
+    // aos 100%. Dividido por contribuição dos 4 vendedores (total R$41.806).
+    'Tatiane': {S1: 79},  // 14.328 / 41.806 × 230
+    'Rayra':   {S1: 76},  // 13.889 / 41.806 × 230
+    'Alcione': {S1: 48},  //  8.744 / 41.806 × 230
+    'Sofia':   {S1: 27}   //  4.845 / 41.806 × 230
   },
   L3: {
     // Pool R$100, dividido entre 4 (Naila vendeu R$0)
@@ -1290,28 +1293,28 @@ const QUIZ_SEMANA = {
     ],
     S3: [
       {
-        p: 'Cliente loira chegou com o cabelo amarelado e quer neutralizar o tom. O que você recomenda?',
-        opcoes: ['Tinta 9.0 da Wella', 'Tinta 8.7 da Igora', 'Shampoo matizador da Kiss', 'Matizador roxo da Itallian (0.20 Purple Coloratto)'],
+        p: 'Cliente loira chegou com cabelo amarelado e quer matizar em casa. Qual produto da nossa loja é específico pra isso?',
+        opcoes: ['Tinta 9.0 Itallian (cor base, não matiza)', 'Tonalizante 7.7 vermelho (muda a cor)', 'Coloração 6.0 castanho (escurece)', 'Shampoo Matizer Blond Hair Extrattus 300ml (pigmento violeta, matiza amarelado lavagem após lavagem)'],
         correta: 3
       },
       {
-        p: 'Cliente com cabelo muito ressecado e quebradiço quer uma hidratação profunda. O que sugere?',
-        opcoes: ['Creme Salon Line', 'Máscara Skala', 'Creme Aussie', 'Bottox Vintage 1kg da Hair Extrattus'],
+        p: 'Cliente comprou só shampoo Hair Extrattus Cachos. Como aumentar a venda e ajudar o giro da linha ao mesmo tempo?',
+        opcoes: ['Deixo ela ir só com o shampoo', 'Dou desconto pra ela comprar máscara também', 'Mando ela voltar amanhã', 'Mostro a Máscara Cachos 250g Hair Extrattus da MESMA linha e explico: "se quer manter o efeito do shampoo, essa máscara potencializa — combo de 2 da mesma marca funciona melhor"'],
         correta: 3
       },
       {
-        p: 'Cliente loira quer um tom claro e frio (sem amarelado). Qual cor da Beauty Color você indica?',
-        opcoes: ['Tinta 4.0 castanho', 'Tinta 7.7 vermelho', 'Tinta 6.6 acaju', '11/11 Beauty Color Hollywood Blondes (tom frio com argan e coco)'],
+        p: 'Por que é importante olhar os MEUS resultados (vendas, marca A, valor médio) durante a semana?',
+        opcoes: ['Pra me comparar com as colegas', 'Pra cumprir uma exigência da gerente', 'Pra reclamar quando estiver baixo', 'Pra entender o que está funcionando comigo, o que precisa ajustar, e pedir ajuda/treino quando perceber alguma métrica fora do esperado. Quanto mais cedo eu vejo, mais cedo eu cresço'],
         correta: 3
       },
       {
-        p: 'Cliente vegana entrou pedindo coloração sem testes em animais e com ativos naturais. O que oferece?',
-        opcoes: ['Soft Color', 'Niely tradicional', 'Cor & Tons', 'Linha Natum Color (vegana, ativos da Amazônia)'],
+        p: 'Cliente quer pintar de loiro em casa. Qual combo MAXIMIZA o valor da venda?',
+        opcoes: ['Vendo só a tinta — ela compra o resto depois', 'Vendo tinta + oxigenada com desconto separados', 'Mando ela fazer no salão', 'Vendo combo: 11/11 Beauty Color Hollywood Blondes + Oxidante + Condicionador Matizer Blond Hair Extrattus pra manutenção. 3 produtos da mesma necessidade = valor 3x maior'],
         correta: 3
       },
       {
-        p: 'Cliente cacheada quer um ativador pra definir os cachos no dia a dia. O que indica?',
-        opcoes: ['Gel Bozzano', 'Creme Salon Line comum', 'Pomada genérica', 'Acidificante Juba 500ml da Widi Care'],
+        p: 'Como crescer junto quando uma colega da loja consegue vendas muito maiores?',
+        opcoes: ['Trabalhar mais e sozinha', 'Competir contra ela', 'Reclamar pra gerente', 'Pedir pra ela contar o que fez de diferente — quais frases usou, que produtos sugeriu primeiro. Quando uma técnica funciona pra uma, pode funcionar pra outras. A loja inteira sobe junto'],
         correta: 3
       }
     ]
@@ -1346,28 +1349,28 @@ const QUIZ_SEMANA = {
     ],
     S3: [
       {
-        p: 'Cliente chegou pra cobrir cabelos brancos com tom preto natural. O que você oferece?',
-        opcoes: ['Tinta da Niely', 'Tinta Cor & Tons', 'Soft Color preta', 'Tinta 1.0 Preto Itallian Color 60g'],
+        p: 'Cliente quer cobrir cabelos brancos com preto natural, sem agredir o couro cabeludo. Qual oferecer?',
+        opcoes: ['Tinta 1.0 Niely (com amônia)', 'Tinta Cor & Tons preta (com amônia)', 'Soft Color 1.0 preta (com amônia)', '1.0 Preto Coloratto Itallian Color 60g (SEM amônia, com extrato de alga marinha + óleo de uva)'],
         correta: 3
       },
       {
-        p: 'Cliente fez progressiva semana passada e o cabelo está ressecando. O que sugere pra manutenção?',
-        opcoes: ['Shampoo Pantene', 'Máscara Karina', 'Creme genérico', 'Condicionador Pós-Progressiva CBB 1L'],
+        p: 'Cliente pede 30% de desconto num produto. Como PROTEGER a margem da loja sem perder a venda?',
+        opcoes: ['Aceito o desconto direto pra fechar', 'Recuso e mando ela embora', 'Dou 20% e fecho', 'Ofereço o produto cheio + 1 amostra de brinde primeiro. Se ainda assim quiser desconto, sugiro combo (2 produtos com 10% off em cada) — economia parecida pra ela, mas 2x mais venda pra loja e nossa margem fica preservada'],
         correta: 3
       },
       {
-        p: 'Cliente quer um cabelo bem nutrido, com efeito de salão profissional, em casa. O que oferecer?',
-        opcoes: ['Creme Skala', 'Máscara Lola', 'Salon Line hidratação', 'Bottox Vintage 1kg Hair Extrattus'],
+        p: 'Por que é importante olhar os MEUS resultados (vendas, marca A, valor médio) durante a semana?',
+        opcoes: ['Pra me comparar com as colegas', 'Pra cumprir uma exigência da gerente', 'Pra reclamar quando estiver baixo', 'Pra entender o que está funcionando comigo, o que precisa ajustar, e pedir ajuda/treino quando perceber alguma métrica fora do esperado. Quanto mais cedo eu vejo, mais cedo eu cresço'],
         correta: 3
       },
       {
-        p: 'Cliente alérgica à amônia entrou pedindo coloração sem amônia. Qual marca você oferece?',
-        opcoes: ['Niely tradicional', 'Beauty Color comum', 'Wella Koleston', 'Coloração Nano Infusion SEM AMÔNIA da Yamá'],
+        p: 'Cliente nova entra na loja. Você sabe que o foco da semana é Marcas A. Qual abordagem?',
+        opcoes: ['"Posso ajudar?" e espero resposta', '"Fica à vontade pra olhar"', 'Fico em silêncio atrás do balcão', '"Bem-vinda! Conhece a linha nova de Itallian que chegou essa semana? Vou te mostrar" — vai direto pra Marca A, abertura proativa'],
         correta: 3
       },
       {
-        p: 'Cliente crespa pediu um ativador de cachos pra usar todo dia. O que indica?',
-        opcoes: ['Gel Bozzano', 'Creme Karina', 'Spray comum', 'Ativador de Cachos Phytomanga Widi Care'],
+        p: 'Como crescer junto quando uma colega da loja consegue vendas muito maiores?',
+        opcoes: ['Trabalhar mais e sozinha', 'Competir contra ela', 'Reclamar pra gerente', 'Pedir pra ela contar o que fez de diferente — quais frases usou, que produtos sugeriu primeiro. Quando uma técnica funciona pra uma, pode funcionar pra outras. A loja inteira sobe junto'],
         correta: 3
       }
     ]
@@ -1402,28 +1405,28 @@ const QUIZ_SEMANA = {
     ],
     S3: [
       {
-        p: 'Cliente loira chegou com o cabelo amarelado e quer neutralizar o tom. O que você recomenda?',
-        opcoes: ['Tinta 9.0 da Wella', 'Tinta da L\'Oréal', 'Shampoo matizador Kiss', '11/11 Beauty Color Hollywood Blondes (tom frio, neutraliza amarelo)'],
+        p: 'Cliente loira chegou com cabelo amarelado e quer tom platinado real. Qual cor Beauty Color?',
+        opcoes: ['9.0 louro natural (não platina, fica dourado)', '8.7 louro acinzentado (não chega a platinar)', '7.7 louro vermelho (cor totalmente diferente)', '11/11 Beauty Color Hollywood Blondes — Louro Claríssimo Especial Platinado (8 óleos com argan e coco)'],
         correta: 3
       },
       {
-        p: 'Cliente quer um óleo capilar leve pra finalização sem pesar o cabelo. O que indica?',
-        opcoes: ['Óleo de coco comum', 'Óleo Skala', 'Spray brilho Niely', 'Argan Oil 7ml Hair Extrattus'],
+        p: 'Cliente comprou shampoo Hair Extrattus Cachos. Como subir a venda E ajudar o giro?',
+        opcoes: ['Não atrapalho, deixo ela ir', 'Ofereço desconto pra ela voltar amanhã', 'Indico ProBelle (marca diferente)', 'Mostro Máscara Cachos 250g Hair Extrattus da MESMA linha — combo de 2 da mesma marca, efeito potencializado'],
         correta: 3
       },
       {
-        p: 'Cliente fez química e está com cabelo bem danificado. Quer recuperar urgente. O que oferecer?',
-        opcoes: ['Creme Salon Line', 'Máscara Niely', 'Creme Skala', 'Bottox Vintage 1kg Hair Extrattus'],
+        p: 'Cliente saiu do salão, cabelo MUITO volumoso e danificado por química. Quer reduzir volume e recuperar fios. O que indicar?',
+        opcoes: ['Creme Salon Line (não é marca A, não trata química)', 'Máscara Niely Açaí (não é marca A)', 'Hair Extrattus Bottox Vintage só (sem nutrição extra)', 'Combo Hair Extrattus: Bottox Vintage 1kg (alisa, reduz volume, nutre com Argan+Ojon+Macadâmia) + Máscara Lamelar Intense 200g (intensifica nutrição) — 2 produtos marca A'],
         correta: 3
       },
       {
-        p: 'Cliente vegana querendo tinta sem ingredientes de origem animal. O que indica?',
-        opcoes: ['Beauty Color tradicional', 'Soft Color', 'Yamá comum', 'Linha Natum Color (vegana, ativos da Amazônia)'],
+        p: 'Por que é importante olhar os MEUS resultados (vendas, marca A, valor médio) durante a semana?',
+        opcoes: ['Pra me comparar com as colegas', 'Pra cumprir uma exigência da gerente', 'Pra reclamar quando estiver baixo', 'Pra entender o que está funcionando comigo, o que precisa ajustar, e pedir ajuda/treino quando perceber alguma métrica fora do esperado. Quanto mais cedo eu vejo, mais cedo eu cresço'],
         correta: 3
       },
       {
-        p: 'Cliente cacheada perguntou por kit de cuidados pros cachos. O que sugere?',
-        opcoes: ['Shampoo + condicionador comum', 'Pomada genérica', 'Hidratação Salon Line', 'Kit Cachos dos Sonhos Probelle (Shampoo + Condicionador 2L)'],
+        p: 'Como crescer junto quando uma colega da loja consegue vendas muito maiores?',
+        opcoes: ['Trabalhar mais e sozinha', 'Competir contra ela', 'Reclamar pra gerente', 'Pedir pra ela contar o que fez de diferente — quais frases usou, que produtos sugeriu primeiro. Quando uma técnica funciona pra uma, pode funcionar pra outras. A loja inteira sobe junto'],
         correta: 3
       }
     ]
@@ -1458,28 +1461,28 @@ const QUIZ_SEMANA = {
     ],
     S3: [
       {
-        p: 'Cliente loira chegou com cabelo amarelado e quer neutralizar o tom. O que recomenda?',
-        opcoes: ['Tinta 9.0 da Wella', 'Tinta 8.7 da Igora', 'Shampoo matizador Kiss', '11/11 Beauty Color Hollywood Blondes (tom frio com argan e coco)'],
+        p: 'Cliente loira chegou com cabelo amarelado e quer matizar (sem mudar a cor base). O que indicar?',
+        opcoes: ['Tinta 9.0 louro (cor base, não matiza)', 'Tonalizante 7.7 vermelho (muda a cor)', 'Coloração 6.0 castanho (escurece)', '11/11 Beauty Color Hollywood Blondes — Louro Claríssimo Platinado (tom frio que neutraliza amarelado)'],
         correta: 3
       },
       {
-        p: 'Cliente quer cobrir cabelos brancos com tom preto natural. O que indica?',
-        opcoes: ['Tinta da Niely', 'Tinta Cor & Tons', 'Soft Color preta', '1.0 Preto Itallian Color 60g'],
+        p: 'Cliente cacheada quer um ativador pra usar TODOS OS DIAS (não tratamento). Qual indicar?',
+        opcoes: ['Acidificante Juba Widi Care (uso semanal, ajusta pH — NÃO é ativador)', 'Pantene Cachos', 'Máscara Karina', 'Ativador de Cachos Phytomanga 500ml Widi Care (efeito leve, uso diário pra definir cachos)'],
         correta: 3
       },
       {
-        p: 'Cliente quer uma coloração super clara (loiríssimo, tipo 12). Qual oferecer?',
-        opcoes: ['Tinta 4.0 castanho', 'Tinta 6.6 vermelha', 'Niely 7.0 tradicional', '12/0 Beauty Color (loiríssimo natural)'],
+        p: 'Por que é importante olhar os MEUS resultados (vendas, marca A, valor médio) durante a semana?',
+        opcoes: ['Pra me comparar com as colegas', 'Pra cumprir uma exigência da gerente', 'Pra reclamar quando estiver baixo', 'Pra entender o que está funcionando comigo, o que precisa ajustar, e pedir ajuda/treino quando perceber alguma métrica fora do esperado. Quanto mais cedo eu vejo, mais cedo eu cresço'],
         correta: 3
       },
       {
-        p: 'Cliente crespa quer um produto natural pra hidratar os cachos, sem química pesada. O que indica?',
-        opcoes: ['Creme genérico', 'Salon Line comum', 'Pantene', 'Linha Santa Clara (cosméticos naturais com óleos vegetais)'],
+        p: 'Cliente crespa quer um produto natural pra hidratar os cachos no dia a dia, sem química pesada. O que indicar?',
+        opcoes: ['Pantene comum', 'Salon Line aleatória', 'Creme Karina', 'Creme de Pentear Juba Encrespando 500ml Widi Care (linha natural pra cabelos crespos)'],
         correta: 3
       },
       {
-        p: 'Cliente cacheada quer um kit completo pros cachos: shampoo + condicionador + ativador. O que sugere?',
-        opcoes: ['Vidros separados de marcas diferentes', 'Salon Line aleatória', 'Karina e Skala juntas', 'Combo Widi Care Juba: shampoo + condicionador + acidificante da mesma linha'],
+        p: 'Como crescer junto quando uma colega da loja consegue vendas muito maiores?',
+        opcoes: ['Trabalhar mais e sozinha', 'Competir contra ela', 'Reclamar pra gerente', 'Pedir pra ela contar o que fez de diferente — quais frases usou, que produtos sugeriu primeiro. Quando uma técnica funciona pra uma, pode funcionar pra outras. A loja inteira sobe junto'],
         correta: 3
       }
     ]
