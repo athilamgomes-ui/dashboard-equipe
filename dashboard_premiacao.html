@@ -522,6 +522,67 @@ const SUGESTOES = {
        titulo:'Painel diário da equipe',
        descricao:'Imprimir e colar no caixa de cada loja, todo dia, o "Acumulado vs Meta" do dia e da semana. As vendedoras precisam ver o número quando chegam de manhã - traz consciência de quanto falta pra bater meta. Quem virou o gap recebe reconhecimento na reunião de sábado.', prazo:'curto', status:'rejeitada'},
     ]
+  },
+  '2026-W22': {
+    semana_label: 'Semana 25/05 – 30/05 (S4)',
+    geradas_em: '2026-05-27',
+    itens: [
+      // ── L1 — Casa da Beleza Altamira (foco giro Beauty/Hair Ex/Natum + volume) ──
+      {id:'2026-W22-L1-01', escopo:'loja', loja:'L1', tipo:'marca', meta_alvo:'vendas_individuais',
+       titulo:'L1 — Giro Beauty Color + Hair Extrattus + Natum',
+       descricao:'Chegou lote grande dessas 3 marcas em Altamira. Pra escoar 50% do estoque em 90 dias, meta semanal é 160 peças das 3 marcas juntas (~40 peças/vendedora, ~6/dia cada). Estratégia: combo de 3 produtos da mesma marca (shampoo + condicionador + máscara). Primeira oferta pra cliente novo sempre uma dessas 3 marcas.',
+       prazo:'medio', status:'aprovada'},
+      {id:'2026-W22-L1-02', escopo:'loja', loja:'L1', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'L1 — Volume R$7,5k/dia',
+       descricao:'L1 está em R$4.669 de R$35.000 da semana (13%). Faltam R$30.331 em 4 dias úteis = R$7.583/dia. Foco da equipe inteira em fechar venda. Tatiane lidera pelo exemplo (gerente). Sofia em pareamento pra acelerar ramp.',
+       prazo:'curto', status:'aprovada'},
+      {id:'2026-W22-L1-03', escopo:'vendedora', loja:'L1', vendedora:'Alcione', tipo:'ticket_medio', meta_alvo:'ticket_medio',
+       titulo:'Alcione — Subir Ticket Médio com combo das marcas novas',
+       descricao:'Seu Ticket Médio está em R$63 (mais baixo da loja). Solução: combo de 3 produtos da mesma marca A — começando pelas 3 marcas novas (Beauty Color, Hair Extrattus, Natum) que precisam giro. Cliente leva 3 peças em vez de 1, e seu ticket sobe pra R$120-150 naturalmente.',
+       prazo:'curto', status:'aprovada'},
+
+      // ── L3 — Miss Beleza Itaituba (crítica em Marcas A) ──
+      {id:'2026-W22-L3-01', escopo:'loja', loja:'L3', tipo:'marca', meta_alvo:'marcas_a',
+       titulo:'L3 — URGENTE: Marcas A pra ≥20% até sábado',
+       descricao:'Marcas A despencaram para 6,6% nessa semana (era 19,1% em S3). Situação crítica. Sem subir, equipe perde bônus E margem da loja segue caindo. Ação: pra CADA cliente novo, primeira oferta = Itallian, Truss ou Natum. Mesmo que recuse depois, plantou a ideia.',
+       prazo:'curto', status:'aprovada'},
+      {id:'2026-W22-L3-02', escopo:'loja', loja:'L3', tipo:'atendimento', meta_alvo:'ticket_medio',
+       titulo:'L3 — Reduzir descontos acima de 20%',
+       descricao:'CMV da loja em 56-69% (mais alto das 4 lojas). Causa principal: descontos generosos demais. Antes de oferecer desconto >20%, sempre tentar: 1) oferecer o produto cheio + 1 amostra, 2) sugerir combo com desconto MENOR em todos os 3 itens, 3) só por último o desconto >20%.',
+       prazo:'medio', status:'aprovada'},
+      {id:'2026-W22-L3-03', escopo:'vendedora', loja:'L3', vendedora:'Naila', tipo:'treinamento', meta_alvo:'vendas_individuais',
+       titulo:'Naila — Manter ritmo recuperado',
+       descricao:'Você cresceu +521% na semana passada (R$427 → R$2.651). Mostrou que quando tem foco, entrega. Pra essa semana: mantém esse ritmo. Eu vou acompanhar a Marca A das suas vendas. Continue com Itallian ou Truss como primeira oferta.',
+       prazo:'curto', status:'aprovada'},
+
+      // ── L4 — MissBeleza Altamira (no bônus 30% MA, manter + giro novas marcas) ──
+      {id:'2026-W22-L4-01', escopo:'loja', loja:'L4', tipo:'marca', meta_alvo:'vendas_individuais',
+       titulo:'L4 — Giro Beauty Color + Hair Extrattus + Natum (mesma situação L1)',
+       descricao:'Chegou lote grande dessas 3 marcas em Altamira. Meta: 125 peças/semana (~31/vendedora, ~5/dia). Bônus duplo: essas 3 marcas SÃO curva A, então vender elas mantém os 34,5% atuais de Marcas A E gira o estoque acumulado. Combo de 3 produtos da mesma marca.',
+       prazo:'medio', status:'aprovada'},
+      {id:'2026-W22-L4-02', escopo:'loja', loja:'L4', tipo:'marca', meta_alvo:'marcas_a',
+       titulo:'L4 — MANTER Marcas A ≥30% até sábado',
+       descricao:'A loja está em 34,5% de Marcas A — ACIMA do bônus! Se fechar a semana acima de 30%, prêmio da equipe sobe +R$50 por faixa (todas ganham mais). Como manter: continuar oferecendo marca A primeiro pra cada cliente novo, especialmente as 3 que precisam giro (Beauty, Hair Ex, Natum).',
+       prazo:'curto', status:'aprovada'},
+      {id:'2026-W22-L4-03', escopo:'vendedora', loja:'L4', vendedora:'Tanaia', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'Tanaia (gerente, gestante) — Liderar via delegação',
+       descricao:'Você está em gestação, ritmo individual reduzido é esperado e respeitado. Foco da semana: alinhar a equipe de manhã (10min), parear Rosana com Bruna F. todos os dias, cobrar combo de marca A em cada cliente. Sua liderança organiza o time — a venda vem da equipe que você dirige.',
+       prazo:'curto', status:'aprovada'},
+
+      // ── L5 — MissBeleza Santarém (consistência + Marcas A) ──
+      {id:'2026-W22-L5-01', escopo:'loja', loja:'L5', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'L5 — Consistência diária (não acumular pro fim de semana)',
+       descricao:'A loja tem histórico de variação alta — alguns dias bombam, outros caem. Pra fechar a semana com consistência: meta diária dividida e cumprida todo dia (não deixa acumular pro sábado). Cada vendedora olha seu número às 12h e às 17h e ajusta o ritmo.',
+       prazo:'curto', status:'aprovada'},
+      {id:'2026-W22-L5-02', escopo:'loja', loja:'L5', tipo:'marca', meta_alvo:'marcas_a',
+       titulo:'L5 — Marcas A pra ≥25%',
+       descricao:'Loja está em 17,3% de Marcas A. Pra chegar em 25% essa semana: cada cliente novo, primeira sugestão = Truss, Itallian ou Santa Clara. Combo de 3 da mesma marca acelera tanto Marcas A quanto ticket. Falta pouco pro bônus de 30%.',
+       prazo:'curto', status:'aprovada'},
+      {id:'2026-W22-L5-03', escopo:'vendedora', loja:'L5', vendedora:'Joyce', tipo:'cliente_recorrente', meta_alvo:'vendas_individuais',
+       titulo:'Joyce — Manter o destaque (+148% na S3) e ensinar a equipe',
+       descricao:'Você foi o destaque da L5 na semana passada — +148% de crescimento (R$1.373 → R$3.401). Mostra que quando tem foco em marca A + combo, a venda acontece. Pra essa semana: 1) mantém o ritmo, 2) conta pra Joyce/Karina/Rayssa o que você está fazendo de diferente — quando a equipe inteira aprende sua técnica, todo mundo ganha mais.',
+       prazo:'curto', status:'aprovada'},
+    ]
   }
 };
 
