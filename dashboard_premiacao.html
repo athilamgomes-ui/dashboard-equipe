@@ -2152,7 +2152,46 @@ function rerender() {
 }
 
 // Init — carrega dados do Worker primeiro, depois renderiza
+// Retornos pré-cadastrados (espelha loja.html — mantém em sync).
+// Worker (se deployado) sobrescreve por (idSug+loja+vendedora).
+const RETORNOS_PRESET_PAINEL = [
+  {id_sugestao:'2026-W21-L1-03', loja:'L1', vendedora:'Tatiane',  status:'reconhecida', em:'2026-05-26T13:30:00.000Z',
+   texto:'Tatiane, suas vendas subiram +47% da metade pré-app pra metade pós-app (R$3.829 → R$5.639). Como gerente, você puxou pelo exemplo. Continua firme na S4.'},
+  {id_sugestao:'2026-W21-L1-01', loja:'L1', vendedora:'Rayra',    status:'excelente',  em:'2026-05-26T13:30:00.000Z',
+   texto:'Rayra, suas vendas MAIS QUE DOBRARAM (+112%, R$2.341 → R$4.966). Foi o maior crescimento individual da L1. Show.'},
+  {id_sugestao:'2026-W21-L1-01', loja:'L1', vendedora:'Alcione',  status:'reconhecida', em:'2026-05-26T13:30:00.000Z',
+   texto:'Alcione, você manteve o ritmo (R$1.803 → R$1.935). Pra S4 o foco é volume — mais clientes atendidos.'},
+  {id_sugestao:'2026-W21-L1-04', loja:'L1', vendedora:'Sofia',    status:'excelente',  em:'2026-05-26T13:30:00.000Z',
+   texto:'Sofia, +62% de crescimento (R$1.665 → R$2.696). Sendo nova, esse ritmo é ótimo. Continua focando nas 3 marcas A.'},
+  {id_sugestao:'2026-W21-L3-01', loja:'L3', vendedora:'Ana Mira', status:'reconhecida', em:'2026-05-26T13:30:00.000Z',
+   texto:'Ana Mira, a L3 INTEIRA subiu +45% — você liderou o alinhamento. Como gerente, esse é o resultado que importa.'},
+  {id_sugestao:'2026-W21-L3-03', loja:'L3', vendedora:'Raimunda', status:'reconhecida', em:'2026-05-26T13:30:00.000Z',
+   texto:'Raimunda, manteve o ritmo (R$1.903 → R$1.989). Pra S4 foco em combo de marca A.'},
+  {id_sugestao:'2026-W21-L3-03', loja:'L3', vendedora:'Brunna',   status:'excelente',  em:'2026-05-26T13:30:00.000Z',
+   texto:'Brunna, +59% (R$1.201 → R$1.913). Você converte bem — continua oferecendo marca A primeiro pra cliente novo.'},
+  {id_sugestao:'2026-W21-L3-02', loja:'L3', vendedora:'Naila',    status:'excelente',  em:'2026-05-26T13:30:00.000Z',
+   texto:'Naila, R$427 → R$2.651 (+521%). Você reagiu forte. Mantém esse ritmo na S4.'},
+  {id_sugestao:'2026-W21-L4-01', loja:'L4', vendedora:'Tanaia',   status:'excelente',  em:'2026-05-26T13:30:00.000Z',
+   texto:'Tanaia, vendas DOBRARAM (+106%, R$1.629 → R$3.359) mesmo gestante. Liderança que puxou a L4 toda.'},
+  {id_sugestao:'2026-W21-L4-04', loja:'L4', vendedora:'Josilene', status:'reconhecida', em:'2026-05-26T13:30:00.000Z',
+   texto:'Josilene, queda individual (R$2.657 → R$1.887) mas L4 subiu +54%. 3 dias é amostra pequena. Pra S4: marca A primeiro pra cliente novo.'},
+  {id_sugestao:'2026-W21-L4-04', loja:'L4', vendedora:'Bruna F.', status:'excelente',  em:'2026-05-26T13:30:00.000Z',
+   texto:'Bruna F., +112% (R$2.329 → R$4.929) — maior crescimento individual da L4. Show. Pareie com Rosana quando puder.'},
+  {id_sugestao:'2026-W21-L4-03', loja:'L4', vendedora:'Rosana',   status:'excelente',  em:'2026-05-26T13:30:00.000Z',
+   texto:'Rosana, +60% (R$1.095 → R$1.747). Sendo nova esse ritmo é ótimo. Continua pareando com Bruna F.'},
+  {id_sugestao:'2026-W21-L5-02', loja:'L5', vendedora:'Rayssa',   status:'reconhecida', em:'2026-05-26T13:30:00.000Z',
+   texto:'Rayssa, queda individual (R$2.220 → R$1.849). 3 dias é amostra pequena. Pra S4 bora puxar mais cliente — sua conversão é ótima, falta volume.'},
+  {id_sugestao:'2026-W21-L5-02', loja:'L5', vendedora:'Joyce',    status:'excelente',  em:'2026-05-26T13:30:00.000Z',
+   texto:'Joyce, +148% (R$1.373 → R$3.401) — destaque da L5 na S3. Continua puxando assim na S4.'},
+  {id_sugestao:'2026-W21-L5-03', loja:'L5', vendedora:'Rosiene',  status:'reconhecida', em:'2026-05-26T13:30:00.000Z',
+   texto:'Rosiene, +20% (R$1.765 → R$2.124). Como gerente, segurou o ritmo. Pra S4: alinha com o time as ações que mais funcionaram.'},
+  {id_sugestao:'2026-W21-L5-01', loja:'L5', vendedora:'Karina',   status:'excelente',  em:'2026-05-26T13:30:00.000Z',
+   texto:'Karina, +68% (R$1.561 → R$2.625). Sendo nova esse ritmo é ótimo. Mantém foco nas 3 marcas A.'},
+];
+
 async function initDashboard() {
+  // Pré-popula retornos preset ANTES do primeiro render
+  window.__FEEDBACK_RETORNOS = [...RETORNOS_PRESET_PAINEL];
   rerender(); // primeiro render com dados inline
   // Em paralelo busca tudo do Worker
   try {
@@ -2166,7 +2205,12 @@ async function initDashboard() {
     const avaliacoes = (await aR.json()).items || [];
     const feedbacks = (await fR.json()).items || [];
     const retornos = (await rR.json()).items || [];
-    window.__FEEDBACK_RETORNOS = retornos; // cache pra UI
+    // Mergeia preset + worker (worker wins on conflict por idSug+loja+vendedora)
+    const key = (r) => `${r.id_sugestao}|${r.loja}|${r.vendedora}`;
+    const mergedMap = {};
+    for (const r of RETORNOS_PRESET_PAINEL) mergedMap[key(r)] = r;
+    for (const r of retornos) mergedMap[key(r)] = r;
+    window.__FEEDBACK_RETORNOS = Object.values(mergedMap);
 
     // Mescla overrides no localStorage (mantém também o que ele fez localmente)
     const localOv = JSON.parse(localStorage.getItem('sugestoes_overrides') || '{}');
