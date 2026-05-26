@@ -1804,7 +1804,7 @@ function renderMeuDia() {
     </div>
 
     <div class="card">
-      <h3>📅 Ontem</h3>
+      <h3 style="margin-bottom:4px">📅 Ontem${ontem.data ? ` <span style="font-weight:normal;color:#6b7280;font-size:0.65em;letter-spacing:0.3px">· ${ontem.dia_semana ? ontem.dia_semana.toUpperCase() + ' ' : ''}${ontem.data}</span>` : ''}</h3>
       <div class="row2">
         <div>
           <div class="big green">${fR(meuOntem)}</div>
