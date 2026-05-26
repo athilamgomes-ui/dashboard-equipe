@@ -1305,6 +1305,67 @@ function calcAutoMetrics(sug) {
   };
 }
 
+// Gera mensagem pronta de feedback pra enviar pra vendedora/equipe via WhatsApp.
+// Personaliza por: meta_alvo, status (funcionou/parcial/nao), escopo (vendedora/loja),
+// delta absoluto. Retorna string ou null se não há mensagem aplicável.
+function gerarMensagemFeedback(sug, m) {
+  if (!m || m.tipo !== 'calculado' || m.status === null) return null;
+  const nome = sug.vendedora ? sug.vendedora.split(' ')[0] : null;
+  const fmtR = (v) => 'R$ ' + Math.round(v||0).toLocaleString('pt-BR');
+  const isWeekendComparison = m.sem_baseline === 'S3_pre';
+
+  if (sug.meta_alvo === 'vendas_individuais' && nome) {
+    if (m.status === 'funcionou') {
+      return `${nome}, suas vendas cresceram ${m.deltaStr} depois que o app começou ` +
+        `(${fmtR(m.baseline)} → ${fmtR(m.resultado)}). Excelente trabalho! ` +
+        `Continua nessa pegada — as técnicas que você usou essa semana estão funcionando.`;
+    }
+    if (m.status === 'parcial') {
+      return `${nome}, suas vendas subiram ${m.deltaStr} essa semana ` +
+        `(${fmtR(m.baseline)} → ${fmtR(m.resultado)}). Tá no caminho — ` +
+        `pra subir mais, foca em oferecer Marcas A já na primeira sugestão ao cliente.`;
+    }
+    // não funcionou
+    return `${nome}, essa semana suas vendas ficaram em ${m.deltaStr} ` +
+      `(${fmtR(m.baseline)} → ${fmtR(m.resultado)}). Vamos sentar e olhar o que ` +
+      `aconteceu — pode ser escala, cliente, ou ajuste de abordagem. A próxima semana é nova.`;
+  }
+
+  if (sug.meta_alvo === 'atingir_meta' && isWeekendComparison) {
+    const lojaLabel = LOJAS_BASE[sug.loja]?.nome || sug.loja;
+    if (m.status === 'funcionou') {
+      return `Equipe da ${lojaLabel}: o final da semana fechou com crescimento de ` +
+        `${m.deltaStr.replace(' vs antes do app','')} comparado ao início da semana ` +
+        `(${fmtR(m.baseline)} → ${fmtR(m.resultado)}). Vocês reagiram juntas — ` +
+        `vamos manter esse ritmo na próxima!`;
+    }
+    if (m.status === 'parcial') {
+      return `Equipe da ${lojaLabel}: o final da semana ficou ${m.deltaStr.replace(' vs antes do app','')} ` +
+        `vs o início (${fmtR(m.baseline)} → ${fmtR(m.resultado)}). Crescemos, mas dá pra mais — ` +
+        `na próxima semana foco em oferecer Marca A pra todo cliente novo já no primeiro contato.`;
+    }
+    return `Equipe da ${lojaLabel}: o final da semana ficou ${m.deltaStr.replace(' vs antes do app','')} ` +
+      `(${fmtR(m.baseline)} → ${fmtR(m.resultado)}). Vamos conversar na reunião de segunda ` +
+      `pra entender o que travou — e ajustar a abordagem.`;
+  }
+
+  if (sug.meta_alvo === 'marcas_a' && sug.escopo === 'loja') {
+    const lojaLabel = LOJAS_BASE[sug.loja]?.nome || sug.loja;
+    if (m.status === 'funcionou') {
+      return `Equipe da ${lojaLabel}: % de Marcas A subiu ${m.deltaStr} (${m.baseline?.toFixed(1)}% → ${m.resultado?.toFixed(1)}%). ` +
+        `Vocês entenderam a estratégia — continua oferecendo marca A primeiro!`;
+    }
+    if (m.status === 'parcial') {
+      return `Equipe da ${lojaLabel}: % Marcas A subiu ${m.deltaStr} (${m.baseline?.toFixed(1)}% → ${m.resultado?.toFixed(1)}%). ` +
+        `Tá subindo — pra atingir os 30% e destravar +R$50 no prêmio, intensificar combo de 3 produtos.`;
+    }
+    return `Equipe da ${lojaLabel}: % Marcas A em ${m.resultado?.toFixed(1)}% (era ${m.baseline?.toFixed(1)}%). ` +
+      `Precisamos rever a abordagem — sugestão: monte mesa de destaque com Marcas A na entrada e oriente a equipe.`;
+  }
+
+  return null;
+}
+
 function renderStatusObjetivo(sug) {
   const m = calcAutoMetrics(sug);
   if (!m) return '';
@@ -1328,6 +1389,13 @@ function renderStatusObjetivo(sug) {
   const emoji = m.status === 'funcionou' ? '🟢' : m.status === 'parcial' ? '🟡' : '🔴';
   const lbl = m.status === 'funcionou' ? 'FUNCIONOU' : m.status === 'parcial' ? 'PARCIAL' : 'NÃO FUNCIONOU';
   const fmtV = (v) => m.unidade === 'R$' ? 'R$ ' + Math.round(v||0).toLocaleString('pt-BR') : (v||0).toFixed(1) + '%';
+  const msg = gerarMensagemFeedback(sug, m);
+  const msgBloco = msg ? `
+    <div style="margin-top:10px;padding-top:10px;border-top:1px dashed ${cor};font-size:11px">
+      <div style="font-size:10px;font-weight:700;color:${cor};letter-spacing:.3px;margin-bottom:6px">💬 MENSAGEM PRONTA PRA ENVIAR</div>
+      <div id="msg-fb-${sug.id}" style="background:rgba(15,23,42,.5);padding:8px 10px;border-radius:6px;color:#e2e8f0;line-height:1.5;font-size:12px">${msg.replace(/</g,'&lt;')}</div>
+      <button class="sug-btn" style="background:rgba(99,102,241,.2);color:#a5b4fc;border-color:rgba(99,102,241,.5);font-size:11px;padding:5px 10px;margin-top:6px" onclick="copiarMensagemFb('${sug.id}', this)">📋 Copiar mensagem</button>
+    </div>` : '';
   return `<div style="margin-top:10px;padding:10px 12px;border-radius:8px;background:${cor==='var(--green)'?'rgba(34,197,94,.08)':cor==='var(--yellow)'?'rgba(234,179,8,.08)':'rgba(239,68,68,.08)'};border-left:3px solid ${cor}">
     <div style="font-size:11px;font-weight:700;color:${cor};margin-bottom:6px">${emoji} STATUS OBJETIVO: ${lbl}</div>
     <div style="font-size:12px;color:var(--text)">
@@ -1338,7 +1406,21 @@ function renderStatusObjetivo(sug) {
     <div style="font-size:10px;color:var(--muted);margin-top:4px">
       Critério: ≥${m.threshold.funcionou}${m.threshold.tipo==='absoluto_pp'?'pp':m.threshold.tipo==='meta_pct'?'%':'%'} = funcionou · ≥${m.threshold.parcial}${m.threshold.tipo==='absoluto_pp'?'pp':'%'} = parcial · &lt; = não funcionou
     </div>
+    ${msgBloco}
   </div>`;
+}
+
+function copiarMensagemFb(idSug, btn) {
+  const el = document.getElementById('msg-fb-' + idSug);
+  if (!el) return;
+  const txt = el.innerText;
+  navigator.clipboard.writeText(txt).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Copiado!';
+    btn.style.background = 'rgba(34,197,94,.2)';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; btn.style.color = ''; }, 1800);
+  });
 }
 
 // Carrega avaliações persistidas no localStorage (mescladas com as do arquivo)
