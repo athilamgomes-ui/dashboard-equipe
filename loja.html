@@ -1576,6 +1576,21 @@ async function init() {
   for (const r of RETORNOS_PRESET) mergedMap[retornoKey(r)] = r;
   for (const r of retornosDinamicos) mergedMap[retornoKey(r)] = r;
   window.__RETORNOS_DONO = Object.values(mergedMap).filter(x => x.loja === LOJA_KEY);
+
+  // Sincroniza quizzes respondidos do Worker. Sem isso, vendedora que respondeu
+  // o quiz em outro dispositivo (ou apagou cache) via "Prêmio da semana X está
+  // pronto" novamente, sendo que já respondeu.
+  // No boot currentUser ainda é null (login ainda não aconteceu) — cachemos
+  // globalmente e aplicamos em enterApp().
+  try {
+    const qr = await fetch(`${WORKER_URL}/quizzes`, {cache: 'no-store'});
+    const qd = await qr.json();
+    window.__QUIZZES_REMOTOS = (qd.items || []).filter(q => q.loja === LOJA_KEY);
+  } catch (e) {
+    window.__QUIZZES_REMOTOS = [];
+    console.warn('[init] /quizzes falhou — só localStorage vai contar:', e);
+  }
+
   document.getElementById('login-nomeloja').textContent = loja.nome;
   document.documentElement.style.setProperty('--theme-color', loja.cor);
   // Logo da marca (Casa da Beleza pra L1, Miss Beleza pras outras)
@@ -1675,6 +1690,16 @@ async function atualizarApp() {
 function enterApp() {
   document.getElementById('login').style.display = 'none';
   document.getElementById('app').style.display = '';
+
+  // Aplica quizzes respondidos (sincronizados do Worker no boot) ao localStorage.
+  // Garante que vendedora que respondeu o quiz em outro dispositivo não veja
+  // "Prêmio da semana X está pronto" de novo.
+  const quizzesRemotos = window.__QUIZZES_REMOTOS || [];
+  for (const q of quizzesRemotos) {
+    if (q.vendedora === currentUser && q.semana) {
+      localStorage.setItem('quiz_ok_' + LOJA_KEY + '_' + currentUser + '_' + q.semana, 'true');
+    }
+  }
 
   // Logo da marca no header
   const brand = window.__BRAND__ || (LOJA_KEY === 'L1' ? 'casa-beleza' : 'miss-beleza');
@@ -1999,7 +2024,7 @@ function renderHoje() {
     </div>
 
     <div class="card" style="border-left:4px solid ${corMaSem};${temBonus?'background:linear-gradient(135deg,rgba(34,197,94,.10),rgba(34,197,94,.03))':''}">
-      <h3>🔥 Marcas A da loja</h3>
+      <h3>⭐ Marcas A da loja</h3>
       <div class="row2" style="margin-top:8px">
         <div>
           <div class="big" style="color:${corMaSem}">${fP(maSem)}</div>
@@ -2012,7 +2037,7 @@ function renderHoje() {
       </div>
       <div style="margin-top:12px;padding:8px 10px;background:${temBonus?'rgba(34,197,94,.15)':'rgba(0,0,0,.18)'};border-radius:6px;font-size:12px;line-height:1.5">
         ${temBonus
-          ? '🎉 <b style="color:var(--green)">Loja no bônus de Marcas A!</b> A semana fechando com ≥30% MA = prêmio do pool sobe (R$20 a R$50 a mais por faixa pra equipe toda).'
+          ? '🎉 <b style="color:var(--green)">Loja no bônus de Marcas A!</b> A semana fechando com ≥30% MA = prêmio da equipe sobe (R$20 a R$50 a mais por faixa).'
           : `💡 Faltam <b>${faltaPpBonus.toFixed(1)}pp</b> pra chegar em 30% e a equipe ganhar o bônus no prêmio dessa semana. Cada cliente novo → primeira oferta marca A.`}
       </div>
     </div>
@@ -2377,12 +2402,12 @@ function renderMetas() {
     <div class="faixa-card">
       <h3>Tabela de prêmio da semana</h3>
       <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">
-        Base = prêmio normal. Com 🔥 30% Marcas A = prêmio do pool sobe!
+        Base = prêmio normal. Com 30% Marcas A = prêmio da equipe sobe!
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:6px 0;border-bottom:2px solid var(--border);font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px">
         <div>% da meta</div>
         <div style="text-align:right">Base</div>
-        <div style="text-align:right">Com 🔥 30% MA</div>
+        <div style="text-align:right">Com 30% MA</div>
       </div>
       ${PRZ_FAIXAS.map(f => {
         const isAtual = faixaAtual && f.pct === faixaAtual.pct;
@@ -2402,7 +2427,7 @@ function renderMetas() {
       </div>` : ''}
       <div style="margin-top:14px;padding:10px 12px;background:${bonusMA?'rgba(34,197,94,.12)':'rgba(124,92,252,.10)'};border-radius:8px;border-left:3px solid ${bonusMA?'var(--green)':'#a78bfa'};font-size:12px;line-height:1.55">
         ${bonusMA ? `
-          🎉 <b style="color:var(--green)">Vocês estão GANHANDO o bônus!</b> A loja está em <b>${fP(ld.ma_pct_loja_sem)}</b> Marcas A na semana — acima de 30%. O prêmio que vocês recebem é o da coluna <b style="color:var(--green)">Com 🔥 30% MA</b>.
+          🎉 <b style="color:var(--green)">Vocês estão GANHANDO o bônus!</b> A loja está em <b>${fP(ld.ma_pct_loja_sem)}</b> Marcas A na semana — acima de 30%. O prêmio da equipe que vocês recebem é o da coluna <b style="color:var(--green)">Com 30% MA</b>.
         ` : `
           💡 <b>Marcas A da loja: ${fP(ld.ma_pct_loja_sem)}</b> nessa semana. Falta chegar em <b>30%</b> pra a equipe ganhar o bônus (R$20 a R$50 a mais por faixa). Como subir? Cada cliente novo, primeira sugestão é uma marca A (Truss, Marco Boni, Itallian, Natum, Santa Clara...).
         `}
