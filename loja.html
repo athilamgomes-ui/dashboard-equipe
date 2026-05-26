@@ -2575,29 +2575,39 @@ function renderMetas() {
 
 // ─── PRÊMIO ──────────────────────────────────────────────────────────────────
 
+function _quizGet(key) {
+  // Em modo_dono lê de sessionStorage; senão de localStorage.
+  const isDono = sessionStorage.getItem('modo_dono') === '1';
+  return (isDono ? sessionStorage : localStorage).getItem(key);
+}
+
 function quizJaPassou(semanaId) {
-  return localStorage.getItem('quiz_ok_' + LOJA_KEY + '_' + currentUser + '_' + semanaId) === 'true';
+  return _quizGet('quiz_ok_' + LOJA_KEY + '_' + currentUser + '_' + semanaId) === 'true';
 }
 
 function quizJaRespondeu(semanaId) {
   // Considera respondido se acertou (passou) OU se respondeu sem passar.
   if (quizJaPassou(semanaId)) return true;
-  return localStorage.getItem('quiz_resp_' + LOJA_KEY + '_' + currentUser + '_' + semanaId) === 'true';
+  return _quizGet('quiz_resp_' + LOJA_KEY + '_' + currentUser + '_' + semanaId) === 'true';
 }
 
 function marcarQuizRespondido(semanaId, acertos) {
-  if (sessionStorage.getItem('modo_dono') === '1') return;
-  localStorage.setItem('quiz_resp_' + LOJA_KEY + '_' + currentUser + '_' + semanaId, 'true');
-  localStorage.setItem('quiz_acertos_' + LOJA_KEY + '_' + currentUser + '_' + semanaId, String(acertos));
+  // Sempre salva localmente (inclusive modo_dono) pra UI sair do gate.
+  // No modo_dono, salva em sessionStorage (some quando fecha) em vez de localStorage.
+  const isDono = sessionStorage.getItem('modo_dono') === '1';
+  const store = isDono ? sessionStorage : localStorage;
+  store.setItem('quiz_resp_' + LOJA_KEY + '_' + currentUser + '_' + semanaId, 'true');
+  store.setItem('quiz_acertos_' + LOJA_KEY + '_' + currentUser + '_' + semanaId, String(acertos));
 }
 
 function marcarQuizPassou(semanaId, acertos) {
-  // Modo dono: não persiste nem envia (só simula localmente pra visualização)
-  if (sessionStorage.getItem('modo_dono') === '1') return;
-  localStorage.setItem('quiz_ok_' + LOJA_KEY + '_' + currentUser + '_' + semanaId, 'true');
+  const isDono = sessionStorage.getItem('modo_dono') === '1';
+  const store = isDono ? sessionStorage : localStorage;
+  store.setItem('quiz_ok_' + LOJA_KEY + '_' + currentUser + '_' + semanaId, 'true');
   if (typeof acertos === 'number') {
-    localStorage.setItem('quiz_acertos_' + LOJA_KEY + '_' + currentUser + '_' + semanaId, String(acertos));
+    store.setItem('quiz_acertos_' + LOJA_KEY + '_' + currentUser + '_' + semanaId, String(acertos));
   }
+  if (isDono) return; // não persiste fora da sessão nem envia pro Worker
   const pending = JSON.parse(localStorage.getItem('quiz_respostas') || '[]');
   pending.push({loja: LOJA_KEY, vendedora: currentUser, semana: semanaId, em: new Date().toISOString()});
   localStorage.setItem('quiz_respostas', JSON.stringify(pending));
