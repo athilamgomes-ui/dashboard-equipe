@@ -2047,6 +2047,7 @@ function renderSugestoes() {
     // Feedbacks das vendedoras
     const totFb = s._feedbacks.length;
     const retornos = window.__FEEDBACK_RETORNOS || [];
+    const sugeridos = window.__TEXTOS_SUGERIDOS || [];
     const fbBlock = totFb > 0 ? `
       <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
         <button class="sug-btn" style="background:transparent;color:var(--blue);border-color:var(--blue);padding:5px 10px;font-size:11px;cursor:pointer" onclick="toggleFeedbacks('${s.id}')">
@@ -2056,21 +2057,31 @@ function renderSugestoes() {
           ${s._feedbacks.map(fb => {
             const cls = fb.acao==='apliquei'?'color:var(--green)':fb.acao==='tentei'?'color:var(--yellow)':'color:var(--red)';
             const lbl = fb.acao==='apliquei'?'✓ Apliquei':fb.acao==='tentei'?'🟡 Tentei mas tá difícil':'❌ Não consegui aplicar';
-            // Retorno do dono pra esse feedback (se já existir)
+            // Retorno APROVADO (já enviado, vendedora já viu)
             const ret = retornos.find(r => r.id_sugestao === fb.id_sugestao && r.loja === fb.loja && r.vendedora === fb.vendedora);
+            // Texto sugerido (rascunho do sistema) — só pre-fill, não aprovado
+            const sug = sugeridos.find(s => s.id_sugestao === fb.id_sugestao && s.loja === fb.loja && s.vendedora === fb.vendedora);
+            const statusInicial = ret?.status || sug?.status || '';
+            const textoInicial = ret?.texto || sug?.texto || '';
+            const ehSugestao = !ret && !!sug;
             const retornoUI = `
-              <div style="margin-top:8px;padding:8px;background:rgba(124,92,252,.08);border-radius:6px;border-left:2px solid rgba(124,92,252,.6)">
-                <div style="font-size:10px;font-weight:700;color:#9d8aff;letter-spacing:.4px;margin-bottom:6px">📨 FEEDBACK DA GESTÃO — PRA ${fb.vendedora.toUpperCase()}</div>
+              <div style="margin-top:8px;padding:8px;background:${ret?'rgba(34,197,94,.10)':ehSugestao?'rgba(234,179,8,.08)':'rgba(124,92,252,.08)'};border-radius:6px;border-left:2px solid ${ret?'var(--green)':ehSugestao?'var(--yellow)':'rgba(124,92,252,.6)'}">
+                <div style="font-size:10px;font-weight:700;color:${ret?'var(--green)':ehSugestao?'var(--yellow)':'#9d8aff'};letter-spacing:.4px;margin-bottom:6px">
+                  ${ret ? '✅ APROVADO E ENVIADO PRA ' + fb.vendedora.toUpperCase() : ehSugestao ? '✏️ RASCUNHO SUGERIDO PELO SISTEMA — REVISE E APROVE' : '📨 FEEDBACK PRA ' + fb.vendedora.toUpperCase()}
+                </div>
                 <select id="ret-status-${fb.id_sugestao}-${fb.vendedora}" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:4px 6px;font-size:11px;width:100%;margin-bottom:6px">
                   <option value="">— escolha um status —</option>
-                  <option value="excelente" ${ret?.status==='excelente'?'selected':''}>⭐ Excelente — exemplo pra equipe</option>
-                  <option value="reconhecida" ${ret?.status==='reconhecida'?'selected':''}>👏 Reconhecida — bom trabalho</option>
-                  <option value="precisa_melhorar" ${ret?.status==='precisa_melhorar'?'selected':''}>⚠️ Precisa melhorar — não vi resultado</option>
+                  <option value="excelente" ${statusInicial==='excelente'?'selected':''}>⭐ Excelente — exemplo pra equipe</option>
+                  <option value="reconhecida" ${statusInicial==='reconhecida'?'selected':''}>👏 Reconhecida — bom trabalho</option>
+                  <option value="precisa_melhorar" ${statusInicial==='precisa_melhorar'?'selected':''}>⚠️ Precisa melhorar — não vi resultado</option>
                 </select>
-                <textarea id="ret-txt-${fb.id_sugestao}-${fb.vendedora}" class="sug-comment" placeholder="Mensagem pra ela (opcional): o que você viu, o que espera..." style="min-height:50px;font-size:11px">${ret?.texto||''}</textarea>
+                <textarea id="ret-txt-${fb.id_sugestao}-${fb.vendedora}" class="sug-comment" placeholder="Mensagem pra ela: o que você viu, o que espera..." style="min-height:50px;font-size:11px">${textoInicial}</textarea>
                 <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
-                  <button class="sug-btn" style="background:rgba(124,92,252,.2);color:#9d8aff;border-color:rgba(124,92,252,.5);font-size:11px;padding:5px 10px" onclick="salvarRetornoFeedback('${fb.id_sugestao}','${fb.loja}','${fb.vendedora}')">💾 Salvar retorno</button>
-                  ${ret ? `<span style="font-size:10px;color:var(--muted)">salvo em ${(ret.em||'').slice(0,16).replace('T',' ')}</span>` : ''}
+                  <button class="sug-btn" style="background:rgba(124,92,252,.2);color:#9d8aff;border-color:rgba(124,92,252,.5);font-size:11px;padding:5px 10px" onclick="salvarRetornoFeedback('${fb.id_sugestao}','${fb.loja}','${fb.vendedora}')">
+                    ${ret ? '💾 Atualizar retorno' : ehSugestao ? '✓ Aprovar e enviar' : '💾 Salvar e enviar'}
+                  </button>
+                  ${ret ? `<span style="font-size:10px;color:var(--green)">enviado em ${(ret.em||'').slice(0,16).replace('T',' ')}</span>` : ''}
+                  ${ehSugestao ? '<span style="font-size:10px;color:var(--yellow)">⚠️ NÃO foi enviado ainda — vendedora não vê até você clicar Aprovar</span>' : ''}
                 </div>
               </div>`;
             return `<div style="background:var(--bg3);border-radius:7px;padding:8px 10px;margin-bottom:6px">
@@ -2445,9 +2456,12 @@ function rerender() {
 }
 
 // Init — carrega dados do Worker primeiro, depois renderiza
-// Retornos pré-cadastrados (espelha loja.html — mantém em sync).
-// Worker (se deployado) sobrescreve por (idSug+loja+vendedora).
-const RETORNOS_PRESET_PAINEL = [
+// ⚠️ TEXTOS_SUGERIDOS — não são retornos APROVADOS, são RASCUNHOS de texto
+// pra Athila revisar e aprovar. Pré-preenchem o textarea na aba 💡 Sugestões;
+// só viram retorno real quando ele clica "Salvar retorno" (POST pro Worker).
+// Indexado por (idSug, loja, vendedora) — chave igual ao retorno real, mas
+// NUNCA aparece pra vendedora sem aprovação explícita.
+const TEXTOS_SUGERIDOS_RETORNO = [
   {id_sugestao:'2026-W21-L1-03', loja:'L1', vendedora:'Tatiane',  status:'reconhecida', em:'2026-05-26T13:30:00.000Z',
    texto:'Tatiane, suas vendas subiram +47% da metade pré-app pra metade pós-app (R$3.829 → R$5.639). Como gerente, você puxou pelo exemplo. Continua firme na S4.'},
   {id_sugestao:'2026-W21-L1-01', loja:'L1', vendedora:'Rayra',    status:'excelente',  em:'2026-05-26T13:30:00.000Z',
@@ -2483,9 +2497,12 @@ const RETORNOS_PRESET_PAINEL = [
 ];
 
 async function initDashboard() {
-  // Pré-popula retornos preset ANTES do primeiro render
-  window.__FEEDBACK_RETORNOS = [...RETORNOS_PRESET_PAINEL];
-  rerender(); // primeiro render com dados inline
+  // Retornos REAIS (aprovados) começam vazios — só são populados via Worker.
+  // Textos sugeridos (rascunhos) ficam separados em TEXTOS_SUGERIDOS_RETORNO
+  // e só pre-fill o textarea na UI (não contam como retorno aprovado).
+  window.__FEEDBACK_RETORNOS = [];
+  window.__TEXTOS_SUGERIDOS = TEXTOS_SUGERIDOS_RETORNO;
+  rerender();
   // Em paralelo busca tudo do Worker
   try {
     const [oR, aR, fR, rR] = await Promise.all([
@@ -2498,12 +2515,8 @@ async function initDashboard() {
     const avaliacoes = (await aR.json()).items || [];
     const feedbacks = (await fR.json()).items || [];
     const retornos = (await rR.json()).items || [];
-    // Mergeia preset + worker (worker wins on conflict por idSug+loja+vendedora)
-    const key = (r) => `${r.id_sugestao}|${r.loja}|${r.vendedora}`;
-    const mergedMap = {};
-    for (const r of RETORNOS_PRESET_PAINEL) mergedMap[key(r)] = r;
-    for (const r of retornos) mergedMap[key(r)] = r;
-    window.__FEEDBACK_RETORNOS = Object.values(mergedMap);
+    // Retornos aprovados vêm SÓ do Worker — sem mistura com sugestões.
+    window.__FEEDBACK_RETORNOS = retornos;
 
     // Mescla overrides no localStorage (mantém também o que ele fez localmente)
     const localOv = JSON.parse(localStorage.getItem('sugestoes_overrides') || '{}');
