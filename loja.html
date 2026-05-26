@@ -1046,15 +1046,14 @@ const DADOS_LOJA = {
 const HISTORICO_PREMIOS = {
   L1: {
     // Pool R$230 — CONCESSÃO da gestão. A loja fechou em 96% da meta de R$45k
-    // (R$43.177 com 10/05 incluso). A gestão decidiu reconhecer o esforço
-    // pagando o equivalente proporcional ao patamar de 96%, mesmo sem chegar
-    // aos 100%. Divisão por contribuição individual sobre o TOTAL da loja
-    // (R$43.177). R$7 ficam atribuíveis aos "Outros" (Rosana 780 + Vendedor
-    // Padrão 591) e não são distribuídos.
+    // (R$43.177 com 10/05 incluso). A gestão decidiu reconhecer o esforço.
+    // Divisão por contribuição individual sobre o TOTAL da loja (R$43.177).
+    // ⚠️ Sofia recebe considerando vendas L1 + L4 (cross-loja, ela migrou de L4
+    //    pra L1 durante o ano). Total Sofia S1 = 4.845 (L1) + 1.155 (L4) = R$6.000.
     'Tatiane': {S1: 76},  // 14.328 / 43.177 × 230
     'Rayra':   {S1: 74},  // 13.889 / 43.177 × 230
     'Alcione': {S1: 47},  //  8.744 / 43.177 × 230
-    'Sofia':   {S1: 26}   //  4.845 / 43.177 × 230
+    'Sofia':   {S1: 32}   //  6.000 / 43.177 × 230 (com L4 cross-loja)
   },
   L3: {
     // Pool R$100, dividido entre 4 (Naila vendeu R$0)
@@ -1064,11 +1063,13 @@ const HISTORICO_PREMIOS = {
     'Naila':    {S1: 0}
   },
   L4: {
-    // Pool R$100, dividido entre 4 (Sofia não conta — está em L1 agora)
-    'Tanaia':   {S1: 39}, // 13.430 / 34.702 × 100
-    'Josilene': {S1: 26}, //  9.182 / 34.702 × 100
-    'Bruna F.': {S1: 20}, //  6.929 / 34.702 × 100
-    'Rosana':   {S1: 15}  //  5.161 / 34.702 × 100
+    // Pool R$100, dividido sobre o total da loja R$35.860.
+    // ⚠️ Rosana recebe considerando vendas L1 + L4 (cross-loja, ela migrou de
+    //    L1 pra L4 durante o ano). Total Rosana S1 = 780 (L1) + 5.081 (L4) = R$5.861.
+    'Tanaia':   {S1: 37}, // 13.430 / 35.860 × 100
+    'Josilene': {S1: 26}, //  9.182 / 35.860 × 100
+    'Bruna F.': {S1: 19}, //  6.929 / 35.860 × 100
+    'Rosana':   {S1: 16}  //  5.861 / 35.860 × 100 (com L1 cross-loja)
   },
   L5: {
     // Pool R$80, dividido entre 4 vendedoras (Lucas excluído por ser caixa)
