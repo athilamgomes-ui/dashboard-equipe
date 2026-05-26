@@ -270,6 +270,13 @@ const DADOS = {
       },
       marcasA_loja: {S1:20.9, S2:20.5, S3:16.3, S4:0},
       marcasA_indiv: {Tatiane:19.8,Rayra:17.8,Alcione:21.3,Sofia:20.3},
+      // Divisão da S3 pra avaliar sugestões W21 (app lançado quinta 21/05):
+      // S3_pre = 18-20/05 (seg-qua, 3 dias antes do app)
+      // S3_pos = 21-23/05 (qui-sáb, 3 dias com app)
+      vendas_split: {
+        S3_pre:{Tatiane:3829,Rayra:2341,Alcione:1803,Sofia:1665},
+        S3_pos:{Tatiane:5639,Rayra:4966,Alcione:1935,Sofia:2696},
+      },
     },
     L3: {
       meta_mensal: 80000,
@@ -287,6 +294,10 @@ const DADOS = {
       },
       marcasA_loja: {S1:26.5, S2:21.3, S3:21.6, S4:0},
       marcasA_indiv: {'Ana Mira':24.8,Raimunda:28.9,Brunna:17.8,Naila:22.3},
+      vendas_split: {
+        S3_pre:{'Ana Mira':1746,Raimunda:1903,Brunna:1201,Naila:427},
+        S3_pos:{'Ana Mira':1097,Raimunda:1989,Brunna:1913,Naila:2651},
+      },
     },
     L4: {
       meta_mensal: 140000,
@@ -304,6 +315,10 @@ const DADOS = {
       },
       marcasA_loja: {S1:28.9, S2:21.9, S3:12.6, S4:0},
       marcasA_indiv: {Tanaia:23.8,Josilene:21.1,'Bruna F.':22.8,Rosana:20.5},
+      vendas_split: {
+        S3_pre:{Tanaia:1629,Josilene:2657,'Bruna F.':2329,Rosana:1095,Outros:44},
+        S3_pos:{Tanaia:3359,Josilene:1887,'Bruna F.':4929,Rosana:1747},
+      },
     },
     L5: {
       meta_mensal: 90000,
@@ -321,6 +336,10 @@ const DADOS = {
       },
       marcasA_loja: {S1:21.0, S2:25.9, S3:19.3, S4:0},
       marcasA_indiv: {Rayssa:27.4,Joyce:25.6,Rosiene:22.5,Karina:10.5,Lucas:0},
+      vendas_split: {
+        S3_pre:{Rayssa:2220,Joyce:1373,Rosiene:1765,Karina:1561,Lucas:19},
+        S3_pos:{Rayssa:1849,Joyce:3401,Rosiene:2124,Karina:2625,Lucas:220},
+      },
     },
   },
   // Meses futuros: adicionar dados ao longo do ano
@@ -1129,15 +1148,18 @@ const DEFAULT_THRESHOLDS = {
 
 // Da semana ISO da sug (ex '2026-W21'), descobre quais Sx do MES_KEY correspondem:
 // W21 = 18-23/05 = S3. W22 = 25-30 = S4. Retorna {semBaselineId, semAvalId}.
+//
+// ⚠️ Caso especial — W21 (S3, mai/2026): App lançado quinta 21/05, no MEIO da S3.
+// Antes do app vs depois do app é a comparação justa pras sugestões W21. Não compara
+// com S2 (toda pré-app). Usa vendas_split.S3_pre (seg-qua 18-20/05) vs S3_pos
+// (qui-sáb 21-23/05). Ver memória [[premiacao_metrica_antes_depois_app]].
+// Outras semanas seguem regra padrão (S vs S-1).
 function _semIdsDaSugestao(idSug) {
-  // ID formato '2026-W21-Lx-NN'. A semana da SUG é a semana em que ela foi PUBLICADA —
-  // ou seja, baseline = semana ANTERIOR (S2 pra W21) e resultado = semana ATUAL (S3 pra W21).
-  // Hardcode simples por enquanto (mês de mai/2026):
   const mapa = {
-    'W21': {baseline:'S2', avaliada:'S3'},
-    'W22': {baseline:'S3', avaliada:'S4'},
-    'W19': {baseline:'',   avaliada:'S1'},
-    'W20': {baseline:'S1', avaliada:'S2'},
+    'W21': {baseline:'S3_pre', avaliada:'S3_pos', label:'antes app (18-20/05) → depois app (21-23/05)'},
+    'W22': {baseline:'S3',     avaliada:'S4'},
+    'W19': {baseline:'',       avaliada:'S1'},
+    'W20': {baseline:'S1',     avaliada:'S2'},
   };
   const m = idSug.match(/-W(\d+)-/);
   if (!m) return null;
@@ -1147,6 +1169,9 @@ function _semIdsDaSugestao(idSug) {
 
 function _getMA(ld, semId, vendOuLoja) {
   if (!ld || !semId) return null;
+  // S3_pre/S3_pos: não temos MA% por sub-período (relatório só gera por semana inteira).
+  // Retornar null → calcAutoMetrics marca como "não rastreável" pra essas sugestões.
+  if (semId === 'S3_pre' || semId === 'S3_pos') return null;
   if (vendOuLoja === '__loja__') {
     return ld.marcasA_loja?.[semId] ?? null;
   }
@@ -1155,16 +1180,29 @@ function _getMA(ld, semId, vendOuLoja) {
   return ld.marcasA_indiv?.[vendOuLoja] ?? null;
 }
 
+// IDs especiais S3_pre/S3_pos vêm de ld.vendas_split (sub-períodos de S3)
+function _getVendasPorId(ld, semId) {
+  if (semId === 'S3_pre' || semId === 'S3_pos') {
+    return ld?.vendas_split?.[semId] || {};
+  }
+  return ld?.vendas?.[semId] || {};
+}
+
 function _getVendasIndiv(ld, semId, vend) {
-  return ld?.vendas?.[semId]?.[vend] ?? 0;
+  return _getVendasPorId(ld, semId)[vend] ?? 0;
 }
 
 function _getVendasLoja(ld, semId) {
-  const v = ld?.vendas?.[semId] || {};
+  const v = _getVendasPorId(ld, semId);
   return Object.values(v).reduce((s,x) => s+(x||0), 0);
 }
 
 function _getMetaSem(ld, semId) {
+  // S3_pre/S3_pos: 3 dias cada → meta da semana ÷ 2 (aproximação)
+  if (semId === 'S3_pre' || semId === 'S3_pos') {
+    const metaS3 = (ld?.semanas||[]).find(s => s.id === 'S3')?.meta || 0;
+    return Math.round(metaS3 / 2);
+  }
   return (ld?.semanas||[]).find(s => s.id === semId)?.meta || 0;
 }
 
@@ -1202,17 +1240,37 @@ function calcAutoMetrics(sug) {
       // Pra vendedora: bateu meta semanal proporcional dela? simplificado: usar % loja
       // (a vendedora não tem meta individual no schema)
     }
-    const vendido = _getVendasLoja(ld, ids.avaliada);
-    const meta = _getMetaSem(ld, ids.avaliada);
-    baseline = meta;
-    resultado = vendido;
-    unidade = 'R$';
-    if (meta > 0 && vendido > 0) {
-      const pctBatido = vendido / meta * 100;
-      deltaStr = pctBatido.toFixed(0) + '% da meta';
-      if (pctBatido >= th.funcionou) status = 'funcionou';
-      else if (pctBatido >= th.parcial) status = 'parcial';
-      else status = 'nao_funcionou';
+    // ⚠️ Caso especial W21 (S3_pre vs S3_pos): comparar VOLUMES, não % da meta
+    // (a meta da semana é única — não faz sentido pedir 100% em meio período).
+    // Compara crescimento de R$: se vendido_pos ≥ vendido_pre * (1 + threshold/100), funcionou.
+    if (ids.baseline === 'S3_pre') {
+      const vendidoPre = _getVendasLoja(ld, ids.baseline);
+      const vendidoPos = _getVendasLoja(ld, ids.avaliada);
+      baseline = vendidoPre;
+      resultado = vendidoPos;
+      unidade = 'R$';
+      if (vendidoPre > 0 && vendidoPos > 0) {
+        const variacao = (vendidoPos - vendidoPre) / vendidoPre * 100;
+        deltaStr = (variacao >= 0 ? '+' : '') + variacao.toFixed(0) + '% vs antes do app';
+        // Reaproveita thresholds de vendas_individuais (15% / 5%)
+        const thr = DEFAULT_THRESHOLDS.vendas_individuais;
+        if (variacao >= thr.funcionou) status = 'funcionou';
+        else if (variacao >= thr.parcial) status = 'parcial';
+        else status = 'nao_funcionou';
+      }
+    } else {
+      const vendido = _getVendasLoja(ld, ids.avaliada);
+      const meta = _getMetaSem(ld, ids.avaliada);
+      baseline = meta;
+      resultado = vendido;
+      unidade = 'R$';
+      if (meta > 0 && vendido > 0) {
+        const pctBatido = vendido / meta * 100;
+        deltaStr = pctBatido.toFixed(0) + '% da meta';
+        if (pctBatido >= th.funcionou) status = 'funcionou';
+        else if (pctBatido >= th.parcial) status = 'parcial';
+        else status = 'nao_funcionou';
+      }
     }
   }
   else if (sug.meta_alvo === 'marcas_a') {
