@@ -855,7 +855,25 @@ function calcularAjusteMeta(ld, semAtual, lojaKey) {
   return {gapTotal, gapPorSemana, sugestao, faltaMensal, vendidoAcum, usaHist, pesos};
 }
 
+// Helpers de decisão (persistente)
+function _decisaoKey(mesKey, lojaKey) { return `${mesKey}|${lojaKey}`; }
+function loadDecisoesMeta() {
+  try { return JSON.parse(localStorage.getItem('ajustes_meta_decisoes') || '{}'); }
+  catch(e) { return {}; }
+}
+function getDecisaoMeta(mesKey, lojaKey) {
+  return loadDecisoesMeta()[_decisaoKey(mesKey, lojaKey)] || null;
+}
+function setDecisaoMeta(mesKey, lojaKey, decisao) {
+  const all = loadDecisoesMeta();
+  all[_decisaoKey(mesKey, lojaKey)] = {...decisao, em: new Date().toISOString()};
+  localStorage.setItem('ajustes_meta_decisoes', JSON.stringify(all));
+}
+
 function renderAjusteMeta(mesKey, lojaKey, ld) {
+  // Se já tem decisão registrada pra esse (mês, loja), não mostra o card
+  if (getDecisaoMeta(mesKey, lojaKey)) return '';
+
   const semAtual = DADOS[mesKey].semana_atual;
   const aj = calcularAjusteMeta(ld, semAtual, lojaKey);
   if (!aj) return '';
@@ -899,7 +917,20 @@ function renderAjusteMeta(mesKey, lojaKey, ld) {
 
   const dadosAplicar = JSON.stringify(sugestao.map(s=>({id:s.sem.id, nova:s.nova}))).replace(/"/g,'&quot;');
 
-  return `<div class="ajuste-meta">
+  // Form pra digitar meta custom (escondido até clicar em "ignorar e digitar")
+  const inputsCustom = sugestao.map(s => `
+    <tr>
+      <td style="padding:6px 8px">${s.sem.label}${s.sem.id===semAtual?' <span style="color:var(--blue);font-size:10px">(atual)</span>':''}</td>
+      <td style="padding:6px 8px;color:var(--muted)">${fR(s.atual)}</td>
+      <td style="padding:6px 8px">
+        <input type="number" id="custom-${lojaKey}-${s.sem.id}" value="${s.atual}" step="100" min="0"
+          style="width:110px;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:4px 8px;font-size:13px;text-align:right">
+      </td>
+    </tr>`).join('');
+
+  const idsRestantes = JSON.stringify(sugestao.map(s=>s.sem.id)).replace(/"/g,'&quot;');
+
+  return `<div class="ajuste-meta" id="ajuste-${lojaKey}">
     <h3>📊 Sugestão de ajuste de meta</h3>
     <div class="ajuste-status">${statusText}</div>
     <table class="ajuste-tabela">
@@ -918,15 +949,28 @@ function renderAjusteMeta(mesKey, lojaKey, ld) {
         ${rowsSug}
       </tbody>
     </table>
-    <div class="ajuste-btns">
+    <div class="ajuste-btns" id="ajuste-btns-${lojaKey}">
       <button class="ajuste-btn aplicar" onclick="aplicarAjusteMeta('${mesKey}','${lojaKey}', '${dadosAplicar}')">
         ✓ Aplicar nova distribuição
       </button>
-      <button class="ajuste-btn cancelar" onclick="this.parentElement.parentElement.style.display='none'">
-        Ignorar essa sugestão
+      <button class="ajuste-btn cancelar" onclick="abrirCustomMeta('${lojaKey}')">
+        Ignorar sugestão — quero digitar a meta manualmente
+      </button>
+      <button class="ajuste-btn cancelar" style="opacity:.6" onclick="ignorarAjusteMeta('${mesKey}','${lojaKey}')">
+        Ignorar e manter metas atuais
       </button>
     </div>
-    <div class="ajuste-aplicado" id="aplicado-${lojaKey}"></div>
+    <div id="custom-form-${lojaKey}" style="display:none;margin-top:10px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px">
+      <div style="font-size:12px;color:var(--text);font-weight:600;margin-bottom:8px">✏️ Digite a meta nova de cada semana restante:</div>
+      <table style="width:100%;font-size:12px;margin-bottom:10px">
+        <thead><tr style="color:var(--muted)"><th style="text-align:left;padding:6px 8px">Semana</th><th style="text-align:left;padding:6px 8px">Meta atual</th><th style="text-align:left;padding:6px 8px">Nova meta (R$)</th></tr></thead>
+        <tbody>${inputsCustom}</tbody>
+      </table>
+      <div style="display:flex;gap:8px">
+        <button class="ajuste-btn aplicar" onclick="salvarMetaCustom('${mesKey}','${lojaKey}','${idsRestantes}')">💾 Salvar metas manuais</button>
+        <button class="ajuste-btn cancelar" onclick="document.getElementById('custom-form-${lojaKey}').style.display='none';document.getElementById('ajuste-btns-${lojaKey}').style.display='flex'">Voltar</button>
+      </div>
+    </div>
   </div>`;
 }
 
@@ -937,11 +981,54 @@ function aplicarAjusteMeta(mesKey, lojaKey, dadosStr) {
     const sem = ld.semanas.find(s => s.id === d.id);
     if (sem) sem.meta = d.nova;
   });
-  // Persiste em localStorage pra skill sincronizar no próximo run
+  // Persiste decisão E pendente (skill sincroniza no próximo run)
+  setDecisaoMeta(mesKey, lojaKey, {tipo:'aplicado_sugestao', metas: dados});
   const pending = JSON.parse(localStorage.getItem('ajustes_meta_pendentes') || '[]');
   pending.push({mesKey, lojaKey, dados, aplicado_em: new Date().toISOString()});
   localStorage.setItem('ajustes_meta_pendentes', JSON.stringify(pending));
-  document.getElementById('aplicado-'+lojaKey).innerHTML = '✓ Aplicado! Sincroniza no próximo update do dashboard (próximo cron).';
+  rerender();
+}
+
+function abrirCustomMeta(lojaKey) {
+  document.getElementById('ajuste-btns-'+lojaKey).style.display = 'none';
+  document.getElementById('custom-form-'+lojaKey).style.display = 'block';
+}
+
+function salvarMetaCustom(mesKey, lojaKey, idsStr) {
+  const ids = JSON.parse(idsStr.replace(/&quot;/g, '"'));
+  const ld = DADOS[mesKey][lojaKey];
+  const novasMetas = [];
+  for (const id of ids) {
+    const inputEl = document.getElementById(`custom-${lojaKey}-${id}`);
+    if (!inputEl) continue;
+    const val = parseFloat(inputEl.value);
+    if (isNaN(val) || val < 0) {
+      alert(`Valor inválido pra ${id}. Tente de novo.`);
+      return;
+    }
+    const sem = ld.semanas.find(s => s.id === id);
+    if (sem) {
+      sem.meta = Math.round(val);
+      novasMetas.push({id, nova: Math.round(val)});
+    }
+  }
+  setDecisaoMeta(mesKey, lojaKey, {tipo:'custom', metas: novasMetas});
+  const pending = JSON.parse(localStorage.getItem('ajustes_meta_pendentes') || '[]');
+  pending.push({mesKey, lojaKey, dados: novasMetas, aplicado_em: new Date().toISOString(), origem: 'custom'});
+  localStorage.setItem('ajustes_meta_pendentes', JSON.stringify(pending));
+  rerender();
+}
+
+function ignorarAjusteMeta(mesKey, lojaKey) {
+  setDecisaoMeta(mesKey, lojaKey, {tipo:'ignorado'});
+  rerender();
+}
+
+// Permite resetar decisão (caso queira ver a sugestão de novo no console)
+function resetarDecisaoMeta(mesKey, lojaKey) {
+  const all = loadDecisoesMeta();
+  delete all[_decisaoKey(mesKey, lojaKey)];
+  localStorage.setItem('ajustes_meta_decisoes', JSON.stringify(all));
   rerender();
 }
 
@@ -1613,80 +1700,6 @@ function aprovarTodasDaSemana() {
   rerender();
 }
 
-// ─── ANÁLISE SAZONAL — efeito do app vs baseline histórico ───────────────────
-// Comparação qui-sáb (com app) vs seg-qua (sem app) da S3 de maio/2026 contra
-// padrão natural de 16 meses anteriores (jan/25–abr/26).
-// Lift = (variação maio/2026) − (mediana 16m baseline)
-const ANALISE_SAZONAL_S3 = {"maio_2026": {"L1": {"pre": 9638, "pos": 15236, "delta": 58}, "L3": {"pre": 5277, "pos": 7650, "delta": 45}, "L4": {"pre": 7754, "pos": 11922, "delta": 54}, "L5": {"pre": 6938, "pos": 10219, "delta": 47}}, "historico": {"L1": {"meses": [{"mes": "JAN25", "pre": 8295, "pos": 11404, "delta": 37.5}, {"mes": "FEV25", "pre": 12233, "pos": 13282, "delta": 8.6}, {"mes": "MAR25", "pre": 10190, "pos": 13217, "delta": 29.7}, {"mes": "ABR25", "pre": 6615, "pos": 10887, "delta": 64.6}, {"mes": "MAI25", "pre": 13725, "pos": 15293, "delta": 11.4}, {"mes": "JUN25", "pre": 9735, "pos": 11939, "delta": 22.6}, {"mes": "JUL25", "pre": 10306, "pos": 12128, "delta": 17.7}, {"mes": "AGO25", "pre": 11985, "pos": 15518, "delta": 29.5}, {"mes": "SET25", "pre": 8888, "pos": 11098, "delta": 24.9}, {"mes": "OUT25", "pre": 16277, "pos": 16167, "delta": -0.7}, {"mes": "NOV25", "pre": 15585, "pos": 13497, "delta": -13.4}, {"mes": "DEZ25", "pre": 21853, "pos": 30436, "delta": 39.3}, {"mes": "JAN26", "pre": 9852, "pos": 11225, "delta": 14}, {"mes": "FEV26", "pre": 7016, "pos": 14356, "delta": 105}, {"mes": "MAR26", "pre": 11090, "pos": 10730, "delta": -3}, {"mes": "ABR26", "pre": 9271, "pos": 9879, "delta": 7}], "mediana": 20.1, "media": 24.7, "n": 16, "lift": 37.9}, "L3": {"meses": [{"mes": "JAN25", "pre": 5717, "pos": 4245, "delta": -25.7}, {"mes": "FEV25", "pre": 6987, "pos": 5479, "delta": -21.6}, {"mes": "MAR25", "pre": 4053, "pos": 6072, "delta": 49.8}, {"mes": "ABR25", "pre": 7280, "pos": 5376, "delta": -26.2}, {"mes": "MAI25", "pre": 5035, "pos": 6330, "delta": 25.7}, {"mes": "JUN25", "pre": 4553, "pos": 6046, "delta": 32.8}, {"mes": "JUL25", "pre": 2997, "pos": 4986, "delta": 66.4}, {"mes": "AGO25", "pre": 6048, "pos": 4962, "delta": -18.0}, {"mes": "SET25", "pre": 7666, "pos": 3773, "delta": -50.8}, {"mes": "OUT25", "pre": 3891, "pos": 3277, "delta": -15.8}, {"mes": "NOV25", "pre": 5321, "pos": 6069, "delta": 14.1}, {"mes": "DEZ25", "pre": 9332, "pos": 10162, "delta": 8.9}, {"mes": "JAN26", "pre": 5507, "pos": 4850, "delta": -12}, {"mes": "FEV26", "pre": 2390, "pos": 5704, "delta": 139}, {"mes": "MAR26", "pre": 5250, "pos": 6277, "delta": 20}, {"mes": "ABR26", "pre": 4804, "pos": 5930, "delta": 23}], "mediana": 11.5, "media": 13.1, "n": 16, "lift": 33.5}, "L4": {"meses": [{"mes": "JAN25", "pre": 11915, "pos": 10718, "delta": -10.0}, {"mes": "FEV25", "pre": 9439, "pos": 11741, "delta": 24.4}, {"mes": "MAR25", "pre": 12655, "pos": 16640, "delta": 31.5}, {"mes": "ABR25", "pre": 12151, "pos": 13417, "delta": 10.4}, {"mes": "MAI25", "pre": 15185, "pos": 13809, "delta": -9.1}, {"mes": "JUN25", "pre": 21966, "pos": 11765, "delta": -46.4}, {"mes": "JUL25", "pre": 18186, "pos": 14126, "delta": -22.3}, {"mes": "AGO25", "pre": 20349, "pos": 16229, "delta": -20.2}, {"mes": "SET25", "pre": 17501, "pos": 18726, "delta": 7.0}, {"mes": "OUT25", "pre": 13279, "pos": 14006, "delta": 5.5}, {"mes": "NOV25", "pre": 15979, "pos": 14959, "delta": -6.4}, {"mes": "DEZ25", "pre": 21265, "pos": 30032, "delta": 41.2}, {"mes": "JAN26", "pre": 7723, "pos": 15116, "delta": 96}, {"mes": "FEV26", "pre": 5489, "pos": 12684, "delta": 131}, {"mes": "MAR26", "pre": 10258, "pos": 14454, "delta": 41}, {"mes": "ABR26", "pre": 11355, "pos": 8816, "delta": -22}], "mediana": 6.2, "media": 15.7, "n": 16, "lift": 47.8}, "L5": {"meses": [{"mes": "JAN25", "pre": 16498, "pos": 12828, "delta": -22.2}, {"mes": "FEV25", "pre": 13095, "pos": 11090, "delta": -15.3}, {"mes": "MAR25", "pre": 8080, "pos": 10258, "delta": 27.0}, {"mes": "ABR25", "pre": 9718, "pos": 13632, "delta": 40.3}, {"mes": "MAI25", "pre": 8071, "pos": 9990, "delta": 23.8}, {"mes": "JUN25", "pre": 9668, "pos": 11367, "delta": 17.6}, {"mes": "JUL25", "pre": 7426, "pos": 9493, "delta": 27.8}, {"mes": "AGO25", "pre": 10545, "pos": 15577, "delta": 47.7}, {"mes": "SET25", "pre": 8588, "pos": 15112, "delta": 76.0}, {"mes": "OUT25", "pre": 10523, "pos": 11174, "delta": 6.2}, {"mes": "NOV25", "pre": 14860, "pos": 10379, "delta": -30.2}, {"mes": "DEZ25", "pre": 14926, "pos": 17152, "delta": 14.9}, {"mes": "JAN26", "pre": 8477, "pos": 14050, "delta": 66}, {"mes": "FEV26", "pre": 5309, "pos": 8885, "delta": 67}, {"mes": "MAR26", "pre": 6721, "pos": 8112, "delta": 21}, {"mes": "ABR26", "pre": 4517, "pos": 13141, "delta": 191}], "mediana": 25.4, "media": 34.9, "n": 16, "lift": 21.6}}};
-
-function renderAnaliseSazonal() {
-  const fmtR = (v) => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
-  const rows = ['L1','L3','L4','L5'].map(L => {
-    const m = ANALISE_SAZONAL_S3.maio_2026[L];
-    const h = ANALISE_SAZONAL_S3.historico[L];
-    const corLift = h.lift >= 20 ? 'var(--green)' : h.lift >= 10 ? 'var(--yellow)' : 'var(--red)';
-    const emojiLift = h.lift >= 20 ? '🟢' : h.lift >= 10 ? '🟡' : '🔴';
-    return `<tr>
-      <td style="padding:8px 10px;font-weight:700;color:${LOJAS_BASE[L].cor}">${L} ${LOJAS_BASE[L].nome}</td>
-      <td style="padding:8px 10px;text-align:right">${fmtR(m.pre)} → ${fmtR(m.pos)}</td>
-      <td style="padding:8px 10px;text-align:right;font-weight:700">+${m.delta}%</td>
-      <td style="padding:8px 10px;text-align:right;color:var(--muted)">${h.mediana>=0?'+':''}${h.mediana}% (n=${h.n})</td>
-      <td style="padding:8px 10px;text-align:right;font-weight:800;color:${corLift};font-size:14px">${emojiLift} ${h.lift>=0?'+':''}${h.lift}pp</td>
-    </tr>`;
-  }).join('');
-
-  // Tabela detalhada por mês (collapsable)
-  const detalhes = ['L1','L3','L4','L5'].map(L => {
-    const h = ANALISE_SAZONAL_S3.historico[L];
-    const rowsM = h.meses.map(mo => {
-      const cor = mo.delta >= 20 ? 'var(--green)' : mo.delta < 0 ? 'var(--red)' : 'var(--muted)';
-      return `<tr>
-        <td style="padding:4px 8px">${mo.mes}</td>
-        <td style="padding:4px 8px;text-align:right;color:var(--muted)">${fmtR(mo.pre)}</td>
-        <td style="padding:4px 8px;text-align:right;color:var(--muted)">${fmtR(mo.pos)}</td>
-        <td style="padding:4px 8px;text-align:right;color:${cor};font-weight:600">${mo.delta>=0?'+':''}${Math.round(mo.delta)}%</td>
-      </tr>`;
-    }).join('');
-    return `<div style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:6px">
-      <div style="font-size:12px;font-weight:700;color:${LOJAS_BASE[L].cor};margin-bottom:6px">${L} — histórico mensal (qui-sáb vs seg-qua)</div>
-      <table style="width:100%;font-size:11px;border-collapse:collapse">
-        <thead><tr style="color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.3px">
-          <th style="padding:4px 8px;text-align:left">Mês</th>
-          <th style="padding:4px 8px;text-align:right">Seg-Qua</th>
-          <th style="padding:4px 8px;text-align:right">Qui-Sáb</th>
-          <th style="padding:4px 8px;text-align:right">Δ</th>
-        </tr></thead>
-        <tbody>${rowsM}</tbody>
-      </table>
-    </div>`;
-  }).join('');
-
-  return `<div class="card" style="border:1px solid rgba(124,92,252,.3);background:linear-gradient(135deg,rgba(99,102,241,.05),rgba(139,92,246,.02));padding:14px;margin-bottom:14px;border-radius:12px">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-      <span style="font-size:18px">📊</span>
-      <h3 style="margin:0;font-size:15px">Efeito do app na S3 (vs baseline de 16 meses sem app)</h3>
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">
-      Comparação qui-sáb (com app) vs seg-qua (sem app) da S3 de mai/2026 contra a mesma divisão da 3ª semana de cada mês de jan/25 a abr/26.
-      Lift = (Δ% mai) − (mediana 16 meses). Lift ≥ +20pp = efeito claro do app; +10 a +20pp = moderado; &lt; +10pp = dentro da variação natural.
-    </div>
-    <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:10px">
-      <thead><tr style="background:var(--bg3);color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.4px">
-        <th style="padding:8px 10px;text-align:left">Loja</th>
-        <th style="padding:8px 10px;text-align:right">Maio 2026 (com app)</th>
-        <th style="padding:8px 10px;text-align:right">Δ%</th>
-        <th style="padding:8px 10px;text-align:right">Mediana histórica</th>
-        <th style="padding:8px 10px;text-align:right">Lift do app</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <details style="margin-top:8px">
-      <summary style="cursor:pointer;font-size:11px;color:var(--blue);user-select:none">▸ Ver detalhes mês-a-mês (16 meses)</summary>
-      <div style="margin-top:10px">${detalhes}</div>
-    </details>
-  </div>`;
-}
-
 function renderSugestoes() {
   const semKey = getSemanaCorrente();
   const sem = SUGESTOES[semKey];
@@ -1766,7 +1779,7 @@ function renderSugestoes() {
             const ret = retornos.find(r => r.id_sugestao === fb.id_sugestao && r.loja === fb.loja && r.vendedora === fb.vendedora);
             const retornoUI = `
               <div style="margin-top:8px;padding:8px;background:rgba(124,92,252,.08);border-radius:6px;border-left:2px solid rgba(124,92,252,.6)">
-                <div style="font-size:10px;font-weight:700;color:#9d8aff;letter-spacing:.4px;margin-bottom:6px">📨 SEU RETORNO PRA ${fb.vendedora.toUpperCase()}</div>
+                <div style="font-size:10px;font-weight:700;color:#9d8aff;letter-spacing:.4px;margin-bottom:6px">📨 FEEDBACK DA GESTÃO — PRA ${fb.vendedora.toUpperCase()}</div>
                 <select id="ret-status-${fb.id_sugestao}-${fb.vendedora}" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:4px 6px;font-size:11px;width:100%;margin-bottom:6px">
                   <option value="">— escolha um status —</option>
                   <option value="excelente" ${ret?.status==='excelente'?'selected':''}>⭐ Excelente — exemplo pra equipe</option>
@@ -1859,7 +1872,6 @@ function renderSugestoes() {
       2) Sábado à noite, marque <b>Funcionou / Indiferente / Não funcionou</b> nas aprovadas — alimenta os 4 gráficos da aba <b>📊 Análise</b>.
       <br><br>⚠️ Vendedoras só veem sugestões <b>aprovadas</b>. Pendentes/rejeitadas ficam só com você.
     </div>
-    ${renderAnaliseSazonal()}
     <div class="sug-grid">${cards}</div>
   `;
 }
