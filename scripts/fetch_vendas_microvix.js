@@ -115,7 +115,14 @@ function tokenExpiradoErro() {
 async function fetchVendasMicrovix(semanas) {
   const out = { L1: {}, L3: {}, L4: {}, L5: {} };
   for (const loja of ["L1", "L3", "L4", "L5"]) {
-    for (const s of semanas) out[loja][s.id] = {};
+    for (const s of semanas) {
+      out[loja][s.id] = {};
+      // Campos paralelos com métricas extras (retrocompatibilidade preservada):
+      // o consumer pode ignorar esses sufixos e usar só out[loja][s.id][vendedora] = valor.
+      out[loja][s.id + "_tickets"] = {};
+      out[loja][s.id + "_pecas"] = {};
+      out[loja][s.id + "_cmv"] = {};
+    }
   }
 
   for (const emp of EMPRESAS) {
@@ -127,15 +134,23 @@ async function fetchVendasMicrovix(semanas) {
           const rows = await fetchPerformance(emp, s.di, s.df);
           for (const row of rows) {
             const valor = parseFloat(String(row.vlr_vendas).replace(",", "."));
+            const tickets = parseInt(row.qtde_vendas_sem_devolucao || row.qtde_vendas || 0, 10);
+            const pecas = parseInt(row.qtde_pecas || 0, 10);
+            const cmv = parseFloat(String(row.vlr_cmv || "0").replace(",", "."));
             const canonico = canonicalizarNome(loja, row.nome_vendedor);
             if (canonico) {
               out[loja][s.id][canonico] = Math.round(valor);
+              out[loja][s.id + "_tickets"][canonico] = tickets;
+              out[loja][s.id + "_pecas"][canonico] = pecas;
+              out[loja][s.id + "_cmv"][canonico] = Math.round(cmv * 10) / 10;
             } else {
               // Agrega em "Outros": vendas de VENDEDOR PADRAO, ou de vendedoras
               // que mudaram de loja (ex: Rosana vendeu em L1 antes de migrar pra
               // L4; Sofia vendeu em L4 antes de migrar pra L1). Sem essa linha,
               // o total da loja fica menor que o do ERP.
               out[loja][s.id]["Outros"] = (out[loja][s.id]["Outros"] || 0) + Math.round(valor);
+              out[loja][s.id + "_tickets"]["Outros"] = (out[loja][s.id + "_tickets"]["Outros"] || 0) + tickets;
+              out[loja][s.id + "_pecas"]["Outros"] = (out[loja][s.id + "_pecas"]["Outros"] || 0) + pecas;
             }
           }
           break;
