@@ -2579,10 +2579,25 @@ function quizJaPassou(semanaId) {
   return localStorage.getItem('quiz_ok_' + LOJA_KEY + '_' + currentUser + '_' + semanaId) === 'true';
 }
 
+function quizJaRespondeu(semanaId) {
+  // Considera respondido se acertou (passou) OU se respondeu sem passar.
+  if (quizJaPassou(semanaId)) return true;
+  return localStorage.getItem('quiz_resp_' + LOJA_KEY + '_' + currentUser + '_' + semanaId) === 'true';
+}
+
+function marcarQuizRespondido(semanaId, acertos) {
+  if (sessionStorage.getItem('modo_dono') === '1') return;
+  localStorage.setItem('quiz_resp_' + LOJA_KEY + '_' + currentUser + '_' + semanaId, 'true');
+  localStorage.setItem('quiz_acertos_' + LOJA_KEY + '_' + currentUser + '_' + semanaId, String(acertos));
+}
+
 function marcarQuizPassou(semanaId, acertos) {
   // Modo dono: não persiste nem envia (só simula localmente pra visualização)
   if (sessionStorage.getItem('modo_dono') === '1') return;
   localStorage.setItem('quiz_ok_' + LOJA_KEY + '_' + currentUser + '_' + semanaId, 'true');
+  if (typeof acertos === 'number') {
+    localStorage.setItem('quiz_acertos_' + LOJA_KEY + '_' + currentUser + '_' + semanaId, String(acertos));
+  }
   const pending = JSON.parse(localStorage.getItem('quiz_respostas') || '[]');
   pending.push({loja: LOJA_KEY, vendedora: currentUser, semana: semanaId, em: new Date().toISOString()});
   localStorage.setItem('quiz_respostas', JSON.stringify(pending));
@@ -2607,7 +2622,9 @@ function renderPremio() {
 
   // 1. Encontrar semanas com prêmio pendente de quiz (semanas fechadas, loja bateu pool, vendedora ainda não respondeu)
   const semanasComPremio = listarSemanasFechadasComPremio(LOJA_KEY);
-  const pendentes = semanasComPremio.filter(semId => !quizJaPassou(semId));
+  // Pendente = ainda não respondeu o quiz UMA vez. Quem já respondeu (passou ou não)
+  // não vê mais o gate, vai direto pro histórico.
+  const pendentes = semanasComPremio.filter(semId => !quizJaRespondeu(semId));
 
   // Se existe quiz aberto agora, render o quiz
   if (quizSemana) {
@@ -2649,8 +2666,10 @@ function renderHistoricoPremios() {
     const temPremioSemana = c && c.pool > 0;
     const pendente = temPremioSemana ? calcPremioPendente(LOJA_KEY, s.id, currentUser) : undefined;
     const ehSkipQuiz = _skipSemQuiz.includes(s.id); // S1 em maio/2026 → mostra direto do HISTORICO_PREMIOS
-    const isPendente = pendente !== undefined && !quizJaPassou(s.id) && !ehSkipQuiz;
+    const isPendente = pendente !== undefined && !quizJaRespondeu(s.id) && !ehSkipQuiz;
     const jaRecebeuViaQuiz = pendente !== undefined && quizJaPassou(s.id);
+    const respondeuSemPassar = pendente !== undefined && quizJaRespondeu(s.id) && !quizJaPassou(s.id);
+    const acertosTentativa = respondeuSemPassar ? (localStorage.getItem('quiz_acertos_'+LOJA_KEY+'_'+currentUser+'_'+s.id) || '?') : null;
 
     if (s.id === ld.semana_atual) {
       // Semana atual em andamento - mostra projeção
@@ -2687,6 +2706,18 @@ function renderHistoricoPremios() {
         <div style="text-align:right">
           <div class="hist-valor pendente">R$ ?</div>
           <div class="hist-status" style="color:var(--yellow)">responda o quiz pra ver</div>
+        </div>
+      </div>`;
+    } else if (respondeuSemPassar) {
+      // Respondeu mas não atingiu 3 acertos — sem prêmio dessa semana
+      rows += `<div class="hist-row" style="opacity:.75">
+        <div>
+          <div class="hist-label">${s.label} ❌</div>
+          <div class="hist-data">${s.periodo}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="hist-valor" style="color:var(--muted);font-size:14px">R$ 0</div>
+          <div class="hist-status" style="color:var(--muted)">acertou ${acertosTentativa}/5 no quiz</div>
         </div>
       </div>`;
     } else if (historico[s.id] !== undefined) {
@@ -2898,12 +2929,15 @@ function renderQuizResultado(quiz) {
   const acertos = quizRespostas.filter((r, i) => r === quiz[i].correta).length;
   const total = quiz.length;
   const passou = acertos >= 3; // precisa acertar pelo menos 3 das 5
+  const semanaId = quizSemana;
+  const semana = SEMANAS_MES.find(s => s.id === semanaId);
+
+  // SEMPRE marca como respondido (independente do score) — uma resposta só.
+  marcarQuizRespondido(semanaId, acertos);
 
   if (passou) {
-    marcarQuizPassou(quizSemana);
-    const semanaId = quizSemana;
+    marcarQuizPassou(semanaId, acertos);
     const premio = calcPremioPendente(LOJA_KEY, semanaId, currentUser);
-    const semana = SEMANAS_MES.find(s => s.id === semanaId);
     quizSemana = null; // limpa
 
     return `
@@ -2917,20 +2951,30 @@ function renderQuizResultado(quiz) {
         <div class="valor">R$ ${premio}</div>
         <div class="nota">${premio > 0 ? '✓ Desbloqueado em ' + new Date().toLocaleString('pt-BR') : 'A loja não atingiu 70% da meta'}</div>
       </div>
-      <button class="btn-li-tudo" onclick="renderContent()">📊 Ver meu histórico de prêmios</button>
+      <button class="btn-li-tudo" onclick="voltarParaHistorico()">📊 Ver meu histórico de prêmios</button>
     `;
   }
 
-  // Não passou
+  // Não passou — uma chance só, sem tentar de novo
+  quizSemana = null;
   return `
     <div class="quiz-resultado">
       <div class="icon">😅</div>
       <h2>Você acertou ${acertos} de ${total}</h2>
-      <p>Precisa acertar pelo menos 3 das 5 pra desbloquear o prêmio.<br>Releia as recomendações e tenta de novo - sem pressa!</p>
-      <button class="btn-rever-leitura" onclick="resetQuiz()">📖 Rever recomendações</button>
-      <button class="btn-iniciar-quiz" onclick="iniciarQuiz('${quizSemana}')" style="background:var(--orange);color:#fff;border:none;padding:14px 18px;border-radius:10px;font-size:15px;font-weight:700;width:100%;margin-top:10px">▶️ Tentar de novo</button>
+      <p>Precisava acertar pelo menos 3 das 5 pra desbloquear o prêmio dessa semana.<br>
+      Sem stress — semana que vem tem outro quiz. Releia as recomendações pra fixar pra próxima.</p>
+      <button class="btn-li-tudo" onclick="voltarParaHistorico()">📊 Ver meu histórico</button>
     </div>
   `;
+}
+
+function voltarParaHistorico() {
+  quizSemana = null;
+  quizPerguntaIdx = 0;
+  quizRespostas = [];
+  quizConfirmado = false;
+  renderContent();
+  window.scrollTo({top: 0, behavior:'smooth'});
 }
 
 function resetQuiz() {
