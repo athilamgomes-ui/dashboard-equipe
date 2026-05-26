@@ -1239,6 +1239,15 @@ const VENDAS_HIST = {
         const sem = (hist.semanas||[]).find(s => s.id === m.id);
         if (sem && typeof m.nova === 'number') sem.meta = m.nova;
       }
+      // Também atualiza DADOS_LOJA.meta_semana (aba Metas usa esse campo)
+      // se a semana ajustada for a semana atual da loja.
+      const ld = DADOS_LOJA[lojaKey];
+      if (ld) {
+        const ajusteSemAtual = dec.metas.find(m => m.id === ld.semana_atual);
+        if (ajusteSemAtual && typeof ajusteSemAtual.nova === 'number') {
+          ld.meta_semana = ajusteSemAtual.nova;
+        }
+      }
     }
   } catch (e) {
     console.warn('[meta-sync] falha ao aplicar decisões do painel:', e);
@@ -1934,6 +1943,14 @@ function renderHoje() {
   // Período da semana atual (do label "Semana 25 a 30/05" → "25 a 30/05")
   const periodoSem = (ld.semana_label || '').replace(/^Semana\s*/i, '');
 
+  // % Marcas A da loja (semana atual + média do mês)
+  const maSem = ld.ma_pct_loja_sem || 0;
+  const maMes = ld.ma_pct_loja_mes || 0;
+  const corMaSem = maSem >= 30 ? '#10b981' : maSem >= 20 ? '#f59e0b' : '#ef4444';
+  const corMaMes = maMes >= 30 ? '#10b981' : maMes >= 20 ? '#f59e0b' : '#ef4444';
+  const temBonus = maSem >= 30;
+  const faltaPpBonus = Math.max(0, 30 - maSem);
+
   return `
     ${msgGer.mensagem ? `<div class="msg-gerente">
       <h3>💬 Mensagem da gerente</h3>
@@ -1978,6 +1995,25 @@ function renderHoje() {
           <div class="big" style="color:${corMetaHoje};font-size:32px">${fR(metaHojeLoja)}</div>
           <div class="sub" style="margin-top:8px;padding:8px 10px;background:rgba(0,0,0,.18);border-radius:6px;line-height:1.5">${msgHoje}</div>
         `}
+      </div>
+    </div>
+
+    <div class="card" style="border-left:4px solid ${corMaSem};${temBonus?'background:linear-gradient(135deg,rgba(34,197,94,.10),rgba(34,197,94,.03))':''}">
+      <h3>🔥 Marcas A da loja</h3>
+      <div class="row2" style="margin-top:8px">
+        <div>
+          <div class="big" style="color:${corMaSem}">${fP(maSem)}</div>
+          <div class="sub">na semana</div>
+        </div>
+        <div>
+          <div class="big" style="color:${corMaMes}">${fP(maMes)}</div>
+          <div class="sub">no mês</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding:8px 10px;background:${temBonus?'rgba(34,197,94,.15)':'rgba(0,0,0,.18)'};border-radius:6px;font-size:12px;line-height:1.5">
+        ${temBonus
+          ? '🎉 <b style="color:var(--green)">Loja no bônus de Marcas A!</b> A semana fechando com ≥30% MA = prêmio do pool sobe (R$20 a R$50 a mais por faixa pra equipe toda).'
+          : `💡 Faltam <b>${faltaPpBonus.toFixed(1)}pp</b> pra chegar em 30% e a equipe ganhar o bônus no prêmio dessa semana. Cada cliente novo → primeira oferta marca A.`}
       </div>
     </div>
 
@@ -2340,19 +2376,37 @@ function renderMetas() {
 
     <div class="faixa-card">
       <h3>Tabela de prêmio da semana</h3>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">
+        Base = prêmio normal. Com 🔥 30% Marcas A = prêmio do pool sobe!
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:6px 0;border-bottom:2px solid var(--border);font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px">
+        <div>% da meta</div>
+        <div style="text-align:right">Base</div>
+        <div style="text-align:right">Com 🔥 30% MA</div>
+      </div>
       ${PRZ_FAIXAS.map(f => {
-        const v = bonusMA ? f.bonus : f.base;
         const isAtual = faixaAtual && f.pct === faixaAtual.pct;
         const isProx = proxFaixa && f.pct === proxFaixa.pct;
-        return `<div class="faixa-row ${isAtual?'atual':isProx?'proxima':''}">
-          <span>${f.pct}% da meta</span>
-          <span>${fR(v)}${isAtual?' ← VOCÊS ESTÃO AQUI':''}${isProx?' ← PRÓXIMA':''}</span>
+        const corBase = bonusMA ? 'var(--muted)' : (isAtual ? 'var(--green)' : 'var(--text)');
+        const corBonus = bonusMA ? (isAtual ? 'var(--green)' : 'var(--text)') : '#a78bfa';
+        const fontBase = bonusMA ? '400' : (isAtual ? '700' : '500');
+        const fontBonus = bonusMA ? (isAtual ? '700' : '500') : '600';
+        return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);${isAtual?'background:rgba(34,197,94,.08)':''}${isProx?'background:rgba(234,179,8,.06)':''}">
+          <span style="font-weight:${isAtual?'700':'500'}">${f.pct}%${isAtual?' ★':''}${isProx?' ↑':''}</span>
+          <span style="text-align:right;color:${corBase};font-weight:${fontBase}">${fR(f.base)}</span>
+          <span style="text-align:right;color:${corBonus};font-weight:${fontBonus}">${fR(f.bonus)}</span>
         </div>`;
       }).join('')}
-      ${proxFaixa && faltaParaProx > 0 ? `<div class="falta-meta">
+      ${proxFaixa && faltaParaProx > 0 ? `<div class="falta-meta" style="margin-top:10px">
         Faltam <b>${fR(faltaParaProx)}</b> pra subir de <b>${fR(valorAtual)}</b> pra <b>${fR(valorProx)}</b>
       </div>` : ''}
-      ${!bonusMA ? `<div class="sub" style="margin-top:10px">💡 Marcas A da loja em ${fP(ld.ma_pct_loja_sem)} - chegando em 30% o prêmio sobe mais ainda!</div>` : ''}
+      <div style="margin-top:14px;padding:10px 12px;background:${bonusMA?'rgba(34,197,94,.12)':'rgba(124,92,252,.10)'};border-radius:8px;border-left:3px solid ${bonusMA?'var(--green)':'#a78bfa'};font-size:12px;line-height:1.55">
+        ${bonusMA ? `
+          🎉 <b style="color:var(--green)">Vocês estão GANHANDO o bônus!</b> A loja está em <b>${fP(ld.ma_pct_loja_sem)}</b> Marcas A na semana — acima de 30%. O prêmio que vocês recebem é o da coluna <b style="color:var(--green)">Com 🔥 30% MA</b>.
+        ` : `
+          💡 <b>Marcas A da loja: ${fP(ld.ma_pct_loja_sem)}</b> nessa semana. Falta chegar em <b>30%</b> pra a equipe ganhar o bônus (R$20 a R$50 a mais por faixa). Como subir? Cada cliente novo, primeira sugestão é uma marca A (Truss, Marco Boni, Itallian, Natum, Santa Clara...).
+        `}
+      </div>
     </div>
 
     <div class="card">
