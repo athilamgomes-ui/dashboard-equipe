@@ -670,6 +670,11 @@ function renderSemCard(mesKey, lojaKey, ld, semId, semAtual) {
     </div>`;
   }
 
+  // Detecta se a meta dessa semana foi ajustada manualmente
+  const decisao = getDecisaoMeta(mesKey, lojaKey);
+  const metaFoiAjustada = decisao && decisao.tipo !== 'ignorado' && Array.isArray(decisao.metas) &&
+    decisao.metas.some(m => m.id === semId);
+
   return `<div class="sem-card ${isCurrent?'current':''} ${isFuture?'future':''}">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
       <div class="sem-ttl">${sem.label}</div>
@@ -677,7 +682,10 @@ function renderSemCard(mesKey, lojaKey, ld, semId, semAtual) {
     </div>
     <div class="sem-per">${sem.periodo}${sem.parcial?` · <em style="color:var(--blue);font-style:normal">${sem.parcial}</em>`:''}${isFuture?' · sem dados':''}</div>
     <div class="sem-nums">
-      <div class="num-blk"><label>Meta loja</label><div class="v">${fR(sem.meta)}</div></div>
+      <div class="num-blk">
+        <label>Meta loja${metaFoiAjustada?` <span title="Meta ajustada por você em ${(decisao.em||'').slice(0,10)} (${decisao.tipo==='custom'?'manual':'distribuição sugerida'}). Pra resetar e voltar pra meta original, clique no botão abaixo." style="background:rgba(99,102,241,.2);color:#9d8aff;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:600;margin-left:4px;cursor:help">✏️ ajustada</span>`:''}</label>
+        <div class="v">${fR(sem.meta)}</div>
+      </div>
       <div class="num-blk"><label>Real${isCurrent?' (parcial)':''}</label>
         <div class="v" style="color:${hasData?(em_pct>=90?'#22c55e':em_pct>=70?'#eab308':'#ef4444'):'var(--muted)'}">${hasData?fR(total):'—'}</div>
         ${hasData?`<div class="s">${fP(em_pct)} da meta</div>`:''}
@@ -942,6 +950,40 @@ function setDecisaoMeta(mesKey, lojaKey, decisao) {
   localStorage.setItem('ajustes_meta_decisoes', JSON.stringify(all));
 }
 
+// Snapshot dos defaults originais ANTES de aplicar decisões — usado pelo reset
+// pra restaurar a meta original sem precisar recarregar a página.
+const METAS_ORIGINAIS = (() => {
+  const out = {};
+  for (const [mk, m] of Object.entries(DADOS)) {
+    if (!m || typeof m !== 'object') continue;
+    for (const [lk, ld] of Object.entries(m)) {
+      if (!ld || !Array.isArray(ld.semanas)) continue;
+      out[`${mk}|${lk}`] = ld.semanas.map(s => ({id:s.id, meta:s.meta}));
+    }
+  }
+  return out;
+})();
+
+// Aplica decisões salvas em DADOS no carregamento (faz override dos defaults hardcoded).
+// Sem isso, ao recarregar a página as metas voltavam pro valor original e o usuário
+// via o card "decidido" sumir mas a meta antiga voltar.
+function aplicarDecisoesSalvasNoDADOS() {
+  const all = loadDecisoesMeta();
+  for (const [key, dec] of Object.entries(all)) {
+    if (!dec || dec.tipo === 'ignorado') continue; // ignorado não muda meta
+    if (!Array.isArray(dec.metas)) continue;
+    const [mesKey, lojaKey] = key.split('|');
+    const ld = DADOS[mesKey]?.[lojaKey];
+    if (!ld) continue;
+    for (const m of dec.metas) {
+      const sem = ld.semanas?.find(s => s.id === m.id);
+      if (sem && typeof m.nova === 'number') sem.meta = m.nova;
+    }
+  }
+}
+// Aplica IMEDIATAMENTE (síncrono) — antes do primeiro render.
+aplicarDecisoesSalvasNoDADOS();
+
 function renderAjusteMeta(mesKey, lojaKey, ld) {
   // Se já tem decisão registrada pra esse (mês, loja), não mostra o card
   if (getDecisaoMeta(mesKey, lojaKey)) return '';
@@ -1096,11 +1138,26 @@ function ignorarAjusteMeta(mesKey, lojaKey) {
   rerender();
 }
 
-// Permite resetar decisão (caso queira ver a sugestão de novo no console)
+// Restaura metas originais E remove decisão. Botão "↩️ resetar metas ajustadas"
+// no header da loja aciona isso.
 function resetarDecisaoMeta(mesKey, lojaKey) {
+  // 1. Remove decisão do localStorage
   const all = loadDecisoesMeta();
   delete all[_decisaoKey(mesKey, lojaKey)];
   localStorage.setItem('ajustes_meta_decisoes', JSON.stringify(all));
+  // 2. Restaura metas originais em DADOS (a partir do snapshot METAS_ORIGINAIS)
+  const original = METAS_ORIGINAIS[_decisaoKey(mesKey, lojaKey)];
+  const ld = DADOS[mesKey]?.[lojaKey];
+  if (original && ld) {
+    for (const o of original) {
+      const sem = ld.semanas.find(s => s.id === o.id);
+      if (sem) sem.meta = o.meta;
+    }
+  }
+  // 3. Limpa também pendentes (skill não vai mais aplicar)
+  const pending = JSON.parse(localStorage.getItem('ajustes_meta_pendentes') || '[]');
+  const filtered = pending.filter(p => !(p.mesKey === mesKey && p.lojaKey === lojaKey));
+  localStorage.setItem('ajustes_meta_pendentes', JSON.stringify(filtered));
   rerender();
 }
 
@@ -1207,11 +1264,15 @@ function renderLoja(mesKey, lojaKey) {
 
   const semCards = ld.semanas.map(s => renderSemCard(mesKey, lojaKey, ld, s.id, semAtual)).join('');
 
+  const decisaoLoja = getDecisaoMeta(mesKey, lojaKey);
+  const temDecisao = decisaoLoja && decisaoLoja.tipo !== 'ignorado' && Array.isArray(decisaoLoja.metas);
+
   return `
   <div class="loja-hdr">
     <div class="loja-nm" style="color:${base.cor}">${base.nome}</div>
     <div class="pill">Meta mensal: <b>${fR(ld.meta_mensal)}</b></div>
     <div class="pill">Acumulado S1–S3: <b style="color:${acumEM>=90?'#22c55e':acumEM>=70?'#eab308':'#ef4444'}">${fR(acum)} (${fP(acumEM)})</b></div>
+    ${temDecisao ? `<button onclick="if(confirm('Resetar meta ajustada e voltar pras metas originais dessa loja? A sugestão de ajuste vai aparecer de novo.')) resetarDecisaoMeta('${mesKey}','${lojaKey}')" style="background:rgba(239,68,68,.15);border:1px solid var(--red);color:var(--red);padding:5px 10px;font-size:11px;border-radius:5px;cursor:pointer;font-weight:600">↩️ resetar metas ajustadas</button>` : ''}${decisaoLoja && decisaoLoja.tipo === 'ignorado' ? `<button onclick="if(confirm('Reativar a sugestão de ajuste de meta?')) resetarDecisaoMeta('${mesKey}','${lojaKey}')" style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 10px;font-size:11px;border-radius:5px;cursor:pointer">↩️ rever sugestão</button>` : ''}
   </div>
 
   <div class="nota">
