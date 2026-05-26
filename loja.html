@@ -350,8 +350,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   </div>
 
   <div class="tabs-vend">
-    <div class="tab-vend active" data-t="meu_dia" onclick="setTabV('meu_dia')">☀️ Meu Dia</div>
-    <div class="tab-vend" data-t="hoje" onclick="setTabV('hoje')">📊 Hoje</div>
+    <div class="tab-vend active" data-t="hoje" onclick="setTabV('hoje')">📊 Hoje</div>
     <div class="tab-vend" data-t="progresso" onclick="setTabV('progresso')">🎯 Meu Progresso</div>
     <div class="tab-vend" data-t="metas" onclick="setTabV('metas')">📈 Metas</div>
     <div class="tab-vend" data-t="premio" onclick="setTabV('premio')">💰 Prêmio</div>
@@ -1104,6 +1103,24 @@ const VENDAS_HIST = {
     },
     marcasA_loja: {S1:20.9, S2:20.5, S3:16.3, S4:0},
     ontem: {data:'25/05/2026', dia_semana:'segunda', vendas:{Tatiane:949,Rayra:769,Alcione:366,Sofia:1184,Outros:178}},
+    tickets: {
+      S1:{'Outros':14,Tatiane:127,Rayra:163,Alcione:103,Sofia:67},
+      S2:{'Outros':1,Tatiane:63,Rayra:99,Alcione:65,Sofia:58},
+      S3:{Tatiane:74,Rayra:84,Alcione:59,Sofia:68},
+      S4:{'Outros':1,Tatiane:15,Rayra:13,Alcione:11,Sofia:14},
+    },
+    pecas: {
+      S1:{'Outros':35,Tatiane:418,Rayra:390,Alcione:264,Sofia:173},
+      S2:{'Outros':5,Tatiane:229,Rayra:276,Alcione:123,Sofia:168},
+      S3:{Tatiane:295,Rayra:235,Alcione:178,Sofia:301},
+      S4:{'Outros':13,Tatiane:54,Rayra:51,Alcione:33,Sofia:23},
+    },
+    cmv: {
+      S1:{Tatiane:41.1,Rayra:56.6,Alcione:42.8,Sofia:53.2},
+      S2:{Tatiane:39.5,Rayra:57.3,Alcione:52,Sofia:51.1},
+      S3:{Tatiane:35.9,Rayra:45.3,Alcione:54.2},
+      S4:{Tatiane:43.8,Rayra:36.7,Alcione:44,Sofia:41.4},
+    },
   },
   L3: {
     semanas: [
@@ -1118,6 +1135,24 @@ const VENDAS_HIST = {
     },
     marcasA_loja: {S1:26.5, S2:21.3, S3:21.6, S4:0},
     ontem: {data:'25/05/2026', dia_semana:'segunda', vendas:{'Ana Mira':1293,Raimunda:2027,Brunna:390,Naila:342}},
+    tickets: {
+      S1:{'Outros':1,Raimunda:75,'Ana Mira':114,Brunna:92},
+      S2:{Raimunda:43,'Ana Mira':61,Naila:32,Brunna:49},
+      S3:{Raimunda:41,'Ana Mira':38,Naila:41,Brunna:48},
+      S4:{Raimunda:7,'Ana Mira':15,Naila:8,Brunna:7},
+    },
+    pecas: {
+      S1:{'Outros':1,Raimunda:270,'Ana Mira':383,Brunna:319},
+      S2:{Raimunda:184,'Ana Mira':238,Naila:60,Brunna:177},
+      S3:{Raimunda:180,'Ana Mira':81,Naila:151,Brunna:136},
+      S4:{Raimunda:28,'Ana Mira':39,Naila:40,Brunna:29},
+    },
+    cmv: {
+      S1:{Raimunda:55.6,'Ana Mira':66.4,Brunna:46.8},
+      S2:{Raimunda:58.8,'Ana Mira':69.8,Naila:48.8,Brunna:61.2},
+      S3:{'Ana Mira':56,Naila:71.2,Brunna:63.3},
+      S4:{Raimunda:49.5,'Ana Mira':31.2,Naila:71.7},
+    },
   },
   L4: {
     semanas: [
@@ -1132,6 +1167,24 @@ const VENDAS_HIST = {
     },
     marcasA_loja: {S1:28.9, S2:21.9, S3:12.6, S4:0},
     ontem: {data:'25/05/2026', dia_semana:'segunda', vendas:{Tanaia:682,Josilene:88,'Bruna F.':1962,Rosana:289}},
+    tickets: {
+      S1:{Tanaia:150,Josilene:122,'Bruna F.':92,Rosana:86,'Outros':20},
+      S2:{'Outros':1,Tanaia:53,Josilene:78,'Bruna F.':133,Rosana:46},
+      S3:{Tanaia:63,Josilene:53,'Outros':2,'Bruna F.':97,Rosana:47},
+      S4:{Tanaia:18,Josilene:4,'Bruna F.':33,Rosana:12},
+    },
+    pecas: {
+      S1:{Tanaia:419,Josilene:291,'Bruna F.':204,Rosana:204,'Outros':44},
+      S2:{'Outros':5,Tanaia:139,Josilene:165,'Bruna F.':337,Rosana:94},
+      S3:{Tanaia:298,Josilene:170,'Outros':2,'Bruna F.':220,Rosana:113},
+      S4:{Tanaia:48,Josilene:8,'Bruna F.':69,Rosana:29},
+    },
+    cmv: {
+      S1:{Tanaia:40.6,Josilene:48.8,'Bruna F.':44.6,Rosana:40.4},
+      S2:{Tanaia:42,Josilene:39.6,'Bruna F.':46.1,Rosana:42.6},
+      S3:{Tanaia:42.1,Josilene:36.5,'Bruna F.':43.7,Rosana:41.9},
+      S4:{Tanaia:32.2,Josilene:31.8,'Bruna F.':45,Rosana:24.9},
+    },
   },
   L5: {
     semanas: [
@@ -1146,6 +1199,24 @@ const VENDAS_HIST = {
     },
     marcasA_loja: {S1:21.0, S2:25.9, S3:19.3, S4:0},
     ontem: {data:'25/05/2026', dia_semana:'segunda', vendas:{Rayssa:698,Joyce:656,Rosiene:372,Karina:525,Lucas:0}},
+    tickets: {
+      S1:{Rosiene:57,Joyce:84,Rayssa:77,Lucas:2,Karina:38},
+      S2:{Rosiene:18,Joyce:37,Rayssa:49,Lucas:1,Karina:63},
+      S3:{Rosiene:38,Joyce:44,Rayssa:41,Lucas:3,Karina:42},
+      S4:{Rosiene:8,Joyce:10,Rayssa:8,Karina:7},
+    },
+    pecas: {
+      S1:{Rosiene:230,Joyce:339,Rayssa:388,Lucas:4,Karina:348},
+      S2:{Rosiene:50,Joyce:151,Rayssa:172,Lucas:1,Karina:271},
+      S3:{Rosiene:100,Joyce:157,Rayssa:118,Lucas:11,Karina:134},
+      S4:{Rosiene:23,Joyce:29,Rayssa:36,Karina:20},
+    },
+    cmv: {
+      S1:{Rosiene:61,Joyce:46.8,Rayssa:64.4,Lucas:28.2},
+      S2:{Rosiene:39.2,Joyce:38.9,Rayssa:48.6,Lucas:50.2,Karina:45.3},
+      S3:{Rosiene:35.7,Joyce:41.9,Rayssa:42.9,Lucas:74.8,Karina:50.1},
+      S4:{Rosiene:37.1,Joyce:45.3,Rayssa:52.8,Karina:32.1},
+    },
   },
 };
 
@@ -1350,7 +1421,7 @@ let pinsDB = null;
 let mensagensDB = null;
 let selectedVend = null;
 let currentUser = null;
-let currentTab = 'meu_dia';
+let currentTab = 'hoje';
 let leuTudo = false;
 // Quiz state
 let quizSemana = null;     // ID da semana em quiz (ex: 'S2')
@@ -1750,18 +1821,14 @@ function calcMeuPremio() {
 
 function renderContent() {
   const el = document.getElementById('content');
-  if (currentTab === 'meu_dia') el.innerHTML = renderMeuDia();
-  else if (currentTab === 'hoje') el.innerHTML = renderHoje();
+  if (currentTab === 'hoje') el.innerHTML = renderHoje();
   else if (currentTab === 'progresso') el.innerHTML = renderProgresso();
   else if (currentTab === 'metas') el.innerHTML = renderMetas();
   else if (currentTab === 'premio') el.innerHTML = renderPremio();
 }
 
-// ─── MEU DIA ─────────────────────────────────────────────────────────────────
-// Aba que abre por padrão: vendas de ontem + acumulado semana/mês + meta do dia
-// individual (quanto a vendedora precisa vender HOJE pra ficar no ritmo).
-//
-// Toda lógica numérica usa VENDAS_HIST (espelhado do painel via cron 8h).
+// ─── HELPERS DE ACUMULADO + META (usados pela aba Hoje) ──────────────────────
+// VENDAS_HIST é espelhado do painel via cron 8h.
 
 function _semFechadasAteAtual(lojaKey) {
   const hist = VENDAS_HIST[lojaKey];
@@ -1791,143 +1858,6 @@ function _metaMensalLoja(lojaKey) {
   return (hist.semanas||[]).reduce((s, x) => s + (x.meta||0), 0);
 }
 
-function renderMeuDia() {
-  const lojaKey = LOJA_KEY;
-  const hist = VENDAS_HIST[lojaKey];
-  const ld = DADOS_LOJA[lojaKey];
-  const me = ld.vendedoras[currentUser];
-  const isCaixa = (VENDEDORAS_META[currentUser]?.badges || []).includes('caixa');
-  const primeiroNome = currentUser.split(' ')[0];
-
-  // Ontem (espelhado do cron 8h)
-  const ontem = hist?.ontem || {};
-  const ontemVendas = ontem.vendas || {};
-  const meuOntem = ontemVendas[currentUser] || 0;
-  const lojaOntem = Object.values(ontemVendas).reduce((s, v) => s + (v||0), 0);
-  const minhaPartOntem = lojaOntem > 0 ? (meuOntem / lojaOntem * 100) : 0;
-
-  // Acumulado mês (semanas até a atual, inclusive)
-  const acum = _acumuladoMes(lojaKey, currentUser);
-  const metaMensal = _metaMensalLoja(lojaKey);
-
-  // Semana atual
-  const semAtualId = ld?.semana_atual || 'S1';
-  const semAtualObj = (hist?.semanas||[]).find(s => s.id === semAtualId) || {meta:0};
-  const vendasSemAtual = (hist?.vendas||{})[semAtualId] || {};
-  const meSemAtual = vendasSemAtual[currentUser] || 0;
-  const lojaSemAtual = Object.values(vendasSemAtual).reduce((s, v) => s + (v||0), 0);
-  const metaSem = semAtualObj.meta || 0;
-  const pctSem = metaSem > 0 ? (lojaSemAtual / metaSem * 100) : 0;
-  const pctMes = metaMensal > 0 ? (acum.loja / metaMensal * 100) : 0;
-
-  // Meta de hoje
-  const hoje = new Date();
-  const diaSemana = hoje.getDay(); // 0=dom 1=seg ... 6=sáb
-  const NOMES_DIA = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
-  const nomeHoje = NOMES_DIA[diaSemana];
-  let metaHojeLoja = 0, metaHojeIndiv = 0, msgHoje = '', diaFechado = false;
-
-  if (diaSemana === 0) {
-    diaFechado = true;
-    msgHoje = 'Lojas fechadas hoje (domingo). Aproveita pra descansar — segunda começa forte!';
-  } else {
-    // dias úteis restantes incluindo hoje: seg=6, ter=5, qua=4, qui=3, sex=2, sáb=1
-    const diasUteisRestantes = 6 - diaSemana + 1;
-    const faltaLoja = Math.max(0, metaSem - lojaSemAtual);
-    metaHojeLoja = diasUteisRestantes > 0 ? Math.round(faltaLoja / diasUteisRestantes) : 0;
-
-    if (!isCaixa) {
-      // Distribuição individual: proporcional à contribuição da vendedora na semana atual
-      const totalNonCaixa = Object.entries(vendasSemAtual)
-        .filter(([n]) => !(VENDEDORAS_META[n]?.badges||[]).includes('caixa') && n !== 'Outros')
-        .reduce((s, [,v]) => s + (v||0), 0);
-      if (totalNonCaixa > 0) {
-        metaHojeIndiv = Math.round(metaHojeLoja * (meSemAtual / totalNonCaixa));
-      } else {
-        // Semana ainda vazia (S4 segunda de manhã) → divisão igual
-        const numV = Object.keys(ld.vendedoras||{})
-          .filter(n => !(VENDEDORAS_META[n]?.badges||[]).includes('caixa')).length;
-        metaHojeIndiv = numV > 0 ? Math.round(metaHojeLoja / numV) : 0;
-      }
-    }
-
-    if (faltaLoja === 0) {
-      msgHoje = '🎉 Loja já bateu a meta da semana! Tudo daqui pra frente é bônus pra subir o prêmio.';
-    } else if (metaHojeIndiv === 0) {
-      msgHoje = 'Tranquilo — ritmo do dia normal.';
-    } else if (metaHojeIndiv < 1500) {
-      msgHoje = '✨ Dia tranquilo. Mantém o ritmo, sem pressa.';
-    } else if (metaHojeIndiv < 3000) {
-      msgHoje = '⚡ Dia médio — atendimento focado, marca A na primeira oferta.';
-    } else {
-      msgHoje = '🔥 Dia decisivo — meta apertada, cada cliente conta.';
-    }
-  }
-
-  return `
-    <div class="card" style="border-left:4px solid #6366f1;background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(139,92,246,.04))">
-      <h3 style="margin-bottom:4px">☀️ Bom dia, ${primeiroNome}!</h3>
-      <div class="sub">${diaFechado ? 'Hoje é domingo.' : `Hoje é ${nomeHoje}.`} ${ontem.data ? `Aqui está o resumo do seu ${ontem.dia_semana||'dia anterior'} (${ontem.data}).` : ''}</div>
-    </div>
-
-    <div class="card">
-      <h3 style="margin-bottom:4px">📅 Ontem${ontem.data ? ` <span style="font-weight:normal;color:#6b7280;font-size:0.65em;letter-spacing:0.3px">· ${ontem.dia_semana ? ontem.dia_semana.toUpperCase() + ' ' : ''}${ontem.data}</span>` : ''}</h3>
-      <div class="row2">
-        <div>
-          <div class="big green">${fR(meuOntem)}</div>
-          <div class="sub">você vendeu</div>
-        </div>
-        <div>
-          <div class="big">${fR(lojaOntem)}</div>
-          <div class="sub">total da loja</div>
-        </div>
-      </div>
-      ${meuOntem > 0 && lojaOntem > 0 ? `<div class="sub" style="margin-top:10px;padding-top:10px;border-top:1px solid #e5e7eb">Sua parte: <strong>${minhaPartOntem.toFixed(0)}%</strong> das vendas da loja</div>` : ''}
-    </div>
-
-    <div class="card">
-      <h3>📊 Acumulado</h3>
-      <div class="row2">
-        <div>
-          <div class="big">${fR(meSemAtual)}</div>
-          <div class="sub">você na semana</div>
-        </div>
-        <div>
-          <div class="big">${fR(acum.minha)}</div>
-          <div class="sub">você no mês</div>
-        </div>
-      </div>
-      <div style="margin-top:14px;padding-top:14px;border-top:1px solid #e5e7eb">
-        <div class="sub" style="margin-bottom:6px">Loja na semana: <strong>${fR(lojaSemAtual)}</strong> de ${fR(metaSem)} <span style="color:${pctSem>=100?'#10b981':pctSem>=70?'#f59e0b':'#ef4444'}">(${pctSem.toFixed(0)}%)</span></div>
-        <div class="sub">Loja no mês: <strong>${fR(acum.loja)}</strong> de ${fR(metaMensal)} <span style="color:${pctMes>=100?'#10b981':pctMes>=70?'#f59e0b':'#ef4444'}">(${pctMes.toFixed(0)}%)</span></div>
-      </div>
-    </div>
-
-    ${isCaixa ? `
-    <div class="card">
-      <h3>🎯 Hoje</h3>
-      <div class="sub">Você é caixa — sem meta individual. Bom trabalho recebendo as clientes!</div>
-    </div>
-    ` : `
-    <div class="card" style="border:2px solid ${diaFechado?'#94a3b8':metaHojeIndiv>=3000?'#ef4444':metaHojeIndiv>=1500?'#f59e0b':'#10b981'}">
-      <h3>🎯 Meta de hoje</h3>
-      ${diaFechado ? `
-        <div class="big" style="font-size:22px">😴 Loja fechada</div>
-        <div class="sub" style="margin-top:8px">${msgHoje}</div>
-      ` : `
-        <div class="big" style="color:${metaHojeIndiv>=3000?'#ef4444':metaHojeIndiv>=1500?'#f59e0b':'#10b981'}">${fR(metaHojeIndiv)}</div>
-        <div class="sub">o que você precisa vender hoje pra ficar no ritmo da meta semanal</div>
-        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e5e7eb">
-          <div class="sub">Loja precisa vender hoje: <strong>${fR(metaHojeLoja)}</strong></div>
-          <div class="sub" style="margin-top:8px">${msgHoje}</div>
-        </div>
-      `}
-    </div>
-    `}
-  `;
-}
-
-// ─── HOJE ────────────────────────────────────────────────────────────────────
 
 function renderHoje() {
   const ld = DADOS_LOJA[LOJA_KEY];
@@ -1941,12 +1871,65 @@ function renderHoje() {
 
   const msgGer = (mensagensDB && mensagensDB[LOJA_KEY]) || {};
 
+  // ─── META DA LOJA (semana + hoje) ─────────────────────────────────────────
+  const hist = VENDAS_HIST[LOJA_KEY];
+  const semAtualId = ld?.semana_atual || 'S1';
+  const semAtualObj = (hist?.semanas||[]).find(s => s.id === semAtualId) || {meta:0,id:semAtualId};
+  const vendasSemAtual = (hist?.vendas||{})[semAtualId] || {};
+  const lojaSemAtual = Object.values(vendasSemAtual).reduce((s, v) => s + (v||0), 0);
+  const metaSem = semAtualObj.meta || 0;
+  const pctSem = metaSem > 0 ? (lojaSemAtual / metaSem * 100) : 0;
+  const faltaSemana = Math.max(0, metaSem - lojaSemAtual);
+
+  const hoje = new Date();
+  const diaSemana = hoje.getDay(); // 0=dom 1=seg ... 6=sáb
+  const NOMES_DIA = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+  const nomeHoje = NOMES_DIA[diaSemana];
+  const diaFechado = diaSemana === 0;
+  let metaHojeLoja = 0, msgHoje = '';
+  if (!diaFechado) {
+    const diasUteisRestantes = 6 - diaSemana + 1; // seg=6, ter=5, qua=4, qui=3, sex=2, sáb=1
+    metaHojeLoja = diasUteisRestantes > 0 ? Math.round(faltaSemana / diasUteisRestantes) : 0;
+    if (faltaSemana === 0) {
+      msgHoje = '🎉 Loja já bateu a meta da semana! Tudo a mais é bônus pro prêmio.';
+    } else if (metaHojeLoja < 3000) {
+      msgHoje = '✨ Dia tranquilo — ritmo normal pra fechar a semana.';
+    } else if (metaHojeLoja < 6000) {
+      msgHoje = '⚡ Dia médio — atendimento focado, marca A na primeira oferta.';
+    } else {
+      msgHoje = '🔥 Dia decisivo — meta apertada, cada cliente conta. Foco e ritmo!';
+    }
+  } else {
+    msgHoje = 'Domingo — lojas fechadas. Aproveita pra descansar.';
+  }
+
+  const corMetaHoje = diaFechado ? '#94a3b8' : metaHojeLoja >= 6000 ? '#ef4444' : metaHojeLoja >= 3000 ? '#f59e0b' : '#10b981';
+  const corPctSem = pctSem >= 100 ? '#10b981' : pctSem >= 70 ? '#f59e0b' : '#ef4444';
+
   return `
     ${msgGer.mensagem ? `<div class="msg-gerente">
       <h3>💬 Mensagem da gerente</h3>
       <p>${msgGer.mensagem}</p>
       <div class="assinatura">— ${msgGer.por||'gerente'} · ${msgGer.atualizado_em||''}</div>
     </div>` : ''}
+
+    <div class="card" style="border:2px solid ${corMetaHoje};background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(139,92,246,.03))">
+      <h3>🎯 Meta da loja — ${ld.nome_loja}</h3>
+      <div class="row2" style="margin-top:8px">
+        <div>
+          <div class="sub" style="margin-bottom:4px">Esta semana (${semAtualId})</div>
+          <div class="big" style="color:${corPctSem}">${fR(lojaSemAtual)}</div>
+          <div class="sub">de ${fR(metaSem)} (${pctSem.toFixed(0)}%)</div>
+        </div>
+        <div>
+          <div class="sub" style="margin-bottom:4px">Pra hoje (${nomeHoje})</div>
+          <div class="big" style="color:${corMetaHoje}">${diaFechado ? '😴' : fR(metaHojeLoja)}</div>
+          <div class="sub">${diaFechado ? 'loja fechada' : 'meta do dia da loja'}</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding:8px 10px;background:rgba(0,0,0,.18);border-radius:6px;font-size:12px;line-height:1.5">${msgHoje}</div>
+      ${!diaFechado && faltaSemana > 0 ? `<div class="sub" style="margin-top:8px">Falta vender <strong>${fR(faltaSemana)}</strong> até sábado pra bater a meta semanal.</div>` : ''}
+    </div>
 
     <div class="card">
       <h3>Minhas vendas</h3>
@@ -2092,6 +2075,88 @@ function getISOWeekKey() {
   return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`;
 }
 
+// ─── EFICIÊNCIA DA VENDA (TM / Tickets / PA / CMV) ───────────────────────────
+// Mostra métricas de qualidade da venda da vendedora com explicações em
+// linguagem clara. Adicionado 2026-05-27.
+function renderEficienciaVendedora() {
+  const hist = VENDAS_HIST[LOJA_KEY];
+  if (!hist || !hist.tickets) return ''; // sem dados extras → não mostra
+  const v = currentUser;
+
+  // Acumulado do mês
+  let totVlr = 0, totTk = 0, totPc = 0;
+  const cmvVals = [];
+  for (const s of (hist.semanas||[])) {
+    const sId = s.id;
+    totVlr += (hist.vendas?.[sId]||{})[v] || 0;
+    totTk  += (hist.tickets?.[sId]||{})[v] || 0;
+    totPc  += (hist.pecas?.[sId]||{})[v] || 0;
+    const cm = (hist.cmv?.[sId]||{})[v];
+    if (typeof cm === 'number' && cm > 0 && cm < 100) cmvVals.push(cm);
+  }
+  if (totTk === 0) return ''; // vendedora sem vendas ainda
+
+  const tm = totVlr / totTk;
+  const pa = totPc / totTk;
+  const cmvMed = cmvVals.length > 0 ? cmvVals.reduce((s,x)=>s+x,0) / cmvVals.length : null;
+
+  // Cores e badges
+  const tmCor = tm >= 100 ? '#10b981' : tm >= 70 ? '#f59e0b' : '#ef4444';
+  const tmLabel = tm >= 100 ? '💎 Premium' : tm >= 70 ? '👍 Médio' : '📉 Baixo';
+  const paCor = pa >= 3.5 ? '#10b981' : pa >= 2.5 ? '#f59e0b' : '#ef4444';
+  const paLabel = pa >= 3.5 ? '🛒 Vende combo' : pa >= 2.5 ? '👍 Médio' : '📉 Item único';
+  const cmvCor = cmvMed === null ? '#94a3b8' : cmvMed <= 45 ? '#10b981' : cmvMed <= 55 ? '#f59e0b' : '#ef4444';
+  const cmvLabel = cmvMed === null ? '—' : cmvMed <= 45 ? '✨ Ótimo' : cmvMed <= 55 ? '👍 Normal' : '⚠️ Alto';
+
+  return `
+    <div class="card" style="background:linear-gradient(135deg,rgba(59,130,246,.06),rgba(124,92,252,.03));border-left:3px solid #6366f1">
+      <h3 style="margin-bottom:4px">📦 Eficiência da sua venda no mês</h3>
+      <div class="sub" style="margin-bottom:12px">Quanto cada cliente gasta com você e quantos produtos leva. Não é prêmio nem ranking — é pra você entender o que melhorar.</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+
+        <div style="background:rgba(0,0,0,.18);border-radius:8px;padding:10px 12px">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">🧾 Tickets (vendas)</div>
+          <div class="big">${totTk}</div>
+          <div class="sub" style="margin-top:4px">clientes que fecharam venda com você no mês</div>
+        </div>
+
+        <div style="background:rgba(0,0,0,.18);border-radius:8px;padding:10px 12px">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">💰 TM (Ticket Médio)</div>
+          <div class="big" style="color:${tmCor}">${fR(tm)}</div>
+          <div class="sub" style="margin-top:4px">${tmLabel}</div>
+        </div>
+
+        <div style="background:rgba(0,0,0,.18);border-radius:8px;padding:10px 12px">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">🛍️ PA (Peças/Atendimento)</div>
+          <div class="big" style="color:${paCor}">${pa.toFixed(1)}</div>
+          <div class="sub" style="margin-top:4px">${paLabel}</div>
+        </div>
+
+        <div style="background:rgba(0,0,0,.18);border-radius:8px;padding:10px 12px">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">📊 CMV (Custo)</div>
+          <div class="big" style="color:${cmvCor}">${cmvMed !== null ? cmvMed.toFixed(1)+'%' : '—'}</div>
+          <div class="sub" style="margin-top:4px">${cmvLabel}</div>
+        </div>
+
+      </div>
+
+      <details style="margin-top:14px">
+        <summary style="cursor:pointer;font-size:12px;color:var(--blue);font-weight:600;padding:6px 0">💡 O que cada número significa? (clica pra ler)</summary>
+        <div style="margin-top:8px;padding:10px 12px;background:rgba(0,0,0,.22);border-radius:6px;font-size:12px;line-height:1.65">
+          <p style="margin-bottom:8px"><b>🧾 Tickets</b> — É o número de clientes que <b>fecharam venda</b> com você. Não conta quem só olhou. <b>Quanto mais tickets, mais clientes você está atendendo bem.</b></p>
+
+          <p style="margin-bottom:8px"><b>💰 Ticket Médio (TM)</b> — É o <b>valor médio que cada cliente seu gasta</b>. Se você vendeu R$ 1.000 para 10 clientes, seu TM é R$ 100. <b>Pra subir o TM:</b> ofereça produto premium primeiro, monte combo de 2-3 produtos, sugira finalizador junto com o shampoo.</p>
+
+          <p style="margin-bottom:8px"><b>🛍️ PA (Peças por Atendimento)</b> — É <b>quantas peças cada cliente leva, em média</b>. Se cada cliente leva 2,5 peças, seu PA é 2,5. <b>Pra subir o PA:</b> sempre que o cliente pegar um shampoo, ofereça o condicionador da mesma marca + uma máscara — combo de 3 peças. PA acima de 3 mostra que você domina venda em conjunto.</p>
+
+          <p style="margin-bottom:0"><b>📊 CMV (Custo da Mercadoria Vendida)</b> — É <b>quanto do preço do produto é custo pra loja</b>. Se um produto custa R$ 10 pra loja e vende por R$ 20, o CMV é 50%. <b>Quanto MENOR o CMV, MELHOR pra loja</b> — sobra mais margem. <span style="color:#f59e0b">⚠️ Hoje o CMV da loja está um pouco mais alto porque temos vários produtos com 20%+ de desconto (estão vencendo esse ano). Isso afeta a média — é normal nesse momento.</span></p>
+        </div>
+      </details>
+    </div>
+  `;
+}
+
 function renderProgresso() {
   const ld = DADOS_LOJA[LOJA_KEY];
   const me = ld.vendedoras[currentUser];
@@ -2179,6 +2244,8 @@ function renderProgresso() {
       <div class="metric-row"><span class="lbl">% Marcas A semana</span><span class="val">${fP(me.ma_sem)}</span></div>
       <div class="metric-row"><span class="lbl">% Marcas A mês</span><span class="val">${fP(me.ma_mes)}</span></div>
     </div>
+
+    ${renderEficienciaVendedora()}
 
     ${blocoIndiv}
     ${blocoLoja}
