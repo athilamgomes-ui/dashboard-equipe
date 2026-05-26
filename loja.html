@@ -1906,6 +1906,9 @@ function renderHoje() {
   const corMetaHoje = diaFechado ? '#94a3b8' : metaHojeLoja >= 6000 ? '#ef4444' : metaHojeLoja >= 3000 ? '#f59e0b' : '#10b981';
   const corPctSem = pctSem >= 100 ? '#10b981' : pctSem >= 70 ? '#f59e0b' : '#ef4444';
 
+  // Período da semana atual (do label "Semana 25 a 30/05" → "25 a 30/05")
+  const periodoSem = (ld.semana_label || '').replace(/^Semana\s*/i, '');
+
   return `
     ${msgGer.mensagem ? `<div class="msg-gerente">
       <h3>💬 Mensagem da gerente</h3>
@@ -1913,22 +1916,44 @@ function renderHoje() {
       <div class="assinatura">— ${msgGer.por||'gerente'} · ${msgGer.atualizado_em||''}</div>
     </div>` : ''}
 
-    <div class="card" style="border:2px solid ${corMetaHoje};background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(139,92,246,.03))">
-      <h3>🎯 Meta da loja — ${ld.nome_loja}</h3>
-      <div class="row2" style="margin-top:8px">
-        <div>
-          <div class="sub" style="margin-bottom:4px">Esta semana (${semAtualId})</div>
-          <div class="big" style="color:${corPctSem}">${fR(lojaSemAtual)}</div>
-          <div class="sub">de ${fR(metaSem)} (${pctSem.toFixed(0)}%)</div>
+    <div class="card" style="border-left:4px solid ${corPctSem};background:linear-gradient(135deg,rgba(99,102,241,.05),rgba(139,92,246,.03))">
+      <h3>🎯 Meta da loja — ${periodoSem ? periodoSem : semAtualId}</h3>
+      <div style="margin-top:10px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px">
+          <div>
+            <div class="sub">Já vendeu:</div>
+            <div class="big" style="color:${corPctSem}">${fR(lojaSemAtual)}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="sub">Meta da semana:</div>
+            <div style="font-size:20px;font-weight:600;color:var(--text)">${fR(metaSem)}</div>
+          </div>
         </div>
-        <div>
-          <div class="sub" style="margin-bottom:4px">Pra hoje (${nomeHoje})</div>
-          <div class="big" style="color:${corMetaHoje}">${diaFechado ? '😴' : fR(metaHojeLoja)}</div>
-          <div class="sub">${diaFechado ? 'loja fechada' : 'meta do dia da loja'}</div>
+        <div style="background:rgba(0,0,0,.25);border-radius:6px;height:10px;margin-top:10px;overflow:hidden">
+          <div style="width:${Math.min(100,pctSem).toFixed(0)}%;height:100%;background:${corPctSem};transition:width .4s"></div>
+        </div>
+        <div class="sub" style="margin-top:6px;text-align:center">
+          <strong style="color:${corPctSem}">${pctSem.toFixed(0)}%</strong> da meta
+          ${faltaSemana > 0 ? ` · falta <strong>${fR(faltaSemana)}</strong>` : ' · 🎉 meta batida!'}
         </div>
       </div>
-      <div style="margin-top:12px;padding:8px 10px;background:rgba(0,0,0,.18);border-radius:6px;font-size:12px;line-height:1.5">${msgHoje}</div>
-      ${!diaFechado && faltaSemana > 0 ? `<div class="sub" style="margin-top:8px">Falta vender <strong>${fR(faltaSemana)}</strong> até sábado pra bater a meta semanal.</div>` : ''}
+    </div>
+
+    <div class="card" style="border-left:4px solid ${corMetaHoje}">
+      <h3>📅 Meta do dia — ${nomeHoje}</h3>
+      <div style="margin-top:10px;text-align:center">
+        ${diaFechado ? `
+          <div class="big" style="color:${corMetaHoje};font-size:28px">😴 Loja fechada</div>
+          <div class="sub" style="margin-top:6px">${msgHoje}</div>
+        ` : faltaSemana === 0 ? `
+          <div class="big" style="color:#10b981">🎉</div>
+          <div class="sub" style="margin-top:6px">Loja já bateu a meta da semana! Tudo a mais agora é bônus pro prêmio.</div>
+        ` : `
+          <div class="sub">A loja precisa vender hoje:</div>
+          <div class="big" style="color:${corMetaHoje};font-size:32px">${fR(metaHojeLoja)}</div>
+          <div class="sub" style="margin-top:8px;padding:8px 10px;background:rgba(0,0,0,.18);border-radius:6px;line-height:1.5">${msgHoje}</div>
+        `}
+      </div>
     </div>
 
     <div class="card">
@@ -2110,8 +2135,8 @@ function renderEficienciaVendedora() {
 
   return `
     <div class="card" style="background:linear-gradient(135deg,rgba(59,130,246,.06),rgba(124,92,252,.03));border-left:3px solid #6366f1">
-      <h3 style="margin-bottom:4px">📦 Eficiência da sua venda no mês</h3>
-      <div class="sub" style="margin-bottom:12px">Quanto cada cliente gasta com você e quantos produtos leva. Não é prêmio nem ranking — é pra você entender o que melhorar.</div>
+      <h3 style="margin-bottom:4px">✨ Qualidade das minhas vendas (no mês)</h3>
+      <div class="sub" style="margin-bottom:12px">Quanto cada cliente compra com você e quantos produtos leva. Não é prêmio nem ranking — é pra você entender o que melhorar.</div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
 
@@ -2146,11 +2171,14 @@ function renderEficienciaVendedora() {
         <div style="margin-top:8px;padding:10px 12px;background:rgba(0,0,0,.22);border-radius:6px;font-size:12px;line-height:1.65">
           <p style="margin-bottom:8px"><b>🧾 Tickets</b> — É o número de clientes que <b>fecharam venda</b> com você. Não conta quem só olhou. <b>Quanto mais tickets, mais clientes você está atendendo bem.</b></p>
 
-          <p style="margin-bottom:8px"><b>💰 Ticket Médio (TM)</b> — É o <b>valor médio que cada cliente seu gasta</b>. Se você vendeu R$ 1.000 para 10 clientes, seu TM é R$ 100. <b>Pra subir o TM:</b> ofereça produto premium primeiro, monte combo de 2-3 produtos, sugira finalizador junto com o shampoo.</p>
+          <p style="margin-bottom:8px"><b>💰 Ticket Médio (TM)</b> — É o <b>valor médio que cada cliente compra com você</b>. <b>Não significa que cada cliente PRECISA gastar esse valor</b> — é apenas a média. Exemplo: se em uma semana você teve 3 clientes (um comprou R$ 50, outro R$ 100 e outro R$ 150), seu total foi R$ 300 e seu TM é R$ 100 (300 ÷ 3). <b>Pra subir o TM:</b> ofereça produto premium primeiro, monte combo de 2-3 produtos, sugira finalizador junto com o shampoo.</p>
 
-          <p style="margin-bottom:8px"><b>🛍️ PA (Peças por Atendimento)</b> — É <b>quantas peças cada cliente leva, em média</b>. Se cada cliente leva 2,5 peças, seu PA é 2,5. <b>Pra subir o PA:</b> sempre que o cliente pegar um shampoo, ofereça o condicionador da mesma marca + uma máscara — combo de 3 peças. PA acima de 3 mostra que você domina venda em conjunto.</p>
+          <p style="margin-bottom:8px"><b>🛍️ PA (Peças por Atendimento)</b> — É <b>quantas peças cada cliente leva, em média</b>. Se você atendeu 10 clientes e vendeu 30 peças no total, seu PA é 3,0 (30 ÷ 10). <b>Pra subir o PA:</b> sempre que o cliente pegar um shampoo, ofereça o condicionador da mesma marca + uma máscara — combo de 3 peças. PA acima de 3 mostra que você domina venda em conjunto.</p>
 
-          <p style="margin-bottom:0"><b>📊 CMV (Custo da Mercadoria Vendida)</b> — É <b>quanto do preço do produto é custo pra loja</b>. Se um produto custa R$ 10 pra loja e vende por R$ 20, o CMV é 50%. <b>Quanto MENOR o CMV, MELHOR pra loja</b> — sobra mais margem. <span style="color:#f59e0b">⚠️ Hoje o CMV da loja está um pouco mais alto porque temos vários produtos com 20%+ de desconto (estão vencendo esse ano). Isso afeta a média — é normal nesse momento.</span></p>
+          <p style="margin-bottom:0"><b>📊 CMV (Custo da Mercadoria Vendida)</b> — É <b>quanto do preço do produto é custo pra loja</b>. Se um produto custa R$ 10 pra loja e vende por R$ 20, o CMV é 50%. <b>Quanto MENOR o CMV, MELHOR pra equipe</b> — sobra mais margem, e essa margem é o que faz a loja conseguir pagar os prêmios e investir em mais marcas A.<br><br>
+          <b>Duas coisas afetam o CMV de vocês:</b><br>
+          • <b>Descontos</b> — quanto mais desconto a gente dá (acima de 20%, em produtos vencendo, em promoções), MAIOR fica o CMV. Hoje a loja tem vários produtos com 20%+ de desconto pra escoar antes do vencimento, e isso puxa o CMV pra cima — é normal nesse momento.<br>
+          • <b>Marcas A</b> — marcas curva A (Truss, Marco Boni, Itallian, Natum...) têm <b>margem maior</b> que marcas C/D. Quanto mais vocês venderem marcas A, MAIS BAIXO fica o CMV médio da semana. É por isso que oferecer marca A primeiro pra cliente novo é tão importante: não é só pra subir % marcas A — é pra manter o CMV saudável da loja toda.</p>
         </div>
       </details>
     </div>
