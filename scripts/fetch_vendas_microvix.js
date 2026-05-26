@@ -126,10 +126,17 @@ async function fetchVendasMicrovix(semanas) {
         try {
           const rows = await fetchPerformance(emp, s.di, s.df);
           for (const row of rows) {
-            const canonico = canonicalizarNome(loja, row.nome_vendedor);
-            if (!canonico) continue; // VENDEDOR EXTERNO/PADRAO etc.
             const valor = parseFloat(String(row.vlr_vendas).replace(",", "."));
-            out[loja][s.id][canonico] = Math.round(valor);
+            const canonico = canonicalizarNome(loja, row.nome_vendedor);
+            if (canonico) {
+              out[loja][s.id][canonico] = Math.round(valor);
+            } else {
+              // Agrega em "Outros": vendas de VENDEDOR PADRAO, ou de vendedoras
+              // que mudaram de loja (ex: Rosana vendeu em L1 antes de migrar pra
+              // L4; Sofia vendeu em L4 antes de migrar pra L1). Sem essa linha,
+              // o total da loja fica menor que o do ERP.
+              out[loja][s.id]["Outros"] = (out[loja][s.id]["Outros"] || 0) + Math.round(valor);
+            }
           }
           break;
         } catch (e) {
