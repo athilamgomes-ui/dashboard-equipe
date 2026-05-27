@@ -318,6 +318,7 @@
           <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Venda</th>
           <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Tkt</th>
           <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">TM</th>
+          <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Méd 12M</th>
         </tr></thead>
         <tbody id="vend_L1" style="font-size:11px;"></tbody>
       </table>
@@ -332,6 +333,7 @@
           <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Venda</th>
           <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Tkt</th>
           <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">TM</th>
+          <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Méd 12M</th>
         </tr></thead>
         <tbody id="vend_L3" style="font-size:11px;"></tbody>
       </table>
@@ -346,6 +348,7 @@
           <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Venda</th>
           <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Tkt</th>
           <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">TM</th>
+          <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Méd 12M</th>
         </tr></thead>
         <tbody id="vend_L5" style="font-size:11px;"></tbody>
       </table>
@@ -360,6 +363,7 @@
           <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Venda</th>
           <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Tkt</th>
           <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">TM</th>
+          <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Méd 12M</th>
         </tr></thead>
         <tbody id="vend_L4" style="font-size:11px;"></tbody>
       </table>
@@ -429,35 +433,36 @@ const metas    = [90000, 140000, 140000, 80000];   // Meta Mai/2026
 const colors = ['#7c5cfc','#ef4444','#ffb347','#00d4aa'];
 
 // ─── VENDEDORES_INICIO ───────────────────────────────
-// Formato: {n: nome, v: venda_liquida, t: tickets, tm: ticket_medio}
-// Atualizado automaticamente — NÃO editar manualmente
+// Formato: {n: nome, v: venda_liquida, t: tickets, tm: ticket_medio, m12: media_mensal_12m}
+// v/t/tm — atualizado automaticamente pelo agente (acumulado mês corrente)
+// m12 — média mensal Jun/2025–Mai/2026; atualizar 1x/mês manualmente
 const vendedores = {
   L1: [
-    {n:'Tatiane',    v:35365, t:290, tm:122},
-    {n:'Rayra',      v:30472, t:367, tm:83},
-    {n:'Alcione',    v:18527, t:247, tm:75},
-    {n:'Sofia',      v:17505, t:217, tm:81},
-    {n:'Rosana',     v:780,   t:11,  tm:71}
+    {n:'Tatiane',    v:35365, t:288, tm:123, m12:27918},
+    {n:'Rayra',      v:30472, t:366, tm:83,  m12:36871},
+    {n:'Alcione',    v:18527, t:246, tm:75,  m12:19169},
+    {n:'Sofia',      v:17505, t:217, tm:81,  m12:1459},
+    {n:'Rosana',     v:780,   t:11,  tm:71,  m12:4400}
   ],
   L3: [
-    {n:'Ana',        v:17248, t:230, tm:75},
-    {n:'Raimunda',   v:16781, t:171, tm:98},
-    {n:'Brunna',     v:14765, t:202, tm:73},
-    {n:'Naila',      v:5550,  t:87,  tm:64}
+    {n:'Ana',        v:17256, t:231, tm:75,  m12:6785},
+    {n:'Raimunda',   v:16781, t:171, tm:98,  m12:19520},
+    {n:'Brunna',     v:14765, t:202, tm:73,  m12:2511},
+    {n:'Naila',      v:5550,  t:87,  tm:64,  m12:4615}
   ],
   L4: [
-    {n:'Bruna',      v:30614, t:374, tm:82},
-    {n:'Tanaia',     v:24572, t:287, tm:86},
-    {n:'Josilene',   v:20222, t:266, tm:76},
-    {n:'Rosana',     v:12801, t:198, tm:65},
-    {n:'Sofia',      v:1169,  t:21,  tm:56}
+    {n:'Bruna',      v:30614, t:371, tm:83,  m12:25958},
+    {n:'Tanaia',     v:24572, t:286, tm:86,  m12:34705},
+    {n:'Josilene',   v:20222, t:265, tm:76,  m12:28878},
+    {n:'Rosana',     v:12801, t:198, tm:65,  m12:1067},
+    {n:'Sofia',      v:1169,  t:21,  tm:56,  m12:1246}
   ],
   L5: [
-    {n:'Rayssa',     v:17575, t:179, tm:98},
-    {n:'Joyce',      v:17451, t:178, tm:98},
-    {n:'Karina',     v:13117, t:159, tm:82},
-    {n:'Rosiene',    v:11451, t:125, tm:92},
-    {n:'Lucas',      v:735,   t:7,   tm:105}
+    {n:'Rayssa',     v:17575, t:176, tm:100, m12:16024},
+    {n:'Joyce',      v:17451, t:178, tm:98,  m12:24948},
+    {n:'Karina',     v:13117, t:158, tm:83,  m12:1093},
+    {n:'Rosiene',    v:11451, t:124, tm:92,  m12:23946},
+    {n:'Lucas',      v:735,   t:7,   tm:105, m12:363}
   ]
 };
 // ─── VENDEDORES_FIM ──────────────────────────────────
@@ -483,11 +488,13 @@ function renderVendorTables() {
     let html = '';
     rows.forEach(r => {
       const top = totalV > 0 && (r.v / totalV) >= 0.05;
+      const m12Str = r.m12 ? fR(r.m12) : '—';
       html += `<tr>
         <td style="padding:5px 4px;font-weight:${top?'600':'400'};">${r.n}</td>
         <td style="text-align:right;color:${top?color:'var(--muted)'};font-weight:${top?'700':'400'};padding:5px 4px;">${fR(r.v)}</td>
         <td style="text-align:right;color:var(--muted);padding:5px 4px;">${r.t}</td>
         <td style="text-align:right;color:var(--muted);padding:5px 4px;">${fR(r.tm)}</td>
+        <td style="text-align:right;color:var(--muted);padding:5px 4px;font-size:11px;opacity:0.8;">${m12Str}</td>
       </tr>`;
     });
     html += `<tr style="border-top:1px solid var(--border);background:rgba(${rgba},0.05);">
@@ -495,6 +502,7 @@ function renderVendorTables() {
       <td style="text-align:right;color:${color};font-weight:800;padding:5px 4px;">${fR(totalV)}</td>
       <td style="text-align:right;font-weight:800;padding:5px 4px;">${totalT}</td>
       <td style="text-align:right;color:var(--muted);padding:5px 4px;">${fR(avgTM)}</td>
+      <td></td>
     </tr>`;
     tbody.innerHTML = html;
   });
