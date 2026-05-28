@@ -521,14 +521,14 @@ const erpL3  = [23019, 52584, 30177, 24364, 24364];
 const erpL4  = [7696,  59792, 62955, 43606, 38830];
 const erpL5  = [16218, 61161, 55741, 44687, 44687];
 
-// Planilha (não-Athila, ALTAMIRA ÷ 2 entre L1 e L4) — recalculado item a item 25/05/2026
-// ⚠️ TOTAIS DA PLANILHA ESTAVAM DESATUALIZADOS (fórmulas não capturam linhas novas)
-// Calculado manualmente: soma itens com Status ≠ "Athila" de cada loja por mês de pagamento
-const planAtm   = [6347,  23885,  96228, 89913, 35154]; // total altamira (não-Athila)
+// Planilha (não-Athila, ALTAMIRA ÷ 2 entre L1 e L4)
+// Fonte: Gestao Compras 2026.xlsx (Google Drive) — lido via API em 28/05/2026
+// Soma dos TOTAIS de cada seção (Março+Abril+Maio) excluindo seções 100% ATHILA (Junho/Julho/Agosto ATM, Junho STM, Junho ITB)
+const planAtm   = [6347,  23885,  92122, 92265, 48865]; // total altamira (não-Athila)
 const planL1    = planAtm.map(v => +(v/2).toFixed(0));   // L1 = metade
 const planL4    = planAtm.map(v => +(v/2).toFixed(0));   // L4 = metade
-const planL3    = [0,     6856,   34376, 31917, 10103];
-const planL5    = [2078,  21760,  34246, 19616, 7865];
+const planL3    = [0,     6856,   32312, 30216, 10103];
+const planL5    = [2078,  21760,  33760, 20097, 9313];
 
 // ─── CHARTS POR LOJA (alinhados com KPI cards) ───────
 // Índices no array: L5=0, L4=1, L1=2, L3=3
