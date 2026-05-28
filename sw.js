@@ -3,7 +3,7 @@
 // Cache-first pra icones/imagens (raramente mudam).
 // Fallback pro cache se internet cair.
 
-const CACHE = 'amgomes-v5';
+const CACHE = 'amgomes-v6';
 
 // Instala: ativa logo, nao espera tabs antigas fecharem
 self.addEventListener('install', (event) => {
@@ -33,7 +33,7 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== location.origin) return;
 
   const path = url.pathname;
-  // HTML, JS, JSON, manifest: NETWORK FIRST
+  // HTML, JS, JSON, manifest: NETWORK FIRST com cache:'no-store' para bypassar HTTP cache
   const networkFirst = (
     path.endsWith('/') ||
     path.endsWith('.html') ||
@@ -43,7 +43,7 @@ self.addEventListener('fetch', (event) => {
 
   if (networkFirst) {
     event.respondWith(
-      fetch(req)
+      fetch(req, {cache: 'no-store'})
         .then(res => {
           // Cache em background pra fallback offline
           const clone = res.clone();
@@ -55,7 +55,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Outros (imagens, ícones, css): CACHE FIRST
+  // Outros (imagens, ícones): CACHE FIRST
   event.respondWith(
     caches.match(req).then(cached => {
       if (cached) return cached;
