@@ -522,14 +522,17 @@ const erpL3  = [8320,   21268,  40533,  27630,  24364];
 const erpL4  = [0,      17002,  81599,  51244,  43942];
 const erpL5  = [6678,   26176,  67756,  47589,  44687];
 
-// Planilha (não-Athila, ALTAMIRA ÷ 2 entre L1 e L4)
-// Fonte: Gestao Compras 2026.xlsx (Google Drive) — lido via API em 28/05/2026
-// Soma dos TOTAIS de cada seção (Março+Abril+Maio) excluindo seções 100% ATHILA (Junho/Julho/Agosto ATM, Junho STM, Junho ITB)
-const planAtm   = [6347,  23885,  92122, 92265, 48865]; // total altamira (não-Athila)
+// Planilha (excluindo ATHILA e ENTREGUE, ALTAMIRA ÷ 2 entre L1 e L4)
+// Fonte: Gestao Compras 2026.xlsx (Google Drive) — relido em 28/05/2026
+// Regra: excluir linhas com Status = "ATHILA" ou "ENTREGUE" (pedidos já entregues/pagos não geram contas futuras a pagar)
+// ALTAMIRA: ABR=0 (tudo ENTREGUE), MAI=0; JUN=APICE+MAIO-não-ENTREGUE; JUL/AGO=MAIO-não-ENTREGUE; JUN+JUL+AGO 100% ATHILA
+// ITAITUBA:  ABR=0, MAI=0; JUN/JUL=IGORA-FATURADO+MAIO-não-ENTREGUE; AGO=MAIO-não-ENTREGUE; JUNHO 100% ATHILA
+// SANTARÉM:  ABR=0, MAI=0; JUN/JUL/AGO=MAIO-não-ENTREGUE (LATIKA excluída); JUNHO 100% ATHILA
+const planAtm   = [0,     0,      34924, 73973, 31278]; // total altamira (não-Athila, não-Entregue)
 const planL1    = planAtm.map(v => +(v/2).toFixed(0));   // L1 = metade
 const planL4    = planAtm.map(v => +(v/2).toFixed(0));   // L4 = metade
-const planL3    = [0,     6856,   32312, 30216, 10103];
-const planL5    = [2078,  21760,  33760, 20097, 9313];
+const planL3    = [0,     0,      19653, 27927, 8930];
+const planL5    = [0,     0,      12355, 16815, 7799];
 
 // ─── CHARTS POR LOJA (alinhados com KPI cards) ───────
 // Índices no array: L5=0, L4=1, L1=2, L3=3
