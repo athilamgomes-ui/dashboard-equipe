@@ -308,9 +308,9 @@ const DADOS = {
         S1:{Outros:12,Raimunda:5930,'Ana Mira':9010,Brunna:6954},
         S2:{Raimunda:4424,'Ana Mira':3651,Naila:1632,Brunna:3713},
         S3:{Raimunda:3892,'Ana Mira':2843,Naila:3078,Brunna:3113},
-        S4:{Outros:-114,Raimunda:5147,'Ana Mira':5520,Naila:4360,Brunna:3886},
+        S4:{Outros:-114,Raimunda:5238,'Ana Mira':5520,Naila:4360,Brunna:3886},
       },
-      marcasA_loja: {S1:25.2, S2:23.0, S3:19.1, S4:12.1},
+      marcasA_loja: {S1:25.2, S2:23.0, S3:19.1, S4:12.3},
       marcasA_indiv: {'Ana Mira':24.8,Raimunda:28.9,Brunna:17.8,Naila:22.3},
       tickets: {
         S1:{Outros:1,Raimunda:75,'Ana Mira':128,Brunna:92},
@@ -328,7 +328,7 @@ const DADOS = {
         S1:{Raimunda:55.6,'Ana Mira':63.1,Brunna:46.8},
         S2:{Raimunda:58.8,'Ana Mira':79,Naila:48.8,Brunna:61.2},
         S3:{Raimunda:87.5,'Ana Mira':56,Naila:71.2,Brunna:63.3},
-        S4:{Raimunda:55.5,'Ana Mira':54.5,Naila:70.3,Brunna:68.7},
+        S4:{Raimunda:55.4,'Ana Mira':54.5,Naila:70.3,Brunna:68.7},
       },
       vendas_split: {
         S3_pre:{'Ana Mira':1746,Raimunda:1903,Brunna:1201,Naila:427},
@@ -581,6 +581,77 @@ const SUGESTOES = {
       {id:'2026-W22-L5-03', escopo:'vendedora', loja:'L5', vendedora:'Joyce', tipo:'cliente_recorrente', meta_alvo:'vendas_individuais',
        titulo:'Joyce — manter o destaque e ensinar a equipe',
        descricao:'Você foi o destaque da nossa loja na semana passada — +148% de crescimento (R$1.373 → R$3.401). Mostra que quando tem foco em marca A + combo, a venda acontece. Pra essa semana: 1) mantém o ritmo, 2) conta pra Rayssa, Rosiene e Karina o que você está fazendo diferente — quando a equipe inteira aprende sua técnica, todo mundo ganha mais.',
+       prazo:'curto', status:'pendente'},
+    ]
+  },
+  '2026-W23': {
+    semana_label: 'Semana 01/06 – 06/06 (jun S1)',
+    geradas_em: '2026-05-30',
+    itens: [
+      // ── Casa da Beleza Altamira (fechou maio em 87% — R$122k/140k; Marcas A subindo, 23,7% na última semana) ──
+      {id:'2026-W23-L1-01', escopo:'loja', loja:'L1', tipo:'marca', meta_alvo:'marcas_a',
+       titulo:'L1 — Firmar Marcas A acima de 24% em junho',
+       descricao:'Mês novo começando. Fechamos maio com as Marcas A subindo (23,7% na última semana). A meta de junho é manter acima de 24% e mirar 30%, onde a loja ganha o bônus de R$50 a mais no prêmio da equipe. Como: mesa de destaque na entrada com Truss + Marco Boni + Itallian, e pra todo cliente novo a primeira oferta é uma dessas marcas.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W23-L1-02', escopo:'vendedora', loja:'L1', vendedora:'Alcione', tipo:'atendimento', meta_alvo:'vendas_individuais',
+       titulo:'Alcione — atender mais clientes em junho',
+       descricao:'Você é a melhor da loja em Marcas A, mas fechou maio com o menor volume entre as colegas. Junho é mês novo pra virar isso: a meta é atender MAIS clientes. Quando alguém entrar, vá com sorriso e ofereça uma marca A primeiro. Você já sabe vender bem — agora é aumentar a quantidade de atendimentos.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W23-L1-03', escopo:'vendedora', loja:'L1', vendedora:'Sofia', tipo:'treinamento', meta_alvo:'vendas_individuais',
+       titulo:'Sofia (nova) — firmar o domínio das marcas A',
+       descricao:'Você fechou seu primeiro ciclo crescendo bem. Junho é pra firmar: domine de vez Truss, Marco Boni e Itallian (saber o que cada uma faz e ter 1 frase pronta de oferta). Continue usando frases que fecham, tipo "esse aqui tá fazendo sucesso, quer levar?". A Tatiane segue te acompanhando — pergunte sempre que tiver dúvida.',
+       prazo:'curto', status:'pendente'},
+
+      // ── Miss Beleza Itaituba (fechou maio em 84% — R$67k/80k; Marcas A despencaram pra 12,3% na última semana) ──
+      {id:'2026-W23-L3-01', escopo:'loja', loja:'L3', tipo:'marca', meta_alvo:'marcas_a',
+       titulo:'L3 — URGENTE: recuperar Marcas A pra 25%',
+       descricao:'Atenção: nossas Marcas A caíram pra 12,3% na última semana de maio (estava em 19% antes). Isso derruba a margem da loja e custa o bônus do prêmio. Junho começa com foco total: pra CADA cliente novo, a primeira oferta é Itallian, Truss ou Natum. Meta da loja: voltar pra 25% já na primeira semana.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W23-L3-02', escopo:'vendedora', loja:'L3', vendedora:'Ana Mira', tipo:'marca', meta_alvo:'marcas_a',
+       titulo:'Ana Mira (gerente) — puxar as Marcas A da equipe',
+       descricao:'Como gerente, junho começa com uma missão clara sua: puxar as Marcas A da loja de volta pra cima (caímos pra 12%). Alinhe com a equipe todo dia de manhã (10 min): cada uma se compromete a oferecer marca A primeiro pra todo cliente. Acompanhe o número da loja no caixa ao longo do dia e corrija no mesmo dia, sem deixar pro fim da semana.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W23-L3-03', escopo:'loja', loja:'L3', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'L3 — manter o ritmo forte do fim de maio',
+       descricao:'Fechamos maio em 84% da meta, mas a última semana foi a mais forte do mês — a loja tem fôlego. Pra junho: manter esse ritmo desde o dia 1, sem esperar o fim do mês pra correr atrás. Cada vendedora olha o próprio número às 12h e às 17h e ajusta no mesmo dia.',
+       prazo:'curto', status:'pendente'},
+
+      // ── MissBeleza Altamira (fechou maio em 81% — R$113k/140k; Marcas A recuperaram pra 24,1% na última semana) ──
+      {id:'2026-W23-L4-01', escopo:'loja', loja:'L4', tipo:'marca', meta_alvo:'marcas_a',
+       titulo:'L4 — firmar a recuperação das Marcas A',
+       descricao:'Recuperamos bem as Marcas A no fim de maio (24%). Junho é pra firmar acima de 24% e mirar 30% (bônus de R$50 no prêmio). Como: continuar oferecendo marca A primeiro pra cada cliente. Beauty Color, Hair Extrattus e Natum (que temos em estoque) contam como Marca A E giram o estoque ao mesmo tempo — dois ganhos numa venda só.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W23-L4-02', escopo:'vendedora', loja:'L4', vendedora:'Bruna F.', tipo:'cliente_recorrente', meta_alvo:'vendas_individuais',
+       titulo:'Bruna F. — manter o ritmo e ensinar a equipe',
+       descricao:'Você fechou maio como a maior vendedora da loja, com folga. Junho é pra manter esse ritmo e ensinar: quando a Rosana (nova) e as colegas perguntarem como você aborda o cliente, conte sem segredo. Quando a equipe inteira vende como você, o prêmio sobe pra todas.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W23-L4-03', escopo:'vendedora', loja:'L4', vendedora:'Rosana', tipo:'treinamento', meta_alvo:'vendas_individuais',
+       titulo:'Rosana (nova) — aplicar sozinha o que aprendeu',
+       descricao:'Você cresceu bem no seu ramp-up — o pareamento com a Bruna F. funcionou. Junho é pra firmar sozinha: continue 1 manhã por semana observando a Bruna, mas agora aplique as frases dela nos seus próprios atendimentos. Comece dominando a Truss (a que mais vende aqui) e vá somando as outras marcas A.',
+       prazo:'curto', status:'pendente'},
+
+      // ── MissBeleza Santarém (fechou maio em 81% — R$73k/90k; Marcas A caíram pra 14,7% na última semana) ──
+      {id:'2026-W23-L5-01', escopo:'loja', loja:'L5', tipo:'marca', meta_alvo:'marcas_a',
+       titulo:'L5 — recuperar Marcas A pra 25%',
+       descricao:'Nossas Marcas A caíram pra 14,7% no fim de maio. Junho começa com foco em recuperar: pra cada cliente novo, a primeira sugestão é Truss, Itallian ou Santa Clara. Meta da loja: voltar pra 25% na primeira semana. O combo de 3 produtos da mesma marca acelera as Marcas A e o valor da venda ao mesmo tempo.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W23-L5-02', escopo:'vendedora', loja:'L5', vendedora:'Karina', tipo:'treinamento', meta_alvo:'vendas_individuais',
+       titulo:'Karina (nova) — firmar o ótimo ramp-up',
+       descricao:'Você fechou maio como a maior vendedora da loja — ramp-up muito forte, parabéns! Junho é pra firmar: continue oferecendo marca A primeiro (Truss, Itallian, Santa Clara) e mantenha o ritmo de atendimento. Você mostrou que tem talento; agora o foco é constância dia após dia.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W23-L5-03', escopo:'vendedora', loja:'L5', vendedora:'Rosiene', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'Rosiene (gerente) — ritmo diário e apoio à Karina',
+       descricao:'Como gerente, junho começa com a loja precisando de ritmo todos os dias (fechamos maio em 81%). Reforce a escala de sexta e sábado com todas presentes — são os dias de mais movimento. E apoie a Karina: ela está vendendo muito sendo nova; dê feedback rápido logo após os atendimentos pra ela manter o nível.',
+       prazo:'curto', status:'pendente'},
+
+      // ── GERAL ──
+      {id:'2026-W23-GE-01', escopo:'geral', tipo:'comunicacao', meta_alvo:'conversao',
+       titulo:'Campanha de WhatsApp de início de mês',
+       descricao:'Cada vendedora manda mensagem pros seus 15 melhores clientes contando uma novidade ou marca em destaque e convidando pra passar na loja na primeira semana de junho. Início de mês é quando o cliente tem dinheiro — vale aproveitar pra trazer gente pra dentro da loja.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W23-GE-02', escopo:'geral', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'Novo mês, meta nova — painel diário no caixa',
+       descricao:'Imprimir e colar no caixa de cada loja o "Acumulado vs Meta" do dia e da semana, atualizado todo dia. A equipe precisa ver o número quando chega de manhã pra ter consciência de quanto falta. Quem virar o gap recebe reconhecimento na reunião de sábado.',
        prazo:'curto', status:'pendente'},
     ]
   }
