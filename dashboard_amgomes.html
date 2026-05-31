@@ -313,6 +313,15 @@
     </div>
   </div>
 
+  <!-- Comparativo ano a ano (mesmo período do ano anterior) -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">
+      <span>📈</span> Faturamento vs. mesmo período de 2025 (01–30/mai) — V. Líquida
+      <span id="yoyTotalBadge"></span>
+    </div>
+    <div class="grid4" id="yoyGrid"></div>
+  </div>
+
   <!-- Vendedores por Loja — ordem: L1 · L3 · L5 · L4 (igual ao ranking acima) -->
   <div class="grid4" style="margin-bottom:16px;">
 
@@ -435,6 +444,8 @@
 const lojas = ['MB Santarém', 'MB Altamira', 'Casa ATM', 'MB Itaituba'];
 const faturado = [71864, 95585, 111738, 61181];   // Abr/2026 — mês completo
 const maiAcum  = [73197, 112794, 122126, 67141];   // Mai/2026 — acum 01–30/mai (V. Líquida — Vendas por Lojas)
+// Mesmo período do ano anterior (01–30/mai/2025) — ordem [L5, L4, L1, L3], igual a maiAcum. Fonte: Vendas por Lojas (V. Líquida)
+const maiAcum2025 = [94258, 169082, 120449, 56317];
 const metas    = [90000, 140000, 140000, 80000];   // Meta Mai/2026
 // colors ordem [L5, L4, L1, L3] — cor do rank de cada loja
 const colors = ['#6366f1','#dc2626','#d97706','#0891b2'];
@@ -513,6 +524,57 @@ function renderVendorTables() {
   });
 }
 renderVendorTables();
+
+// ─── COMPARATIVO ANO A ANO (mesmo período do mês corrente) ───
+// Arrays maiAcum / maiAcum2025 na ordem [L5, L4, L1, L3]. Exibe na ordem do ranking: L1, L3, L5, L4.
+function renderYoY() {
+  const grid = document.getElementById('yoyGrid');
+  if (!grid) return;
+  const ordem = [
+    { nome: 'Casa Altamira (L1)',      idx: 2, cor: '#d97706' },
+    { nome: 'Casa Itaituba (L3)',      idx: 3, cor: '#0891b2' },
+    { nome: 'MissBeleza Santarém (L5)', idx: 0, cor: '#6366f1' },
+    { nome: 'MissBeleza Altamira (L4)', idx: 1, cor: '#dc2626' }
+  ];
+  const fR = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+  const fPct = p => (p >= 0 ? '+' : '') + p.toFixed(1).replace('.', ',') + '%';
+  let html = '';
+  ordem.forEach(o => {
+    const atual = maiAcum[o.idx];
+    const ant   = maiAcum2025[o.idx];
+    const pct   = ant > 0 ? ((atual - ant) / ant) * 100 : 0;
+    const pos   = pct >= 0;
+    const cor   = pos ? 'var(--green)' : 'var(--red)';
+    const seta  = pos ? '▲' : '▼';
+    html += `<div class="card" style="padding:14px;border-top:3px solid ${o.cor};">
+      <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">${o.nome}</div>
+      <div style="font-size:22px;font-weight:800;color:${o.cor};line-height:1.1;">${fR(atual)}</div>
+      <div style="font-size:11px;color:var(--muted);margin:3px 0 10px;">2026 · mês atual</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid var(--border);padding-top:9px;">
+        <div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">2025</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text2);">${fR(ant)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:19px;font-weight:800;color:${cor};">${seta} ${fPct(pct)}</div>
+        </div>
+      </div>
+    </div>`;
+  });
+  grid.innerHTML = html;
+
+  // Total do grupo no badge do cabeçalho do card
+  const totAtual = maiAcum.reduce((a, b) => a + b, 0);
+  const totAnt   = maiAcum2025.reduce((a, b) => a + b, 0);
+  const totPct   = totAnt > 0 ? ((totAtual - totAnt) / totAnt) * 100 : 0;
+  const pos = totPct >= 0;
+  const badge = document.getElementById('yoyTotalBadge');
+  if (badge) {
+    badge.innerHTML = `Grupo: <strong style="color:${pos ? 'var(--green)' : 'var(--red)'};">${pos ? '▲ ' : '▼ '}${fPct(totPct)}</strong> &nbsp;·&nbsp; ${fR(totAtual)} vs ${fR(totAnt)}`;
+    badge.style.cssText = 'margin-left:auto;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:600;';
+  }
+}
+renderYoY();
 
 // Contas a Pagar (ERP - R$) — Fonte: Microvix relatorio_faturas_periodo.asp, vencimento 01/04–31/08/2026
 // Extraído em 28/05/2026 via Playwright (fetch_faturas_pagar.mjs)
