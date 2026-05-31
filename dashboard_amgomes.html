@@ -452,14 +452,18 @@ const lojas = ['MB Santarém', 'MB Altamira', 'Casa ATM', 'MB Itaituba'];
 const faturado = [71864, 95585, 111738, 61181];   // Abr/2026 — mês completo
 const maiAcum  = [73197, 112794, 122126, 67141];   // Mai/2026 — acum 01–30/mai (V. Líquida — Vendas por Lojas)
 // ─── COMPARATIVO MÊS A MÊS (YoY) — ano corrente vs ano anterior ───
-// Fonte: Vendas por Lojas (V. Líquida, inteiros). Atualizado pela skill via coleta_amgomes_mensal.mjs.
-// Os arrays têm 1 valor por mês de Jan até o mês corrente. O mês em curso é parcial
-// (MTD) e o ano anterior é coletado com o MESMO dia-limite → comparação simétrica.
+// Fonte: Vendas por Lojas (V. Líquida, inteiros).
+// Atualizado pelo script atualiza_fatmensal.mjs (modo "light" diário reaproveita a
+// coleta da Etapa 1; "full" semanal/virada-de-mês recoleta tudo). NÃO editar à mão:
+// o bloco entre os marcadores FATMENSAL_INICIO/FIM é reescrito pelo script.
+// Os arrays têm 1 valor por mês de Jan até o mês corrente; mês em curso = parcial (MTD),
+// ano anterior coletado com o MESMO dia-limite → comparação simétrica.
+// ─── FATMENSAL_INICIO ───
 const fatMensal = {
   mesesLabel: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
   anoAtual: 2026,
   anoAnterior: 2025,
-  mesParcial: 5,   // nº do mês ainda em curso (parcial); null se nenhum
+  mesParcial: 5,
   atual: {
     L1: [102031, 88157, 117404, 111738, 122126],
     L3: [50793, 40930, 57589, 61181, 67141],
@@ -473,6 +477,7 @@ const fatMensal = {
     L5: [109652, 92097, 108596, 102022, 99993]
   }
 };
+// ─── FATMENSAL_FIM ───
 const metas    = [90000, 140000, 140000, 80000];   // Meta Mai/2026
 // colors ordem [L5, L4, L1, L3] — cor do rank de cada loja
 const colors = ['#6366f1','#dc2626','#d97706','#0891b2'];
