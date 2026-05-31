@@ -221,6 +221,9 @@
   @media (max-width: 680px) {
     .grid4, .grid3 { grid-template-columns: 1fr; }
   }
+  @media (max-width: 900px) {
+    .yoy-layout { grid-template-columns: 1fr !important; }
+  }
   .btn-volta-painel{position:fixed;top:14px;left:14px;z-index:9999;background:var(--accent);color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(99,102,241,.35);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
   .btn-volta-painel:hover{background:#4f46e5;box-shadow:0 4px 14px rgba(99,102,241,.45)}
   .btn-volta-painel:active{transform:scale(.96)}
@@ -313,13 +316,17 @@
     </div>
   </div>
 
-  <!-- Comparativo ano a ano (mesmo período do ano anterior) -->
+  <!-- Comparativo mês a mês (ano corrente vs ano anterior) -->
   <div class="card" style="margin-bottom:16px;">
     <div class="card-title">
-      <span>📈</span> <span id="yoyTitle">Faturamento vs. mesmo período do ano anterior</span>
+      <span>📈</span> <span id="yoyTitle">Faturamento mês a mês — ano corrente vs ano anterior</span>
       <span id="yoyTotalBadge"></span>
     </div>
-    <div class="grid4" id="yoyGrid"></div>
+    <div id="yoyFilters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;"></div>
+    <div class="yoy-layout" style="display:grid;grid-template-columns:1.5fr 1fr;gap:22px;align-items:start;">
+      <div style="position:relative;height:280px;"><canvas id="yoyChart"></canvas></div>
+      <div style="overflow-x:auto;"><table id="yoyTable" style="width:100%;border-collapse:collapse;font-size:12px;"></table></div>
+    </div>
   </div>
 
   <!-- Vendedores por Loja — ordem: L1 · L3 · L5 · L4 (igual ao ranking acima) -->
@@ -444,11 +451,28 @@
 const lojas = ['MB Santarém', 'MB Altamira', 'Casa ATM', 'MB Itaituba'];
 const faturado = [71864, 95585, 111738, 61181];   // Abr/2026 — mês completo
 const maiAcum  = [73197, 112794, 122126, 67141];   // Mai/2026 — acum 01–30/mai (V. Líquida — Vendas por Lojas)
-// Mesmo período do ano anterior — ordem [L5, L4, L1, L3], igual a maiAcum. Fonte: Vendas por Lojas (V. Líquida)
-// Atualizado pela skill: coleta_amgomes_lojas.mjs com o MESMO período do mês corrente, porém no ano anterior.
-const maiAcum2025  = [94258, 169082, 120449, 56317];
-const yoyAnoAnterior = 2025;        // ano da base comparativa
-const yoyPeriodo     = '01–30/mai'; // rótulo do período comparado (igual ao período atual)
+// ─── COMPARATIVO MÊS A MÊS (YoY) — ano corrente vs ano anterior ───
+// Fonte: Vendas por Lojas (V. Líquida, inteiros). Atualizado pela skill via coleta_amgomes_mensal.mjs.
+// Os arrays têm 1 valor por mês de Jan até o mês corrente. O mês em curso é parcial
+// (MTD) e o ano anterior é coletado com o MESMO dia-limite → comparação simétrica.
+const fatMensal = {
+  mesesLabel: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+  anoAtual: 2026,
+  anoAnterior: 2025,
+  mesParcial: 5,   // nº do mês ainda em curso (parcial); null se nenhum
+  atual: {
+    L1: [102031, 88157, 117404, 111738, 122126],
+    L3: [50793, 40930, 57589, 61181, 67141],
+    L4: [98591, 94702, 110536, 95585, 112794],
+    L5: [76717, 74452, 73258, 71864, 73197]
+  },
+  anterior: {
+    L1: [93765, 90647, 110872, 105453, 124977],
+    L3: [44243, 41166, 53257, 62971, 58245],
+    L4: [104155, 104378, 125006, 128738, 176881],
+    L5: [109652, 92097, 108596, 102022, 99993]
+  }
+};
 const metas    = [90000, 140000, 140000, 80000];   // Meta Mai/2026
 // colors ordem [L5, L4, L1, L3] — cor do rank de cada loja
 const colors = ['#6366f1','#dc2626','#d97706','#0891b2'];
@@ -528,55 +552,124 @@ function renderVendorTables() {
 }
 renderVendorTables();
 
-// ─── COMPARATIVO ANO A ANO (mesmo período do mês corrente) ───
-// Arrays maiAcum / maiAcum2025 na ordem [L5, L4, L1, L3]. Exibe na ordem do ranking: L1, L3, L5, L4.
-function renderYoY() {
-  const grid = document.getElementById('yoyGrid');
-  if (!grid) return;
-  const titleEl = document.getElementById('yoyTitle');
-  if (titleEl) titleEl.textContent = `Faturamento vs. mesmo período de ${yoyAnoAnterior} (${yoyPeriodo}) — V. Líquida`;
-  const ordem = [
-    { nome: 'Casa Altamira (L1)',      idx: 2, cor: '#d97706' },
-    { nome: 'Casa Itaituba (L3)',      idx: 3, cor: '#0891b2' },
-    { nome: 'MissBeleza Santarém (L5)', idx: 0, cor: '#6366f1' },
-    { nome: 'MissBeleza Altamira (L4)', idx: 1, cor: '#dc2626' }
-  ];
-  const fR = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
-  const fPct = p => (p >= 0 ? '+' : '') + p.toFixed(1).replace('.', ',') + '%';
-  let html = '';
-  ordem.forEach(o => {
-    const atual = maiAcum[o.idx];
-    const ant   = maiAcum2025[o.idx];
-    const pct   = ant > 0 ? ((atual - ant) / ant) * 100 : 0;
-    const pos   = pct >= 0;
-    const cor   = pos ? 'var(--green)' : 'var(--red)';
-    const seta  = pos ? '▲' : '▼';
-    html += `<div class="card" style="padding:14px;border-top:3px solid ${o.cor};">
-      <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">${o.nome}</div>
-      <div style="font-size:22px;font-weight:800;color:${o.cor};line-height:1.1;">${fR(atual)}</div>
-      <div style="font-size:11px;color:var(--muted);margin:3px 0 10px;">${yoyAnoAnterior + 1} · mês atual</div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid var(--border);padding-top:9px;">
-        <div>
-          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">${yoyAnoAnterior}</div>
-          <div style="font-size:14px;font-weight:600;color:var(--text2);">${fR(ant)}</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:19px;font-weight:800;color:${cor};">${seta} ${fPct(pct)}</div>
-        </div>
-      </div>
-    </div>`;
-  });
-  grid.innerHTML = html;
+// ─── COMPARATIVO MÊS A MÊS (YoY) — gráfico + tabela com filtro de escopo ───
+const yoyEscopos = [
+  { key: 'Grupo', label: 'Grupo (4 lojas)', cor: '#6366f1' },
+  { key: 'L1',    label: 'Casa Altamira',   cor: '#d97706' },
+  { key: 'L3',    label: 'Casa Itaituba',   cor: '#0891b2' },
+  { key: 'L4',    label: 'MB Altamira',     cor: '#dc2626' },
+  { key: 'L5',    label: 'MB Santarém',     cor: '#6366f1' }
+];
+let yoyScope = 'Grupo';
+let yoyChartInstance = null;
 
-  // Total do grupo no badge do cabeçalho do card
-  const totAtual = maiAcum.reduce((a, b) => a + b, 0);
-  const totAnt   = maiAcum2025.reduce((a, b) => a + b, 0);
-  const totPct   = totAnt > 0 ? ((totAtual - totAnt) / totAnt) * 100 : 0;
-  const pos = totPct >= 0;
-  const badge = document.getElementById('yoyTotalBadge');
-  if (badge) {
-    badge.innerHTML = `Grupo: <strong style="color:${pos ? 'var(--green)' : 'var(--red)'};">${pos ? '▲ ' : '▼ '}${fPct(totPct)}</strong> &nbsp;·&nbsp; ${fR(totAtual)} vs ${fR(totAnt)}`;
-    badge.style.cssText = 'margin-left:auto;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:600;';
+function yoySerie(dados, scope) {
+  const n = dados.L1.length;
+  if (scope === 'Grupo') {
+    return Array.from({ length: n }, (_, i) => dados.L1[i] + dados.L3[i] + dados.L4[i] + dados.L5[i]);
+  }
+  return dados[scope].slice();
+}
+
+function renderYoY() {
+  const titleEl = document.getElementById('yoyTitle');
+  if (titleEl) titleEl.textContent = `Faturamento mês a mês — ${fatMensal.anoAtual} vs ${fatMensal.anoAnterior} (V. Líquida)`;
+
+  const fR  = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+  const fRk = v => 'R$' + (v / 1000).toFixed(0) + 'k';
+  const fPct = p => (p >= 0 ? '+' : '') + p.toFixed(1).replace('.', ',') + '%';
+
+  const escopoAtual = yoyEscopos.find(e => e.key === yoyScope) || yoyEscopos[0];
+  const corAtual = escopoAtual.cor;
+  const n = fatMensal.atual.L1.length;
+  const labels = fatMensal.mesesLabel.slice(0, n);
+  const serieAtual = yoySerie(fatMensal.atual, yoyScope);
+  const serieAnt   = yoySerie(fatMensal.anterior, yoyScope);
+
+  // ── Botões de filtro ──
+  const filtros = document.getElementById('yoyFilters');
+  if (filtros) {
+    filtros.innerHTML = yoyEscopos.map(e => {
+      const on = e.key === yoyScope;
+      return `<button data-scope="${e.key}" style="
+        cursor:pointer;border:1px solid ${on ? e.cor : 'var(--border)'};
+        background:${on ? e.cor : '#fff'};color:${on ? '#fff' : 'var(--text2)'};
+        padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;
+        font-family:inherit;transition:all .15s;">${e.label}</button>`;
+    }).join('');
+    filtros.querySelectorAll('button').forEach(b => {
+      b.onclick = () => { yoyScope = b.dataset.scope; renderYoY(); };
+    });
+  }
+
+  // ── Gráfico de barras agrupadas (2 anos) ──
+  const canvas = document.getElementById('yoyChart');
+  if (canvas && window.Chart) {
+    if (yoyChartInstance) yoyChartInstance.destroy();
+    yoyChartInstance = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: String(fatMensal.anoAnterior), data: serieAnt,
+            backgroundColor: '#cbd5e1', borderRadius: 5, barPercentage: 0.9, categoryPercentage: 0.7 },
+          { label: String(fatMensal.anoAtual), data: serieAtual,
+            backgroundColor: corAtual, borderRadius: 5, barPercentage: 0.9, categoryPercentage: 0.7 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 }, color: '#334155' } },
+          tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: R$ ${ctx.raw.toLocaleString('pt-BR')}` } }
+        },
+        scales: {
+          x: { ticks: { color: '#64748b', font: { size: 11 } }, grid: { display: false } },
+          y: { ticks: { color: '#64748b', font: { size: 9 }, callback: fRk }, grid: { color: '#e2e8f0' } }
+        }
+      }
+    });
+  }
+
+  // ── Tabela mês a mês com Δ% ──
+  const tbl = document.getElementById('yoyTable');
+  if (tbl) {
+    let html = `<thead><tr style="border-bottom:2px solid var(--border);">
+      <th style="text-align:left;padding:6px 4px;color:var(--muted);font-size:10px;text-transform:uppercase;">Mês</th>
+      <th style="text-align:right;padding:6px 4px;color:var(--muted);font-size:10px;">${fatMensal.anoAnterior}</th>
+      <th style="text-align:right;padding:6px 4px;color:var(--muted);font-size:10px;">${fatMensal.anoAtual}</th>
+      <th style="text-align:right;padding:6px 4px;color:var(--muted);font-size:10px;">Δ%</th>
+    </tr></thead><tbody>`;
+    let totA = 0, totB = 0;
+    labels.forEach((lbl, i) => {
+      const a = serieAtual[i], b = serieAnt[i];
+      totA += a; totB += b;
+      const pct = b > 0 ? ((a - b) / b) * 100 : 0;
+      const cor = pct >= 0 ? 'var(--green)' : 'var(--red)';
+      const parcial = (i + 1) === fatMensal.mesParcial;
+      html += `<tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:5px 4px;font-weight:600;">${lbl}${parcial ? ' <span style="font-size:9px;color:var(--muted);font-weight:400;">(parcial)</span>' : ''}</td>
+        <td style="text-align:right;padding:5px 4px;color:var(--muted);">${fR(b)}</td>
+        <td style="text-align:right;padding:5px 4px;font-weight:600;color:${corAtual};">${fR(a)}</td>
+        <td style="text-align:right;padding:5px 4px;font-weight:700;color:${cor};">${pct >= 0 ? '▲' : '▼'} ${fPct(pct)}</td>
+      </tr>`;
+    });
+    const totPct = totB > 0 ? ((totA - totB) / totB) * 100 : 0;
+    const totCor = totPct >= 0 ? 'var(--green)' : 'var(--red)';
+    html += `</tbody><tfoot><tr style="border-top:2px solid var(--border);background:#f8fafc;">
+      <td style="padding:7px 4px;font-weight:800;">Acum.</td>
+      <td style="text-align:right;padding:7px 4px;font-weight:800;color:var(--text2);">${fR(totB)}</td>
+      <td style="text-align:right;padding:7px 4px;font-weight:800;color:${corAtual};">${fR(totA)}</td>
+      <td style="text-align:right;padding:7px 4px;font-weight:800;color:${totCor};">${totPct >= 0 ? '▲' : '▼'} ${fPct(totPct)}</td>
+    </tr></tfoot>`;
+    tbl.innerHTML = html;
+
+    // Badge no cabeçalho do card
+    const badge = document.getElementById('yoyTotalBadge');
+    if (badge) {
+      badge.innerHTML = `${escopoAtual.label}: <strong style="color:${totCor};">${totPct >= 0 ? '▲ ' : '▼ '}${fPct(totPct)}</strong> &nbsp;·&nbsp; acum. ${fatMensal.anoAtual} ${fR(totA)} vs ${fR(totB)}`;
+      badge.style.cssText = 'margin-left:auto;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:600;';
+    }
   }
 }
 renderYoY();
