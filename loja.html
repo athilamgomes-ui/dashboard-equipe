@@ -1044,29 +1044,30 @@ const DADOS_LOJA = {
 const HISTORICO_PREMIOS = {
   '2026-05': {
     L1: {
-      // S1 = concessão da gestão (R$230 — loja em 96%). S2/S3/S4 calculados via faixa.
-      'Tatiane': {S1:76, S2:31, S3:30, S4:30},
-      'Rayra':   {S1:74, S2:29, S3:23, S4:22},
-      'Alcione': {S1:47, S2:18, S3:12, S4:12},
-      'Sofia':   {S1:32, S2:22, S3:14, S4:16},
-      _em_pct: {S1:96, S2:85, S3:71, S4:77},
-      _pool:   {S1:230, S2:100, S3:80, S4:80},
+      // S1 = concessão da gestão (R$230 — loja em 96%). S2/S3 calculados via faixa.
+      // S4: nenhuma loja bateu 70% → sem prêmio.
+      'Tatiane': {S1:76, S2:31, S3:30, S4:0},
+      'Rayra':   {S1:74, S2:29, S3:23, S4:0},
+      'Alcione': {S1:47, S2:18, S3:12, S4:0},
+      'Sofia':   {S1:32, S2:22, S3:14, S4:0},
+      _em_pct: {S1:96, S2:85, S3:71},  // S4 omitido — meta ajustada não bateu 70%
+      _pool:   {S1:230, S2:100, S3:80, S4:0},
     },
     L3: {
-      'Ana Mira': {S1:41, S2:0, S3:0, S4:29},
-      'Raimunda': {S1:27, S2:0, S3:0, S4:28},
-      'Brunna':   {S1:32, S2:0, S3:0, S4:20},
-      'Naila':    {S1:0,  S2:0, S3:0, S4:23},
-      _em_pct: {S1:88, S2:67, S3:56, S4:82},
-      _pool:   {S1:100, S2:0, S3:0, S4:100},
+      'Ana Mira': {S1:41, S2:0, S3:0, S4:0},
+      'Raimunda': {S1:27, S2:0, S3:0, S4:0},
+      'Brunna':   {S1:32, S2:0, S3:0, S4:0},
+      'Naila':    {S1:0,  S2:0, S3:0, S4:0},
+      _em_pct: {S1:88, S2:67, S3:56},
+      _pool:   {S1:100, S2:0, S3:0, S4:0},
     },
     L4: {
-      'Tanaia':   {S1:37, S2:15, S3:0, S4:16},
-      'Josilene': {S1:26, S2:18, S3:0, S4:18},
-      'Bruna F.': {S1:19, S2:37, S3:0, S4:50},
-      'Rosana':   {S1:16, S2:10, S3:0, S4:16},
-      _em_pct: {S1:80, S2:72, S3:49, S4:80},
-      _pool:   {S1:100, S2:80, S3:0, S4:100},
+      'Tanaia':   {S1:37, S2:15, S3:0, S4:0},
+      'Josilene': {S1:26, S2:18, S3:0, S4:0},
+      'Bruna F.': {S1:19, S2:37, S3:0, S4:0},
+      'Rosana':   {S1:16, S2:10, S3:0, S4:0},
+      _em_pct: {S1:80, S2:72, S3:49},
+      _pool:   {S1:100, S2:80, S3:0, S4:0},
     },
     L5: {
       'Rayssa':  {S1:27, S2:0, S3:0, S4:0},
@@ -1074,7 +1075,7 @@ const HISTORICO_PREMIOS = {
       'Rosiene': {S1:19, S2:0, S3:0, S4:0},
       'Karina':  {S1:9,  S2:0, S3:0, S4:0},
       'Lucas':   {},  // caixa
-      _em_pct: {S1:77, S2:69, S3:66, S4:68},
+      _em_pct: {S1:77, S2:69, S3:66},
       _pool:   {S1:80, S2:0, S3:0, S4:0},
     },
   },
