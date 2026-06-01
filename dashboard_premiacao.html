@@ -415,7 +415,84 @@ const DADOS = {
     },
   },
   // Meses futuros: adicionar dados ao longo do ano
-  '2026-06': null,
+  '2026-06': {
+    // Mês iniciado pelo agente em 01/06/2026 (seg, 08h). Dados de S1 = só 01/06 (parcial).
+    // Metas mensais de METAS_FUTURAS. Split semanal proporcional aos dias úteis (S1-S3=6d, S4=8d).
+    // marcasA_loja inicia em 0 — Etapa 2 adiada (volume de R$ no dia 1 é ruído). Será preenchida nas próximas execuções.
+    semana_atual: 'S1',
+    L1: {
+      meta_mensal: 130000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/06–06/06', meta:30000},
+        {id:'S2', label:'Semana 2', periodo:'08/06–13/06', meta:30000},
+        {id:'S3', label:'Semana 3', periodo:'15/06–20/06', meta:30000},
+        {id:'S4', label:'Semana 4', periodo:'22/06–30/06', meta:40000},
+      ],
+      vendas: {
+        S1:{Tatiane:511,Rayra:409,Alcione:247},
+        S2:{}, S3:{}, S4:{},
+      },
+      marcasA_loja: {S1:0, S2:0, S3:0, S4:0},
+      marcasA_indiv: {},
+      tickets: { S1:{Tatiane:2,Rayra:2,Alcione:1}, S2:{}, S3:{}, S4:{} },
+      pecas:   { S1:{Tatiane:13,Rayra:9,Alcione:4}, S2:{}, S3:{}, S4:{} },
+      cmv:     { S1:{Tatiane:34.2,Rayra:49.5,Alcione:55.5}, S2:{}, S3:{}, S4:{} },
+    },
+    L3: {
+      meta_mensal: 75000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/06–06/06', meta:17000},
+        {id:'S2', label:'Semana 2', periodo:'08/06–13/06', meta:17000},
+        {id:'S3', label:'Semana 3', periodo:'15/06–20/06', meta:17000},
+        {id:'S4', label:'Semana 4', periodo:'22/06–30/06', meta:24000},
+      ],
+      vendas: {
+        S1:{'Ana Mira':8},
+        S2:{}, S3:{}, S4:{},
+      },
+      marcasA_loja: {S1:0, S2:0, S3:0, S4:0},
+      marcasA_indiv: {},
+      tickets: { S1:{'Ana Mira':1}, S2:{}, S3:{}, S4:{} },
+      pecas:   { S1:{'Ana Mira':2}, S2:{}, S3:{}, S4:{} },
+      cmv:     { S1:{'Ana Mira':192.3}, S2:{}, S3:{}, S4:{} },
+    },
+    L4: {
+      meta_mensal: 130000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/06–06/06', meta:30000},
+        {id:'S2', label:'Semana 2', periodo:'08/06–13/06', meta:30000},
+        {id:'S3', label:'Semana 3', periodo:'15/06–20/06', meta:30000},
+        {id:'S4', label:'Semana 4', periodo:'22/06–30/06', meta:40000},
+      ],
+      vendas: {
+        S1:{'Bruna F.':126,Rosana:20},
+        S2:{}, S3:{}, S4:{},
+      },
+      marcasA_loja: {S1:0, S2:0, S3:0, S4:0},
+      marcasA_indiv: {},
+      tickets: { S1:{'Bruna F.':2,Rosana:1}, S2:{}, S3:{}, S4:{} },
+      pecas:   { S1:{'Bruna F.':2,Rosana:2}, S2:{}, S3:{}, S4:{} },
+      cmv:     { S1:{'Bruna F.':41.4,Rosana:79.9}, S2:{}, S3:{}, S4:{} },
+    },
+    L5: {
+      meta_mensal: 85000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/06–06/06', meta:19000},
+        {id:'S2', label:'Semana 2', periodo:'08/06–13/06', meta:19000},
+        {id:'S3', label:'Semana 3', periodo:'15/06–20/06', meta:19000},
+        {id:'S4', label:'Semana 4', periodo:'22/06–30/06', meta:28000},
+      ],
+      vendas: {
+        S1:{Karina:48},
+        S2:{}, S3:{}, S4:{},
+      },
+      marcasA_loja: {S1:0, S2:0, S3:0, S4:0},
+      marcasA_indiv: {},
+      tickets: { S1:{Karina:1}, S2:{}, S3:{}, S4:{} },
+      pecas:   { S1:{Karina:1}, S2:{}, S3:{}, S4:{} },
+      cmv:     { S1:{Karina:52}, S2:{}, S3:{}, S4:{} },
+    },
+  },
   '2026-07': null,
   '2026-08': null,
   '2026-09': null,
@@ -531,57 +608,57 @@ const SUGESTOES = {
       {id:'2026-W22-L1-01', escopo:'loja', loja:'L1', tipo:'marca', meta_alvo:'vendas_individuais',
        titulo:'Giro de Beauty Color + Hair Extrattus + Natum',
        descricao:'Chegou um lote grande dessas 3 marcas na nossa loja. Pra elas não ficarem encalhadas no estoque, precisamos girar 160 peças por semana das 3 marcas juntas (~40 peças por vendedora, ~6 por dia). Estratégia: combo de 3 produtos da mesma marca (shampoo + condicionador + máscara). Primeira oferta pra cliente novo sempre uma dessas 3 marcas.',
-       prazo:'medio', status:'pendente'},
+       prazo:'medio', status:'aprovada'},
       {id:'2026-W22-L1-02', escopo:'loja', loja:'L1', tipo:'meta', meta_alvo:'atingir_meta',
        titulo:'Acelerar volume — R$ 7,5k por dia',
        descricao:'A loja vendeu R$4.669 dos R$35.000 da semana (13%). Faltam R$30.331 em 4 dias úteis — R$7.583 por dia. Foco da equipe inteira em fechar venda. Tatiane lidera pelo exemplo, Sofia em pareamento pra crescer mais rápido.',
-       prazo:'curto', status:'pendente'},
+       prazo:'curto', status:'rejeitada'},
       {id:'2026-W22-L1-03', escopo:'vendedora', loja:'L1', vendedora:'Alcione', tipo:'ticket_medio', meta_alvo:'ticket_medio',
        titulo:'Alcione — subir o valor médio das vendas',
        descricao:'Seu valor médio por venda está em R$63 (o mais baixo da loja). Solução: combo de 3 produtos da mesma marca — começando pelas 3 marcas novas (Beauty Color, Hair Extrattus, Natum) que precisam girar. Cliente leva 3 peças em vez de 1, e seu valor por venda sobe naturalmente pra R$120-150.',
-       prazo:'curto', status:'pendente'},
+       prazo:'curto', status:'aprovada'},
 
       // ── Miss Beleza Itaituba ──
       {id:'2026-W22-L3-01', escopo:'loja', loja:'L3', tipo:'marca', meta_alvo:'marcas_a',
        titulo:'URGENTE — subir Marcas A pra 20% até sábado',
        descricao:'As Marcas A da nossa loja despencaram pra 6,6% essa semana (semana passada estava em 19%). Sem subir até sábado, perdemos o bônus do prêmio E a margem da loja segue caindo. Ação: pra CADA cliente novo, primeira oferta é Itallian, Truss ou Natum. Mesmo que ela recuse, plantamos a ideia pra próxima vez.',
-       prazo:'curto', status:'pendente'},
+       prazo:'curto', status:'aprovada'},
       {id:'2026-W22-L3-02', escopo:'loja', loja:'L3', tipo:'atendimento', meta_alvo:'ticket_medio',
        titulo:'Reduzir descontos acima de 20%',
        descricao:'O custo dos produtos vendidos da loja está alto. Causa principal: descontos generosos demais. Antes de oferecer desconto acima de 20%, sempre tentar: 1) oferecer o produto cheio + 1 amostra de brinde, 2) sugerir combo (3 produtos com desconto MENOR em cada), 3) só em último caso desconto grande. Quanto menos desconto, mais sobra de lucro pra dividir em prêmio.',
-       prazo:'medio', status:'pendente'},
+       prazo:'medio', status:'aprovada'},
       {id:'2026-W22-L3-03', escopo:'vendedora', loja:'L3', vendedora:'Naila', tipo:'treinamento', meta_alvo:'vendas_individuais',
        titulo:'Naila — manter o ritmo da semana passada',
        descricao:'Você cresceu de R$427 pra R$2.651 (+521%) na semana passada. Mostrou que quando tem foco, entrega de verdade. Pra essa semana: mantém esse ritmo. Eu vou acompanhar pessoalmente. Continue oferecendo Itallian ou Truss como primeira opção pros clientes.',
-       prazo:'curto', status:'pendente'},
+       prazo:'curto', status:'aprovada'},
 
       // ── MissBeleza Altamira ──
       {id:'2026-W22-L4-01', escopo:'loja', loja:'L4', tipo:'marca', meta_alvo:'vendas_individuais',
        titulo:'Giro de Beauty Color + Hair Extrattus + Natum',
        descricao:'Chegou um lote grande dessas 3 marcas na nossa loja. Pra elas não ficarem encalhadas, precisamos girar 125 peças por semana das 3 marcas juntas (~31 peças por vendedora, ~5 por dia). Bônus duplo: essas 3 marcas SÃO curva A, então vender elas mantém os 34,5% atuais de Marcas A E gira o estoque. Combo de 3 produtos da mesma marca.',
-       prazo:'medio', status:'pendente'},
+       prazo:'medio', status:'aprovada'},
       {id:'2026-W22-L4-02', escopo:'loja', loja:'L4', tipo:'marca', meta_alvo:'marcas_a',
        titulo:'Manter Marcas A acima de 30% até sábado',
        descricao:'A nossa loja está em 34,5% de Marcas A — acima do bônus de 30%! Se fechar a semana acima de 30%, o prêmio da equipe sobe R$20 a R$50 por faixa (todas ganham mais). Como manter: continuar oferecendo marca A primeiro pra cada cliente novo, especialmente Beauty Color, Hair Extrattus e Natum que precisam giro.',
-       prazo:'curto', status:'pendente'},
+       prazo:'curto', status:'aprovada'},
       {id:'2026-W22-L4-03', escopo:'vendedora', loja:'L4', vendedora:'Tanaia', tipo:'meta', meta_alvo:'atingir_meta',
        titulo:'Tanaia (gerente, gestante) — liderar pela equipe',
        descricao:'Você está em gestação, ritmo individual reduzido é esperado e respeitado. Foco da semana: alinhar a equipe de manhã (10min), parear Rosana com Bruna F. todos os dias, cobrar combo de marca A em cada cliente atendido. Sua liderança organiza o time — a venda vem da equipe que você dirige.',
-       prazo:'curto', status:'pendente'},
+       prazo:'curto', status:'aprovada'},
 
       // ── MissBeleza Santarém ──
       {id:'2026-W22-L5-01', escopo:'loja', loja:'L5', tipo:'meta', meta_alvo:'atingir_meta',
        titulo:'Consistência diária — não acumular pro fim de semana',
        descricao:'A nossa loja tem histórico de variação alta — alguns dias bombam, outros caem. Pra fechar a semana batida com tranquilidade: cada vendedora olha seu número às 12h e às 17h, e ajusta o ritmo no MESMO dia. Não deixa a dívida acumular pro sábado.',
-       prazo:'curto', status:'pendente'},
+       prazo:'curto', status:'aprovada'},
       {id:'2026-W22-L5-02', escopo:'loja', loja:'L5', tipo:'marca', meta_alvo:'marcas_a',
        titulo:'Subir Marcas A pra 25%',
        descricao:'A nossa loja está em 17,3% de Marcas A. Pra chegar em 25% essa semana: cada cliente novo, primeira sugestão = Truss, Itallian ou Santa Clara. Combo de 3 produtos da mesma marca acelera tanto Marcas A quanto valor médio da venda. Falta pouco pro bônus de 30%.',
-       prazo:'curto', status:'pendente'},
+       prazo:'curto', status:'aprovada'},
       {id:'2026-W22-L5-03', escopo:'vendedora', loja:'L5', vendedora:'Joyce', tipo:'cliente_recorrente', meta_alvo:'vendas_individuais',
        titulo:'Joyce — manter o destaque e ensinar a equipe',
        descricao:'Você foi o destaque da nossa loja na semana passada — +148% de crescimento (R$1.373 → R$3.401). Mostra que quando tem foco em marca A + combo, a venda acontece. Pra essa semana: 1) mantém o ritmo, 2) conta pra Rayssa, Rosiene e Karina o que você está fazendo diferente — quando a equipe inteira aprende sua técnica, todo mundo ganha mais.',
-       prazo:'curto', status:'pendente'},
+       prazo:'curto', status:'aprovada'},
     ]
   },
   '2026-W23': {
@@ -2481,11 +2558,12 @@ function renderAnalise() {
 
 // ─── STATE & EVENTOS ─────────────────────────────────────────────────────────
 
-let curMes = '2026-05';
+let curMes = '2026-06';
 let curTab = 'L1';
 
 function setMes(m) {
   curMes = m;
+  const _sel = document.getElementById('mes-sel'); if (_sel) _sel.value = m;
   document.getElementById('hdr-sub').textContent =
     {'05':'Maio','06':'Junho','07':'Julho','08':'Agosto','09':'Setembro','10':'Outubro','11':'Novembro','12':'Dezembro'}[m.slice(5)] + ' 2026';
   rerender();
@@ -2573,7 +2651,7 @@ async function initDashboard() {
   // e só pre-fill o textarea na UI (não contam como retorno aprovado).
   window.__FEEDBACK_RETORNOS = [];
   window.__TEXTOS_SUGERIDOS = TEXTOS_SUGERIDOS_RETORNO;
-  rerender();
+  setMes(curMes); // sincroniza seletor + cabeçalho com o mês corrente e renderiza
   // Em paralelo busca tudo do Worker
   try {
     const [oR, aR, fR, rR] = await Promise.all([
