@@ -24,21 +24,30 @@ const EMPRESAS = [1, 3, 4, 10];
 // Vendedoras válidas por loja (filtra vendedores fantasma como VENDEDOR EXTERNO/PADRAO).
 // Comparação é case-insensitive e por substring do primeiro nome.
 // Nome canônico esperado em DADOS[mes][Lx].vendas[Sx] (igual ao painel)
+// Alcione (L1) saiu em jun/2026 mas é mantida na lista pra capturar vendas
+// residuais que ela fez nos primeiros dias do mês (atribuídas a ela, não a Outros).
+// Bárbara (L1), Débora+Eliane (L4) entraram em jun/2026.
 const VENDEDORAS = {
-  L1: ["Tatiane", "Rayra", "Alcione", "Sofia"],
+  L1: ["Tatiane", "Rayra", "Alcione", "Sofia", "Bárbara"],
   L3: ["Ana Mira", "Raimunda", "Brunna", "Naila"],
-  L4: ["Tanaia", "Josilene", "Bruna F.", "Rosana"],
+  L4: ["Tanaia", "Josilene", "Bruna F.", "Rosana", "Débora", "Eliane"],
   L5: ["Rayssa", "Joyce", "Rosiene", "Karina", "Lucas"],
 };
+
+// Remove acentos pra comparação (o ERP às vezes grava nomes sem acento:
+// "BARBARA", "DEBORA"). Sem isso, "BÁRBARA".includes falha por causa do acento.
+function semAcento(s) {
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
 
 /**
  * Mapeia o `nome_vendedor` retornado pela API para o nome canônico
  * usado em DADOS[mes][Lx].vendas[Sx]. Retorna null se não casar.
  */
 function canonicalizarNome(loja, nomeApi) {
-  const upper = nomeApi.toUpperCase();
+  const upper = semAcento(nomeApi.toUpperCase());
   for (const canonico of VENDEDORAS[loja]) {
-    const first = canonico.toUpperCase().split(" ")[0];
+    const first = semAcento(canonico.toUpperCase().split(" ")[0]);
     if (upper.includes(first)) return canonico;
   }
   return null;
