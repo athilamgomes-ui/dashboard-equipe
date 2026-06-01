@@ -911,33 +911,33 @@ const VENDEDORAS_META = {
 };
 
 // MOCK DATA — substituir depois pelo carregamento de dados_premiacao.json gerado pelo agente
-// Por enquanto pra demonstrar o app, dados fixos de maio/2026 S3 (semana atual)
+// Atualizado pra Jun/2026 S1 em 01/06/2026 (dados parciais 01/06 — domingo)
 const DADOS_LOJA = {
   L1: {
     nome_loja: 'Casa da Beleza Altamira',
     meta_mensal: 140000,
-    meta_semana: 35000,
-    vendido_semana: 26903,  // S4 parcial
-    vendido_mes: 122125,    // soma das 4 semanas
+    meta_semana: 36000,
+    vendido_semana: 1897,   // S1 parcial (só 01/06)
+    vendido_mes: 1897,
     posicao_loja: 1, // 1-4
-    ma_pct_loja_sem: 23.7,
-    ma_pct_loja_mes: 19.4,
-    semana_atual: 'S4',
-    semana_label: 'Semana 25 a 30/05',
+    ma_pct_loja_sem: 0,
+    ma_pct_loja_mes: 0,
+    semana_atual: 'S1',
+    semana_label: 'Semana 01 a 06/06',
     vendedoras: {
-      'Tatiane':  {sem:10111, mes:42420, ma_sem:18, ma_mes:20, melhorias:[
+      'Tatiane':  {sem:818, mes:818, ma_sem:0, ma_mes:0, melhorias:[
         'Suas Marcas A estão em 22%. Pra chegar em 30%, faça assim: pra cada 10 clientes que você atender, ofereça primeiro uma marca A (Truss, Marco Boni ou Itallian) pra 7 deles. Os outros 3 podem ser outras marcas.',
         'Você foi a vendedora que mais vendeu na loja essa semana. Mantenha o ritmo - quanto mais você fechar venda, mais cresce o prêmio de toda a equipe.'
       ]},
-      'Rayra':    {sem:7493,  mes:36530, ma_sem:16, ma_mes:18, melhorias:[
+      'Rayra':    {sem:567, mes:567, ma_sem:0, ma_mes:0, melhorias:[
         'Suas Marcas A caíram de 21% (média do mês) pra 19% essa semana. Pra subir de novo: ofereça shampoo + condicionador + máscara da mesma marca como combo. Vendendo combo, suas Marcas A sobem e o valor do atendimento também.',
         'Quando um cliente que já comprou com você vem de novo, ele compra mais. Pegue o celular dos seus 10 melhores clientes e mande uma mensagem assim: "Oi fulana, chegou uma novidade da marca X que você vai amar". Mensagens assim trazem cliente pra loja.'
       ]},
-      'Alcione':  {sem:3888,  mes:21172, ma_sem:17, ma_mes:21, melhorias:[
+      'Alcione':  {sem:247, mes:247, ma_sem:0, ma_mes:0, melhorias:[
         'Você é a melhor da loja em vender Marcas A (25%), mas vendeu menos que as colegas em volume total. O caminho pra subir: atender mais clientes. Quando o cliente entrar, vá nele com sorriso, ofereça uma marca A primeiro. Quanto mais clientes você atender, mais venda fecha.',
         'Estratégia que vai te fazer crescer: vender combo de 3 produtos da mesma marca A (shampoo + condicionador + máscara). Por que isso funciona? Porque o cliente que leva combo gasta R$150 a R$300 no atendimento, em vez de R$50 a R$100 que gasta levando produto solto. Você já sabe vender Marca A - agora venda em combo.'
       ]},
-      'Sofia':    {sem:5233,  mes:20454, ma_sem:13, ma_mes:20, melhorias:[
+      'Sofia':    {sem:106, mes:106, ma_sem:0, ma_mes:0, melhorias:[
         'Você é nova e está aprendendo - cresceu 24% na semana passada, parabéns! Próximo passo: quando o cliente estiver olhando um produto, não espere ele decidir sozinho. Diga: "Esse aqui está fazendo sucesso, quer levar?" ou "Se quiser, eu já separo aqui pra você". Frases assim ajudam a fechar a venda.',
         'Seu foco dessa semana: aprender bem as 3 marcas A da loja - Truss, Marco Boni e Itallian. Saber o que cada uma faz e ter pelo menos 1 frase pronta pra oferecer ela. Quando você dominar uma marca, sua confiança sobe e você vende mais.'
       ]},
@@ -946,28 +946,28 @@ const DADOS_LOJA = {
   L3: {
     nome_loja: 'Miss Beleza Itaituba',
     meta_mensal: 80000,
-    meta_semana: 23000,
-    vendido_semana: 18890,  // S4 parcial
-    vendido_mes: 67142,    // soma das 4 semanas
+    meta_semana: 20000,
+    vendido_semana: 907,
+    vendido_mes: 907,
     posicao_loja: 4,
-    ma_pct_loja_sem: 12.3,
-    ma_pct_loja_mes: 22.4,
-    semana_atual: 'S4',
-    semana_label: 'Semana 25 a 30/05',
+    ma_pct_loja_sem: 0,
+    ma_pct_loja_mes: 0,
+    semana_atual: 'S1',
+    semana_label: 'Semana 01 a 06/06',
     vendedoras: {
-      'Ana Mira': {sem:5520,  mes:21024, ma_sem:20, ma_mes:25, melhorias:[
+      'Ana Mira': {sem:54, mes:54, ma_sem:0, ma_mes:0, melhorias:[
         'A loja vendeu 39% menos na semana 2 do que na semana 1. Precisamos retomar o ritmo. Olhe os números: o que mudou entre uma semana e outra? Faltou alguma marca importante? Algum dia ficou com pouca gente atendendo?',
         'Como gerente, sua maior ferramenta é a equipe. Conversa rápida individual com cada uma no início da semana: o que ela vai focar? Quanto ela quer vender? Quando cada uma tem uma meta clara, todo mundo bate mais.'
       ]},
-      'Raimunda': {sem:5238,  mes:19484, ma_sem:24, ma_mes:29, melhorias:[
+      'Raimunda': {sem:108, mes:108, ma_sem:0, ma_mes:0, melhorias:[
         'Manter consistência é o segredo de quem chega no topo. Vendedora que vende todo dia, mesmo que seja pouco, bate mais meta do que quem vende muito num dia e zero no outro. Olhe seu número de hoje - se está em zero, vá em busca de cliente agora.',
         'Suas Marcas A estão em 20%. Pequena mudança que vai te fazer crescer: pra cada cliente novo que entrar, primeira sugestão sua é uma marca A (Truss, Itallian ou Natum). Se ele recusar, aí oferece outras marcas. Mas a primeira tem que ser A.'
       ]},
-      'Brunna':   {sem:3886,  mes:17666, ma_sem:22, ma_mes:18, melhorias:[
+      'Brunna':   {sem:410, mes:410, ma_sem:0, ma_mes:0, melhorias:[
         'Você está bem em Marcas A (24%) - continue assim. Pra subir ainda mais, foque em combo: ofereça produto pra antes do banho (shampoo + condicionador) e depois do banho (máscara ou finalizador). Esse combo de 3 leva sua porcentagem pra cima.',
         'Você converte bem o que oferece - quando o cliente para com você, fecha. O que falta é volume. Pegue os clientes que estão parados na vitrine ou olhando outras prateleiras - vá até eles, sorria, ofereça uma novidade.'
       ]},
-      'Naila':    {sem:4360,  mes:9070, ma_sem:21, ma_mes:22, melhorias:[
+      'Naila':    {sem:335, mes:335, ma_sem:0, ma_mes:0, melhorias:[
         'Você está aprendendo ainda - tudo bem. Plano dessa semana, faça assim: 1) escolha 1 marca A pra dominar (sugiro Truss ou Itallian), 2) aprenda 3 frases prontas de venda dessa marca, 3) use essas frases com todo cliente novo que entrar.',
         'Quando for abordar o cliente, não pergunte "posso ajudar?" - a resposta vai ser sempre "só olhando". Em vez disso, vá direto na conversa: "Oi, quer ver essa marca nova que está fazendo sucesso?" - assim você puxa a interação e a venda acontece.'
       ]},
@@ -976,28 +976,28 @@ const DADOS_LOJA = {
   L4: {
     nome_loja: 'MissBeleza Altamira',
     meta_mensal: 140000,
-    meta_semana: 40000,
-    vendido_semana: 32165,  // S4 parcial
-    vendido_mes: 112796,    // soma das 4 semanas
+    meta_semana: 36000,
+    vendido_semana: 1359,
+    vendido_mes: 1359,
     posicao_loja: 2,
-    ma_pct_loja_sem: 24.1,
-    ma_pct_loja_mes: 20.7,
-    semana_atual: 'S4',
-    semana_label: 'Semana 25 a 30/05',
+    ma_pct_loja_sem: 0,
+    ma_pct_loja_mes: 0,
+    semana_atual: 'S1',
+    semana_label: 'Semana 01 a 06/06',
     vendedoras: {
-      'Tanaia':   {sem:4812,  mes:27875, ma_sem:13, ma_mes:24, melhorias:[
+      'Tanaia':   {sem:0, mes:0, ma_sem:0, ma_mes:0, melhorias:[
         'Foco essa semana é liderar e delegar. Sua equipe vende muito quando você dá clareza do que cada uma precisa fazer. Reserve 10 minutos no início do dia pra alinhar com elas o foco do dia.',
         'Como gerente, dê suporte especial à Rosana (vendedora nova). Pareie ela com Bruna F. (sua top em Marcas A) por 2 dias dessa semana - vai ver Rosana atendendo junto com Bruna, anotando frases que funcionam, depois aplicando sozinha.'
       ]},
-      'Josilene': {sem:5359, mes:24714, ma_sem:17, ma_mes:21, melhorias:[
+      'Josilene': {sem:0, mes:0, ma_sem:0, ma_mes:0, melhorias:[
         'Você cresceu na semana passada, parabéns! Tem espaço pra subir ainda: você está em 24% de Marcas A. Pra chegar em 30% e destravar o bônus extra de R$50 no prêmio da loja, faça assim: oferece marca A pra cada cliente novo, primeiro.',
         'Estratégia que aumenta tanto vendas quanto Marcas A: combo. Pra cada cliente, ofereça shampoo + condicionador + máscara da mesma marca A. O cliente sai com 3 produtos em vez de 1, e seu ticket sobe.'
       ]},
-      'Bruna F.': {sem:15297,  mes:41111, ma_sem:10, ma_mes:23, melhorias:[
+      'Bruna F.': {sem:1226, mes:1226, ma_sem:0, ma_mes:0, melhorias:[
         'Você é a referência da loja em Marcas A (30%) - parabéns. Objetivo agora: manter esse nível e aumentar o volume total. Mais atendimentos = mais venda fechada = mais prêmio.',
         'Você já sabe vender Marca A com naturalidade. Continue assim. Quando suas colegas perguntarem como você faz, conte sem segredo - quanto mais a equipe inteira vender Marca A, mais o prêmio sobe pra todas vocês (loja em 30% leva bônus extra).'
       ]},
-      'Rosana':   {sem:4863,  mes:15942, ma_sem:10, ma_mes:21, melhorias:[
+      'Rosana':   {sem:93, mes:93, ma_sem:0, ma_mes:0, melhorias:[
         'Você é nova - foco essa semana é aprender, não pressão de bater meta. Plano dessa semana: 1) passar 2 manhãs com Bruna F. (top da loja) observando ela vender, 2) anotar as frases que ela usa pra oferecer marca A, 3) tentar usar essas mesmas frases com seus próprios clientes.',
         'Marcas A da nossa loja pra você aprender: Truss (faz reconstrução capilar profissional), Itallian (tratamento capilar profissional), Marco Boni (acessórios como escova e prancha). Comece pela Truss - é a que mais vende aqui.'
       ]},
@@ -1006,87 +1006,93 @@ const DADOS_LOJA = {
   L5: {
     nome_loja: 'MissBeleza Santarém',
     meta_mensal: 90000,
-    meta_semana: 26000,
-    vendido_semana: 17647,  // S4 parcial
-    vendido_mes: 73198,    // soma das 4 semanas
+    meta_semana: 25000,
+    vendido_semana: 690,
+    vendido_mes: 690,
     posicao_loja: 3,
-    ma_pct_loja_sem: 14.7,
-    ma_pct_loja_mes: 22.7,
-    semana_atual: 'S4',
-    semana_label: 'Semana 25 a 30/05',
+    ma_pct_loja_sem: 0,
+    ma_pct_loja_mes: 0,
+    semana_atual: 'S1',
+    semana_label: 'Semana 01 a 06/06',
     vendedoras: {
-      'Rayssa':   {sem:4085, mes:20550, ma_sem:6, ma_mes:27, melhorias:[
+      'Rayssa':   {sem:107, mes:107, ma_sem:0, ma_mes:0, melhorias:[
         'Você lidera Santarém com R$14.021 acumulados - merecido. Foco agora: manter o ritmo. Tenta vender pelo menos R$1.500 por semana - assim você não cai do topo.',
         'Você converte bem e fecha bem. Quando Joyce ou Karina (que está aprendendo) perguntarem como você aborda o cliente, conte. Quando todo mundo da loja vende bem, o prêmio sobe pra todas (loja em 30% Marcas A leva bônus extra).'
       ]},
-      'Joyce':    {sem:3290,  mes:19906, ma_sem:28, ma_mes:26, melhorias:[
+      'Joyce':    {sem:196, mes:196, ma_sem:0, ma_mes:0, melhorias:[
         'Você vendeu R$280 essa semana (sua média é R$4.000) - caiu muito. O que mudou? Tem dado certo o horário? Cliente difícil? Quando uma semana fica abaixo do normal, conversa rápida com Rosiene (gerente) pra entender e ajustar.',
         'Suas Marcas A estão em 18% - faltam 12 pontos pra chegar nos 30% onde a loja ganha bônus extra. Foco dessa semana: Truss e Itallian. Pra cada cliente novo que entrar, primeira sugestão sua é uma dessas duas marcas. Em uma semana você melhora 5 pontos.'
       ]},
-      'Rosiene':  {sem:4128, mes:14515, ma_sem:35, ma_mes:23, melhorias:[
+      'Rosiene':  {sem:89, mes:89, ma_sem:0, ma_mes:0, melhorias:[
         'A loja tem chance de bater meta de maio - precisa de ritmo todos os dias. Reforce escala de fim de semana (sexta e sábado) com todas presentes - são os dias que mais movimento entra.',
         'Karina (vendedora nova) precisa de apoio pra crescer. Combine com ela um esquema de meio período junto com você nos próximos 5 dias - acompanhe ela atendendo cliente e dê feedback na hora: o que falou bem, o que pode melhorar.'
       ]},
-      'Karina':   {sem:5271,  mes:16767, ma_sem:9, ma_mes:11, melhorias:[
+      'Karina':   {sem:298, mes:298, ma_sem:0, ma_mes:0, melhorias:[
         'Você é nova e está aprendendo. Foco dessa semana: aprender bem 3 marcas A da loja - Truss, Itallian e Santa Clara. Saber o que cada uma faz e ter 1 frase pronta pra oferecer cada uma. Quando você dominar uma marca, sua confiança sobe e a venda acontece naturalmente.',
         'Pra subir 5 pontos em Marcas A em 2 semanas, faça assim: pra cada cliente novo que entrar, sua primeira sugestão é uma marca A (Truss, Itallian ou Santa Clara). Mesmo se o cliente recusar, você plantou a ideia - ele pode lembrar depois.'
       ]},
-      'Lucas':    {sem:480, mes:1067, ma_sem:0, ma_mes:0, melhorias:[
+      'Lucas':    {sem:0, mes:0, ma_sem:0, ma_mes:0, melhorias:[
         'Você é o caixa da nossa loja - mantém a fila andando rápido e com sorriso. Seu trabalho é fundamental: cliente que paga rápido e bem atendido volta. Continue assim.'
       ]},
     }
   }
 };
 
-// Histórico de prêmios já recebidos (semanas fechadas e quiz respondido)
-// Estrutura: {LOJA: {Vendedora: {S1: valor, S2: valor, ...}}}
-// Dados S1 reais extraídos do ERP em 2026-05-20 (período 01/05 a 10/05)
-// Sem bônus de Marcas A ainda (a buscar). Pool calculado pela faixa de meta atingida.
-// L1: 96% (pool R$180) | L3: 88% (R$100) | L4: 80% (R$100) | L5: 77% (R$80)
+// Histórico de prêmios já recebidos (semanas fechadas) — keyed por mês.
+// Estrutura: {mes 'YYYY-MM': {LOJA: {Vendedora: {S1:R$, S2:R$, S3:R$, S4:R$, _em_pct:{S1:%,...}}}}}
+// _em_pct é o % atingido da meta semanal — mostrado na aba Prêmios.
 const HISTORICO_PREMIOS = {
-  L1: {
-    // Pool R$230 — CONCESSÃO da gestão. A loja fechou em 96% da meta de R$45k
-    // (R$43.177 com 10/05 incluso). A gestão decidiu reconhecer o esforço.
-    // Divisão por contribuição individual sobre o TOTAL da loja (R$43.177).
-    // ⚠️ Sofia recebe considerando vendas L1 + L4 (cross-loja, ela migrou de L4
-    //    pra L1 durante o ano). Total Sofia S1 = 4.845 (L1) + 1.155 (L4) = R$6.000.
-    'Tatiane': {S1: 76},  // 14.328 / 43.177 × 230
-    'Rayra':   {S1: 74},  // 13.889 / 43.177 × 230
-    'Alcione': {S1: 47},  //  8.744 / 43.177 × 230
-    'Sofia':   {S1: 32}   //  6.000 / 43.177 × 230 (com L4 cross-loja)
+  '2026-05': {
+    L1: {
+      // S1 = concessão da gestão (R$230 — loja em 96%). S2/S3/S4 calculados via faixa.
+      'Tatiane': {S1:76, S2:31, S3:30, S4:30},
+      'Rayra':   {S1:74, S2:29, S3:23, S4:22},
+      'Alcione': {S1:47, S2:18, S3:12, S4:12},
+      'Sofia':   {S1:32, S2:22, S3:14, S4:16},
+      _em_pct: {S1:96, S2:85, S3:71, S4:77},
+      _pool:   {S1:230, S2:100, S3:80, S4:80},
+    },
+    L3: {
+      'Ana Mira': {S1:41, S2:0, S3:0, S4:29},
+      'Raimunda': {S1:27, S2:0, S3:0, S4:28},
+      'Brunna':   {S1:32, S2:0, S3:0, S4:20},
+      'Naila':    {S1:0,  S2:0, S3:0, S4:23},
+      _em_pct: {S1:88, S2:67, S3:56, S4:82},
+      _pool:   {S1:100, S2:0, S3:0, S4:100},
+    },
+    L4: {
+      'Tanaia':   {S1:37, S2:15, S3:0, S4:16},
+      'Josilene': {S1:26, S2:18, S3:0, S4:18},
+      'Bruna F.': {S1:19, S2:37, S3:0, S4:50},
+      'Rosana':   {S1:16, S2:10, S3:0, S4:16},
+      _em_pct: {S1:80, S2:72, S3:49, S4:80},
+      _pool:   {S1:100, S2:80, S3:0, S4:100},
+    },
+    L5: {
+      'Rayssa':  {S1:27, S2:0, S3:0, S4:0},
+      'Joyce':   {S1:25, S2:0, S3:0, S4:0},
+      'Rosiene': {S1:19, S2:0, S3:0, S4:0},
+      'Karina':  {S1:9,  S2:0, S3:0, S4:0},
+      'Lucas':   {},  // caixa
+      _em_pct: {S1:77, S2:69, S3:66, S4:68},
+      _pool:   {S1:80, S2:0, S3:0, S4:0},
+    },
   },
-  L3: {
-    // Pool R$100, dividido entre 4 (Naila vendeu R$0)
-    'Ana Mira': {S1: 41}, // 9.010 / 21.893 × 100
-    'Raimunda': {S1: 27}, // 5.929 / 21.893 × 100
-    'Brunna':   {S1: 32}, // 6.954 / 21.893 × 100
-    'Naila':    {S1: 0}
-  },
-  L4: {
-    // Pool R$100, dividido sobre o total da loja R$35.860.
-    // ⚠️ Rosana recebe considerando vendas L1 + L4 (cross-loja, ela migrou de
-    //    L1 pra L4 durante o ano). Total Rosana S1 = 780 (L1) + 5.081 (L4) = R$5.861.
-    'Tanaia':   {S1: 37}, // 13.430 / 35.860 × 100
-    'Josilene': {S1: 26}, //  9.182 / 35.860 × 100
-    'Bruna F.': {S1: 19}, //  6.929 / 35.860 × 100
-    'Rosana':   {S1: 16}  //  5.861 / 35.860 × 100 (com L1 cross-loja)
-  },
-  L5: {
-    // Pool R$80, dividido entre 4 vendedoras (Lucas excluído por ser caixa)
-    'Rayssa':  {S1: 27},  // 7.651 / 22.696 × 80
-    'Joyce':   {S1: 25},  // 7.036 / 22.696 × 80
-    'Rosiene': {S1: 19},  // 5.398 / 22.696 × 80
-    'Karina':  {S1: 9},   // 2.611 / 22.696 × 80
-    'Lucas':   {}         // caixa - não recebe prêmio
-  }
 };
+
+// Helper: lookup do mês atual. Se chave novo mês não existe, retorna {}.
+function _histMes(lojaKey) {
+  const hoje = new Date();
+  const mk = hoje.getFullYear() + '-' + String(hoje.getMonth()+1).padStart(2,'0');
+  return (HISTORICO_PREMIOS[mk] || {})[lojaKey] || {};
+}
 
 // Semanas do mês corrente
 const SEMANAS_MES = [
-  {id:'S1', label:'Semana 1', periodo:'01/05 a 10/05'},
-  {id:'S2', label:'Semana 2', periodo:'11/05 a 16/05'},
-  {id:'S3', label:'Semana 3', periodo:'18/05 a 23/05'},
-  {id:'S4', label:'Semana 4', periodo:'25/05 a 30/05'},
+  {id:'S1', label:'Semana 1', periodo:'01/06 a 06/06'},
+  {id:'S2', label:'Semana 2', periodo:'08/06 a 13/06'},
+  {id:'S3', label:'Semana 3', periodo:'15/06 a 20/06'},
+  {id:'S4', label:'Semana 4', periodo:'22/06 a 30/06'},
 ];
 
 // Prêmios pendentes de desbloqueio via quiz
@@ -1098,132 +1104,81 @@ const SEMANAS_MES = [
 const VENDAS_HIST = {
   L1: {
     semanas: [
-      {id:'S1', meta:45000}, {id:'S2', meta:32000},
-      {id:'S3', meta:35000}, {id:'S4', meta:35000},
+      {id:'S1', meta:36000}, {id:'S2', meta:44000},
+      {id:'S3', meta:25000}, {id:'S4', meta:35000},
     ],
     vendas: {
-      S1:{Outros:1371,Tatiane:14328,Rayra:13889,Alcione:8744,Sofia:4845},
-      S2:{Tatiane:8513,Rayra:7841,Alcione:4803,Sofia:6015},
-      S3:{Tatiane:9468,Rayra:7307,Alcione:3737,Sofia:4361},
-      S4:{Outros:178,Tatiane:10111,Rayra:7493,Alcione:3888,Sofia:5233},
+      S1:{Outros:159,Tatiane:818,Rayra:567,Alcione:247,Sofia:106},
+      S2:{}, S3:{}, S4:{},
     },
-    marcasA_loja: {S1:19.2, S2:22.0, S3:17.0, S4:23.7},
-    ontem: {data:'30/05/2026', dia_semana:'sábado', vendas:{Tatiane:3317,Rayra:3055,Alcione:897,Sofia:1138}},
-    tickets: {
-      S1:{Outros:15,Tatiane:137,Rayra:167,Alcione:103,Sofia:67},
-      S2:{Tatiane:53,Rayra:95,Alcione:65,Sofia:58},
-      S3:{Tatiane:74,Rayra:84,Alcione:59,Sofia:68},
-      S4:{Outros:1,Tatiane:112,Rayra:86,Alcione:67,Sofia:69},
-    },
-    pecas: {
-      S1:{Outros:40,Tatiane:452,Rayra:403,Alcione:264,Sofia:173},
-      S2:{Tatiane:195,Rayra:263,Alcione:123,Sofia:168},
-      S3:{Tatiane:295,Rayra:235,Alcione:178,Sofia:301},
-      S4:{Outros:13,Tatiane:273,Rayra:302,Alcione:166,Sofia:166},
-    },
-    cmv: {
-      S1:{Tatiane:40.8,Rayra:58.6,Alcione:42.8,Sofia:53.2},
-      S2:{Tatiane:39.7,Rayra:53.9,Alcione:52,Sofia:51.1},
-      S3:{Tatiane:35.9,Rayra:45.3,Alcione:54.2,Sofia:89.5},
-      S4:{Tatiane:35.7,Rayra:60.1,Alcione:62.5,Sofia:46.3},
-    },
+    marcasA_loja: {S1:0, S2:0, S3:0, S4:0},
+    ontem: {data:'31/05/2026', dia_semana:'sábado', vendas:{}},
+    tickets: { S1:{Outros:3,Tatiane:5,Rayra:4,Alcione:1,Sofia:1}, S2:{}, S3:{}, S4:{} },
+    pecas:   { S1:{Outros:18,Tatiane:27,Rayra:15,Alcione:4,Sofia:5}, S2:{}, S3:{}, S4:{} },
+    cmv:     { S1:{Tatiane:43.4,Rayra:46.4,Alcione:55.5,Sofia:38.2}, S2:{}, S3:{}, S4:{} },
   },
   L3: {
     semanas: [
-      {id:'S1', meta:25000}, {id:'S2', meta:20000},
-      {id:'S3', meta:23000}, {id:'S4', meta:23000},
+      {id:'S1', meta:20000}, {id:'S2', meta:25000},
+      {id:'S3', meta:15000}, {id:'S4', meta:20000},
     ],
     vendas: {
-      S1:{Outros:12,Raimunda:5930,'Ana Mira':9010,Brunna:6954},
-      S2:{Raimunda:4424,'Ana Mira':3651,Naila:1632,Brunna:3713},
-      S3:{Raimunda:3892,'Ana Mira':2843,Naila:3078,Brunna:3113},
-      S4:{Outros:-114,Raimunda:5238,'Ana Mira':5520,Naila:4360,Brunna:3886},
+      S1:{Raimunda:108,'Ana Mira':54,Naila:335,Brunna:410},
+      S2:{}, S3:{}, S4:{},
     },
-    marcasA_loja: {S1:25.2, S2:23.0, S3:19.1, S4:12.3},
-    ontem: {data:'30/05/2026', dia_semana:'sábado', vendas:{'Ana Mira':902,Raimunda:408,Brunna:1094,Naila:1464}},
-    tickets: {
-      S1:{Outros:1,Raimunda:75,'Ana Mira':128,Brunna:92},
-      S2:{Raimunda:43,'Ana Mira':47,Naila:32,Brunna:49},
-      S3:{Raimunda:41,'Ana Mira':38,Naila:41,Brunna:48},
-      S4:{Outros:0,Raimunda:49,'Ana Mira':53,Naila:52,Brunna:49},
-    },
-    pecas: {
-      S1:{Outros:1,Raimunda:270,'Ana Mira':421,Brunna:319},
-      S2:{Raimunda:184,'Ana Mira':200,Naila:60,Brunna:177},
-      S3:{Raimunda:180,'Ana Mira':81,Naila:151,Brunna:136},
-      S4:{Outros:-2,Raimunda:292,'Ana Mira':161,Naila:169,Brunna:144},
-    },
-    cmv: {
-      S1:{Raimunda:55.6,'Ana Mira':63.1,Brunna:46.8},
-      S2:{Raimunda:58.8,'Ana Mira':79,Naila:48.8,Brunna:61.2},
-      S3:{Raimunda:87.5,'Ana Mira':56,Naila:71.2,Brunna:63.3},
-      S4:{Raimunda:55.4,'Ana Mira':54.5,Naila:70.3,Brunna:68.7},
-    },
+    marcasA_loja: {S1:0, S2:0, S3:0, S4:0},
+    ontem: {data:'31/05/2026', dia_semana:'sábado', vendas:{}},
+    tickets: { S1:{Raimunda:2,'Ana Mira':4,Naila:1,Brunna:3}, S2:{}, S3:{}, S4:{} },
+    pecas:   { S1:{Raimunda:3,'Ana Mira':8,Naila:14,Brunna:10}, S2:{}, S3:{}, S4:{} },
+    cmv:     { S1:{Raimunda:49.8,'Ana Mira':368.6,Naila:39.2,Brunna:30.2}, S2:{}, S3:{}, S4:{} },
   },
   L4: {
     semanas: [
-      {id:'S1', meta:45000}, {id:'S2', meta:35000},
-      {id:'S3', meta:40000}, {id:'S4', meta:40000},
+      {id:'S1', meta:36000}, {id:'S2', meta:44000},
+      {id:'S3', meta:25000}, {id:'S4', meta:35000},
     ],
     vendas: {
-      S1:{Tanaia:13431,Josilene:9183,'Bruna F.':6929,Rosana:5161,Outros:1156},
-      S2:{Outros:120,Tanaia:4644,Josilene:5628,'Bruna F.':11627,Rosana:3075},
-      S3:{Tanaia:4988,Josilene:4544,Outros:44,'Bruna F.':7258,Rosana:2843},
-      S4:{Tanaia:4812,Josilene:5359,Outros:1834,'Bruna F.':15297,Rosana:4863},
+      S1:{Outros:40,'Bruna F.':1226,Rosana:93},
+      S2:{}, S3:{}, S4:{},
     },
-    marcasA_loja: {S1:27.7, S2:22.1, S3:12.4, S4:24.1},
-    ontem: {data:'30/05/2026', dia_semana:'sábado', vendas:{Tanaia:362,Josilene:699,'Bruna F.':4088,Rosana:854}},
-    tickets: {
-      S1:{Tanaia:152,Josilene:122,'Bruna F.':93,Rosana:88,Outros:20},
-      S2:{Outros:1,Tanaia:51,Josilene:78,'Bruna F.':132,Rosana:44},
-      S3:{Tanaia:63,Josilene:53,Outros:2,'Bruna F.':97,Rosana:47},
-      S4:{Tanaia:48,Josilene:55,Outros:22,'Bruna F.':156,Rosana:62},
-    },
-    pecas: {
-      S1:{Tanaia:424,Josilene:291,'Bruna F.':208,Rosana:208,Outros:44},
-      S2:{Outros:5,Tanaia:134,Josilene:165,'Bruna F.':333,Rosana:90},
-      S3:{Tanaia:298,Josilene:170,Outros:2,'Bruna F.':220,Rosana:113},
-      S4:{Tanaia:152,Josilene:144,Outros:60,'Bruna F.':429,Rosana:158},
-    },
-    cmv: {
-      S1:{Tanaia:40.6,Josilene:48.8,'Bruna F.':44.4,Rosana:40.5},
-      S2:{Tanaia:42,Josilene:39.6,'Bruna F.':46.2,Rosana:42.5},
-      S3:{Tanaia:42.1,Josilene:36.5,'Bruna F.':43.7,Rosana:41.9},
-      S4:{Tanaia:36.4,Josilene:60.3,'Bruna F.':40.8,Rosana:45.6},
-    },
+    marcasA_loja: {S1:0, S2:0, S3:0, S4:0},
+    ontem: {data:'31/05/2026', dia_semana:'sábado', vendas:{}},
+    tickets: { S1:{Outros:1,'Bruna F.':7,Rosana:4}, S2:{}, S3:{}, S4:{} },
+    pecas:   { S1:{Outros:2,'Bruna F.':21,Rosana:5}, S2:{}, S3:{}, S4:{} },
+    cmv:     { S1:{'Bruna F.':27.8,Rosana:206.4}, S2:{}, S3:{}, S4:{} },
   },
   L5: {
     semanas: [
-      {id:'S1', meta:30000}, {id:'S2', meta:22336},
-      {id:'S3', meta:26000}, {id:'S4', meta:26000},
+      {id:'S1', meta:25000}, {id:'S2', meta:30000},
+      {id:'S3', meta:15000}, {id:'S4', meta:20000},
     ],
     vendas: {
-      S1:{Rosiene:5399,Joyce:7037,Rayssa:7651,Lucas:295,Karina:2611},
-      S2:{Rosiene:1098,Joyce:4805,Rayssa:4746,Lucas:53,Karina:4698},
-      S3:{Rosiene:3890,Joyce:4774,Rayssa:4068,Lucas:239,Karina:4187},
-      S4:{Outros:393,Rosiene:4128,Joyce:3290,Rayssa:4085,Lucas:480,Karina:5271},
+      S1:{Rosiene:89,Joyce:196,Rayssa:107,Karina:298},
+      S2:{}, S3:{}, S4:{},
     },
-    marcasA_loja: {S1:21.1, S2:25.9, S3:21.2, S4:14.7},
-    ontem: {data:'30/05/2026', dia_semana:'sábado', vendas:{Rosiene:1222,Joyce:546,Rayssa:924,Karina:785}},
-    tickets: {
-      S1:{Rosiene:57,Joyce:84,Rayssa:77,Lucas:2,Karina:38},
-      S2:{Rosiene:18,Joyce:37,Rayssa:49,Lucas:1,Karina:63},
-      S3:{Rosiene:38,Joyce:44,Rayssa:41,Lucas:3,Karina:42},
-      S4:{Outros:2,Rosiene:43,Joyce:45,Rayssa:40,Lucas:2,Karina:49},
-    },
-    pecas: {
-      S1:{Rosiene:230,Joyce:339,Rayssa:388,Lucas:4,Karina:348},
-      S2:{Rosiene:50,Joyce:151,Rayssa:172,Lucas:1,Karina:271},
-      S3:{Rosiene:100,Joyce:157,Rayssa:118,Lucas:11,Karina:134},
-      S4:{Outros:5,Rosiene:125,Joyce:132,Rayssa:126,Lucas:17,Karina:152},
-    },
-    cmv: {
-      S1:{Rosiene:61,Joyce:46.8,Rayssa:64.4,Lucas:28.2,Karina:126.5},
-      S2:{Rosiene:39.2,Joyce:38.9,Rayssa:48.6,Lucas:50.2,Karina:45.3},
-      S3:{Rosiene:35.7,Joyce:41.9,Rayssa:42.9,Lucas:74.8,Karina:50.1},
-      S4:{Outros:0,Rosiene:55.8,Joyce:46.3,Rayssa:38.4,Lucas:36.4,Karina:43.6},
-    },
+    marcasA_loja: {S1:0, S2:0, S3:0, S4:0},
+    ontem: {data:'31/05/2026', dia_semana:'sábado', vendas:{}},
+    tickets: { S1:{Rosiene:1,Joyce:3,Rayssa:2,Karina:2}, S2:{}, S3:{}, S4:{} },
+    pecas:   { S1:{Rosiene:2,Joyce:4,Rayssa:5,Karina:5}, S2:{}, S3:{}, S4:{} },
+    cmv:     { S1:{Rosiene:52.3,Joyce:16.2,Rayssa:94.4,Karina:207.4}, S2:{}, S3:{}, S4:{} },
   },
+};
+
+// ─── HISTÓRICO MENSAL (pra gráfico evolução mês a mês na aba Meu Progresso) ──
+// Vendas totais do mês por vendedora. Mês corrente vem de DADOS_LOJA[Lx].vendedoras[Y].mes.
+const HIST_MENSAL_VENDAS = {
+  '2026-05': {
+    L1: {'Tatiane':42420,'Rayra':36530,'Alcione':21172,'Sofia':20454},
+    L3: {'Ana Mira':21024,'Raimunda':19484,'Brunna':17666,'Naila':9070},
+    L4: {'Tanaia':27875,'Josilene':24714,'Bruna F.':41111,'Rosana':15942},
+    L5: {'Rayssa':20550,'Joyce':19906,'Rosiene':14515,'Karina':16767,'Lucas':1067},
+  },
+};
+
+// Metas mensais por mês (pra gráfico mostrar linha de meta)
+const META_MENSAL_HIST = {
+  '2026-05': {L1:140000, L3:80000, L4:140000, L5:90000},
+  '2026-06': {L1:140000, L3:80000, L4:140000, L5:90000},
 };
 
 // ─── SYNC DE METAS COM O PAINEL ──────────────────────────────────────────────
@@ -2412,6 +2367,92 @@ function getISOWeekKey() {
   return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`;
 }
 
+// ─── GRÁFICO EVOLUÇÃO MÊS A MÊS ──────────────────────────────────────────────
+// SVG inline (sem dependência externa). Mostra vendas totais da vendedora em cada mês.
+// Fontes: HIST_MENSAL_VENDAS (meses anteriores) + DADOS_LOJA[X].vendedoras[Y].mes (mês corrente).
+function renderGraficoMensalVendedora() {
+  const ld = DADOS_LOJA[LOJA_KEY];
+  const me = ld.vendedoras[currentUser];
+  if (!me) return '';
+  const hoje = new Date();
+  const mesCorrenteKey = hoje.getFullYear() + '-' + String(hoje.getMonth()+1).padStart(2,'0');
+  const nomesMes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+  // Coleta meses anteriores em ordem ASC
+  const mesesAnt = Object.keys(HIST_MENSAL_VENDAS).filter(m => m < mesCorrenteKey).sort();
+  const pontos = mesesAnt.map(mk => {
+    const v = (HIST_MENSAL_VENDAS[mk]?.[LOJA_KEY] || {})[currentUser] || 0;
+    const [ano, mn] = mk.split('-');
+    return {mes: nomesMes[parseInt(mn,10)-1], ano: ano.slice(2), valor: v, parcial:false};
+  });
+  // Mês corrente (parcial)
+  pontos.push({
+    mes: nomesMes[hoje.getMonth()],
+    ano: String(hoje.getFullYear()).slice(2),
+    valor: me.mes || 0,
+    parcial: true
+  });
+
+  if (pontos.length < 2) return ''; // sem ponto de comparação
+
+  const maxValor = Math.max(...pontos.map(p => p.valor), 1000);
+  const w = 320, h = 180, padL = 38, padR = 12, padT = 18, padB = 32;
+  const innerW = w - padL - padR;
+  const innerH = h - padT - padB;
+  const step = pontos.length > 1 ? innerW / (pontos.length - 1) : innerW;
+
+  // Pontos no SVG
+  const coords = pontos.map((p, i) => ({
+    x: padL + i * step,
+    y: padT + innerH - (p.valor / maxValor) * innerH,
+    p
+  }));
+  const linhaPath = coords.map((c, i) => (i===0?'M':'L') + c.x.toFixed(1) + ',' + c.y.toFixed(1)).join(' ');
+  const areaPath = linhaPath + ` L${coords[coords.length-1].x.toFixed(1)},${(padT+innerH).toFixed(1)} L${coords[0].x.toFixed(1)},${(padT+innerH).toFixed(1)} Z`;
+
+  // Y-axis labels (3 gridlines)
+  const yTicks = [0, 0.5, 1].map(t => {
+    const y = padT + innerH - t * innerH;
+    const val = Math.round(maxValor * t);
+    return `<line x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}" stroke="rgba(255,255,255,.06)" stroke-dasharray="2,3"/>
+            <text x="${padL-4}" y="${y+3}" text-anchor="end" font-size="9" fill="var(--muted)">${val>=1000?(val/1000).toFixed(0)+'k':val}</text>`;
+  }).join('');
+
+  // X-axis labels
+  const xLabels = coords.map(c => `<text x="${c.x.toFixed(1)}" y="${(h-padB+14).toFixed(1)}" text-anchor="middle" font-size="10" fill="var(--muted)">${c.p.mes}/${c.p.ano}</text>`).join('');
+
+  // Pontos + valores
+  const dots = coords.map(c => {
+    const cor = c.p.parcial ? 'var(--yellow)' : 'var(--blue)';
+    return `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="4" fill="${cor}" stroke="var(--bg2)" stroke-width="2"/>
+            <text x="${c.x.toFixed(1)}" y="${(c.y-9).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="600" fill="${cor}">${c.p.valor>=1000?(c.p.valor/1000).toFixed(1)+'k':'R$'+c.p.valor}</text>`;
+  }).join('');
+
+  // Comparação com mês anterior
+  const ult = pontos[pontos.length-1];
+  const ant = pontos[pontos.length-2];
+  let cmp = '';
+  if (ant && ant.valor > 0) {
+    const delta = ((ult.valor - ant.valor) / ant.valor * 100);
+    const sinal = delta >= 0 ? '↗' : '↘';
+    const cor = delta >= 0 ? 'var(--green)' : 'var(--red)';
+    cmp = `<div style="font-size:12px;color:${cor};margin-top:6px"><b>${sinal} ${Math.abs(delta).toFixed(0)}%</b> vs ${ant.mes}/${ant.ano}${ult.parcial?' <span style="color:var(--muted)">(mês ainda em andamento)</span>':''}</div>`;
+  }
+
+  return `<div class="metric-card" style="margin-top:14px">
+    <h3 style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📈 Evolução mês a mês</h3>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Suas vendas totais em cada mês.</p>
+    <svg viewBox="0 0 ${w} ${h}" width="100%" style="display:block;max-width:100%">
+      ${yTicks}
+      <path d="${areaPath}" fill="rgba(59,130,246,.12)"/>
+      <path d="${linhaPath}" fill="none" stroke="var(--blue)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+      ${dots}
+      ${xLabels}
+    </svg>
+    ${cmp}
+  </div>`;
+}
+
 // ─── EFICIÊNCIA DA VENDA (TM / Tickets / PA / CMV) ───────────────────────────
 // Mostra métricas de qualidade da venda da vendedora com explicações em
 // linguagem clara. Adicionado 2026-05-27.
@@ -2585,6 +2626,8 @@ function renderProgresso() {
       <div class="metric-row"><span class="lbl">% Marcas A mês</span><span class="val">${fP(me.ma_mes)}</span></div>
     </div>
 
+    ${renderGraficoMensalVendedora()}
+
     ${renderEficienciaVendedora()}
 
     ${blocoIndiv}
@@ -2751,7 +2794,9 @@ function renderPremio() {
 function renderHistoricoPremios() {
   const ld = DADOS_LOJA[LOJA_KEY];
   const me = ld.vendedoras[currentUser];
-  const historico = (HISTORICO_PREMIOS[LOJA_KEY] || {})[currentUser] || {};
+  const lojaHistMes = _histMes(LOJA_KEY);
+  const historico = lojaHistMes[currentUser] || {};
+  const histEmPct = lojaHistMes._em_pct || {};
 
   // Projeção da semana atual (não definitiva)
   const calc = calcMeuPremio();
@@ -2794,10 +2839,12 @@ function renderHistoricoPremios() {
     } else if (jaRecebeuViaQuiz) {
       // Vendedora ja passou no quiz dessa semana - mostra como recebido
       totalRecebido += pendente;
+      const pctSem = c ? Math.round(c.em_pct) : null;
       rows += `<div class="hist-row">
         <div>
           <div class="hist-label">${s.label} ✅</div>
           <div class="hist-data">${s.periodo}</div>
+          ${pctSem !== null ? `<div class="hist-data" style="color:var(--blue);font-size:11px">loja: ${pctSem}% da meta</div>` : ''}
         </div>
         <div style="text-align:right">
           <div class="hist-valor">R$ ${pendente}</div>
@@ -2806,10 +2853,12 @@ function renderHistoricoPremios() {
       </div>`;
     } else if (isPendente) {
       // Semana fechada mas vendedora ainda não respondeu o quiz
+      const pctSem = c ? Math.round(c.em_pct) : null;
       rows += `<div class="hist-row pendente">
         <div>
           <div class="hist-label">${s.label} 🎁 PRÊMIO PRONTO</div>
           <div class="hist-data">${s.periodo}</div>
+          ${pctSem !== null ? `<div class="hist-data" style="color:var(--blue);font-size:11px">loja: ${pctSem}% da meta</div>` : ''}
         </div>
         <div style="text-align:right">
           <div class="hist-valor pendente">R$ ?</div>
@@ -2818,10 +2867,12 @@ function renderHistoricoPremios() {
       </div>`;
     } else if (respondeuSemPassar) {
       // Respondeu mas não atingiu 3 acertos — sem prêmio dessa semana
+      const pctSem = c ? Math.round(c.em_pct) : null;
       rows += `<div class="hist-row" style="opacity:.75">
         <div>
           <div class="hist-label">${s.label} ❌</div>
           <div class="hist-data">${s.periodo}</div>
+          ${pctSem !== null ? `<div class="hist-data" style="color:var(--muted);font-size:11px">loja: ${pctSem}% da meta</div>` : ''}
         </div>
         <div style="text-align:right">
           <div class="hist-valor" style="color:var(--muted);font-size:14px">R$ 0</div>
@@ -2829,16 +2880,19 @@ function renderHistoricoPremios() {
         </div>
       </div>`;
     } else if (historico[s.id] !== undefined) {
-      // Semana já recebida
+      // Semana já recebida (vinda do HISTORICO_PREMIOS hardcoded)
       totalRecebido += historico[s.id];
-      rows += `<div class="hist-row">
+      const pctSem = histEmPct[s.id];
+      const isZero = !historico[s.id];
+      rows += `<div class="hist-row" ${isZero ? 'style="opacity:.7"' : ''}>
         <div>
-          <div class="hist-label">${s.label} ✅</div>
+          <div class="hist-label">${s.label} ${isZero ? '⚪' : '✅'}</div>
           <div class="hist-data">${s.periodo}</div>
+          ${pctSem != null ? `<div class="hist-data" style="color:${pctSem>=70?'var(--blue)':'var(--muted)'};font-size:11px">loja: ${pctSem}% da meta${pctSem<70?' (não bateu)':''}</div>` : ''}
         </div>
         <div style="text-align:right">
-          <div class="hist-valor">R$ ${historico[s.id]}</div>
-          <div class="hist-status">recebido</div>
+          <div class="hist-valor" ${isZero ? 'style="color:var(--muted);font-size:14px"' : ''}>R$ ${historico[s.id]}</div>
+          <div class="hist-status">${isZero ? 'sem prêmio' : 'recebido'}</div>
         </div>
       </div>`;
     } else if (idx > idxAtual) {
@@ -2868,15 +2922,63 @@ function renderHistoricoPremios() {
     }
   });
 
+  // Render bloco de meses anteriores (todos os meses passados em HISTORICO_PREMIOS,
+  // exceto o mês corrente). Mostra cada mês como mini-tabela com S1-S4 e total.
+  const _hojeBloco = new Date();
+  const _mesAtual = _hojeBloco.getFullYear() + '-' + String(_hojeBloco.getMonth()+1).padStart(2,'0');
+  const _nomesMes = {1:'janeiro',2:'fevereiro',3:'março',4:'abril',5:'maio',6:'junho',7:'julho',8:'agosto',9:'setembro',10:'outubro',11:'novembro',12:'dezembro'};
+  const blocosAnteriores = Object.keys(HISTORICO_PREMIOS)
+    .filter(mk => mk !== _mesAtual)
+    .sort()
+    .reverse()
+    .map(mk => {
+      const dadosMes = (HISTORICO_PREMIOS[mk] || {})[LOJA_KEY] || {};
+      const meuPremiosMes = dadosMes[currentUser] || {};
+      const pctMes = dadosMes._em_pct || {};
+      const semIds = ['S1','S2','S3','S4'];
+      let totalMes = 0;
+      const rowsMes = semIds.map(sid => {
+        const v = meuPremiosMes[sid];
+        if (v === undefined) return '';
+        totalMes += v;
+        const pct = pctMes[sid];
+        const isZero = !v;
+        return `<div class="hist-row" ${isZero ? 'style="opacity:.7"' : ''}>
+          <div>
+            <div class="hist-label">Semana ${sid.slice(1)} ${isZero ? '⚪' : '✅'}</div>
+            ${pct != null ? `<div class="hist-data" style="color:${pct>=70?'var(--blue)':'var(--muted)'};font-size:11px">loja: ${pct}% da meta${pct<70?' (não bateu)':''}</div>` : ''}
+          </div>
+          <div style="text-align:right">
+            <div class="hist-valor" ${isZero ? 'style="color:var(--muted);font-size:14px"' : ''}>R$ ${v}</div>
+            <div class="hist-status">${isZero ? 'sem prêmio' : 'recebido'}</div>
+          </div>
+        </div>`;
+      }).filter(Boolean).join('');
+      if (!rowsMes) return '';
+      const [ano, mesN] = mk.split('-');
+      const nomeMes = _nomesMes[parseInt(mesN,10)] || mk;
+      return `<div class="historico-card" style="margin-top:14px;opacity:.95">
+        <h3 style="font-size:13px;color:var(--muted)">📚 ${nomeMes}/${ano.slice(2)}</h3>
+        ${rowsMes}
+        <div class="hist-total">
+          <div class="lbl">Total recebido em ${nomeMes}</div>
+          <div class="val">R$ ${totalMes}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+  const _mesCorrenteNome = _nomesMes[_hojeBloco.getMonth()+1];
   return `
     <div class="historico-card">
-      <h3>💰 Seu histórico de prêmios em maio</h3>
+      <h3>💰 Seu histórico de prêmios em ${_mesCorrenteNome}</h3>
       ${rows}
       <div class="hist-total">
-        <div class="lbl">Total recebido em maio</div>
+        <div class="lbl">Total recebido em ${_mesCorrenteNome}</div>
         <div class="val">R$ ${totalRecebido}</div>
       </div>
     </div>
+
+    ${blocosAnteriores}
 
     ${calc.motivo === 'meta_nao_atingida' && ld.vendido_semana / ld.meta_semana < 0.7 ? `
     <div class="card" style="border-color:rgba(239,68,68,.3)">
