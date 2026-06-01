@@ -1050,7 +1050,9 @@ const HISTORICO_PREMIOS = {
       'Rayra':   {S1:74, S2:29, S3:23, S4:0},
       'Alcione': {S1:47, S2:18, S3:12, S4:0},
       'Sofia':   {S1:32, S2:22, S3:14, S4:0},
-      _em_pct: {S1:96, S2:85, S3:71},  // S4 omitido — meta ajustada não bateu 70%
+      // S4 meta ajustada pra R$44.778 (sugerirAjusteMeta = mensal − S1+S2+S3
+      // acumulado). Loja vendeu R$26.903 = 60% → sem prêmio.
+      _em_pct: {S1:96, S2:85, S3:71, S4:60},
       _pool:   {S1:230, S2:100, S3:80, S4:0},
     },
     L3: {
@@ -1058,7 +1060,8 @@ const HISTORICO_PREMIOS = {
       'Raimunda': {S1:27, S2:0, S3:0, S4:0},
       'Brunna':   {S1:32, S2:0, S3:0, S4:0},
       'Naila':    {S1:0,  S2:0, S3:0, S4:0},
-      _em_pct: {S1:88, S2:67, S3:56},
+      // S4 meta R$31.748, vendeu R$18.890 = 60%
+      _em_pct: {S1:88, S2:67, S3:56, S4:60},
       _pool:   {S1:100, S2:0, S3:0, S4:0},
     },
     L4: {
@@ -1066,7 +1069,8 @@ const HISTORICO_PREMIOS = {
       'Josilene': {S1:26, S2:18, S3:0, S4:0},
       'Bruna F.': {S1:19, S2:37, S3:0, S4:0},
       'Rosana':   {S1:16, S2:10, S3:0, S4:0},
-      _em_pct: {S1:80, S2:72, S3:49},
+      // S4 meta R$59.369, vendeu R$32.165 = 54%
+      _em_pct: {S1:80, S2:72, S3:49, S4:54},
       _pool:   {S1:100, S2:80, S3:0, S4:0},
     },
     L5: {
@@ -1075,7 +1079,8 @@ const HISTORICO_PREMIOS = {
       'Rosiene': {S1:19, S2:0, S3:0, S4:0},
       'Karina':  {S1:9,  S2:0, S3:0, S4:0},
       'Lucas':   {},  // caixa
-      _em_pct: {S1:77, S2:69, S3:66},
+      // S4 meta R$34.449, vendeu R$17.647 = 51%
+      _em_pct: {S1:77, S2:69, S3:66, S4:51},
       _pool:   {S1:80, S2:0, S3:0, S4:0},
     },
   },
