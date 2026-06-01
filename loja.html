@@ -1666,6 +1666,7 @@ let currentTab = 'hoje';
 let leuTudo = false;
 // Quiz state
 let quizSemana = null;     // ID da semana em quiz (ex: 'S2')
+let metasSemSel = null;    // Sub-aba da aba Metas: qual semana está selecionada
 let quizPerguntaIdx = 0;
 let quizRespostas = [];    // array de índices selecionados
 let quizConfirmado = false; // travou seleção da pergunta atual
@@ -2645,12 +2646,43 @@ function renderProgresso() {
 
 // ─── METAS DA LOJA ───────────────────────────────────────────────────────────
 
+function selecionarMetaSem(semId) {
+  metasSemSel = semId;
+  renderContent();
+}
+
 function renderMetas() {
   const ld = DADOS_LOJA[LOJA_KEY];
-  const em_pct = ld.meta_semana > 0 ? ld.vendido_semana / ld.meta_semana * 100 : 0;
-  const bonusMA = ld.ma_pct_loja_sem >= 30;
+  const hist = VENDAS_HIST[LOJA_KEY] || {semanas:[], vendas:{}};
+  const idxAtual = SEMANAS_MES.findIndex(s => s.id === ld.semana_atual);
 
-  // Acha faixa atual e próxima
+  // Default da sub-aba = semana atual
+  if (!metasSemSel || !SEMANAS_MES.find(s => s.id === metasSemSel)) {
+    metasSemSel = ld.semana_atual;
+  }
+  const semSel = SEMANAS_MES.find(s => s.id === metasSemSel) || SEMANAS_MES[idxAtual];
+  const semHist = (hist.semanas || []).find(s => s.id === metasSemSel);
+  const idxSel = SEMANAS_MES.findIndex(s => s.id === metasSemSel);
+  const isSemAtual = metasSemSel === ld.semana_atual;
+  const isPassada = idxSel < idxAtual;
+  const isFutura = idxSel > idxAtual;
+
+  // Meta da semana selecionada vem de VENDAS_HIST (já reflete os ajustes)
+  const metaSel = semHist?.meta || (isSemAtual ? ld.meta_semana : 0);
+  // Vendido = se for semana atual usa ld.vendido_semana; senão soma vendas da semana
+  let vendidoSel;
+  if (isSemAtual) {
+    vendidoSel = ld.vendido_semana;
+  } else if (isPassada) {
+    const vendas = (hist.vendas || {})[metasSemSel] || {};
+    vendidoSel = Object.values(vendas).reduce((a,v) => a + (v||0), 0);
+  } else {
+    vendidoSel = 0;
+  }
+  const em_pct = metaSel > 0 ? vendidoSel / metaSel * 100 : 0;
+  const bonusMA = isSemAtual ? ld.ma_pct_loja_sem >= 30 : ((hist.marcasA_loja || {})[metasSemSel] || 0) >= 30;
+
+  // Acha faixa atual e próxima (baseado na semana SELECIONADA)
   let faixaAtual = null;
   let proxFaixa = null;
   for (let i = PRZ_FAIXAS.length - 1; i >= 0; i--) {
@@ -2662,16 +2694,45 @@ function renderMetas() {
 
   const valorAtual = faixaAtual ? (bonusMA ? faixaAtual.bonus : faixaAtual.base) : 0;
   const valorProx = proxFaixa ? (bonusMA ? proxFaixa.bonus : proxFaixa.base) : null;
-  const faltaParaProx = proxFaixa ? Math.max(0, ld.meta_semana * proxFaixa.pct / 100 - ld.vendido_semana) : 0;
+  const faltaParaProx = proxFaixa ? Math.max(0, metaSel * proxFaixa.pct / 100 - vendidoSel) : 0;
+
+  // Sub-abas (chips) — uma por semana do mês
+  const chips = SEMANAS_MES.map(s => {
+    const sel = s.id === metasSemSel;
+    const isAt = s.id === ld.semana_atual;
+    const idxS = SEMANAS_MES.findIndex(x => x.id === s.id);
+    const status = idxS < idxAtual ? '✓' : (idxS === idxAtual ? '●' : '');
+    const bg = sel ? 'var(--theme-color, var(--blue))' : 'rgba(255,255,255,.06)';
+    const cor = sel ? '#0a0a0a' : 'var(--text)';
+    const peso = sel ? '700' : '500';
+    return `<button onclick="selecionarMetaSem('${s.id}')" style="background:${bg};color:${cor};border:1px solid ${sel?'transparent':'var(--border)'};border-radius:20px;padding:7px 12px;font-size:12px;font-weight:${peso};cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px">
+      <span>${s.label.replace('Semana ','S')}</span>
+      ${status ? `<span style="font-size:10px;opacity:.7">${status}</span>` : ''}
+    </button>`;
+  }).join('');
+
+  // Texto contextual da semana selecionada
+  let statusBadge = '';
+  if (isSemAtual) statusBadge = `<span style="display:inline-block;background:rgba(59,130,246,.15);color:var(--blue);padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.4px;margin-left:6px">EM ANDAMENTO</span>`;
+  else if (isPassada) statusBadge = `<span style="display:inline-block;background:rgba(255,255,255,.08);color:var(--muted);padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.4px;margin-left:6px">FECHADA</span>`;
+  else statusBadge = `<span style="display:inline-block;background:rgba(234,179,8,.15);color:var(--yellow);padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.4px;margin-left:6px">AINDA NÃO COMEÇOU</span>`;
 
   return `
+    <div style="display:flex;gap:6px;overflow-x:auto;margin:0 -16px 12px;padding:0 16px 4px;scrollbar-width:none">
+      ${chips}
+    </div>
+
     <div class="card">
-      <h3>Meta dessa semana</h3>
-      <div class="big">${fR(ld.meta_semana)}</div>
-      <div class="sub">vendido: ${fR(ld.vendido_semana)} (${fP(em_pct)})</div>
-      <div class="prog">
-        <div class="prog-fill" style="width:${Math.min(em_pct,100)}%;background:${em_pct>=100?'var(--green)':em_pct>=80?'var(--yellow)':em_pct>=70?'var(--orange)':'var(--red)'}"></div>
-      </div>
+      <h3>Meta da ${semSel.label.toLowerCase()}${statusBadge}</h3>
+      <p style="font-size:11px;color:var(--muted);margin-bottom:8px">${semSel.periodo}</p>
+      <div class="big">${fR(metaSel)}</div>
+      ${isFutura
+        ? `<div class="sub">essa semana ainda vai começar</div>`
+        : `<div class="sub">vendido: ${fR(vendidoSel)} (${fP(em_pct)})</div>
+           <div class="prog">
+             <div class="prog-fill" style="width:${Math.min(em_pct,100)}%;background:${em_pct>=100?'var(--green)':em_pct>=80?'var(--yellow)':em_pct>=70?'var(--orange)':'var(--red)'}"></div>
+           </div>`
+      }
     </div>
 
     <div class="faixa-card">
