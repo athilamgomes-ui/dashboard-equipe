@@ -893,8 +893,8 @@ const LOJAS_INFO = {
 const VENDEDORAS_META = {
   'Tatiane':  {loja:'L1', badges:['gerente']},
   'Rayra':    {loja:'L1', badges:[]},
-  'Alcione':  {loja:'L1', badges:[]},
   'Sofia':    {loja:'L1', badges:['nova']},
+  'Bárbara':  {loja:'L1', badges:['nova']},  // entrou jun/2026, no lugar da Alcione
   'Ana Mira': {loja:'L3', badges:['gerente']},
   'Raimunda': {loja:'L3', badges:[]},
   'Brunna':   {loja:'L3', badges:[]},
@@ -903,6 +903,8 @@ const VENDEDORAS_META = {
   'Josilene': {loja:'L4', badges:[]},
   'Bruna F.': {loja:'L4', badges:[]},
   'Rosana':   {loja:'L4', badges:['nova']},
+  'Débora':   {loja:'L4', badges:['nova']},  // entrou jun/2026
+  'Eliane':   {loja:'L4', badges:['nova']},  // entrou jun/2026
   'Rayssa':   {loja:'L5', badges:[]},
   'Joyce':    {loja:'L5', badges:[]},
   'Rosiene':  {loja:'L5', badges:['gerente']},
@@ -911,14 +913,14 @@ const VENDEDORAS_META = {
 };
 
 // MOCK DATA — substituir depois pelo carregamento de dados_premiacao.json gerado pelo agente
-// Atualizado pra Jun/2026 S1 em 01/06/2026 (dados parciais 01/06 — domingo)
+// Atualizado pra Jun/2026 S1 em 01/06/2026 (dados parciais 01/06 — segunda; ontem=sáb 30/05)
 const DADOS_LOJA = {
   L1: {
     nome_loja: 'Casa da Beleza Altamira',
     meta_mensal: 140000,
     meta_semana: 36000,
-    vendido_semana: 1897,   // S1 parcial (só 01/06)
-    vendido_mes: 1897,
+    vendido_semana: 3411,   // S1 parcial (01/06)
+    vendido_mes: 3411,
     posicao_loja: 1, // 1-4
     ma_pct_loja_sem: 0,
     ma_pct_loja_mes: 0,
@@ -933,9 +935,9 @@ const DADOS_LOJA = {
         'Suas Marcas A caíram de 21% (média do mês) pra 19% essa semana. Pra subir de novo: ofereça shampoo + condicionador + máscara da mesma marca como combo. Vendendo combo, suas Marcas A sobem e o valor do atendimento também.',
         'Quando um cliente que já comprou com você vem de novo, ele compra mais. Pegue o celular dos seus 10 melhores clientes e mande uma mensagem assim: "Oi fulana, chegou uma novidade da marca X que você vai amar". Mensagens assim trazem cliente pra loja.'
       ]},
-      'Alcione':  {sem:247, mes:247, ma_sem:0, ma_mes:0, melhorias:[
-        'Você é a melhor da loja em vender Marcas A (25%), mas vendeu menos que as colegas em volume total. O caminho pra subir: atender mais clientes. Quando o cliente entrar, vá nele com sorriso, ofereça uma marca A primeiro. Quanto mais clientes você atender, mais venda fecha.',
-        'Estratégia que vai te fazer crescer: vender combo de 3 produtos da mesma marca A (shampoo + condicionador + máscara). Por que isso funciona? Porque o cliente que leva combo gasta R$150 a R$300 no atendimento, em vez de R$50 a R$100 que gasta levando produto solto. Você já sabe vender Marca A - agora venda em combo.'
+      'Bárbara':  {sem:0, mes:0, ma_sem:0, ma_mes:0, melhorias:[
+        'Bem-vinda à equipe! Como você está chegando agora, foque essa primeira semana em aprender as Marcas A da loja (Truss, Marco Boni, Itallian). Saber o que cada uma faz vai te dar confiança pra oferecer pro cliente.',
+        'Pareie com a Tatiane (gerente) ou a Rayra (top de vendas) por 2 dias - observe como elas abordam o cliente e quais frases usam pra oferecer marca A. Depois aplique nas suas próprias vendas.'
       ]},
       'Sofia':    {sem:106, mes:106, ma_sem:0, ma_mes:0, melhorias:[
         'Você é nova e está aprendendo - cresceu 24% na semana passada, parabéns! Próximo passo: quando o cliente estiver olhando um produto, não espere ele decidir sozinho. Diga: "Esse aqui está fazendo sucesso, quer levar?" ou "Se quiser, eu já separo aqui pra você". Frases assim ajudam a fechar a venda.',
@@ -947,9 +949,9 @@ const DADOS_LOJA = {
     nome_loja: 'Miss Beleza Itaituba',
     meta_mensal: 80000,
     meta_semana: 20000,
-    vendido_semana: 907,
-    vendido_mes: 907,
-    posicao_loja: 4,
+    vendido_semana: 2102,
+    vendido_mes: 2102,
+    posicao_loja: 3,
     ma_pct_loja_sem: 0,
     ma_pct_loja_mes: 0,
     semana_atual: 'S1',
@@ -977,8 +979,8 @@ const DADOS_LOJA = {
     nome_loja: 'MissBeleza Altamira',
     meta_mensal: 140000,
     meta_semana: 36000,
-    vendido_semana: 1359,
-    vendido_mes: 1359,
+    vendido_semana: 2301,
+    vendido_mes: 2301,
     posicao_loja: 2,
     ma_pct_loja_sem: 0,
     ma_pct_loja_mes: 0,
@@ -1001,15 +1003,23 @@ const DADOS_LOJA = {
         'Você é nova - foco essa semana é aprender, não pressão de bater meta. Plano dessa semana: 1) passar 2 manhãs com Bruna F. (top da loja) observando ela vender, 2) anotar as frases que ela usa pra oferecer marca A, 3) tentar usar essas mesmas frases com seus próprios clientes.',
         'Marcas A da nossa loja pra você aprender: Truss (faz reconstrução capilar profissional), Itallian (tratamento capilar profissional), Marco Boni (acessórios como escova e prancha). Comece pela Truss - é a que mais vende aqui.'
       ]},
+      'Débora':   {sem:0, mes:0, ma_sem:0, ma_mes:0, melhorias:[
+        'Bem-vinda à equipe! Primeira semana é aprendizado: aprenda as 3 marcas A da loja (Truss, Itallian, Marco Boni). Saber o que cada uma faz vai te dar segurança pra oferecer pro cliente.',
+        'Pareie com a Bruna F. (top em Marcas A) por 2 dias - observa como ela aborda e oferece. Anota as frases que funcionam e aplica nos seus atendimentos.'
+      ]},
+      'Eliane':   {sem:0, mes:0, ma_sem:0, ma_mes:0, melhorias:[
+        'Bem-vinda à equipe! Primeira semana é aprendizado: aprenda as 3 marcas A da loja (Truss, Itallian, Marco Boni). Saber o que cada uma faz vai te dar segurança pra oferecer pro cliente.',
+        'Pareie com a Bruna F. (top em Marcas A) por 2 dias - observa como ela aborda e oferece. Anota as frases que funcionam e aplica nos seus atendimentos.'
+      ]},
     }
   },
   L5: {
     nome_loja: 'MissBeleza Santarém',
     meta_mensal: 90000,
     meta_semana: 25000,
-    vendido_semana: 690,
-    vendido_mes: 690,
-    posicao_loja: 3,
+    vendido_semana: 1630,
+    vendido_mes: 1630,
+    posicao_loja: 4,
     ma_pct_loja_sem: 0,
     ma_pct_loja_mes: 0,
     semana_atual: 'S1',
@@ -1114,14 +1124,14 @@ const VENDAS_HIST = {
       {id:'S3', meta:25000}, {id:'S4', meta:35000},
     ],
     vendas: {
-      S1:{Outros:159,Tatiane:818,Rayra:567,Alcione:247,Sofia:106},
+      S1:{Tatiane:1113,Rayra:696,Alcione:247,Sofia:911,Outros:444},
       S2:{}, S3:{}, S4:{},
     },
     marcasA_loja: {S1:0, S2:0, S3:0, S4:0},
-    ontem: {data:'31/05/2026', dia_semana:'sábado', vendas:{}},
-    tickets: { S1:{Outros:3,Tatiane:5,Rayra:4,Alcione:1,Sofia:1}, S2:{}, S3:{}, S4:{} },
-    pecas:   { S1:{Outros:18,Tatiane:27,Rayra:15,Alcione:4,Sofia:5}, S2:{}, S3:{}, S4:{} },
-    cmv:     { S1:{Tatiane:43.4,Rayra:46.4,Alcione:55.5,Sofia:38.2}, S2:{}, S3:{}, S4:{} },
+    ontem: {data:'30/05/2026', dia_semana:'sábado', vendas:{Tatiane:3317,Rayra:3055,Alcione:897,Sofia:1138}},
+    tickets: { S1:{Tatiane:9,Rayra:7,Alcione:1,Sofia:8,Outros:7}, S2:{}, S3:{}, S4:{} },
+    pecas:   { S1:{Tatiane:49,Rayra:24,Alcione:4,Sofia:32,Outros:26}, S2:{}, S3:{}, S4:{} },
+    cmv:     { S1:{Tatiane:42.3,Rayra:45.2,Alcione:55.5,Sofia:42.7}, S2:{}, S3:{}, S4:{} },
   },
   L3: {
     semanas: [
@@ -1129,14 +1139,14 @@ const VENDAS_HIST = {
       {id:'S3', meta:15000}, {id:'S4', meta:20000},
     ],
     vendas: {
-      S1:{Raimunda:108,'Ana Mira':54,Naila:335,Brunna:410},
+      S1:{Raimunda:358,'Ana Mira':373,Naila:765,Brunna:606},
       S2:{}, S3:{}, S4:{},
     },
     marcasA_loja: {S1:0, S2:0, S3:0, S4:0},
-    ontem: {data:'31/05/2026', dia_semana:'sábado', vendas:{}},
-    tickets: { S1:{Raimunda:2,'Ana Mira':4,Naila:1,Brunna:3}, S2:{}, S3:{}, S4:{} },
-    pecas:   { S1:{Raimunda:3,'Ana Mira':8,Naila:14,Brunna:10}, S2:{}, S3:{}, S4:{} },
-    cmv:     { S1:{Raimunda:49.8,'Ana Mira':368.6,Naila:39.2,Brunna:30.2}, S2:{}, S3:{}, S4:{} },
+    ontem: {data:'30/05/2026', dia_semana:'sábado', vendas:{Raimunda:408,'Ana Mira':902,Naila:1464,Brunna:1094}},
+    tickets: { S1:{Raimunda:5,'Ana Mira':8,Naila:3,Brunna:5}, S2:{}, S3:{}, S4:{} },
+    pecas:   { S1:{Raimunda:14,'Ana Mira':18,Naila:21,Brunna:16}, S2:{}, S3:{}, S4:{} },
+    cmv:     { S1:{Raimunda:48.6,'Ana Mira':80.4,Naila:39.6,Brunna:35.6}, S2:{}, S3:{}, S4:{} },
   },
   L4: {
     semanas: [
@@ -1144,14 +1154,14 @@ const VENDAS_HIST = {
       {id:'S3', meta:25000}, {id:'S4', meta:35000},
     ],
     vendas: {
-      S1:{Outros:40,'Bruna F.':1226,Rosana:93},
+      S1:{Outros:40,'Bruna F.':1978,Rosana:283},
       S2:{}, S3:{}, S4:{},
     },
     marcasA_loja: {S1:0, S2:0, S3:0, S4:0},
-    ontem: {data:'31/05/2026', dia_semana:'sábado', vendas:{}},
-    tickets: { S1:{Outros:1,'Bruna F.':7,Rosana:4}, S2:{}, S3:{}, S4:{} },
-    pecas:   { S1:{Outros:2,'Bruna F.':21,Rosana:5}, S2:{}, S3:{}, S4:{} },
-    cmv:     { S1:{'Bruna F.':27.8,Rosana:206.4}, S2:{}, S3:{}, S4:{} },
+    ontem: {data:'30/05/2026', dia_semana:'sábado', vendas:{Outros:1693,Tanaia:362,Josilene:699,'Bruna F.':4088,Rosana:854}},
+    tickets: { S1:{Outros:1,'Bruna F.':15,Rosana:5}, S2:{}, S3:{}, S4:{} },
+    pecas:   { S1:{Outros:2,'Bruna F.':56,Rosana:8}, S2:{}, S3:{}, S4:{} },
+    cmv:     { S1:{'Bruna F.':43.5,Rosana:90.7}, S2:{}, S3:{}, S4:{} },
   },
   L5: {
     semanas: [
@@ -1159,14 +1169,14 @@ const VENDAS_HIST = {
       {id:'S3', meta:15000}, {id:'S4', meta:20000},
     ],
     vendas: {
-      S1:{Rosiene:89,Joyce:196,Rayssa:107,Karina:298},
+      S1:{Rosiene:362,Joyce:236,Rayssa:478,Karina:554},
       S2:{}, S3:{}, S4:{},
     },
     marcasA_loja: {S1:0, S2:0, S3:0, S4:0},
-    ontem: {data:'31/05/2026', dia_semana:'sábado', vendas:{}},
-    tickets: { S1:{Rosiene:1,Joyce:3,Rayssa:2,Karina:2}, S2:{}, S3:{}, S4:{} },
-    pecas:   { S1:{Rosiene:2,Joyce:4,Rayssa:5,Karina:5}, S2:{}, S3:{}, S4:{} },
-    cmv:     { S1:{Rosiene:52.3,Joyce:16.2,Rayssa:94.4,Karina:207.4}, S2:{}, S3:{}, S4:{} },
+    ontem: {data:'30/05/2026', dia_semana:'sábado', vendas:{Rosiene:1222,Joyce:546,Rayssa:924,Lucas:332,Karina:785}},
+    tickets: { S1:{Rosiene:4,Joyce:4,Rayssa:3,Karina:5}, S2:{}, S3:{}, S4:{} },
+    pecas:   { S1:{Rosiene:12,Joyce:6,Rayssa:20,Karina:21}, S2:{}, S3:{}, S4:{} },
+    cmv:     { S1:{Rosiene:29.3,Joyce:16.8,Rayssa:45.1,Karina:161.5}, S2:{}, S3:{}, S4:{} },
   },
 };
 
