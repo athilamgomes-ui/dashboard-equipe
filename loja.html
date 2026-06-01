@@ -1752,6 +1752,33 @@ async function init() {
     return;
   }
 
+  // Aplica ajustes de meta que o painel mandou pro Worker. Sem isso o app
+  // mostra só os defaults hardcoded de VENDAS_HIST/DADOS_LOJA, e ajustes que
+  // o Athila fez no painel ficam invisíveis pras vendedoras (localStorage é
+  // por-device — não cruza celulares). Aplica ANTES do primeiro render.
+  try {
+    const r = await fetch(`${WORKER_URL}/metas-loja`, {cache: 'no-store'});
+    const data = await r.json();
+    const itens = (data.items || []).filter(x => x.loja === LOJA_KEY);
+    for (const it of itens) {
+      const hist = VENDAS_HIST[LOJA_KEY];
+      if (hist && Array.isArray(it.metas)) {
+        for (const m of it.metas) {
+          const sem = (hist.semanas || []).find(s => s.id === m.id);
+          if (sem && typeof m.nova === 'number') sem.meta = m.nova;
+        }
+      }
+      // Atualiza DADOS_LOJA.meta_semana se o ajuste cobre a semana atual.
+      const ld = DADOS_LOJA[LOJA_KEY];
+      if (ld && Array.isArray(it.metas)) {
+        const aj = it.metas.find(m => m.id === ld.semana_atual);
+        if (aj && typeof aj.nova === 'number') ld.meta_semana = aj.nova;
+      }
+    }
+  } catch (e) {
+    console.warn('[init] /metas-loja falhou — usando defaults hardcoded:', e);
+  }
+
   // Aplica overrides de aprovação que vieram do Worker (athila aprovou recentemente)
   try {
     const r = await fetch(`${WORKER_URL}/overrides`, {cache: 'no-store'});

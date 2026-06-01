@@ -1172,6 +1172,17 @@ function setDecisaoMeta(mesKey, lojaKey, decisao) {
   const all = loadDecisoesMeta();
   all[_decisaoKey(mesKey, lojaKey)] = {...decisao, em: new Date().toISOString()};
   localStorage.setItem('ajustes_meta_decisoes', JSON.stringify(all));
+  // ⚠️ localStorage é por-device. Pra vendedora ver no celular dela, sync via Worker.
+  // Tipo 'ignorado' não tem metas[] — não precisa enviar (default original já vale).
+  if (decisao.tipo !== 'ignorado' && Array.isArray(decisao.metas)) {
+    try {
+      fetch(`${WORKER_URL}/metas-loja`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({mes: mesKey, loja: lojaKey, tipo: decisao.tipo, metas: decisao.metas})
+      }).catch(e => console.warn('[metas-loja] falha de sync:', e));
+    } catch(e) { console.warn('[metas-loja] erro:', e); }
+  }
 }
 
 // Snapshot dos defaults originais ANTES de aplicar decisões — usado pelo reset

@@ -226,6 +226,30 @@ export default {
         return jsonResponse(request, { items });
       }
 
+      // === AJUSTE DE METAS POR LOJA (sincroniza painel ↔ app vendedora) ===
+      // O painel salva ajuste de meta em localStorage, mas localStorage é
+      // por-device. Pra vendedoras no celular dela verem o valor atualizado,
+      // precisamos sincronizar via Worker. Key: metas_loja:<mes>:<loja>.
+      if (method === 'POST' && url.pathname === '/metas-loja') {
+        const body = await request.json();
+        const { mes, loja, tipo, metas } = body;
+        if (!mes || !loja || !Array.isArray(metas)) {
+          return jsonResponse(request, { error: 'Campos obrigatorios: mes, loja, metas[]' }, 400);
+        }
+        const key = `metas_loja:${mes}:${loja}`;
+        const reg = {
+          mes, loja, tipo: tipo || 'custom', metas,
+          em: new Date().toISOString()
+        };
+        await KV.put(key, JSON.stringify(reg));
+        return jsonResponse(request, { ok: true, salvo: reg });
+      }
+
+      if (method === 'GET' && url.pathname === '/metas-loja') {
+        const items = await listAll(KV, 'metas_loja:');
+        return jsonResponse(request, { items });
+      }
+
       // === HEALTH CHECK ===
       if (url.pathname === '/' || url.pathname === '/health') {
         return jsonResponse(request, { ok: true, msg: 'Premiacao Worker AMGomes' });
