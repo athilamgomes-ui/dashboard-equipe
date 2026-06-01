@@ -1196,10 +1196,18 @@ const META_MENSAL_HIST = {
 (function aplicarMetasAjustadasDoPainel() {
   try {
     const decisoes = JSON.parse(localStorage.getItem('ajustes_meta_decisoes') || '{}');
+    // ⚠️ FILTRA POR MÊS CORRENTE. Sem isso, ajustes de meses passados (ex: S4
+    // maio com meta sugerida R$44.778) sobrescrevem as metas do mês corrente
+    // (S4 junho R$35k) — porque ambos têm chave S4. Quando o painel e o app
+    // rodam no mesmo browser (compartilham localStorage), o app puxa lixo de
+    // mês anterior.
+    const hoje = new Date();
+    const mesCorrenteKey = hoje.getFullYear() + '-' + String(hoje.getMonth()+1).padStart(2,'0');
     for (const [key, dec] of Object.entries(decisoes)) {
       if (!dec || dec.tipo === 'ignorado') continue;
       if (!Array.isArray(dec.metas)) continue;
-      const [, lojaKey] = key.split('|');
+      const [mesKey, lojaKey] = key.split('|');
+      if (mesKey !== mesCorrenteKey) continue; // ⚠️ pula meses passados/futuros
       const hist = VENDAS_HIST[lojaKey];
       if (!hist) continue;
       for (const m of dec.metas) {
@@ -1721,7 +1729,11 @@ async function init() {
   try {
     const r = await fetch(`${WORKER_URL}/metas-loja`, {cache: 'no-store'});
     const data = await r.json();
-    const itens = (data.items || []).filter(x => x.loja === LOJA_KEY);
+    // ⚠️ Filtra por loja E por mês corrente. Ajustes de meses anteriores
+    // (mesmas chaves S1-S4) não devem sobrescrever metas do mês atual.
+    const _hojeM = new Date();
+    const _mesK = _hojeM.getFullYear() + '-' + String(_hojeM.getMonth()+1).padStart(2,'0');
+    const itens = (data.items || []).filter(x => x.loja === LOJA_KEY && x.mes === _mesK);
     for (const it of itens) {
       const hist = VENDAS_HIST[LOJA_KEY];
       if (hist && Array.isArray(it.metas)) {
