@@ -912,6 +912,12 @@ const VENDEDORAS_META = {
   'Lucas':    {loja:'L5', badges:['caixa']},
 };
 
+// ⚠️ TIMESTAMP DA COLETA — string ESTÁTICA escrita pela skill a cada execução
+// do cron (formato 'DD/MM/AAAA HH:MM'). O JS só LÊ esse valor pra exibir e
+// calcular "dado velho" — NUNCA sobrescrever com new Date() (bug do timestamp
+// mentiroso: a hora exibida tem que ser a da coleta real, não a do page-load).
+const DADOS_COLETADO_EM = '11/06/2026 19:33';
+
 // MOCK DATA — substituir depois pelo carregamento de dados_premiacao.json gerado pelo agente
 // Atualizado pra Jun/2026 S1 em 01/06/2026 (dados parciais 01/06 — segunda; ontem=sáb 30/05)
 const DADOS_LOJA = {
@@ -2128,6 +2134,34 @@ function _metaMensalLoja(lojaKey) {
 }
 
 
+// ─── FRESCOR DOS DADOS ───────────────────────────────────────────────────────
+// Mostra QUANDO os dados foram coletados do ERP (lendo a string estática
+// DADOS_COLETADO_EM gravada pela skill). Se o dado estiver velho (>4h30 dentro
+// do horário comercial 8h-20h), mostra aviso amarelo — a vendedora nunca deve
+// confiar num número sem saber de quando ele é. O cron roda 8h/12h/15h/18h.
+function renderFrescorDados() {
+  const m = (DADOS_COLETADO_EM || '').match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
+  if (!m) return '';
+  const coletado = new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5]);
+  const agora = new Date();
+  const horasAtras = (agora - coletado) / 3600000;
+  const horaAgora = agora.getHours();
+  const velho = horasAtras > 4.5 && horaAgora >= 8 && horaAgora < 20 && agora.getDay() !== 0;
+
+  if (velho) {
+    const qtd = horasAtras < 24
+      ? `${Math.floor(horasAtras)}h atrás`
+      : `${Math.floor(horasAtras/24)} dia(s) atrás`;
+    return `<div style="background:rgba(234,179,8,.12);border:1px solid rgba(234,179,8,.4);border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:12px;line-height:1.5">
+      ⚠️ <b style="color:var(--yellow)">Dados de ${DADOS_COLETADO_EM}</b> (${qtd}).
+      Vendas feitas depois desse horário ainda não aparecem aqui — a próxima atualização corrige sozinha.
+    </div>`;
+  }
+  return `<div style="text-align:center;font-size:10px;color:var(--muted);margin-bottom:10px">
+    🔄 Dados do ERP coletados em ${DADOS_COLETADO_EM}
+  </div>`;
+}
+
 function renderHoje() {
   const ld = DADOS_LOJA[LOJA_KEY];
   const me = ld.vendedoras[currentUser] || {sem:0, mes:0, ma_sem:0, ma_mes:0};
@@ -2187,6 +2221,8 @@ function renderHoje() {
   const faltaPpBonus = Math.max(0, 30 - maSem);
 
   return `
+    ${renderFrescorDados()}
+
     ${msgGer.mensagem ? `<div class="msg-gerente">
       <h3>💬 Mensagem da gerente</h3>
       <p>${msgGer.mensagem}</p>
@@ -2647,6 +2683,8 @@ function renderProgresso() {
     </div>` : '';
 
   return `
+    ${renderFrescorDados()}
+
     <div class="metric-card">
       <h3 style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Resumo</h3>
       <div class="metric-row"><span class="lbl">Vendas semana</span><span class="val">${fR(me.sem)}</span></div>
@@ -2740,6 +2778,8 @@ function renderMetas() {
   else statusBadge = `<span style="display:inline-block;background:rgba(234,179,8,.15);color:var(--yellow);padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.4px;margin-left:6px">AINDA NÃO COMEÇOU</span>`;
 
   return `
+    ${renderFrescorDados()}
+
     <div style="display:flex;gap:6px;overflow-x:auto;margin:0 -16px 12px;padding:0 16px 4px;scrollbar-width:none">
       ${chips}
     </div>
