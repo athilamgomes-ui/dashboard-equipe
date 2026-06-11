@@ -2184,29 +2184,6 @@ function renderHoje() {
   const pctSem = metaSem > 0 ? (lojaSemAtual / metaSem * 100) : 0;
   const faltaSemana = Math.max(0, metaSem - lojaSemAtual);
 
-  const hoje = new Date();
-  const diaSemana = hoje.getDay(); // 0=dom 1=seg ... 6=sáb
-  const NOMES_DIA = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
-  const nomeHoje = NOMES_DIA[diaSemana];
-  const diaFechado = diaSemana === 0;
-  let metaHojeLoja = 0, msgHoje = '';
-  if (!diaFechado) {
-    const diasUteisRestantes = 6 - diaSemana + 1; // seg=6, ter=5, qua=4, qui=3, sex=2, sáb=1
-    metaHojeLoja = diasUteisRestantes > 0 ? Math.round(faltaSemana / diasUteisRestantes) : 0;
-    if (faltaSemana === 0) {
-      msgHoje = '🎉 Loja já bateu a meta da semana! Tudo a mais é bônus pro prêmio.';
-    } else if (metaHojeLoja < 3000) {
-      msgHoje = '✨ Dia tranquilo — ritmo normal pra fechar a semana.';
-    } else if (metaHojeLoja < 6000) {
-      msgHoje = '⚡ Dia médio — atendimento focado, marca A na primeira oferta.';
-    } else {
-      msgHoje = '🔥 Dia decisivo — meta apertada, cada cliente conta. Foco e ritmo!';
-    }
-  } else {
-    msgHoje = 'Domingo — lojas fechadas. Aproveita pra descansar.';
-  }
-
-  const corMetaHoje = diaFechado ? '#94a3b8' : metaHojeLoja >= 6000 ? '#ef4444' : metaHojeLoja >= 3000 ? '#f59e0b' : '#10b981';
   const corPctSem = pctSem >= 100 ? '#10b981' : pctSem >= 70 ? '#f59e0b' : '#ef4444';
 
   // Período da semana atual (do label "Semana 25 a 30/05" → "25 a 30/05")
@@ -2249,23 +2226,6 @@ function renderHoje() {
           <strong style="color:${corPctSem}">${pctSem.toFixed(0)}%</strong> da meta
           ${faltaSemana > 0 ? ` · falta <strong>${fR(faltaSemana)}</strong>` : ' · 🎉 meta batida!'}
         </div>
-      </div>
-    </div>
-
-    <div class="card" style="border-left:4px solid ${corMetaHoje}">
-      <h3>📅 Meta do dia — ${nomeHoje}</h3>
-      <div style="margin-top:10px;text-align:center">
-        ${diaFechado ? `
-          <div class="big" style="color:${corMetaHoje};font-size:28px">😴 Loja fechada</div>
-          <div class="sub" style="margin-top:6px">${msgHoje}</div>
-        ` : faltaSemana === 0 ? `
-          <div class="big" style="color:#10b981">🎉</div>
-          <div class="sub" style="margin-top:6px">Loja já bateu a meta da semana! Tudo a mais agora é bônus pro prêmio.</div>
-        ` : `
-          <div class="sub">A loja precisa vender hoje:</div>
-          <div class="big" style="color:${corMetaHoje};font-size:32px">${fR(metaHojeLoja)}</div>
-          <div class="sub" style="margin-top:8px;padding:8px 10px;background:rgba(0,0,0,.18);border-radius:6px;line-height:1.5">${msgHoje}</div>
-        `}
       </div>
     </div>
 
