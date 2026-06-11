@@ -226,6 +226,30 @@ export default {
         return jsonResponse(request, { items });
       }
 
+      // === MENSAGEM DA GERENTE PRA EQUIPE ===
+      // A gerente escreve no app dela (loja.html detecta currentUser ===
+      // GERENTE_LOJA) e publica; toda a equipe da loja vê na aba Hoje.
+      // Uma mensagem ativa por loja (overwrite). Key: msg_gerente:<loja>.
+      if (method === 'POST' && url.pathname === '/mensagem-gerente') {
+        const body = await request.json();
+        const { loja, por, texto } = body;
+        if (!loja || !por || texto === undefined) {
+          return jsonResponse(request, { error: 'Campos obrigatorios: loja, por, texto' }, 400);
+        }
+        if (String(texto).length > 600) {
+          return jsonResponse(request, { error: 'Mensagem muito longa (max 600 chars)' }, 413);
+        }
+        const key = `msg_gerente:${loja}`;
+        const reg = { loja, por, texto: String(texto), em: new Date().toISOString() };
+        await KV.put(key, JSON.stringify(reg));
+        return jsonResponse(request, { ok: true, salvo: reg });
+      }
+
+      if (method === 'GET' && url.pathname === '/mensagem-gerente') {
+        const items = await listAll(KV, 'msg_gerente:');
+        return jsonResponse(request, { items });
+      }
+
       // === AJUSTE DE METAS POR LOJA (sincroniza painel ↔ app vendedora) ===
       // O painel salva ajuste de meta em localStorage, mas localStorage é
       // por-device. Pra vendedoras no celular dela verem o valor atualizado,

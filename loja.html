@@ -1826,6 +1826,21 @@ async function init() {
     mensagensDB = await fetch('./mensagem_gerente.json?t=' + Date.now()).then(r=>r.json());
   } catch(e) { mensagensDB = {}; }
 
+  // Mensagem PUBLICADA PELA GERENTE via app (Worker) — vence o JSON estático.
+  // A gerente escreve no card "✏️ Mensagem pra sua equipe" da aba Hoje; a
+  // mensagem mais recente da loja substitui a do mensagem_gerente.json.
+  // Texto vazio publicado = gerente removeu a mensagem (não mostra nada).
+  try {
+    const r = await fetch(`${WORKER_URL}/mensagem-gerente`, {cache: 'no-store'});
+    const data = await r.json();
+    const minha = (data.items || []).find(x => x.loja === LOJA_KEY);
+    if (minha) {
+      mensagensDB[LOJA_KEY] = minha.texto
+        ? {mensagem: minha.texto, por: minha.por, atualizado_em: _fmtDataMsg(minha.em)}
+        : {};
+    }
+  } catch(e) { console.warn('[init] /mensagem-gerente falhou — usando JSON estático:', e); }
+
   // Sessão salva?
   const saved = sessionStorage.getItem('loja_vend_' + LOJA_KEY);
   if (saved) {
@@ -1995,6 +2010,13 @@ function setTabV(t) {
 }
 
 function fR(v) { return v ? 'R$ ' + Math.round(v).toLocaleString('pt-BR') : 'R$ 0' }
+// ISO → 'DD/MM HH:MM' (pra exibir quando a gerente publicou a mensagem)
+function _fmtDataMsg(iso) {
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  const p = n => String(n).padStart(2,'0');
+  return `${p(d.getDate())}/${p(d.getMonth()+1)} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
 function fP(v) { return (v||0).toFixed(0) + '%' }
 
 function calcPoolFaixa(em_pct, bonusMA) {
@@ -2162,6 +2184,53 @@ function renderFrescorDados() {
   </div>`;
 }
 
+// ─── EDITOR DE MENSAGEM DA GERENTE ───────────────────────────────────────────
+// Só aparece pra quem é gerente da loja (GERENTE_LOJA). Publica via Worker
+// (/mensagem-gerente) — toda a equipe vê na aba Hoje na próxima abertura.
+function renderEditorMensagemGerente(msgGer) {
+  const isDono = sessionStorage.getItem('modo_dono') === '1';
+  return `<div class="card" style="border-left:4px solid var(--theme-color, var(--blue))">
+    <h3>✏️ Mensagem pra sua equipe</h3>
+    <p style="font-size:11px;color:var(--muted);margin:6px 0 8px;line-height:1.5">
+      O que você escrever aqui aparece pra toda a equipe da loja na aba Hoje.
+      Publicar de novo substitui a mensagem anterior. Publicar vazio remove.
+    </p>
+    <textarea id="msg-gerente-input" maxlength="600" placeholder="Ex: Bom dia, equipe! Foco hoje em..." style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 12px;font-size:13px;resize:vertical;min-height:70px;font-family:inherit;line-height:1.5">${msgGer.mensagem || ''}</textarea>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+      <button onclick="publicarMensagemGerente()" ${isDono ? 'disabled style="opacity:.5;cursor:not-allowed;' : 'style="'}flex:1;background:var(--theme-color, var(--blue));color:#0a0a0a;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer">📣 Publicar pra equipe</button>
+    </div>
+    <div id="msg-gerente-status" style="font-size:11px;margin-top:6px;min-height:14px">${isDono ? '<span style="color:var(--muted)">modo dono: publicação desativada (teste não vai pra equipe)</span>' : ''}</div>
+  </div>`;
+}
+
+async function publicarMensagemGerente() {
+  if (sessionStorage.getItem('modo_dono') === '1') return; // teste do dono não publica
+  const input = document.getElementById('msg-gerente-input');
+  const status = document.getElementById('msg-gerente-status');
+  const texto = (input?.value || '').trim();
+  status.innerHTML = '<span style="color:var(--muted)">enviando…</span>';
+  try {
+    const r = await fetch(`${WORKER_URL}/mensagem-gerente`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({loja: LOJA_KEY, por: currentUser, texto})
+    });
+    const data = await r.json();
+    if (!data.ok) throw new Error(data.error || 'falha ao publicar');
+    // Atualiza localmente pra gerente ver na hora (equipe vê na próxima abertura)
+    mensagensDB[LOJA_KEY] = texto
+      ? {mensagem: texto, por: currentUser, atualizado_em: _fmtDataMsg(data.salvo.em)}
+      : {};
+    renderContent();
+    // renderContent recria o DOM — re-acha o status pra confirmar
+    const st = document.getElementById('msg-gerente-status');
+    if (st) st.innerHTML = `<span style="color:var(--green)">✓ ${texto ? 'Publicada! A equipe vê ao abrir o app.' : 'Mensagem removida.'}</span>`;
+  } catch (e) {
+    status.innerHTML = '<span style="color:var(--red)">✗ Falha ao publicar — verifica a internet e tenta de novo.</span>';
+    console.warn('[msg-gerente] erro:', e);
+  }
+}
+
 function renderHoje() {
   const ld = DADOS_LOJA[LOJA_KEY];
   const me = ld.vendedoras[currentUser] || {sem:0, mes:0, ma_sem:0, ma_mes:0};
@@ -2197,8 +2266,12 @@ function renderHoje() {
   const temBonus = maSem >= 30;
   const faltaPpBonus = Math.max(0, 30 - maSem);
 
+  const souGerente = currentUser === GERENTE_LOJA[LOJA_KEY];
+
   return `
     ${renderFrescorDados()}
+
+    ${souGerente ? renderEditorMensagemGerente(msgGer) : ''}
 
     ${msgGer.mensagem ? `<div class="msg-gerente">
       <h3>💬 Mensagem da gerente</h3>
