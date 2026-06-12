@@ -40,6 +40,14 @@ function semAcento(s) {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
+// Nomes que no ERP estão grafados DIFERENTE do canônico (não basta acento).
+// Descoberto 12/06/2026: cadastro da Eliane é "ELIANNA" → includes("ELIANE")
+// falha e as vendas dela caíam em "Outros". Adicionar aqui quando o cadastro
+// do ERP divergir do nome usado no painel/app.
+const ALIAS_ERP = {
+  "Eliane": ["ELIANNA"],
+};
+
 /**
  * Mapeia o `nome_vendedor` retornado pela API para o nome canônico
  * usado em DADOS[mes][Lx].vendas[Sx]. Retorna null se não casar.
@@ -49,6 +57,9 @@ function canonicalizarNome(loja, nomeApi) {
   for (const canonico of VENDEDORAS[loja]) {
     const first = semAcento(canonico.toUpperCase().split(" ")[0]);
     if (upper.includes(first)) return canonico;
+    for (const alias of ALIAS_ERP[canonico] || []) {
+      if (upper.includes(semAcento(alias.toUpperCase()))) return canonico;
+    }
   }
   return null;
 }

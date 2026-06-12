@@ -101,21 +101,38 @@ async function fetchMarcasA(page, empresaId, dataInicial, dataFinal) {
   });
 
   // PASSO 6: aguardar tabela de resultados (procurar "Totais" row)
-  let totRowCells = null;
+  // Extrai a tabela inteira: linha "Totais" (total da loja) + linhas
+  // "Vendedor - NOME" seguidas de "Total Grupo" (subtotal por vendedor).
+  // Estrutura validada 12/06/2026: Total Grupo tem 9 cells, cells[6] =
+  // Pr.Venda (Líq.); Totais tem 10 cells, cells[7] = Pr.Venda (Líq.).
+  let extracao = null;
   for (let i = 0; i < 30; i++) {
     await page.waitForTimeout(1000);
-    totRowCells = await page.evaluate(() => {
+    extracao = await page.evaluate(() => {
       const rows = [...document.querySelectorAll("table tr")];
-      const tr = rows.find(r => [...r.querySelectorAll("td")].some(c => c.textContent.trim() === "Totais"));
-      if (!tr) return null;
-      return [...tr.querySelectorAll("td")].map(c => c.textContent.trim());
+      const temTotais = rows.some(r => [...r.querySelectorAll("td")].some(c => c.textContent.trim() === "Totais"));
+      if (!temTotais) return null;
+      const out = { totRowCells: null, porVendedor: {} };
+      let vendedorAtual = null;
+      for (const tr of rows) {
+        const cells = [...tr.querySelectorAll("td")].map(c => c.textContent.trim());
+        if (cells.length === 1 && /^Vendedor\s*-\s*/i.test(cells[0])) {
+          vendedorAtual = cells[0].replace(/^Vendedor\s*-\s*/i, "").trim();
+        } else if (vendedorAtual && cells[1] === "Total Grupo") {
+          out.porVendedor[vendedorAtual] = cells[6] || "0";
+          vendedorAtual = null;
+        } else if (cells.includes("Totais")) {
+          out.totRowCells = cells;
+        }
+      }
+      return out;
     });
-    if (totRowCells) break;
+    if (extracao) break;
   }
 
-  if (!totRowCells) {
+  if (!extracao || !extracao.totRowCells) {
     logErr(`empresa ${empresaId} ${dataInicial}-${dataFinal}: linha Totais não apareceu em 30s`);
-    return 0;
+    return { total: 0, porVendedor: {} };
   }
 
   // Verificar cabeçalho "Empresa(s): N" pra detectar contaminação
@@ -128,15 +145,21 @@ async function fetchMarcasA(page, empresaId, dataInicial, dataFinal) {
     }
   }
 
-  // Extrai cells[7] = Pr.Venda Líq.
-  const cellTxt = totRowCells[7];
-  if (!cellTxt) {
-    logErr(`empresa ${empresaId} ${dataInicial}-${dataFinal}: cells[7] vazio. totRow=${JSON.stringify(totRowCells)}`);
-    return 0;
-  }
   // Formato BR: "1.234,56" → 1234.56
-  const valor = parseFloat(cellTxt.replace(/\./g, "").replace(",", "."));
-  return isNaN(valor) ? 0 : valor;
+  const parseBR = t => {
+    const v = parseFloat(String(t || "0").replace(/\./g, "").replace(",", "."));
+    return isNaN(v) ? 0 : v;
+  };
+
+  const total = parseBR(extracao.totRowCells[7]);
+  if (!extracao.totRowCells[7]) {
+    logErr(`empresa ${empresaId} ${dataInicial}-${dataFinal}: cells[7] vazio. totRow=${JSON.stringify(extracao.totRowCells)}`);
+  }
+  const porVendedor = {};
+  for (const [nome, txt] of Object.entries(extracao.porVendedor)) {
+    porVendedor[nome] = parseBR(txt);
+  }
+  return { total, porVendedor };
 }
 
 async function main(semanas, totaisLoja) {
@@ -167,16 +190,20 @@ async function main(semanas, totaisLoja) {
   }
 
   const out = { L1: {}, L3: {}, L4: {}, L5: {} };
+  // R$ em marcas A POR VENDEDOR (nome cru do ERP, ex 'TATIANE', 'RAYRA LUANA
+  // SOUZA DOS SANTOS'). O consumidor cruza com as vendas da Etapa 1 (match por
+  // primeiro nome, insensível a acento) pra calcular o % individual.
+  out._indivRS = { L1: {}, L3: {}, L4: {}, L5: {} };
 
   for (const empresaId of EMPRESAS) {
     const loja = LOJA_POR_EMPRESA[empresaId];
     for (const s of semanas) {
       logErr(`${loja} ${s.id} (${s.di}–${s.df})...`);
-      let valorA = 0;
+      let res = { total: 0, porVendedor: {} };
       // Retry simples: tenta 2x antes de desistir
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
-          valorA = await fetchMarcasA(page, empresaId, s.di, s.df);
+          res = await fetchMarcasA(page, empresaId, s.di, s.df);
           break;
         } catch (e) {
           logErr(`  attempt ${attempt+1} erro: ${e.message.slice(0,100)}`);
@@ -184,9 +211,10 @@ async function main(semanas, totaisLoja) {
         }
       }
       const total = (totaisLoja[loja] || {})[s.id] || 0;
-      const pct = total > 0 ? (valorA / total * 100) : 0;
+      const pct = total > 0 ? (res.total / total * 100) : 0;
       out[loja][s.id] = Math.round(pct * 10) / 10; // 1 casa decimal
-      logErr(`  → vendasA R$${valorA.toFixed(2)} / total R$${total} = ${out[loja][s.id]}%`);
+      out._indivRS[loja][s.id] = res.porVendedor;
+      logErr(`  → vendasA R$${res.total.toFixed(2)} / total R$${total} = ${out[loja][s.id]}% | indiv: ${Object.entries(res.porVendedor).map(([n,v])=>`${n.split(' ')[0]}=${v.toFixed(0)}`).join(' ')}`);
     }
   }
 
