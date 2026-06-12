@@ -26,11 +26,11 @@ const EMPRESAS = [1, 3, 4, 10];
 // Nome canônico esperado em DADOS[mes][Lx].vendas[Sx] (igual ao painel)
 // Alcione (L1) saiu em jun/2026 mas é mantida na lista pra capturar vendas
 // residuais que ela fez nos primeiros dias do mês (atribuídas a ela, não a Outros).
-// Bárbara (L1), Débora+Eliane (L4) entraram em jun/2026.
+// Bárbara (L1), Débora+Elianna (L4) entraram em jun/2026.
 const VENDEDORAS = {
   L1: ["Tatiane", "Rayra", "Alcione", "Sofia", "Bárbara"],
   L3: ["Ana Mira", "Raimunda", "Brunna", "Naila"],
-  L4: ["Tanaia", "Josilene", "Bruna F.", "Rosana", "Débora", "Eliane"],
+  L4: ["Tanaia", "Josilene", "Bruna F.", "Rosana", "Débora", "Elianna"],
   L5: ["Rayssa", "Joyce", "Rosiene", "Karina", "Lucas"],
 };
 
@@ -41,11 +41,11 @@ function semAcento(s) {
 }
 
 // Nomes que no ERP estão grafados DIFERENTE do canônico (não basta acento).
-// Descoberto 12/06/2026: cadastro da Eliane é "ELIANNA" → includes("ELIANE")
+// Descoberto 12/06/2026: cadastro da Elianna é "ELIANNA" → includes("ELIANE")
 // falha e as vendas dela caíam em "Outros". Adicionar aqui quando o cadastro
 // do ERP divergir do nome usado no painel/app.
 const ALIAS_ERP = {
-  "Eliane": ["ELIANNA"],
+  "Elianna": ["ELIANNA"],
 };
 
 /**

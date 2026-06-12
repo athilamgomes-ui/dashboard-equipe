@@ -904,7 +904,7 @@ const VENDEDORAS_META = {
   'Bruna F.': {loja:'L4', badges:[]},
   'Rosana':   {loja:'L4', badges:['nova']},
   'Débora':   {loja:'L4', badges:['nova']},  // entrou jun/2026
-  'Eliane':   {loja:'L4', badges:['nova']},  // entrou jun/2026
+  'Elianna':   {loja:'L4', badges:['nova']},  // entrou jun/2026
   'Rayssa':   {loja:'L5', badges:[]},
   'Joyce':    {loja:'L5', badges:[]},
   'Rosiene':  {loja:'L5', badges:['gerente']},
@@ -1013,7 +1013,7 @@ const DADOS_LOJA = {
         'Bem-vinda à equipe! Primeira semana é aprendizado: aprenda as 3 marcas A da loja (Truss, Itallian, Marco Boni). Saber o que cada uma faz vai te dar segurança pra oferecer pro cliente.',
         'Pareie com a Bruna F. (top em Marcas A) por 2 dias - observa como ela aborda e oferece. Anota as frases que funcionam e aplica nos seus atendimentos.'
       ]},
-      'Eliane':   {sem:2044, mes:6191, ma_sem:24.2, ma_mes:23.9, melhorias:[
+      'Elianna':   {sem:2044, mes:6191, ma_sem:24.2, ma_mes:23.9, melhorias:[
         'Bem-vinda à equipe! Primeira semana é aprendizado: aprenda as 3 marcas A da loja (Truss, Itallian, Marco Boni). Saber o que cada uma faz vai te dar segurança pra oferecer pro cliente.',
         'Pareie com a Bruna F. (top em Marcas A) por 2 dias - observa como ela aborda e oferece. Anota as frases que funcionam e aplica nos seus atendimentos.'
       ]},
@@ -1162,15 +1162,15 @@ const VENDAS_HIST = {
       {id:'S3', meta:25000}, {id:'S4', meta:35000},
     ],
     vendas: {
-      S1:{Outros:130,Tanaia:2042,'Bruna F.':10900,Rosana:3429,'Débora':6649,Eliane:4147},
-      S2:{Tanaia:1012,'Bruna F.':9858,Rosana:3249,'Débora':3922,Eliane:2044},
+      S1:{Outros:130,Tanaia:2042,'Bruna F.':10900,Rosana:3429,'Débora':6649,Elianna:4147},
+      S2:{Tanaia:1012,'Bruna F.':9858,Rosana:3249,'Débora':3922,Elianna:2044},
       S3:{}, S4:{},
     },
     marcasA_loja: {S1:25.1, S2:23.5, S3:0, S4:0},
     ontem: {data:'11/06/2026', dia_semana:'quinta', vendas:{'Bruna F.':907,Rosana:780,'Débora':1469,Outros:515}},
-    tickets: { S1:{Outros:3,Tanaia:26,'Bruna F.':144,Rosana:61,'Débora':90,Eliane:63}, S2:{Tanaia:11,'Bruna F.':125,Rosana:47,'Débora':51,Eliane:34}, S3:{}, S4:{} },
-    pecas:   { S1:{Outros:5,Tanaia:60,'Bruna F.':327,Rosana:165,'Débora':265,Eliane:148}, S2:{Tanaia:26,'Bruna F.':298,Rosana:366,'Débora':124,Eliane:73}, S3:{}, S4:{} },
-    cmv:     { S1:{Tanaia:54.9,'Bruna F.':61,Rosana:58.6,'Débora':69.5,Eliane:37.7}, S2:{Tanaia:39.7,'Bruna F.':41.3,Rosana:78.6,'Débora':53.9,Eliane:48.4}, S3:{}, S4:{} },
+    tickets: { S1:{Outros:3,Tanaia:26,'Bruna F.':144,Rosana:61,'Débora':90,Elianna:63}, S2:{Tanaia:11,'Bruna F.':125,Rosana:47,'Débora':51,Elianna:34}, S3:{}, S4:{} },
+    pecas:   { S1:{Outros:5,Tanaia:60,'Bruna F.':327,Rosana:165,'Débora':265,Elianna:148}, S2:{Tanaia:26,'Bruna F.':298,Rosana:366,'Débora':124,Elianna:73}, S3:{}, S4:{} },
+    cmv:     { S1:{Tanaia:54.9,'Bruna F.':61,Rosana:58.6,'Débora':69.5,Elianna:37.7}, S2:{Tanaia:39.7,'Bruna F.':41.3,Rosana:78.6,'Débora':53.9,Elianna:48.4}, S3:{}, S4:{} },
   },
   L5: {
     semanas: [
@@ -3027,9 +3027,13 @@ function renderHistoricoPremios() {
     const jaRecebeuViaQuiz = pendente !== undefined && (quizJaPassou(s.id) || !temQuiz || ehSkipQuiz);
     const respondeuSemPassar = pendente !== undefined && temQuiz && quizJaRespondeu(s.id) && !quizJaPassou(s.id);
     const acertosTentativa = respondeuSemPassar ? (_quizGet(_quizStateKey('acertos', s.id)) || '?') : null;
+    // Contribuição da vendedora = vendas dela / total da loja na semana.
+    // É exatamente a fatia do pool que define o prêmio individual.
+    const contribSem = (c && c.total > 0) ? Math.round((c.vendas[currentUser]||0) / c.total * 100) : null;
 
     if (s.id === ld.semana_atual) {
       // Semana atual em andamento - mostra projeção
+      const contribAtual = ld.vendido_semana > 0 ? Math.round((me?.sem||0) / ld.vendido_semana * 100) : null;
       const txtVal = calc.motivo === 'meta_nao_atingida'
         ? `<div class="hist-valor projecao" style="color:var(--muted)">R$ 0</div><div class="hist-status">projeção</div>`
         : `<div class="hist-valor projecao">~R$ ${calc.premio}</div><div class="hist-status">projeção, muda até sábado</div>`;
@@ -3037,6 +3041,7 @@ function renderHistoricoPremios() {
         <div>
           <div class="hist-label">${s.label} 🔵 EM ANDAMENTO</div>
           <div class="hist-data">${s.periodo}</div>
+          ${contribAtual !== null ? `<div class="hist-data" style="color:var(--green);font-size:11px">você: ${contribAtual}% das vendas da equipe</div>` : ''}
         </div>
         <div style="text-align:right">${txtVal}</div>
       </div>`;
@@ -3049,6 +3054,7 @@ function renderHistoricoPremios() {
           <div class="hist-label">${s.label} ✅</div>
           <div class="hist-data">${s.periodo}</div>
           ${pctSem !== null ? `<div class="hist-data" style="color:var(--blue);font-size:11px">loja: ${pctSem}% da meta</div>` : ''}
+          ${contribSem !== null ? `<div class="hist-data" style="color:var(--green);font-size:11px">você: ${contribSem}% das vendas da equipe</div>` : ''}
         </div>
         <div style="text-align:right">
           <div class="hist-valor">R$ ${pendente}</div>
@@ -3063,6 +3069,7 @@ function renderHistoricoPremios() {
           <div class="hist-label">${s.label} 🎁 PRÊMIO PRONTO</div>
           <div class="hist-data">${s.periodo}</div>
           ${pctSem !== null ? `<div class="hist-data" style="color:var(--blue);font-size:11px">loja: ${pctSem}% da meta</div>` : ''}
+          ${contribSem !== null ? `<div class="hist-data" style="color:var(--green);font-size:11px">você: ${contribSem}% das vendas da equipe</div>` : ''}
         </div>
         <div style="text-align:right">
           <div class="hist-valor pendente">R$ ?</div>
@@ -3077,6 +3084,7 @@ function renderHistoricoPremios() {
           <div class="hist-label">${s.label} ❌</div>
           <div class="hist-data">${s.periodo}</div>
           ${pctSem !== null ? `<div class="hist-data" style="color:var(--muted);font-size:11px">loja: ${pctSem}% da meta</div>` : ''}
+          ${contribSem !== null ? `<div class="hist-data" style="color:var(--muted);font-size:11px">você: ${contribSem}% das vendas da equipe</div>` : ''}
         </div>
         <div style="text-align:right">
           <div class="hist-valor" style="color:var(--muted);font-size:14px">R$ 0</div>
