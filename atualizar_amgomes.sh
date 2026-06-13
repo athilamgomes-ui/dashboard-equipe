@@ -65,9 +65,36 @@ if [ "$PRECISA_FULL" = "1" ]; then
   fi
 fi
 
+# ── 2.5) Contas a Pagar — ERP (faturas por vencimento) + Planilha (Drive) ──
+# Cada fonte é independente: se uma falhar, o build PRESERVA a anterior (com a data real).
+# ERP: coleta Playwright headless, com retry (login Microvix instável à noite).
+rm -f /tmp/faturas_out.json
+FAT_OK=0
+for t in 1 2 3; do
+  if node fetch_faturas_pagar.mjs > /tmp/faturas_out.json 2>/tmp/faturas_err.txt && [ -s /tmp/faturas_out.json ]; then
+    FAT_OK=1; break
+  fi
+  rm -f /tmp/faturas_out.json; log "coleta faturas tentativa $t falhou — retry em $((t*30))s"; sleep $((t*30))
+done
+[ "$FAT_OK" = "1" ] && log "faturas ERP OK" || log "AVISO: faturas ERP falhou — build PRESERVA ERP anterior."
+
+# Planilha: o xlsx é baixado pela SKILL (Drive MCP) p/ /tmp/gestao_compras_2026.xlsx ANTES deste script.
+# Só usa se foi baixado HOJE (mtime de hoje) → nunca parseia planilha velha.
+rm -f /tmp/planilha_out.json
+XLSX=/tmp/gestao_compras_2026.xlsx
+if [ -f "$XLSX" ] && [ "$(date -r "$XLSX" +%Y%m%d)" = "$(date +%Y%m%d)" ]; then
+  if python3 parse_planilha_pagar.py "$XLSX" > /tmp/planilha_out.json 2>/tmp/planilha_err.txt && [ -s /tmp/planilha_out.json ]; then
+    log "planilha parse OK"
+  else
+    rm -f /tmp/planilha_out.json; log "AVISO: parse planilha falhou — build PRESERVA planilha anterior."; tail -3 /tmp/planilha_err.txt
+  fi
+else
+  log "AVISO: xlsx ausente ou não é de hoje — build PRESERVA planilha anterior."
+fi
+
 # ── 3) Build (render determinístico de todos os blocos) ──
 cp "$HTML" /tmp/amgomes_pre_build.html
-if ! node build_amgomes.mjs /tmp/lojas_out.json /tmp/vend_out.json; then
+if ! node build_amgomes.mjs /tmp/lojas_out.json /tmp/vend_out.json /tmp/faturas_out.json /tmp/planilha_out.json; then
   log "ERRO: build falhou — restaurando arquivo e abortando."
   cp /tmp/amgomes_pre_build.html "$HTML"
   exit 20

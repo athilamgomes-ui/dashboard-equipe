@@ -3,7 +3,7 @@
  * build_amgomes.mjs — renderiza TODOS os blocos de dados do dashboard_amgomes.html
  * de forma 100% determinística, a partir dos JSONs coletados. SEM LLM.
  *
- * Uso: node build_amgomes.mjs <lojas_out.json> <vend_out.json>
+ * Uso: node build_amgomes.mjs <lojas_out.json> <vend_out.json> [faturas_out.json] [planilha_out.json]
  *   (fatMensal/YoY é atualizado separadamente por atualiza_fatmensal.mjs, ANTES deste build)
  *
  * Regenera, no dashboard_amgomes.html:
@@ -12,6 +12,9 @@
  *   - arrays faturado / maiAcum / metas
  *   - rótulos e ordem dos gráficos por loja (makeStoreChart)
  *   - bloco `vendedores` (preservando m12 já existente por nome)
+ *   - bloco Contas a Pagar (CONTASPAGAR_INICIO/FIM): ERP (faturas_out) + Planilha
+ *     (planilha_out). Cada fonte é PRESERVADA se seu JSON faltar/for inválido, com
+ *     a data real (cpFontes) — nunca mostra dado velho como se fosse novo.
  *
  * Escrita única (read → transforma tudo em memória → write). Idempotente.
  */
@@ -233,6 +236,100 @@ ${linhasLoja("L5")}
 };
 `;
   html = html.slice(0, iIni) + novoVend + html.slice(iFim);
+}
+
+// ── 6) Contas a Pagar (ERP + Planilha) — bloco CONTASPAGAR_INICIO/FIM ──
+{
+  const iIni = html.indexOf("// ─── CONTASPAGAR_INICIO");
+  const iFim = html.indexOf("// ─── CONTASPAGAR_FIM ───");
+  if (iIni < 0 || iFim < 0) {
+    log("aviso: marcadores CONTASPAGAR ausentes — bloco não atualizado.");
+  } else {
+    const trecho = html.slice(iIni, iFim);
+    // valores atuais (para preservar a fonte que faltar)
+    const arrAtual = nome => {
+      const m = trecho.match(new RegExp(`const ${nome}\\s*=\\s*\\[([^\\]]*)\\]`));
+      return m ? m[1].split(",").map(x => Math.round(parseFloat(x) || 0)) : null;
+    };
+    const mesesAtual = (() => {
+      const m = trecho.match(/const meses\s*=\s*\[([^\]]*)\]/);
+      return m ? m[1].split(",").map(s => s.trim().replace(/['"]/g, "")) : null;
+    })();
+    const fontesAtual = (() => {
+      const e = trecho.match(/erp:\s*'([^']*)'/);
+      const p = trecho.match(/planilha:\s*'([^']*)'/);
+      return { erp: e ? e[1] : "—", planilha: p ? p[1] : "—" };
+    })();
+
+    const lerJSON = arq => { try { return JSON.parse(fs.readFileSync(arq, "utf8")); } catch { return null; } };
+    const arqFat = process.argv[4] || "/tmp/faturas_out.json";
+    const arqPlan = process.argv[5] || "/tmp/planilha_out.json";
+    const fat = lerJSON(arqFat);
+    const plan = lerJSON(arqPlan);
+
+    // meses-base: do ERP se válido, senão da planilha, senão preserva
+    const fatOk = fat && Array.isArray(fat.meses) && ["L1","L3","L4","L5"].every(k => Array.isArray(fat[k]));
+    const meses = fatOk ? fat.meses : (plan?.meses || mesesAtual);
+    if (!meses) die("Contas a Pagar: sem meses (nem ERP, nem planilha, nem HTML)");
+
+    // realinha um array {meses->valores} para a ordem de `meses`-base
+    const realinhar = (srcMeses, srcArr) => meses.map(lbl => {
+      const i = srcMeses ? srcMeses.indexOf(lbl) : -1;
+      return i >= 0 ? Math.round(srcArr[i] || 0) : 0;
+    });
+
+    // ERP: usa coleta nova ou preserva
+    let erp, erpData;
+    if (fatOk) {
+      erp = { L1: fat.L1, L3: fat.L3, L4: fat.L4, L5: fat.L5 };
+      erpData = fat.geradoEm || `${dd}/${mm}/${aaaa}`;
+      log(`Contas a Pagar ERP: coleta nova (${erpData}) — janela ${meses.join(",")}`);
+    } else {
+      erp = { L1: arrAtual("erpL1"), L3: arrAtual("erpL3"), L4: arrAtual("erpL4"), L5: arrAtual("erpL5") };
+      // realinha valores antigos caso a janela tenha mudado
+      erp = { L1: realinhar(mesesAtual, erp.L1 || []), L3: realinhar(mesesAtual, erp.L3 || []),
+              L4: realinhar(mesesAtual, erp.L4 || []), L5: realinhar(mesesAtual, erp.L5 || []) };
+      erpData = fontesAtual.erp;
+      log(`Contas a Pagar ERP: coleta falhou/ausente — PRESERVANDO (${erpData}).`);
+    }
+
+    // Planilha: usa parse novo (ALTAMIRA/SANTAREM/ITAITUBA) ou preserva
+    const planOk = plan && Array.isArray(plan.meses) &&
+      ["ALTAMIRA","SANTAREM","ITAITUBA"].every(k => Array.isArray(plan[k]));
+    let planAtm, planL3, planL5, planData;
+    if (planOk) {
+      planAtm = realinhar(plan.meses, plan.ALTAMIRA);
+      planL3 = realinhar(plan.meses, plan.ITAITUBA);
+      planL5 = realinhar(plan.meses, plan.SANTAREM);
+      planData = plan.geradoEm || `${dd}/${mm}/${aaaa}`;
+      log(`Contas a Pagar Planilha: parse novo (${planData}).`);
+    } else {
+      planAtm = realinhar(mesesAtual, arrAtual("planAtm") || []);
+      planL3 = realinhar(mesesAtual, arrAtual("planL3") || []);
+      planL5 = realinhar(mesesAtual, arrAtual("planL5") || []);
+      planData = fontesAtual.planilha;
+      log(`Contas a Pagar Planilha: parse ausente — PRESERVANDO (${planData}).`);
+    }
+
+    const arrJS = a => "[" + a.map(n => String(n)).join(", ") + "]";
+    const novoBloco = `// ─── CONTASPAGAR_INICIO ─── (gerado por build_amgomes.mjs — NÃO editar à mão)
+// ERP: Microvix relatorio_faturas_periodo.asp (faturas por vencimento, coleta Playwright headless).
+// Planilha: Gestao Compras 2026.xlsx (Google Drive) — excluir Status "ATHILA"/"ENTREGUE", ALTAMIRA ÷ 2 (L1+L4).
+// Janela = mês corrente + 4 meses à frente (rola sozinha). Datas reais de cada fonte em cpFontes.
+const cpFontes = { erp: '${erpData}', planilha: '${planData}' };
+const meses = [${meses.map(s => `'${s}'`).join(",")}];
+const erpL1  = ${arrJS(erp.L1)};
+const erpL3  = ${arrJS(erp.L3)};
+const erpL4  = ${arrJS(erp.L4)};
+const erpL5  = ${arrJS(erp.L5)};
+const planAtm   = ${arrJS(planAtm)}; // total Altamira (≠ Athila/Entregue)
+const planL1    = planAtm.map(v => +(v/2).toFixed(0));   // L1 = metade de Altamira
+const planL4    = planAtm.map(v => +(v/2).toFixed(0));   // L4 = metade de Altamira
+const planL3    = ${arrJS(planL3)};   // Itaituba
+const planL5    = ${arrJS(planL5)};   // Santarém
+`;
+    html = html.slice(0, iIni) + novoBloco + html.slice(iFim);
+  }
 }
 
 fs.writeFileSync(HTML, html);

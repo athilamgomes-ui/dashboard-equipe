@@ -23,9 +23,33 @@ const EMPRESAS = process.env.ONLY_EMP
   ? ALL_EMPRESAS.filter(e => String(e.id) === process.env.ONLY_EMP)
   : ALL_EMPRESAS;
 
-const MESES = ["Abr/26", "Mai/26", "Jun/26", "Jul/26", "Ago/26"];
-const DATA_INI = "01/04/2026";
-const DATA_FIM = "31/08/2026";
+// ── Janela dinâmica: mês corrente + 4 meses à frente (5 colunas). Rola sozinha. ──
+const MES_ABBR = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+const pad = n => String(n).padStart(2, "0");
+function construirJanela(n = 5) {
+  const hoje = new Date();
+  let y = hoje.getFullYear(), m = hoje.getMonth(); // 0-based
+  const meses = [], monthMap = {}; let primeiro = null, ultimo = null;
+  for (let i = 0; i < n; i++) {
+    const label = `${MES_ABBR[m]}/${String(y).slice(2)}`;
+    meses.push(label);
+    monthMap[`${pad(y)}-${pad(m + 1)}`] = label;   // chave AAAA-MM (única por ano/mês)
+    monthMap[pad(m + 1) + "|" + y] = label;
+    if (i === 0) primeiro = { y, m };
+    ultimo = { y, m };
+    m++; if (m > 11) { m = 0; y++; }
+  }
+  const diasUlt = new Date(ultimo.y, ultimo.m + 1, 0).getDate();
+  return {
+    meses, monthMap,
+    DATA_INI: `01/${pad(primeiro.m + 1)}/${primeiro.y}`,
+    DATA_FIM: `${diasUlt}/${pad(ultimo.m + 1)}/${ultimo.y}`,
+  };
+}
+const JANELA = construirJanela(5);
+const MESES = JANELA.meses;
+const DATA_INI = JANELA.DATA_INI;
+const DATA_FIM = JANELA.DATA_FIM;
 const URL_FATURAS = "https://linx.microvix.com.br/gestor_web/financeiro/relatorio_faturas_periodo.asp?ParametroParaFavoritos=pagar";
 const URL_ERP     = "https://erp.microvix.com.br/";
 const URL_HOME    = "https://linx.microvix.com.br/v4/home/index.asp";
@@ -166,22 +190,19 @@ async function extrairFaturas(page, empresaId) {
   log(`após submit: ${page.url()}`);
 
   // Extrair totais mensais do texto da página
-  const result = await page.evaluate(() => {
+  const result = await page.evaluate(({ monthMap, meses }) => {
     const allText = (document.body.innerText || "").replace(/\r/g, "");
-    const monthly = { "Abr/26": 0, "Mai/26": 0, "Jun/26": 0, "Jul/26": 0, "Ago/26": 0 };
-    const monthMap = {
-      "04": "Abr/26", "05": "Mai/26", "06": "Jun/26", "07": "Jul/26", "08": "Ago/26"
-    };
+    const monthly = {};
+    for (const lbl of meses) monthly[lbl] = 0;
 
     // Padrão: "Subtotal do grupo DD/MM/AAAA em reais\tR$ X.XXX,XX"
-    // ou "Subtotal do grupo DD/MM/AAAA em Reais\tR$ X.XXX,XX" (capitalização variável)
-    const subtotalRe = /Subtotal do grupo\s+\d{2}\/(\d{2})\/\d{4}\s+em\s+[Rr]e[a-z]+\s+R\$\s+([\d.]+,\d{2})/gi;
+    // Casa por ANO+MÊS (chave MM|AAAA) → robusto a NFes de anos diferentes.
+    const subtotalRe = /Subtotal do grupo\s+\d{2}\/(\d{2})\/(\d{4})\s+em\s+[Rr]e[a-z]+\s+R\$\s+([\d.]+,\d{2})/gi;
     let m;
     while ((m = subtotalRe.exec(allText)) !== null) {
-      const mm = m[1]; // month number (04, 05, etc.)
-      const label = monthMap[mm];
+      const label = monthMap[m[1] + "|" + m[2]]; // "MM|AAAA"
       if (label) {
-        const val = parseFloat(m[2].replace(/\./g, "").replace(",", "."));
+        const val = parseFloat(m[3].replace(/\./g, "").replace(",", "."));
         monthly[label] = (monthly[label] || 0) + val;
       }
     }
@@ -194,7 +215,7 @@ async function extrairFaturas(page, empresaId) {
       totalGeral: totalMatch ? parseFloat(totalMatch[1].replace(/\./g, "").replace(",", ".")) : null,
       rawText: allText.substring(0, 3000),
     };
-  });
+  }, { monthMap: JANELA.monthMap, meses: MESES });
 
   log("totais mensais:", JSON.stringify(result.monthly));
   log("total geral:", result.totalGeral);
@@ -205,28 +226,43 @@ async function extrairFaturas(page, empresaId) {
 }
 
 async function main() {
-  const browser = await chromium.launch({ headless: false });
-  const results = {};
+  const browser = await chromium.launch({ headless: true });
+  log(`janela: ${MESES.join(", ")} (venc. ${DATA_INI}–${DATA_FIM})`);
+  const monthly = {};   // por loja → {label: val}
+  let okLojas = 0;
 
   for (const emp of EMPRESAS) {
     log(`\n=== Processando ${emp.key} (empresa ${emp.id}) ===`);
     const ctx = await browser.newContext();
     const page = await ctx.newPage();
-
     try {
       await loginEmpresa(page, emp.id);
-      const data = await extrairFaturas(page, emp.id);
-      results[emp.key] = data;
+      monthly[emp.key] = await extrairFaturas(page, emp.id);
+      okLojas++;
     } catch (err) {
       log(`ERRO ${emp.key}:`, err.message);
-      results[emp.key] = { error: err.message };
+      monthly[emp.key] = null;
     }
-
     await ctx.close();
   }
-
   await browser.close();
-  console.log(JSON.stringify(results, null, 2));
+
+  // Falha dura se NENHUMA loja coletou → o pipeline preserva a versão anterior.
+  if (okLojas === 0) {
+    console.error("FATAL: nenhuma loja coletada — abortando (sem saída).");
+    process.exit(1);
+  }
+  if (okLojas < EMPRESAS.length) log(`AVISO: só ${okLojas}/${EMPRESAS.length} lojas coletadas.`);
+
+  // Saída alinhada à janela: arrays de 5 por loja (null/ausente → 0).
+  const arr = key => MESES.map(lbl => Math.round((monthly[key] && monthly[key][lbl]) || 0));
+  const out = {
+    geradoEm: `${pad(new Date().getDate())}/${pad(new Date().getMonth() + 1)}/${new Date().getFullYear()}`,
+    meses: MESES,
+    lojasOk: okLojas,
+    L1: arr("L1"), L3: arr("L3"), L4: arr("L4"), L5: arr("L5"),
+  };
+  console.log(JSON.stringify(out, null, 2));
 }
 
 main().catch(err => {
