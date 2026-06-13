@@ -916,7 +916,7 @@ const VENDEDORAS_META = {
 // do cron (formato 'DD/MM/AAAA HH:MM'). O JS só LÊ esse valor pra exibir e
 // calcular "dado velho" — NUNCA sobrescrever com new Date() (bug do timestamp
 // mentiroso: a hora exibida tem que ser a da coleta real, não a do page-load).
-const DADOS_COLETADO_EM = '13/06/2026 08:11';
+const DADOS_COLETADO_EM = '13/06/2026 09:44';
 
 // MOCK DATA — substituir depois pelo carregamento de dados_premiacao.json gerado pelo agente
 // Atualizado pra Jun/2026 S1 em 01/06/2026 (dados parciais 01/06 — segunda; ontem=sáb 30/05)
@@ -1136,6 +1136,7 @@ const VENDAS_HIST = {
     },
     marcasA_loja: {S1:22.4, S2:18.8, S3:0, S4:0},
     ontem: {data:'12/06/2026', dia_semana:'sexta', vendas:{Tatiane:2703,Rayra:3318,Sofia:1653,'Bárbara':2527}},
+    hoje: {data:'13/06/2026', dia_semana:'sábado', vendas:{Tatiane:160,Rayra:235,'Bárbara':513}},
     tickets: { S1:{Tatiane:124,Rayra:104,Alcione:1,Outros:1,Sofia:55,'Bárbara':78}, S2:{Tatiane:85,Rayra:84,Sofia:50,'Bárbara':81}, S3:{}, S4:{} },
     pecas:   { S1:{Tatiane:441,Rayra:296,Alcione:4,Outros:1,Sofia:153,'Bárbara':186}, S2:{Tatiane:227,Rayra:235,Sofia:148,'Bárbara':201}, S3:{}, S4:{} },
     cmv:     { S1:{Tatiane:52.1,Rayra:47.7,Alcione:55.5,Sofia:46,'Bárbara':40.5}, S2:{Tatiane:40.2,Rayra:45.9,Sofia:52.1,'Bárbara':42.4}, S3:{}, S4:{} },
@@ -1152,6 +1153,7 @@ const VENDAS_HIST = {
     },
     marcasA_loja: {S1:18.7, S2:15.2, S3:0, S4:0},
     ontem: {data:'12/06/2026', dia_semana:'sexta', vendas:{Raimunda:2312,'Ana Mira':918,Naila:0,Brunna:579}},
+    hoje: {data:'13/06/2026', dia_semana:'sábado', vendas:{'Ana Mira':30,Naila:40}},
     tickets: { S1:{Raimunda:36,'Ana Mira':61,Naila:58,Brunna:43}, S2:{Raimunda:49,'Ana Mira':48,Naila:29,Brunna:40}, S3:{}, S4:{} },
     pecas:   { S1:{Raimunda:263,'Ana Mira':167,Naila:186,Brunna:119}, S2:{Raimunda:164,'Ana Mira':145,Naila:77,Brunna:138}, S3:{}, S4:{} },
     cmv:     { S1:{Raimunda:103.2,'Ana Mira':66.9,Naila:54.5,Brunna:67.1}, S2:{Raimunda:52.5,'Ana Mira':88.8,Naila:60.1,Brunna:152.3}, S3:{}, S4:{} },
@@ -1168,6 +1170,7 @@ const VENDAS_HIST = {
     },
     marcasA_loja: {S1:25.1, S2:22.7, S3:0, S4:0},
     ontem: {data:'12/06/2026', dia_semana:'sexta', vendas:{Tanaia:910,Josilene:39,'Bruna F.':2811,Rosana:1678,'Débora':2133,Elianna:1006}},
+    hoje: {data:'13/06/2026', dia_semana:'sábado', vendas:{'Bruna F.':442,Rosana:69}},
     tickets: { S1:{Outros:3,Tanaia:26,'Bruna F.':144,Rosana:61,'Débora':90,Elianna:63}, S2:{Tanaia:19,Josilene:1,'Bruna F.':149,Rosana:59,'Débora':66,Elianna:48}, S3:{}, S4:{} },
     pecas:   { S1:{Outros:5,Tanaia:60,'Bruna F.':327,Rosana:165,'Débora':265,Elianna:148}, S2:{Tanaia:45,Josilene:1,'Bruna F.':347,Rosana:400,'Débora':151,Elianna:114}, S3:{}, S4:{} },
     cmv:     { S1:{Tanaia:54.9,'Bruna F.':61,Rosana:58.6,'Débora':69.5,Elianna:37.7}, S2:{Tanaia:35.7,Josilene:40.9,'Bruna F.':40.5,Rosana:80,'Débora':49.7,Elianna:47.5}, S3:{}, S4:{} },
@@ -1184,6 +1187,7 @@ const VENDAS_HIST = {
     },
     marcasA_loja: {S1:18.2, S2:13.0, S3:0, S4:0},
     ontem: {data:'12/06/2026', dia_semana:'sexta', vendas:{Rosiene:1496,Joyce:745,Rayssa:542,Karina:1682}},
+    hoje: {data:'13/06/2026', dia_semana:'sábado', vendas:{Rosiene:733,Rayssa:242}},
     tickets: { S1:{Rosiene:68,Joyce:45,Rayssa:45,Lucas:2,Karina:57}, S2:{Rosiene:52,Joyce:36,Rayssa:30,Karina:48}, S3:{}, S4:{} },
     pecas:   { S1:{Rosiene:198,Joyce:202,Rayssa:158,Lucas:3,Karina:167}, S2:{Rosiene:137,Joyce:114,Rayssa:75,Karina:146}, S3:{}, S4:{} },
     cmv:     { S1:{Rosiene:41.1,Joyce:41.1,Rayssa:47.6,Lucas:30.8,Karina:80}, S2:{Rosiene:45.2,Joyce:42,Rayssa:46.3,Karina:43.2}, S3:{}, S4:{} },
@@ -2261,6 +2265,35 @@ async function publicarMensagemGerente() {
   }
 }
 
+// ─── MINHAS VENDAS DE HOJE ───────────────────────────────────────────────────
+// Mostra quanto a vendedora vendeu no dia da última coleta (VENDAS_HIST[Lx].hoje,
+// populado pelo cron 4x/dia). Só aparece se o campo 'hoje' é do dia corrente —
+// senão (cron não rodou hoje, ou domingo) some pra não mostrar dado de outro dia.
+function renderMinhasVendasHoje() {
+  const hist = VENDAS_HIST[LOJA_KEY];
+  const hoje = hist && hist.hoje;
+  if (!hoje || !hoje.data) return '';
+  // Confirma que o registro é de HOJE (DD/MM/AAAA)
+  const d = new Date();
+  const hojeStr = String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+  if (hoje.data !== hojeStr) return '';
+
+  const minha = (hoje.vendas || {})[currentUser] || 0;
+  const totalLoja = Object.values(hoje.vendas || {}).reduce((s,v) => s + (v||0), 0);
+  const horaColeta = (DADOS_COLETADO_EM || '').split(' ')[1] || '';
+
+  return `<div class="card" style="border-left:4px solid var(--theme-color, var(--green));background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(34,197,94,.02))">
+    <h3>☀️ Minhas vendas de hoje</h3>
+    <div style="text-align:center;margin-top:8px">
+      <div class="big green" style="font-size:34px">${fR(minha)}</div>
+      <div class="sub">${horaColeta ? `parcial — até ${horaColeta}` : 'parcial de hoje'}</div>
+    </div>
+    <div style="margin-top:10px;padding:8px 10px;background:rgba(0,0,0,.18);border-radius:6px;font-size:12px;text-align:center;color:#cbd5e1">
+      A loja vendeu <b>${fR(totalLoja)}</b> hoje até agora.
+    </div>
+  </div>`;
+}
+
 function renderHoje() {
   const ld = DADOS_LOJA[LOJA_KEY];
   const me = ld.vendedoras[currentUser] || {sem:0, mes:0, ma_sem:0, ma_mes:0};
@@ -2350,6 +2383,8 @@ function renderHoje() {
           : `💡 Faltam <b>${faltaPpBonus.toFixed(1)}pp</b> pra chegar em 30% e a equipe ganhar o bônus no prêmio dessa semana. Cada cliente novo → primeira oferta marca A.`}
       </div>
     </div>
+
+    ${renderMinhasVendasHoje()}
 
     <div class="card">
       <h3>Minhas vendas</h3>
