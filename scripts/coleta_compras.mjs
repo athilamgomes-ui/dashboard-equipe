@@ -238,8 +238,8 @@ async function coletaNotas(page) {
         };
         sawHeader = true;
       } else if (c.length === 7 && /^\d+$/.test(cells[0])) {
-        // item de nota
-        if (cur) cur.itens.push({ c: cells[0], sub: cells[6] });
+        // item de nota: [0]Código [1]Produto [2]CFOP [3]Ref [4]Qtde [6]Subtotal
+        if (cur) cur.itens.push({ c: cells[0], qtde: cells[4], sub: cells[6] });
       }
     }
     if (cur) out.push(cur);
@@ -260,7 +260,7 @@ async function coletaNotas(page) {
       loja, doc: n.doc, data: de.iso, mes: de.mes, ano: de.ano,
       data_lancamento: dl ? dl.iso : null,
       valor: parseNumBR(n.valor), forn: n.forn,
-      itens: n.itens.map(it => ({ c: it.c, v: parseNumBR(it.sub) })),
+      itens: n.itens.map(it => ({ c: it.c, v: parseNumBR(it.sub), q: parseNumBR(it.qtde) })),
     });
   }
   log(`notas: ${norm.length} notas (${notas.length} brutas)`);
