@@ -416,7 +416,7 @@ const DADOS = {
   },
   // Meses futuros: adicionar dados ao longo do ano
   '2026-06': {
-    // Mês iniciado pelo agente em 01/06/2026 (seg). Atualizado 16/06 15:12 (run agendada ter 15h — S3 dia 2, refresh tarde). S1 fechada (01/06–06/06). S2 fechada (08/06–13/06). S3 em curso (15/06–20/06). marcasA L3/L5 preservadas (erro de navegação no coletor Etapa 2).
+    // Mês iniciado pelo agente em 01/06/2026 (seg). Atualizado 16/06 18:12 (run agendada ter 18h30 — S3 dia 2). S1 fechada (01/06–06/06). S2 fechada (08/06–13/06). S3 em curso (15/06–20/06). marcasA das 4 lojas coletadas fresh (Etapa 2 OK).
     // Metas mensais de METAS_FUTURAS. Split semanal proporcional aos dias úteis (S1-S3=6d, S4=8d).
     semana_atual: 'S3',
     L1: {
@@ -427,13 +427,13 @@ const DADOS = {
       vendas: {
         S1:{Tatiane:11113,Rayra:9764,Alcione:247,Outros:56,Sofia:3679,'Bárbara':5852},
         S2:{Tatiane:10744,Rayra:12068,Sofia:5515,'Bárbara':8958},
-        S3:{Tatiane:1795,Rayra:2943,Sofia:850,'Bárbara':2203}, S4:{},
+        S3:{Outros:856,Tatiane:2705,Rayra:3775,Sofia:1346,'Bárbara':2334}, S4:{},
       },
-      marcasA_loja: {S1:22.4, S2:18.8, S3:8.9, S4:0},
-      marcasA_indiv: {Tatiane:19.3,Rayra:22.7,Sofia:17.1,'Bárbara':17.5},
-      tickets: { S1:{Tatiane:124,Rayra:104,Alcione:1,Outros:1,Sofia:55,'Bárbara':78}, S2:{Tatiane:99,Rayra:97,Sofia:58,'Bárbara':97}, S3:{Tatiane:10,Rayra:26,Sofia:13,'Bárbara':36}, S4:{} },
-      pecas:   { S1:{Tatiane:441,Rayra:296,Alcione:4,Outros:1,Sofia:153,'Bárbara':186}, S2:{Tatiane:268,Rayra:272,Sofia:172,'Bárbara':248}, S3:{Tatiane:40,Rayra:83,Sofia:29,'Bárbara':87}, S4:{} },
-      cmv:     { S1:{Tatiane:52.1,Rayra:47.7,Alcione:55.5,Sofia:46,'Bárbara':40.5}, S2:{Tatiane:41.9,Rayra:44.8,Sofia:53.8,'Bárbara':44.7}, S3:{Tatiane:54.1,Rayra:44.8,Sofia:38.2,'Bárbara':42.3}, S4:{} },
+      marcasA_loja: {S1:22.4, S2:18.8, S3:10.7, S4:0},
+      marcasA_indiv: {Tatiane:18.9,Rayra:22.0,Sofia:16.2,'Bárbara':17.5},
+      tickets: { S1:{Tatiane:124,Rayra:104,Alcione:1,Outros:1,Sofia:55,'Bárbara':78}, S2:{Tatiane:99,Rayra:97,Sofia:58,'Bárbara':97}, S3:{Outros:1,Tatiane:17,Rayra:34,Sofia:17,'Bárbara':39}, S4:{} },
+      pecas:   { S1:{Tatiane:441,Rayra:296,Alcione:4,Outros:1,Sofia:153,'Bárbara':186}, S2:{Tatiane:268,Rayra:272,Sofia:172,'Bárbara':248}, S3:{Outros:9,Tatiane:64,Rayra:104,Sofia:43,'Bárbara':94}, S4:{} },
+      cmv:     { S1:{Tatiane:52.1,Rayra:47.7,Alcione:55.5,Sofia:46,'Bárbara':40.5}, S2:{Tatiane:41.9,Rayra:44.8,Sofia:53.8,'Bárbara':44.7}, S3:{Tatiane:47.1,Rayra:43.9,Sofia:38.7,'Bárbara':42.3}, S4:{} },
     },
     L3: {
       meta_mensal: 80000,
@@ -443,13 +443,13 @@ const DADOS = {
       vendas: {
         S1:{Raimunda:3526,'Ana Mira':4059,Naila:4632,Brunna:3245},
         S2:{Raimunda:5584,'Ana Mira':4503,Naila:3101,Brunna:3115},
-        S3:{Raimunda:985,'Ana Mira':993,Naila:526,Brunna:830}, S4:{},
+        S3:{Raimunda:1621,'Ana Mira':993,Naila:750,Brunna:889}, S4:{},
       },
-      marcasA_loja: {S1:18.7, S2:15.9, S3:9.3, S4:0},
-      marcasA_indiv: {Raimunda:17.3,'Ana Mira':22.5,Naila:13.2,Brunna:11.8},
-      tickets: { S1:{Raimunda:36,'Ana Mira':61,Naila:58,Brunna:43}, S2:{Raimunda:58,'Ana Mira':66,Naila:39,Brunna:40}, S3:{Raimunda:10,'Ana Mira':16,Naila:9,Brunna:11}, S4:{} },
-      pecas:   { S1:{Raimunda:263,'Ana Mira':167,Naila:186,Brunna:119}, S2:{Raimunda:176,'Ana Mira':190,Naila:119,Brunna:138}, S3:{Raimunda:45,'Ana Mira':59,Naila:23,Brunna:33}, S4:{} },
-      cmv:     { S1:{Raimunda:103.2,'Ana Mira':66.9,Naila:54.5,Brunna:67.1}, S2:{Raimunda:52.1,'Ana Mira':83.3,Naila:50.4,Brunna:152.3}, S3:{Raimunda:63.4,'Ana Mira':146.2,Naila:56.6,Brunna:47.6}, S4:{} },
+      marcasA_loja: {S1:18.7, S2:15.9, S3:17.5, S4:0},
+      marcasA_indiv: {Raimunda:18.0,'Ana Mira':22.5,Naila:13.6,Brunna:13.6},
+      tickets: { S1:{Raimunda:36,'Ana Mira':61,Naila:58,Brunna:43}, S2:{Raimunda:58,'Ana Mira':66,Naila:39,Brunna:40}, S3:{Raimunda:19,'Ana Mira':16,Naila:12,Brunna:12}, S4:{} },
+      pecas:   { S1:{Raimunda:263,'Ana Mira':167,Naila:186,Brunna:119}, S2:{Raimunda:176,'Ana Mira':190,Naila:119,Brunna:138}, S3:{Raimunda:79,'Ana Mira':59,Naila:30,Brunna:34}, S4:{} },
+      cmv:     { S1:{Raimunda:103.2,'Ana Mira':66.9,Naila:54.5,Brunna:67.1}, S2:{Raimunda:52.1,'Ana Mira':83.3,Naila:50.4,Brunna:152.3}, S3:{Raimunda:65.6,'Ana Mira':146.2,Naila:52.7,Brunna:45.8}, S4:{} },
     },
     L4: {
       meta_mensal: 140000,
@@ -459,13 +459,13 @@ const DADOS = {
       vendas: {
         S1:{Outros:130,Tanaia:2042,'Bruna F.':10900,Rosana:3429,'Débora':6649,Elianna:4147},
         S2:{Tanaia:1534,Josilene:39,'Bruna F.':14263,Rosana:4924,'Débora':6543,Elianna:3277},
-        S3:{Outros:430,Tanaia:961,'Bruna F.':2006,Rosana:1092,'Débora':1700,Elianna:95}, S4:{},
+        S3:{Outros:430,Tanaia:1001,'Bruna F.':2607,Rosana:2834,'Débora':1904,Elianna:95}, S4:{},
       },
-      marcasA_loja: {S1:25.1, S2:22.3, S3:21.5, S4:0},
-      marcasA_indiv: {Tanaia:36.8,Josilene:0,'Bruna F.':24.4,Rosana:19.0,'Débora':21.4,Elianna:22.3},
-      tickets: { S1:{Outros:3,Tanaia:26,'Bruna F.':144,Rosana:61,'Débora':90,Elianna:63}, S2:{Tanaia:21,Josilene:1,'Bruna F.':181,Rosana:65,'Débora':80,Elianna:62}, S3:{Outros:7,Tanaia:13,'Bruna F.':21,Rosana:16,'Débora':23,Elianna:4}, S4:{} },
-      pecas:   { S1:{Outros:5,Tanaia:60,'Bruna F.':327,Rosana:165,'Débora':265,Elianna:148}, S2:{Tanaia:53,Josilene:1,'Bruna F.':426,Rosana:410,'Débora':183,Elianna:138}, S3:{Outros:12,Tanaia:32,'Bruna F.':45,Rosana:131,'Débora':44,Elianna:6}, S4:{} },
-      cmv:     { S1:{Tanaia:54.9,'Bruna F.':61,Rosana:58.6,'Débora':69.5,Elianna:37.7}, S2:{Tanaia:36,Josilene:40.9,'Bruna F.':39.3,Rosana:78.4,'Débora':51.3,Elianna:46.1}, S3:{Tanaia:39.1,'Bruna F.':35.6,Rosana:40.8,'Débora':50.9,Elianna:48.4}, S4:{} },
+      marcasA_loja: {S1:25.1, S2:22.3, S3:19.7, S4:0},
+      marcasA_indiv: {Tanaia:36.1,Josilene:0,'Bruna F.':23.8,Rosana:18.9,'Débora':22.1,Elianna:22.3},
+      tickets: { S1:{Outros:3,Tanaia:26,'Bruna F.':144,Rosana:61,'Débora':90,Elianna:63}, S2:{Tanaia:21,Josilene:1,'Bruna F.':181,Rosana:65,'Débora':80,Elianna:62}, S3:{Outros:7,Tanaia:15,'Bruna F.':28,Rosana:24,'Débora':27,Elianna:4}, S4:{} },
+      pecas:   { S1:{Outros:5,Tanaia:60,'Bruna F.':327,Rosana:165,'Débora':265,Elianna:148}, S2:{Tanaia:53,Josilene:1,'Bruna F.':426,Rosana:410,'Débora':183,Elianna:138}, S3:{Outros:12,Tanaia:37,'Bruna F.':63,Rosana:187,'Débora':50,Elianna:6}, S4:{} },
+      cmv:     { S1:{Tanaia:54.9,'Bruna F.':61,Rosana:58.6,'Débora':69.5,Elianna:37.7}, S2:{Tanaia:36,Josilene:40.9,'Bruna F.':39.3,Rosana:78.4,'Débora':51.3,Elianna:46.1}, S3:{Tanaia:39.3,'Bruna F.':39.4,Rosana:49.4,'Débora':50.9,Elianna:48.4}, S4:{} },
     },
     L5: {
       meta_mensal: 90000,
@@ -475,13 +475,13 @@ const DADOS = {
       vendas: {
         S1:{Rosiene:6048,Joyce:5115,Rayssa:5420,Lucas:182,Karina:4864},
         S2:{Rosiene:6884,Joyce:4792,Rayssa:3933,Karina:5478},
-        S3:{Rosiene:882,Joyce:1095,Rayssa:823,Karina:1196}, S4:{},
+        S3:{Rosiene:949,Joyce:1289,Rayssa:1022,Karina:1289}, S4:{},
       },
-      marcasA_loja: {S1:18.2, S2:12.6, S3:34.1, S4:0},
-      marcasA_indiv: {Rosiene:13.0,Joyce:18.8,Rayssa:16.1,Lucas:0,Karina:20.4},
-      tickets: { S1:{Rosiene:68,Joyce:45,Rayssa:45,Lucas:2,Karina:57}, S2:{Rosiene:64,Joyce:52,Rayssa:35,Karina:55}, S3:{Rosiene:12,Joyce:8,Rayssa:8,Karina:6}, S4:{} },
-      pecas:   { S1:{Rosiene:198,Joyce:202,Rayssa:158,Lucas:3,Karina:167}, S2:{Rosiene:196,Joyce:155,Rayssa:92,Karina:169}, S3:{Rosiene:36,Joyce:28,Rayssa:22,Karina:34}, S4:{} },
-      cmv:     { S1:{Rosiene:41.1,Joyce:41.1,Rayssa:47.6,Lucas:30.8,Karina:80}, S2:{Rosiene:44.3,Joyce:44.5,Rayssa:42.1,Karina:49.1}, S3:{Rosiene:89.6,Joyce:51.2,Rayssa:39.6,Karina:26.5}, S4:{} },
+      marcasA_loja: {S1:18.2, S2:12.6, S3:37.8, S4:0},
+      marcasA_indiv: {Rosiene:14.0,Joyce:18.3,Rayssa:18.9,Lucas:0,Karina:20.3},
+      tickets: { S1:{Rosiene:68,Joyce:45,Rayssa:45,Lucas:2,Karina:57}, S2:{Rosiene:64,Joyce:52,Rayssa:35,Karina:55}, S3:{Rosiene:13,Joyce:10,Rayssa:9,Karina:8}, S4:{} },
+      pecas:   { S1:{Rosiene:198,Joyce:202,Rayssa:158,Lucas:3,Karina:167}, S2:{Rosiene:196,Joyce:155,Rayssa:92,Karina:169}, S3:{Rosiene:38,Joyce:32,Rayssa:33,Karina:37}, S4:{} },
+      cmv:     { S1:{Rosiene:41.1,Joyce:41.1,Rayssa:47.6,Lucas:30.8,Karina:80}, S2:{Rosiene:44.3,Joyce:44.5,Rayssa:42.1,Karina:49.1}, S3:{Rosiene:82.5,Joyce:51,Rayssa:38.2,Karina:27.2}, S4:{} },
     },
   },
   '2026-07': null,
