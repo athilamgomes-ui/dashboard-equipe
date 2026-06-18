@@ -71,7 +71,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 <div id="app" class="hide">
   <header>
     <h1>🛒 Planejamento de Compras</h1>
-    <span class="who"><span id="who"></span> <button class="btn sec" style="padding:5px 12px" onclick="sair()">Sair</button></span>
+    <span class="who"><span id="who"></span></span>
   </header>
   <nav id="nav"></nav>
   <div id="toolbar" style="padding:0 22px 10px;color:var(--muted);font-size:12.5px;font-weight:700"></div>
@@ -110,10 +110,14 @@ function lojaNome(id){var x=LOJAS.filter(function(l){return l.id===id;})[0];retu
 function fmtData(s){var m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?m[3]+'/'+m[2]+'/'+m[1]:(s||'');}
 
 /* ---------- auth ---------- */
-window.addEventListener('DOMContentLoaded', async function(){
-  if(SUPABASE_URL.indexOf('COLE_AQUI')>=0){ el('login').classList.remove('hide'); el('lg_err').textContent='Configure SUPABASE_URL e ANON_KEY no topo do arquivo.'; return; }
-  var {data}=await sb.auth.getSession();
-  if(data.session) start(data.session.user); else el('login').classList.remove('hide');
+function getNome(){ return localStorage.getItem('pc_nome')||''; }
+function setNome(v){ localStorage.setItem('pc_nome',v||''); DB.email=(v||'equipe'); }
+window.addEventListener('DOMContentLoaded', function(){
+  /* LOGIN DESATIVADO temporariamente — acesso livre. Identidade = nome digitado (sem senha). */
+  DB.email=getNome()||'equipe'; DB.isOwner=true;
+  el('login').classList.add('hide'); el('app').classList.remove('hide');
+  el('who').innerHTML='Você: <input value="'+getNome()+'" placeholder="seu nome" style="width:130px;padding:4px 8px;display:inline-block" onchange="setNome(this.value)"> · <span style="color:var(--warn)">login desativado</span>';
+  carregar();
 });
 async function entrar(){
   el('lg_err').textContent='';
@@ -242,6 +246,10 @@ function renderAprovar(){
   var jan=janela6();
   function celv(v){return v?Math.round(v).toLocaleString('pt-BR'):'';}
   var mh=jan.map(function(m){return '<th class="num">'+nomeMes(m)+'</th>';}).join('');
+  var totV=0,totM={};
+  ps.forEach(function(p){totV+=Number(p.valor_total)||0;var d=p.distribuicao||{};jan.forEach(function(m){var v=Number(d[m])||0;if(v)totM[m]=(totM[m]||0)+v;});});
+  var totTds=jan.map(function(m){return '<td class="num">'+celv(totM[m])+'</td>';}).join('');
+  var totalRow='<tr class="totalrow"><td colspan="3" class="right">TOTAL aguardando ('+ps.length+')</td><td class="num">'+brl(totV)+'</td><td></td>'+totTds+'<td colspan="2"></td></tr>';
   el('main').innerHTML='<div class="card"><h2>Aguardando sua aprovação ('+ps.length+')</h2><div style="overflow:auto"><table>'+
     '<tr><th>Marca</th><th>Loja</th><th>Fornecedor</th><th class="num">Valor</th><th>Prazo</th>'+mh+'<th>Lançado por</th><th></th></tr>'+
     ps.map(function(p){var d=p.distribuicao||{};var mt=jan.map(function(m){return '<td class="num mut">'+celv(Number(d[m])||0)+'</td>';}).join('');
@@ -249,7 +257,7 @@ function renderAprovar(){
       '<td class="num">'+brl(p.valor_total)+'</td><td class="mut">'+(p.prazo||'-')+'</td>'+mt+
       '<td class="mut">'+String(p.lancado_por||'').split('@')[0]+'</td>'+
       '<td class="right"><button class="btn ok" onclick="aprovar(\''+p.id+'\')">Aprovar</button> <button class="btn bad" onclick="rejeitar(\''+p.id+'\')">Rejeitar</button></td></tr>';}).join('')+
-    '</table></div></div>';
+    totalRow+'</table></div></div>';
 }
 async function mudaStatus(id,novo,acao){
   var upd={status:novo};
