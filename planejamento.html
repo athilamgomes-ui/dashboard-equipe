@@ -158,7 +158,33 @@ async function carregar(){
     var rr=await fetch('https://athilamgomes-ui.github.io/dashboard-compras-amgomes/dados.json',{cache:'no-store'});
     if(rr.ok){ var dd=await rr.json(); DB.realizado=montarRealizado(dd); DB.realizadoEm=dd.gerado_em||''; }
   }catch(e){ DB.realizado=null; }
+  DB.contasERP=null;
+  try{
+    var cr=await fetch('https://athilamgomes-ui.github.io/dashboard-equipe/dashboard_amgomes.html',{cache:'no-store'});
+    if(cr.ok){ DB.contasERP=parseContasERP(await cr.text()); }
+  }catch(e){ DB.contasERP=null; }
   render();
+}
+/* Lê o bloco CONTASPAGAR (faturas a pagar por vencimento, fonte ERP) do dashboard de vendas público.
+   Usa só os arrays erpLx — a parte de planilha (planLx) é o que ESTE app substitui, então ignoramos. */
+function parseContasERP(html){
+  var seg=html.split('CONTASPAGAR_INICIO')[1]; if(!seg)return null; seg=seg.split('CONTASPAGAR_FIM')[0];
+  function arr(n){var m=seg.match(new RegExp(n+'\\s*=\\s*\\[([^\\]]*)\\]'));return m?m[1].split(',').map(function(x){return Number(x.trim())||0;}):null;}
+  var mm=seg.match(/meses\s*=\s*\[([^\]]*)\]/); if(!mm)return null;
+  var labels=mm[1].split(',').map(function(x){return x.replace(/['"\s]/g,'');}).filter(Boolean);
+  var e1=arr('erpL1'),e3=arr('erpL3'),e4=arr('erpL4'),e5=arr('erpL5'); if(!e1)return null;
+  var fm=seg.match(/erp:\s*'([^']+)'/); var em=fm?fm[1]:'';
+  var ab=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  var out={ALTAMIRA:{},ITAITUBA:{},SANTAREM:{}};
+  labels.forEach(function(lbl,i){var p=lbl.toLowerCase().split('/');var mi=ab.indexOf(p[0]);if(mi<0)return;
+    var k='20'+p[1]+'-'+('0'+(mi+1)).slice(-2);
+    out.ALTAMIRA[k]=(e1[i]||0)+(e4[i]||0); out.ITAITUBA[k]=e3[i]||0; out.SANTAREM[k]=e5[i]||0;});
+  return {dados:out, em:em};
+}
+function contasERPmes(m){
+  var c=DB.contasERP&&DB.contasERP.dados; if(!c)return 0;
+  if(FILTRO_LOJA!=='TODAS')return (c[FILTRO_LOJA]||{})[m]||0;
+  return (c.ALTAMIRA[m]||0)+(c.ITAITUBA[m]||0)+(c.SANTAREM[m]||0);
 }
 function montarRealizado(dd){
   var ano=new Date().getFullYear();
@@ -266,7 +292,8 @@ async function salvar(){
   if(EDIT){ ({error:err}=await sb.from('pedidos').update(row).eq('id',EDIT.id)); if(!err)logAcao('editar_pedido',marca+' / '+row.loja); }
   else { row.status='ATHILA'; row.lancado_por=DB.email; ({error:err}=await sb.from('pedidos').insert([row])); if(!err){logAcao('lancar_pedido',marca+' / '+row.loja+' R$ '+valor); notificarAprovador(row);} }
   if(err){toast('Erro: '+err.message);return;}
-  EDIT=null;TAB='pedidos';toast('Pedido salvo.');carregar();
+  var destino=(EDIT&&EDIT.status==='ATHILA')?'aprovar':'pedidos';
+  EDIT=null;TAB=destino;toast('Pedido salvo.');carregar();
 }
 
 function renderAprovar(){
@@ -285,7 +312,7 @@ function renderAprovar(){
       return '<tr><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td><td class="mut">'+(p.fornecedor||'-')+'</td>'+
       '<td class="num">'+brl(p.valor_total)+'</td><td class="mut">'+(p.prazo||'-')+'</td>'+mt+
       '<td class="mut">'+String(p.lancado_por||'').split('@')[0]+'</td>'+
-      '<td class="right"><button class="btn ok" onclick="aprovar(\''+p.id+'\')">Aprovar</button> <button class="btn bad" onclick="rejeitar(\''+p.id+'\')">Rejeitar</button></td></tr>';}).join('')+
+      '<td class="right"><button class="btn ok" onclick="aprovar(\''+p.id+'\')">Aprovar</button> <button class="btn sec" onclick="editar(\''+p.id+'\')">Alterar</button> <button class="btn bad" onclick="rejeitar(\''+p.id+'\')">Rejeitar</button></td></tr>';}).join('')+
     totalRow+'</table></div></div>';
 }
 async function mudaStatus(id,novo,acao){
@@ -338,20 +365,33 @@ function renderPedidos(){
   var ps=pedidosVisiveis().filter(function(p){return p.status!=='ATHILA';}).sort(function(a,b){return chaveData(a).localeCompare(chaveData(b));});
   var jan=janela6();
   function celv(v){return v?Math.round(v).toLocaleString('pt-BR'):'';}
-  var body='',grupo=null,soma=0,cnt=0,somaMes={};
+  var body='',grupo=null,soma=0,cnt=0,somaMes={},grandMes={};
   function fecha(){ if(grupo!==null){ var tds=jan.map(function(m){return '<td class="num">'+celv(somaMes[m])+'</td>';}).join('');
     body+='<tr class="totalrow"><td colspan="3" class="right">TOTAL '+mesExtenso(grupo)+' ('+cnt+')</td><td class="num">'+brl(soma)+'</td><td></td>'+tds+'<td colspan="2"></td></tr>'; } }
   ps.forEach(function(p){var g=mesDoPedido(p);if(g!==grupo){fecha();grupo=g;soma=0;cnt=0;somaMes={};}
     var conta=p.status!=='ENTREGUE'; if(conta){soma+=Number(p.valor_total)||0;cnt++;} var d=p.distribuicao||{};
-    var mtds=jan.map(function(m){var v=conta?(Number(d[m])||0):0;if(v)somaMes[m]=(somaMes[m]||0)+v;return '<td class="num mut">'+celv(v)+'</td>';}).join('');
+    var mtds=jan.map(function(m){var v=conta?(Number(d[m])||0):0;if(v){somaMes[m]=(somaMes[m]||0)+v;grandMes[m]=(grandMes[m]||0)+v;}return '<td class="num mut">'+celv(v)+'</td>';}).join('');
     body+='<tr><td class="mut">'+fmtData(p.data_pedido)+'</td><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td><td class="num">'+brl(p.valor_total)+'</td>'+
       '<td><span class="pill s-'+p.status+'">'+p.status+'</span></td>'+mtds+
       '<td class="mut">'+String(p.lancado_por||'').split('@')[0]+'</td>'+
       '<td class="right"><button class="btn sec" onclick="editar(\''+p.id+'\')">Editar</button>'+(DB.isOwner?' '+statusSelect(p):'')+'</td></tr>';});
   fecha();
+  /* Fechamento geral: pedidos + contas a pagar já no ERP (por vencimento) + total dos dois */
+  var pedJan=jan.reduce(function(s,m){return s+(grandMes[m]||0);},0);
+  var erpJan=jan.reduce(function(s,m){return s+contasERPmes(m);},0);
+  var fGp=jan.map(function(m){return '<td class="num">'+celv(grandMes[m])+'</td>';}).join('');
+  body+='<tr class="totalrow" style="border-top:3px solid var(--accent)"><td colspan="3" class="right">Σ TODOS OS PEDIDOS (vencendo nestes 6 meses)</td><td class="num">'+brl(pedJan)+'</td><td></td>'+fGp+'<td colspan="2"></td></tr>';
+  if(DB.contasERP){
+    var fEp=jan.map(function(m){return '<td class="num mut">'+celv(contasERPmes(m))+'</td>';}).join('');
+    var fTt=jan.map(function(m){return '<td class="num"><b>'+celv((grandMes[m]||0)+contasERPmes(m))+'</b></td>';}).join('');
+    body+='<tr class="totalrow"><td colspan="3" class="right mut">+ Contas a pagar já no ERP (vencimento'+(DB.contasERP.em?' · ERP '+DB.contasERP.em:'')+')</td><td class="num mut">'+brl(erpJan)+'</td><td></td>'+fEp+'<td colspan="2"></td></tr>'+
+      '<tr class="totalrow" style="background:#eef2ff"><td colspan="3" class="right">= TOTAL A PAGAR (pedidos + ERP)</td><td class="num"><b>'+brl(pedJan+erpJan)+'</b></td><td></td>'+fTt+'<td colspan="2"></td></tr>';
+  } else {
+    body+='<tr><td colspan="13" class="mut" style="padding-top:8px">Contas a pagar do ERP indisponível agora (não consegui ler o dashboard de vendas). Mostrando só os pedidos.</td></tr>';
+  }
   var mh=jan.map(function(m){return '<th class="num">'+nomeMes(m)+'</th>';}).join('');
   el('main').innerHTML='<div class="card"><h2>Pedidos ('+ps.length+')</h2>'+
-    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">Colunas de mês = valor que vence em cada um dos próximos 6 meses (R$, arredondado). Pedidos aguardando aprovação ficam na aba Aprovações; pedidos ENTREGUE não exibem nem somam valores nos meses.</p>'+
+    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">Colunas de mês = valor que vence em cada um dos próximos 6 meses (R$, arredondado). Pedidos aguardando aprovação ficam na aba Aprovações; pedidos ENTREGUE não exibem nem somam valores nos meses. O bloco final soma os pedidos com o <b>contas a pagar já lançado no ERP</b> (por vencimento) para dar a visão total do contas a pagar.</p>'+
     '<div style="overflow:auto"><table>'+
     '<tr><th>Data</th><th>Marca</th><th>Loja</th><th class="num">Valor</th><th>Status</th>'+mh+'<th>Lançado por</th><th></th></tr>'+body+'</table></div></div>';
 }
