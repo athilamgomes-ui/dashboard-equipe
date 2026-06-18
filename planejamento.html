@@ -239,10 +239,14 @@ async function salvar(){
 function renderAprovar(){
   var ps=pendentes().filter(function(p){return FILTRO_LOJA==='TODAS'||p.loja===FILTRO_LOJA;});
   if(!ps.length){el('main').innerHTML='<div class="card">Nenhum pedido aguardando aprovação. 🎉</div>';return;}
+  var jan=janela6();
+  function celv(v){return v?Math.round(v).toLocaleString('pt-BR'):'';}
+  var mh=jan.map(function(m){return '<th class="num">'+nomeMes(m)+'</th>';}).join('');
   el('main').innerHTML='<div class="card"><h2>Aguardando sua aprovação ('+ps.length+')</h2><div style="overflow:auto"><table>'+
-    '<tr><th>Marca</th><th>Loja</th><th>Fornecedor</th><th class="num">Valor</th><th>Prazo</th><th>Meses</th><th>Lançado por</th><th></th></tr>'+
-    ps.map(function(p){return '<tr><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td><td class="mut">'+(p.fornecedor||'-')+'</td>'+
-      '<td class="num">'+brl(p.valor_total)+'</td><td class="mut">'+(p.prazo||'-')+'</td><td class="mut">'+distTxt(p.distribuicao)+'</td>'+
+    '<tr><th>Marca</th><th>Loja</th><th>Fornecedor</th><th class="num">Valor</th><th>Prazo</th>'+mh+'<th>Lançado por</th><th></th></tr>'+
+    ps.map(function(p){var d=p.distribuicao||{};var mt=jan.map(function(m){return '<td class="num mut">'+celv(Number(d[m])||0)+'</td>';}).join('');
+      return '<tr><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td><td class="mut">'+(p.fornecedor||'-')+'</td>'+
+      '<td class="num">'+brl(p.valor_total)+'</td><td class="mut">'+(p.prazo||'-')+'</td>'+mt+
       '<td class="mut">'+String(p.lancado_por||'').split('@')[0]+'</td>'+
       '<td class="right"><button class="btn ok" onclick="aprovar(\''+p.id+'\')">Aprovar</button> <button class="btn bad" onclick="rejeitar(\''+p.id+'\')">Rejeitar</button></td></tr>';}).join('')+
     '</table></div></div>';
@@ -273,7 +277,8 @@ function renderOTB(){
 
 function mesDoPedido(p){var m=String(p.data_pedido||'').match(/^(\d{4})-(\d{2})/);return m?m[1]+'-'+m[2]:'0000-00';}
 function renderPedidos(){
-  var ps=pedidosVisiveis().slice().sort(function(a,b){var ka=mesDoPedido(a),kb=mesDoPedido(b);if(ka!==kb)return ka.localeCompare(kb);return String(a.data_pedido||'').localeCompare(String(b.data_pedido||''));});
+  function chaveData(p){var d=String(p.data_pedido||'');return /^\d{4}-\d{2}-\d{2}/.test(d)?d:'9999-99-99';}
+  var ps=pedidosVisiveis().slice().sort(function(a,b){return chaveData(a).localeCompare(chaveData(b));});
   var jan=janela6();
   function celv(v){return v?Math.round(v).toLocaleString('pt-BR'):'';}
   var body='',grupo=null,soma=0,cnt=0,somaMes={};
