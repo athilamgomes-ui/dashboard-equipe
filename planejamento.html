@@ -89,6 +89,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 </div>
 
 <div class="toast" id="toast"></div>
+<div id="vupd" style="display:none;position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:100;background:var(--accent);color:#fff;padding:10px 16px;border-radius:10px;font-weight:700;font-size:13px;box-shadow:var(--shadow-hover)">🔄 Nova versão disponível <button onclick="location.href=location.pathname+'?v='+Date.now()" style="margin-left:10px;background:#fff;color:var(--accent);border:none;padding:5px 12px;border-radius:7px;font-weight:800;cursor:pointer">Atualizar agora</button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -107,6 +108,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS';
+var BUILD='ORD-8'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -129,9 +131,16 @@ window.addEventListener('DOMContentLoaded', function(){
   /* LOGIN DESATIVADO temporariamente — acesso livre. Identidade = nome digitado (sem senha). */
   DB.email=getNome()||'equipe'; DB.isOwner=true;
   el('login').classList.add('hide'); el('app').classList.remove('hide');
-  el('who').innerHTML='Você: <input value="'+getNome()+'" placeholder="seu nome" style="width:130px;padding:4px 8px;display:inline-block" onchange="setNome(this.value)"> · <span style="color:var(--warn)">login desativado</span> · <span class="mut" title="versão da página">build ORD-7</span>';
+  el('who').innerHTML='Você: <input value="'+getNome()+'" placeholder="seu nome" style="width:130px;padding:4px 8px;display:inline-block" onchange="setNome(this.value)"> · <span style="color:var(--warn)">login desativado</span> · <span class="mut" title="versão da página">build '+BUILD+'</span>';
   carregar();
+  checkVersion(); setInterval(checkVersion,300000); window.addEventListener('focus',checkVersion); // auto-update: avisa quando sair versão nova
 });
+function checkVersion(){
+  fetch(location.pathname+'?vc='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){
+    var m=t.match(/var BUILD=['"](ORD-\d+)['"]/);
+    if(m&&m[1]!==BUILD){ var e=el('vupd'); if(e)e.style.display='block'; }
+  }).catch(function(){});
+}
 async function entrar(){
   el('lg_err').textContent='';
   var email=el('lg_email').value.trim(), pass=el('lg_pass').value;
