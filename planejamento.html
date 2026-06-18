@@ -128,7 +128,7 @@ window.addEventListener('DOMContentLoaded', function(){
   /* LOGIN DESATIVADO temporariamente — acesso livre. Identidade = nome digitado (sem senha). */
   DB.email=getNome()||'equipe'; DB.isOwner=true;
   el('login').classList.add('hide'); el('app').classList.remove('hide');
-  el('who').innerHTML='Você: <input value="'+getNome()+'" placeholder="seu nome" style="width:130px;padding:4px 8px;display:inline-block" onchange="setNome(this.value)"> · <span style="color:var(--warn)">login desativado</span> · <span class="mut" title="versão da página">build ORD-5</span>';
+  el('who').innerHTML='Você: <input value="'+getNome()+'" placeholder="seu nome" style="width:130px;padding:4px 8px;display:inline-block" onchange="setNome(this.value)"> · <span style="color:var(--warn)">login desativado</span> · <span class="mut" title="versão da página">build ORD-6</span>';
   carregar();
 });
 async function entrar(){
@@ -206,7 +206,7 @@ function distIgual(a,b){a=a||{};b=b||{};var ka=Object.keys(a),kb=Object.keys(b);
   for(var i=0;i<ka.length;i++){var k=ka[i];if(!(k in b))return false;if(Math.round(a[k]||0)!==Math.round(b[k]||0))return false;}return true;}
 async function recomputarPendentes(){
   var mudados=[];
-  DB.pedidos.forEach(function(p){ if(p.status!=='ATHILA')return;
+  DB.pedidos.forEach(function(p){ if(p.status!=='ATHILA'&&p.status!=='APROVADO')return; // ainda não enviados rolam de hoje
     var nova=autoSplit(Number(p.valor_total)||0,p.prazo,p.parcelas,''); // base vazia = hoje
     if(!distIgual(p.distribuicao,nova)){ p.distribuicao=nova; mudados.push(p); } });
   if(mudados.length) try{ await Promise.all(mudados.map(function(p){return sb.from('pedidos').update({distribuicao:p.distribuicao}).eq('id',p.id);})); }catch(e){}
@@ -348,14 +348,14 @@ function renderLancar(){
 }
 function prev(){
   var valor=Number(el('f_valor').value)||0; if(!valor){el('split').textContent='';return;}
-  var ehPendente=!EDIT||EDIT.status==='ATHILA';
+  var ehPendente=!EDIT||EDIT.status==='ATHILA'||EDIT.status==='APROVADO';
   var d=autoSplit(valor,el('f_prazo').value,el('f_parc').value, ehPendente?'':el('f_base').value);
-  el('split').innerHTML=(ehPendente?'Divisão a partir de HOJE (recalcula sozinha enquanto aguarda aprovação; congela ao aprovar): ':'Divisão automática: ')+Object.keys(d).sort().map(function(k){return '<b>'+nomeMes(k)+'</b> '+brl(d[k]);}).join(' · ');
+  el('split').innerHTML=(ehPendente?'Divisão a partir de HOJE (recalcula sozinha até ser ENVIADO; congela na data do envio): ':'Divisão automática: ')+Object.keys(d).sort().map(function(k){return '<b>'+nomeMes(k)+'</b> '+brl(d[k]);}).join(' · ');
 }
 async function salvar(){
   var valor=Number(el('f_valor').value)||0, marca=el('f_marca').value.trim();
   if(!marca||!valor){toast('Informe marca e valor.');return;}
-  var ehPendente=!EDIT||EDIT.status==='ATHILA'; // pendente conta de hoje (rolling); aprovado usa a data base informada
+  var ehPendente=!EDIT||EDIT.status==='ATHILA'||EDIT.status==='APROVADO'; // ainda não enviado conta de hoje (rolling); ENVIADO+ usa a data base informada
   var dist=autoSplit(valor,el('f_prazo').value,el('f_parc').value, ehPendente?'':(el('f_base').value||el('f_entrega').value||el('f_data').value));
   var row={loja:el('f_loja').value,marca:marca.toUpperCase(),fornecedor:el('f_forn').value,
     data_pedido:el('f_data').value||null,valor_total:valor,prazo:el('f_prazo').value,parcelas:el('f_parc').value,
@@ -382,7 +382,7 @@ function renderAprovar(){
   var pendRow='<tr class="totalrow"><td colspan="3" class="right mut">Aguardando aprovação ('+ps.length+') — ainda NÃO comprometido</td><td class="num mut">'+brl(pendJan)+'</td><td></td>'+pendTds+'<td colspan="2"></td></tr>';
   var totalRow=pendRow+footerPagar(jan);
   el('main').innerHTML='<div class="card"><h2>Aguardando sua aprovação ('+ps.length+')</h2>'+
-    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">A linha cinza soma o que está aguardando aprovação (ainda NÃO compromete o caixa). O bloco destacado é o <b>total comprometido</b> = pedidos em trânsito (enviado + faturado) + contas a pagar já no ERP — o MESMO total da aba Pedidos. ⏱️ Os meses dos pedidos pendentes são contados a partir de HOJE e recalculados a cada abertura; ao aprovar, congelam na data da aprovação. 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
+    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">A linha cinza soma o que está aguardando aprovação (ainda NÃO compromete o caixa). O bloco destacado é o <b>total comprometido</b> = pedidos em trânsito (enviado + faturado) + contas a pagar já no ERP — o MESMO total da aba Pedidos. ⏱️ Os meses dos pedidos ainda não enviados (pendentes/aprovados) são contados a partir de HOJE e recalculados a cada abertura; quando a equipe marca <b>ENVIADO</b>, são recalculados pela data do envio + forma de pagamento e congelam. 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
     '<div style="overflow:auto"><table>'+
     '<tr><th>Data</th><th>Marca</th><th>Loja</th><th class="num">Valor</th><th>Prazo</th>'+mh+'<th>Lançado por</th><th class="acoes"></th></tr>'+
     ps.map(function(p){var d=p.distribuicao||{};var mt=jan.map(function(m){return '<td class="num mut">'+celv(Number(d[m])||0)+'</td>';}).join('');
@@ -393,10 +393,11 @@ function renderAprovar(){
     totalRow+'</table></div></div>';
 }
 async function mudaStatus(id,novo,acao){
+  var p=DB.pedidos.filter(function(x){return x.id===id;})[0];
   var upd={status:novo};
   if(acao==='aprovar'||acao==='rejeitar'){upd.aprovado_por=DB.email;upd.data_aprovacao=new Date().toISOString();}
-  if(acao==='aprovar'){ var pa=DB.pedidos.filter(function(x){return x.id===id;})[0];
-    if(pa)upd.distribuicao=autoSplit(Number(pa.valor_total)||0,pa.prazo,pa.parcelas,''); } // congela o prazo na data da aprovação (hoje)
+  if(novo==='ENVIADO'&&p&&p.status!=='ENVIADO'){ // ao marcar ENVIADO: recalcula o contas a pagar a partir da DATA DO ENVIO (hoje) + forma de pagamento, e congela
+    upd.distribuicao=autoSplit(Number(p.valor_total)||0,p.prazo,p.parcelas,''); }
   var {error}=await sb.from('pedidos').update(upd).eq('id',id);
   if(error){toast('Erro: '+error.message);return;}
   logAcao(acao||'mudar_status',id+' -> '+novo); carregar();
@@ -458,7 +459,7 @@ function renderPedidos(){
   body+=footerPagar(jan);
   var mh=jan.map(function(m){return '<th class="num">'+nomeMes(m)+'</th>';}).join('');
   el('main').innerHTML='<div class="card"><h2>Pedidos ('+ps.length+')</h2>'+
-    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">Ordenados pela <b>data de lançamento</b> — o mais antigo primeiro. Colunas de mês = valor que vence em cada um dos próximos 6 meses (R$, arredondado); pedidos ENTREGUE não exibem valores nos meses. O bloco final mostra o <b>total comprometido</b> = pedidos em trânsito (enviado + faturado) + contas a pagar já lançado no ERP (por vencimento) — o MESMO total da aba Aprovações. 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
+    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">Ordenados pela <b>data de lançamento</b> — o mais antigo primeiro. Ao marcar um pedido como <b>ENVIADO</b>, os meses são recalculados pela data do envio + forma de pagamento. Colunas de mês = valor que vence em cada um dos próximos 6 meses (R$, arredondado); pedidos ENTREGUE não exibem valores nos meses. O bloco final mostra o <b>total comprometido</b> = pedidos em trânsito (enviado + faturado) + contas a pagar já lançado no ERP (por vencimento) — o MESMO total da aba Aprovações. 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
     banner+
     '<div style="overflow:auto"><table>'+
     '<tr><th>Data</th><th>Marca</th><th>Loja</th><th class="num">Valor</th><th>Status</th>'+mh+'<th>Lançado por</th><th class="acoes"></th></tr>'+body+'</table></div></div>';
