@@ -356,9 +356,9 @@ function renderAprovar(){
   el('main').innerHTML='<div class="card"><h2>Aguardando sua aprovação ('+ps.length+')</h2>'+
     '<p class="mut" style="margin:-8px 0 12px;font-weight:600">A linha cinza soma o que está aguardando aprovação (ainda NÃO compromete o caixa). O bloco destacado é o <b>total comprometido</b> = pedidos em trânsito (enviado + faturado) + contas a pagar já no ERP — o MESMO total da aba Pedidos. 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
     '<div style="overflow:auto"><table>'+
-    '<tr><th>Marca</th><th>Loja</th><th>Fornecedor</th><th class="num">Valor</th><th>Prazo</th>'+mh+'<th>Lançado por</th><th></th></tr>'+
+    '<tr><th>Data</th><th>Marca</th><th>Loja</th><th class="num">Valor</th><th>Prazo</th>'+mh+'<th>Lançado por</th><th></th></tr>'+
     ps.map(function(p){var d=p.distribuicao||{};var mt=jan.map(function(m){return '<td class="num mut">'+celv(Number(d[m])||0)+'</td>';}).join('');
-      return '<tr><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td><td class="mut">'+(p.fornecedor||'-')+'</td>'+
+      return '<tr><td class="mut">'+fmtData(p.data_pedido)+'</td><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td>'+
       '<td class="num">'+brl(p.valor_total)+'</td><td class="mut">'+(p.prazo||'-')+'</td>'+mt+
       '<td class="mut">'+String(p.lancado_por||'').split('@')[0]+'</td>'+
       '<td class="right"><button class="btn ok" onclick="aprovar(\''+p.id+'\')">Aprovar</button> <button class="btn sec" onclick="editar(\''+p.id+'\')">Alterar</button> <button class="btn bad" onclick="rejeitar(\''+p.id+'\')">Rejeitar</button></td></tr>';}).join('')+
