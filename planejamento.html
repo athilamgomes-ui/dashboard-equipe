@@ -153,7 +153,24 @@ async function carregar(){
   DB.limites=lr.data||[];
   DB.meses=mesesHorizonte();
   DB.otb=computeOTB(DB.pedidos,DB.limites);
+  DB.realizado=null; DB.realizadoEm='';
+  try{
+    var rr=await fetch('https://athilamgomes-ui.github.io/dashboard-compras-amgomes/dados.json',{cache:'no-store'});
+    if(rr.ok){ var dd=await rr.json(); DB.realizado=montarRealizado(dd); DB.realizadoEm=dd.gerado_em||''; }
+  }catch(e){ DB.realizado=null; }
   render();
+}
+function montarRealizado(dd){
+  var ano=new Date().getFullYear();
+  var mapLoja={L1:'ALTAMIRA',L4:'ALTAMIRA',L3:'ITAITUBA',L5:'SANTAREM'};
+  var out={ALTAMIRA:{},ITAITUBA:{},SANTAREM:{}};
+  (dd.marcas||[]).forEach(function(m){
+    var cmr=m.compras_mensais_rs||{};
+    Object.keys(cmr).forEach(function(lo){var alvo=mapLoja[lo];if(!alvo)return;
+      Object.keys(cmr[lo]||{}).forEach(function(mesN){var mes=ano+'-'+('0'+mesN).slice(-2);
+        out[alvo][mes]=(out[alvo][mes]||0)+(Number(cmr[lo][mesN])||0);});});
+  });
+  return out;
 }
 function computeOTB(peds,lims){
   var meses=DB.meses, limMap={}, out={};
@@ -197,7 +214,7 @@ async function notificarAprovador(row){
 /* ---------- render ---------- */
 function pendentes(){return DB.pedidos.filter(function(p){return p.status==='ATHILA';});}
 function render(){
-  var tabs=[['lancar','➕ Lançar pedido'],['otb','📊 Saldo disponível (OTB)'],['pedidos','📋 Pedidos']];
+  var tabs=[['lancar','➕ Lançar pedido'],['otb','📊 Saldo disponível (OTB)'],['real','📈 Planejado × Realizado'],['pedidos','📋 Pedidos']];
   if(DB.isOwner){tabs.splice(1,0,['aprovar','✅ Aprovações']);tabs.push(['limites','🎯 Limites']);}
   el('nav').innerHTML=tabs.map(function(t){var b=t[0]==='aprovar'&&pendentes().length?'<span class="badge">'+pendentes().length+'</span>':'';
     return '<button class="'+(TAB===t[0]?'active':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+b+'</button>';}).join('');
@@ -206,7 +223,7 @@ function render(){
     '<option value="TODAS"'+(FILTRO_LOJA==='TODAS'?' selected':'')+'>Todas as lojas</option>'+
     LOJAS.map(function(l){return '<option value="'+l.id+'"'+(FILTRO_LOJA===l.id?' selected':'')+'>'+l.nome+'</option>';}).join('')+'</select>'; }
   if(TAB==='lancar')renderLancar(); else if(TAB==='aprovar')renderAprovar(); else if(TAB==='otb')renderOTB();
-  else if(TAB==='pedidos')renderPedidos(); else if(TAB==='limites')renderLimites();
+  else if(TAB==='real')renderReal(); else if(TAB==='pedidos')renderPedidos(); else if(TAB==='limites')renderLimites();
 }
 function go(t){TAB=t;if(t!=='lancar')EDIT=null;render();}
 function distTxt(d){d=d||{};return Object.keys(d).sort().map(function(k){return nomeMes(k)+' '+brl(d[k]);}).join(' · ')||'-';}
@@ -295,6 +312,26 @@ function renderOTB(){
   el('main').innerHTML=html+'</div>';
 }
 
+/* ---------- Planejado x Realizado ---------- */
+function renderReal(){
+  if(!DB.realizado){ el('main').innerHTML='<div class="card">Não consegui carregar o "realizado" do dashboard de Compras agora. Recarregue a página (Cmd+Shift+R).</div>'; return; }
+  var ano=new Date().getFullYear();
+  var plan={ALTAMIRA:{},ITAITUBA:{},SANTAREM:{}};
+  DB.pedidos.forEach(function(p){ if(p.status==='REJEITADO')return; var mp=mesDoPedido(p); if(mp.slice(0,4)!=String(ano))return; if(!plan[p.loja])return; plan[p.loja][mp]=(plan[p.loja][mp]||0)+(Number(p.valor_total)||0); });
+  var html='<div class="card"><h2>Planejado × Realizado '+ano+'</h2>'+
+    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">Planejado = valor dos pedidos lançados aqui (por mês do pedido, exceto rejeitados). Realizado = NFs de compra que entraram no ERP, por mês de emissão (fonte: dashboard de Compras'+(DB.realizadoEm?' · '+DB.realizadoEm:'')+'). Δ = Realizado − Planejado.</p>';
+  lojasVisiveis().forEach(function(lo){
+    var meses={}; Object.keys(plan[lo.id]||{}).forEach(function(m){meses[m]=1;}); Object.keys(DB.realizado[lo.id]||{}).forEach(function(m){meses[m]=1;});
+    var ks=Object.keys(meses).sort(); var tp=0,tr=0;
+    html+='<div class="lojahead">'+lo.nome+'</div><div style="overflow:auto"><table><tr><th>Mês</th><th class="num">Planejado</th><th class="num">Realizado</th><th class="num">Δ (R$)</th><th class="num">Δ %</th></tr>';
+    ks.forEach(function(m){ var pv=plan[lo.id][m]||0, rv=(DB.realizado[lo.id]||{})[m]||0; tp+=pv; tr+=rv; var d=rv-pv;
+      html+='<tr><td>'+nomeMes(m)+'</td><td class="num">'+brl(pv)+'</td><td class="num">'+brl(rv)+'</td>'+
+        '<td class="num '+(d<0?'neg':'pos')+'">'+brl(d)+'</td><td class="num '+(d<0?'neg':'pos')+'">'+(pv?((d>=0?'+':'')+Math.round(d/pv*100)+'%'):'—')+'</td></tr>'; });
+    var td=tr-tp;
+    html+='<tr class="totalrow"><td>TOTAL</td><td class="num">'+brl(tp)+'</td><td class="num">'+brl(tr)+'</td><td class="num '+(td<0?'neg':'pos')+'">'+brl(td)+'</td><td class="num '+(td<0?'neg':'pos')+'">'+(tp?((td>=0?'+':'')+Math.round(td/tp*100)+'%'):'—')+'</td></tr></table></div>';
+  });
+  el('main').innerHTML=html+'</div>';
+}
 function mesDoPedido(p){var m=String(p.data_pedido||'').match(/^(\d{4})-(\d{2})/);return m?m[1]+'-'+m[2]:'0000-00';}
 function renderPedidos(){
   function chaveData(p){var d=String(p.data_pedido||'');return /^\d{4}-\d{2}-\d{2}/.test(d)?d:'9999-99-99';}
