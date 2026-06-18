@@ -92,6 +92,7 @@ var WEB3FORMS_KEY = '65791c8f-eab3-4e7a-91bf-ce645c273332';  // avisa o aprovado
 var LOJAS=[{id:'ALTAMIRA',nome:'Altamira (L1+L4)'},{id:'ITAITUBA',nome:'Itaituba (L3)'},{id:'SANTAREM',nome:'Santarém (L5)'}];
 var STATUS=['ATHILA','ENVIADO','FATURADO','ENTREGUE','REJEITADO'];
 var STATUS_COMPROMETE=['ENVIADO','FATURADO','ENTREGUE'];
+var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o caixa e ainda há o que pagar (ATHILA=não aprovado, ENTREGUE=já recebido — fora do "a pagar")
 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
@@ -188,32 +189,45 @@ function contasERPmes(m){
   return (c.ALTAMIRA[m]||0)+(c.ITAITUBA[m]||0)+(c.SANTAREM[m]||0);
 }
 function celvBR(v){return v?Math.round(v).toLocaleString('pt-BR'):'';}
-/* Rodapé "contas a pagar geral": Σ pedidos + contas a pagar no ERP + total dos dois.
-   jan=janela de meses; grandMes={mes:valorPedidos}. Usado em Pedidos e Aprovações. */
-function footerPagar(jan,grandMes,labelPed,labelTot){
-  var pedJan=jan.reduce(function(s,m){return s+(grandMes[m]||0);},0);
-  var fGp=jan.map(function(m){return '<td class="num">'+celvBR(grandMes[m])+'</td>';}).join('');
-  var h='<tr class="totalrow" style="border-top:3px solid var(--accent)"><td colspan="3" class="right">'+labelPed+'</td><td class="num">'+brl(pedJan)+'</td><td></td>'+fGp+'<td colspan="2"></td></tr>';
+/* Pedidos comprometidos (ENVIADO+FATURADO = em trânsito), por mês, respeitando o filtro de loja.
+   Fonte ÚNICA usada nos rodapés de Pedidos E Aprovações → o total é idêntico nas duas abas. */
+function comprometidoMes(jan){
+  var out={};
+  DB.pedidos.forEach(function(p){
+    if(STATUS_A_PAGAR.indexOf(p.status)<0)return;
+    if(FILTRO_LOJA!=='TODAS'&&p.loja!==FILTRO_LOJA)return;
+    var d=p.distribuicao||{};
+    jan.forEach(function(m){var v=Number(d[m])||0;if(v)out[m]=(out[m]||0)+v;});
+  });
+  return out;
+}
+/* Rodapé "contas a pagar geral" (IDÊNTICO nas abas Pedidos e Aprovações):
+   pedidos em trânsito (enviado+faturado) + contas a pagar já no ERP = total comprometido. */
+function footerPagar(jan){
+  var comp=comprometidoMes(jan);
+  var pedJan=jan.reduce(function(s,m){return s+(comp[m]||0);},0);
+  var fGp=jan.map(function(m){return '<td class="num">'+celvBR(comp[m])+'</td>';}).join('');
+  var h='<tr class="totalrow" style="border-top:3px solid var(--accent)"><td colspan="3" class="right">Pedidos em trânsito (enviado + faturado)</td><td class="num">'+brl(pedJan)+'</td><td></td>'+fGp+'<td colspan="2"></td></tr>';
   if(DB.contasERP){
     var erpJan=jan.reduce(function(s,m){return s+contasERPmes(m);},0);
     var fEp=jan.map(function(m){return '<td class="num mut">'+celvBR(contasERPmes(m))+'</td>';}).join('');
-    var fTt=jan.map(function(m){return '<td class="num"><b>'+celvBR((grandMes[m]||0)+contasERPmes(m))+'</b></td>';}).join('');
+    var fTt=jan.map(function(m){return '<td class="num"><b>'+celvBR((comp[m]||0)+contasERPmes(m))+'</b></td>';}).join('');
     h+='<tr class="totalrow"><td colspan="3" class="right mut">+ Contas a pagar já no ERP (vencimento'+(DB.contasERP.em?' · ERP '+DB.contasERP.em:'')+')</td><td class="num mut">'+brl(erpJan)+'</td><td></td>'+fEp+'<td colspan="2"></td></tr>'+
-      '<tr class="totalrow" style="background:#eef2ff"><td colspan="3" class="right">'+labelTot+'</td><td class="num"><b>'+brl(pedJan+erpJan)+'</b></td><td></td>'+fTt+'<td colspan="2"></td></tr>'+
-      breakdownAltamira(jan,grandMes);
+      '<tr class="totalrow" style="background:#eef2ff"><td colspan="3" class="right">= TOTAL COMPROMETIDO (trânsito + ERP)</td><td class="num"><b>'+brl(pedJan+erpJan)+'</b></td><td></td>'+fTt+'<td colspan="2"></td></tr>'+
+      breakdownAltamira(jan,comp);
   } else {
-    h+='<tr><td colspan="13" class="mut" style="padding-top:8px">Contas a pagar do ERP indisponível agora (não consegui ler o dashboard de vendas). Mostrando só os pedidos.</td></tr>';
+    h+='<tr><td colspan="13" class="mut" style="padding-top:8px">Contas a pagar do ERP indisponível agora (não consegui ler o dashboard de vendas). Mostrando só os pedidos em trânsito.</td></tr>';
   }
   return h;
 }
 /* Quando a loja filtrada é Altamira, separa o total em L1 e L4: cada um = ½ dos pedidos + ERP próprio. */
-function breakdownAltamira(jan,grandMes){
+function breakdownAltamira(jan,comp){
   if(FILTRO_LOJA!=='ALTAMIRA')return '';
   var c=DB.contasERP&&DB.contasERP.dados; if(!c)return '';
   function linha(id,nome){
-    var cells=jan.map(function(m){var v=(grandMes[m]||0)/2+((c[id]||{})[m]||0);return '<td class="num">'+celvBR(v)+'</td>';}).join('');
-    var tot=jan.reduce(function(s,m){return s+(grandMes[m]||0)/2+((c[id]||{})[m]||0);},0);
-    return '<tr style="background:#f8fafc;font-weight:700;font-size:11.5px"><td colspan="3" class="right mut">↳ '+id+' '+nome+' (½ pedidos + ERP '+id+')</td><td class="num mut">'+brl(tot)+'</td><td></td>'+cells+'<td colspan="2"></td></tr>';
+    var cells=jan.map(function(m){var v=(comp[m]||0)/2+((c[id]||{})[m]||0);return '<td class="num">'+celvBR(v)+'</td>';}).join('');
+    var tot=jan.reduce(function(s,m){return s+(comp[m]||0)/2+((c[id]||{})[m]||0);},0);
+    return '<tr style="background:#f8fafc;font-weight:700;font-size:11.5px"><td colspan="3" class="right mut">↳ '+id+' '+nome+' (½ trânsito + ERP '+id+')</td><td class="num mut">'+brl(tot)+'</td><td></td>'+cells+'<td colspan="2"></td></tr>';
   }
   return linha('L1','Casa Altamira')+linha('L4','MissBeleza Altamira');
 }
@@ -335,9 +349,12 @@ function renderAprovar(){
   var mh=jan.map(function(m){return '<th class="num">'+nomeMes(m)+'</th>';}).join('');
   var totM={};
   ps.forEach(function(p){var d=p.distribuicao||{};jan.forEach(function(m){var v=Number(d[m])||0;if(v)totM[m]=(totM[m]||0)+v;});});
-  var totalRow=footerPagar(jan,totM,'Σ AGUARDANDO APROVAÇÃO ('+ps.length+')','= TOTAL se aprovar tudo + ERP');
+  var pendTds=jan.map(function(m){return '<td class="num mut">'+celv(totM[m])+'</td>';}).join('');
+  var pendJan=jan.reduce(function(s,m){return s+(totM[m]||0);},0);
+  var pendRow='<tr class="totalrow"><td colspan="3" class="right mut">Aguardando aprovação ('+ps.length+') — ainda NÃO comprometido</td><td class="num mut">'+brl(pendJan)+'</td><td></td>'+pendTds+'<td colspan="2"></td></tr>';
+  var totalRow=pendRow+footerPagar(jan);
   el('main').innerHTML='<div class="card"><h2>Aguardando sua aprovação ('+ps.length+')</h2>'+
-    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">O bloco final mostra quanto ficaria o <b>contas a pagar total</b> (estes pedidos + o que já está no ERP por vencimento) caso você aprove tudo. 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
+    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">A linha cinza soma o que está aguardando aprovação (ainda NÃO compromete o caixa). O bloco destacado é o <b>total comprometido</b> = pedidos em trânsito (enviado + faturado) + contas a pagar já no ERP — o MESMO total da aba Pedidos. 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
     '<div style="overflow:auto"><table>'+
     '<tr><th>Marca</th><th>Loja</th><th>Fornecedor</th><th class="num">Valor</th><th>Prazo</th>'+mh+'<th>Lançado por</th><th></th></tr>'+
     ps.map(function(p){var d=p.distribuicao||{};var mt=jan.map(function(m){return '<td class="num mut">'+celv(Number(d[m])||0)+'</td>';}).join('');
@@ -397,21 +414,21 @@ function renderPedidos(){
   var ps=pedidosVisiveis().filter(function(p){return p.status!=='ATHILA';}).sort(function(a,b){return chaveData(a).localeCompare(chaveData(b));});
   var jan=janela6();
   function celv(v){return v?Math.round(v).toLocaleString('pt-BR'):'';}
-  var body='',grupo=null,soma=0,cnt=0,somaMes={},grandMes={};
+  var body='',grupo=null,soma=0,cnt=0,somaMes={};
   function fecha(){ if(grupo!==null){ var tds=jan.map(function(m){return '<td class="num">'+celv(somaMes[m])+'</td>';}).join('');
     body+='<tr class="totalrow"><td colspan="3" class="right">TOTAL '+mesExtenso(grupo)+' ('+cnt+')</td><td class="num">'+brl(soma)+'</td><td></td>'+tds+'<td colspan="2"></td></tr>'; } }
   ps.forEach(function(p){var g=mesDoPedido(p);if(g!==grupo){fecha();grupo=g;soma=0;cnt=0;somaMes={};}
     var conta=p.status!=='ENTREGUE'; if(conta){soma+=Number(p.valor_total)||0;cnt++;} var d=p.distribuicao||{};
-    var mtds=jan.map(function(m){var v=conta?(Number(d[m])||0):0;if(v){somaMes[m]=(somaMes[m]||0)+v;grandMes[m]=(grandMes[m]||0)+v;}return '<td class="num mut">'+celv(v)+'</td>';}).join('');
+    var mtds=jan.map(function(m){var v=conta?(Number(d[m])||0):0;if(v){somaMes[m]=(somaMes[m]||0)+v;}return '<td class="num mut">'+celv(v)+'</td>';}).join('');
     body+='<tr><td class="mut">'+fmtData(p.data_pedido)+'</td><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td><td class="num">'+brl(p.valor_total)+'</td>'+
       '<td><span class="pill s-'+p.status+'">'+p.status+'</span></td>'+mtds+
       '<td class="mut">'+String(p.lancado_por||'').split('@')[0]+'</td>'+
       '<td class="right"><button class="btn sec" onclick="editar(\''+p.id+'\')">Editar</button>'+(DB.isOwner?' '+statusSelect(p):'')+'</td></tr>';});
   fecha();
-  body+=footerPagar(jan,grandMes,'Σ TODOS OS PEDIDOS (vencendo nestes 6 meses)','= TOTAL A PAGAR (pedidos + ERP)');
+  body+=footerPagar(jan);
   var mh=jan.map(function(m){return '<th class="num">'+nomeMes(m)+'</th>';}).join('');
   el('main').innerHTML='<div class="card"><h2>Pedidos ('+ps.length+')</h2>'+
-    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">Colunas de mês = valor que vence em cada um dos próximos 6 meses (R$, arredondado). Pedidos aguardando aprovação ficam na aba Aprovações; pedidos ENTREGUE não exibem nem somam valores nos meses. O bloco final soma os pedidos com o <b>contas a pagar já lançado no ERP</b> (por vencimento). 💡 Filtre a loja <b>Altamira</b> para ver o total separado em L1 e L4.</p>'+
+    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">Colunas de mês = valor que vence em cada um dos próximos 6 meses (R$, arredondado). O bloco final mostra o <b>total comprometido</b> = pedidos em trânsito (enviado + faturado) + contas a pagar já lançado no ERP (por vencimento). É o MESMO total da aba Aprovações. 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
     '<div style="overflow:auto"><table>'+
     '<tr><th>Data</th><th>Marca</th><th>Loja</th><th class="num">Valor</th><th>Status</th>'+mh+'<th>Lançado por</th><th></th></tr>'+body+'</table></div></div>';
 }
