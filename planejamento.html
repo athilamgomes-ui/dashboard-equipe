@@ -118,7 +118,7 @@ window.addEventListener('DOMContentLoaded', function(){
   /* LOGIN DESATIVADO temporariamente — acesso livre. Identidade = nome digitado (sem senha). */
   DB.email=getNome()||'equipe'; DB.isOwner=true;
   el('login').classList.add('hide'); el('app').classList.remove('hide');
-  el('who').innerHTML='Você: <input value="'+getNome()+'" placeholder="seu nome" style="width:130px;padding:4px 8px;display:inline-block" onchange="setNome(this.value)"> · <span style="color:var(--warn)">login desativado</span> · <span class="mut" title="versão da página">build ORD-2</span>';
+  el('who').innerHTML='Você: <input value="'+getNome()+'" placeholder="seu nome" style="width:130px;padding:4px 8px;display:inline-block" onchange="setNome(this.value)"> · <span style="color:var(--warn)">login desativado</span> · <span class="mut" title="versão da página">build ORD-3</span>';
   carregar();
 });
 async function entrar(){
@@ -357,7 +357,7 @@ async function salvar(){
 }
 
 function renderAprovar(){
-  var ps=pendentes().filter(function(p){return FILTRO_LOJA==='TODAS'||p.loja===FILTRO_LOJA;});
+  var ps=pendentes().filter(function(p){return FILTRO_LOJA==='TODAS'||p.loja===FILTRO_LOJA;}).sort(function(a,b){return ordData(a).localeCompare(ordData(b));});
   if(!ps.length){el('main').innerHTML='<div class="card">Nenhum pedido aguardando aprovação. 🎉</div>';return;}
   var jan=janela6();
   function celv(v){return v?Math.round(v).toLocaleString('pt-BR'):'';}
@@ -426,9 +426,10 @@ function renderReal(){
   el('main').innerHTML=html+'</div>';
 }
 function mesDoPedido(p){var m=String(p.data_pedido||'').match(/^(\d{4})-(\d{2})/);return m?m[1]+'-'+m[2]:'0000-00';}
+/* chave de ordenação por data de lançamento (asc, sem-data por último) — usada em Pedidos e Aprovações */
+function ordData(p){var d=String(p.data_pedido||'');return /^\d{4}-\d{2}-\d{2}/.test(d)?d:'9999-99-99';}
 function renderPedidos(){
-  function chaveData(p){var d=String(p.data_pedido||'');return /^\d{4}-\d{2}-\d{2}/.test(d)?d:'9999-99-99';}
-  var ps=pedidosVisiveis().filter(function(p){return p.status!=='ATHILA';}).sort(function(a,b){return chaveData(a).localeCompare(chaveData(b));});
+  var ps=pedidosVisiveis().filter(function(p){return p.status!=='ATHILA';}).sort(function(a,b){return ordData(a).localeCompare(ordData(b));});
   var jan=janela6();
   function celv(v){return v?Math.round(v).toLocaleString('pt-BR'):'';}
   var body='';
