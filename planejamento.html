@@ -86,6 +86,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 var SUPABASE_URL = 'https://valhewbvjwdkkvuejrxa.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4';
 var OWNER_EMAIL = 'athilamgomes@gmail.com';
+var WEB3FORMS_KEY = '';  // chave grátis de https://web3forms.com (avisa o aprovador por e-mail ao lançar). Vazio = sem e-mail.
 /* ================================================== */
 
 var LOJAS=[{id:'ALTAMIRA',nome:'Altamira (L1+L4)'},{id:'ITAITUBA',nome:'Itaituba (L3)'},{id:'SANTAREM',nome:'Santarém (L5)'}];
@@ -181,6 +182,17 @@ function autoSplit(valor,prazo,parcelas,dataBase){
   return out;
 }
 async function logAcao(acao,detalhe){ try{ await sb.from('log').insert([{email:DB.email,acao:acao,detalhe:detalhe}]); }catch(e){} }
+async function notificarAprovador(row){
+  if(!WEB3FORMS_KEY) return;
+  try{
+    await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},
+      body:JSON.stringify({access_key:WEB3FORMS_KEY,from_name:'Planejamento de Compras',
+        subject:'🛒 Novo pedido p/ aprovar: '+row.marca+' ('+row.loja+')',
+        message:'Pedido aguardando aprovação (ATHILA).\n\nMarca: '+row.marca+'\nLoja: '+row.loja+'\nFornecedor: '+(row.fornecedor||'-')+
+          '\nValor total: R$ '+Number(row.valor_total||0).toFixed(2)+'\nPrazo: '+(row.prazo||'-')+'\nLançado por: '+(row.lancado_por||'-')+
+          '\n\nAbra para aprovar/rejeitar:\nhttps://athilamgomes-ui.github.io/dashboard-equipe/planejamento.html'})});
+  }catch(e){}
+}
 
 /* ---------- render ---------- */
 function pendentes(){return DB.pedidos.filter(function(p){return p.status==='ATHILA';});}
@@ -235,7 +247,7 @@ async function salvar(){
   toast('Salvando…');
   var err;
   if(EDIT){ ({error:err}=await sb.from('pedidos').update(row).eq('id',EDIT.id)); if(!err)logAcao('editar_pedido',marca+' / '+row.loja); }
-  else { row.status='ATHILA'; row.lancado_por=DB.email; ({error:err}=await sb.from('pedidos').insert([row])); if(!err)logAcao('lancar_pedido',marca+' / '+row.loja+' R$ '+valor); }
+  else { row.status='ATHILA'; row.lancado_por=DB.email; ({error:err}=await sb.from('pedidos').insert([row])); if(!err){logAcao('lancar_pedido',marca+' / '+row.loja+' R$ '+valor); notificarAprovador(row);} }
   if(err){toast('Erro: '+err.message);return;}
   EDIT=null;TAB='pedidos';toast('Pedido salvo.');carregar();
 }
