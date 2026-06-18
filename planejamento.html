@@ -118,7 +118,7 @@ window.addEventListener('DOMContentLoaded', function(){
   /* LOGIN DESATIVADO temporariamente — acesso livre. Identidade = nome digitado (sem senha). */
   DB.email=getNome()||'equipe'; DB.isOwner=true;
   el('login').classList.add('hide'); el('app').classList.remove('hide');
-  el('who').innerHTML='Você: <input value="'+getNome()+'" placeholder="seu nome" style="width:130px;padding:4px 8px;display:inline-block" onchange="setNome(this.value)"> · <span style="color:var(--warn)">login desativado</span>';
+  el('who').innerHTML='Você: <input value="'+getNome()+'" placeholder="seu nome" style="width:130px;padding:4px 8px;display:inline-block" onchange="setNome(this.value)"> · <span style="color:var(--warn)">login desativado</span> · <span class="mut" title="versão da página">build ORD-2</span>';
   carregar();
 });
 async function entrar(){
