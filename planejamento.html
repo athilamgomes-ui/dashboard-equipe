@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planejamento de Compras — A.M. Gomes</title>
+<style>
+:root{
+  --bg:#f0f4f8; --card:#ffffff; --card2:#f8fafc; --border:#e2e8f0;
+  --shadow:0 1px 3px rgba(15,23,42,.06),0 4px 16px rgba(15,23,42,.04);
+  --shadow-hover:0 4px 12px rgba(15,23,42,.10),0 8px 28px rgba(15,23,42,.06);
+  --text:#0f172a; --text2:#334155; --muted:#64748b; --muted2:#94a3b8;
+  --accent:#6366f1; --ok:#059669; --warn:#d97706; --crit:#dc2626;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+a{color:var(--accent)}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:16px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:var(--shadow)}
+header h1{font-size:19px;font-weight:800;margin:0;letter-spacing:-.4px}
+.who{margin-left:auto;color:var(--muted);font-size:12.5px;display:flex;align-items:center;gap:10px}
+nav{display:flex;gap:6px;padding:12px 22px;flex-wrap:wrap}
+nav button{background:var(--card);border:1px solid var(--border);color:var(--text2);padding:8px 15px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:var(--shadow)}
+nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+nav .badge{background:var(--crit);color:#fff;border-radius:10px;padding:1px 7px;margin-left:6px;font-size:11px}
+main{padding:6px 22px 40px;max-width:1180px}
+.card{background:var(--card);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+h2{font-size:14px;margin:0 0 14px;font-weight:800}
+label{display:block;font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin:10px 0 4px}
+input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:9px 11px;border-radius:9px;font-size:14px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:12px}
+.btn{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:9px;font-weight:700;cursor:pointer;font-size:14px}
+.btn.sec{background:var(--card2);border:1px solid var(--border);color:var(--text2)}
+.btn.ok{background:var(--ok)} .btn.bad{background:var(--crit)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+th{color:var(--muted);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.3px}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.pill{padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.s-ATHILA{background:#fef3c7;color:#92400e} .s-ENVIADO{background:#e0e7ff;color:#3730a3}
+.s-FATURADO{background:#f3e8ff;color:#6b21a8} .s-ENTREGUE{background:#d1fae5;color:#065f46}
+.s-REJEITADO{background:#fee2e2;color:#991b1b}
+.neg{color:var(--crit);font-weight:800} .pos{color:var(--ok);font-weight:700}
+.mut{color:var(--muted)} .right{text-align:right}
+.lojahead{font-weight:800;color:var(--accent);margin:18px 0 6px;font-size:13px}
+.split-preview{font-size:12px;color:var(--muted);margin-top:8px}
+.totalrow{background:var(--card2);font-weight:800}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:12px 18px;border-radius:10px;opacity:0;transition:.3s;z-index:50;box-shadow:var(--shadow-hover)}
+.toast.show{opacity:1}
+#login{max-width:380px;margin:8vh auto;text-align:center}
+#login .card{border-top-color:var(--accent)}
+.hide{display:none}
+</style>
+</head>
+<body>
+
+<div id="login" class="hide">
+  <div class="card">
+    <h1 style="font-size:20px;margin:0 0 4px">🛒 Planejamento de Compras</h1>
+    <p class="mut" style="margin:0 0 18px">A.M. Gomes — acesso da equipe</p>
+    <label style="text-align:left">E-mail</label>
+    <input id="lg_email" type="email" autocomplete="username" placeholder="voce@email.com">
+    <label style="text-align:left">Senha</label>
+    <input id="lg_pass" type="password" autocomplete="current-password" placeholder="••••••">
+    <div style="margin-top:16px"><button class="btn" style="width:100%" onclick="entrar()">Entrar</button></div>
+    <p id="lg_err" class="mut" style="color:var(--crit);margin-top:12px"></p>
+  </div>
+</div>
+
+<div id="app" class="hide">
+  <header>
+    <h1>🛒 Planejamento de Compras</h1>
+    <span class="who"><span id="who"></span> <button class="btn sec" style="padding:5px 12px" onclick="sair()">Sair</button></span>
+  </header>
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ===================== CONFIG ===================== */
+var SUPABASE_URL = 'https://valhewbvjwdkkvuejrxa.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4';
+var OWNER_EMAIL = 'athilamgomes@gmail.com';
+/* ================================================== */
+
+var LOJAS=[{id:'ALTAMIRA',nome:'Altamira (L1+L4)'},{id:'ITAITUBA',nome:'Itaituba (L3)'},{id:'SANTAREM',nome:'Santarém (L5)'}];
+var STATUS=['ATHILA','ENVIADO','FATURADO','ENTREGUE','REJEITADO'];
+var STATUS_COMPROMETE=['ENVIADO','FATURADO','ENTREGUE'];
+
+var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
+var TAB='lancar', EDIT=null;
+
+function brl(v){return (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+function el(id){return document.getElementById(id);}
+function toast(m){var t=el('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
+function nomeMes(m){var p=m.split('-');var nm=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];return nm[+p[1]-1]+'/'+p[0].slice(2);}
+function mesExtenso(m){if(m==='0000-00')return 'Sem data';var p=m.split('-');var nm=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];return nm[+p[1]-1]+'/'+p[0];}
+function lojaNome(id){var x=LOJAS.filter(function(l){return l.id===id;})[0];return x?x.nome:id;}
+function fmtData(s){var m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?m[3]+'/'+m[2]+'/'+m[1]:(s||'');}
+
+/* ---------- auth ---------- */
+window.addEventListener('DOMContentLoaded', async function(){
+  if(SUPABASE_URL.indexOf('COLE_AQUI')>=0){ el('login').classList.remove('hide'); el('lg_err').textContent='Configure SUPABASE_URL e ANON_KEY no topo do arquivo.'; return; }
+  var {data}=await sb.auth.getSession();
+  if(data.session) start(data.session.user); else el('login').classList.remove('hide');
+});
+async function entrar(){
+  el('lg_err').textContent='';
+  var email=el('lg_email').value.trim(), pass=el('lg_pass').value;
+  var {data,error}=await sb.auth.signInWithPassword({email:email,password:pass});
+  if(error){ el('lg_err').textContent=error.message; return; }
+  start(data.user);
+}
+async function sair(){ await sb.auth.signOut(); location.reload(); }
+function start(user){
+  DB.email=(user.email||'').toLowerCase();
+  DB.isOwner=DB.email===OWNER_EMAIL.toLowerCase();
+  el('login').classList.add('hide'); el('app').classList.remove('hide');
+  el('who').textContent=DB.email+(DB.isOwner?' · aprovador':'');
+  carregar();
+}
+
+/* ---------- dados ---------- */
+function mesesHorizonte(){
+  var hoje=new Date(), arr=[], base=new Date(hoje.getFullYear(),hoje.getMonth()-1,1);
+  for(var i=0;i<14;i++){var d=new Date(base.getFullYear(),base.getMonth()+i,1);arr.push(d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2));}
+  return arr;
+}
+async function carregar(){
+  el('main').innerHTML='<div class="card">Carregando…</div>';
+  var [pr,lr]=await Promise.all([
+    sb.from('pedidos').select('*'),
+    sb.from('limites').select('*')
+  ]);
+  if(pr.error){ el('main').innerHTML='<div class="card">Erro: '+pr.error.message+'</div>'; return; }
+  DB.pedidos=(pr.data||[]).map(function(p){ if(typeof p.distribuicao==='string'){try{p.distribuicao=JSON.parse(p.distribuicao);}catch(e){p.distribuicao={};}} return p; });
+  DB.limites=lr.data||[];
+  DB.meses=mesesHorizonte();
+  DB.otb=computeOTB(DB.pedidos,DB.limites);
+  render();
+}
+function computeOTB(peds,lims){
+  var meses=DB.meses, limMap={}, out={};
+  lims.forEach(function(l){limMap[l.loja+'|'+l.mes]=Number(l.valor)||0;});
+  LOJAS.forEach(function(lo){out[lo.id]={};meses.forEach(function(m){out[lo.id][m]={limite:limMap[lo.id+'|'+m]||0,comprometido:0,em_aprovacao:0};});});
+  peds.forEach(function(p){
+    if(p.status==='REJEITADO')return; var b=out[p.loja]; if(!b)return; var d=p.distribuicao||{};
+    Object.keys(d).forEach(function(m){ if(!b[m])return; var v=Number(d[m])||0;
+      if(STATUS_COMPROMETE.indexOf(p.status)>=0)b[m].comprometido+=v; else if(p.status==='ATHILA')b[m].em_aprovacao+=v; });
+  });
+  Object.keys(out).forEach(function(lo){Object.keys(out[lo]).forEach(function(m){var c=out[lo][m];
+    c.comprometido=Math.round(c.comprometido*100)/100; c.em_aprovacao=Math.round(c.em_aprovacao*100)/100;
+    c.disponivel=Math.round((c.limite-c.comprometido)*100)/100;
+    c.disponivel_pos=Math.round((c.limite-c.comprometido-c.em_aprovacao)*100)/100;});});
+  return out;
+}
+function autoSplit(valor,prazo,parcelas,dataBase){
+  var txt=String(prazo||'').toUpperCase();
+  var dias=(txt.match(/\d+/g)||[]).map(Number).filter(function(n){return n<=365;});
+  if(!dias.length){ if(/AVISTA|VISTA|PIX|PAGO|DINHEIRO/.test(txt))dias=[0]; else {var n=parseInt(parcelas,10); if(n>0){dias=[];for(var i=1;i<=n;i++)dias.push(30*i);} else dias=[0];} }
+  var b=dataBase?new Date(dataBase+'T12:00:00'):new Date();
+  var cota=valor/dias.length, out={};
+  dias.forEach(function(d){var v=new Date(b.getFullYear(),b.getMonth(),b.getDate()+d);var k=v.getFullYear()+'-'+('0'+(v.getMonth()+1)).slice(-2);out[k]=(out[k]||0)+cota;});
+  var ks=Object.keys(out).sort(),soma=0; ks.forEach(function(k){out[k]=Math.round(out[k]*100)/100;soma+=out[k];});
+  if(ks.length)out[ks[ks.length-1]]+=Math.round((valor-soma)*100)/100;
+  return out;
+}
+async function logAcao(acao,detalhe){ try{ await sb.from('log').insert([{email:DB.email,acao:acao,detalhe:detalhe}]); }catch(e){} }
+
+/* ---------- render ---------- */
+function pendentes(){return DB.pedidos.filter(function(p){return p.status==='ATHILA';});}
+function render(){
+  var tabs=[['lancar','➕ Lançar pedido'],['otb','📊 Saldo disponível (OTB)'],['pedidos','📋 Pedidos']];
+  if(DB.isOwner){tabs.splice(1,0,['aprovar','✅ Aprovações']);tabs.push(['limites','🎯 Limites']);}
+  el('nav').innerHTML=tabs.map(function(t){var b=t[0]==='aprovar'&&pendentes().length?'<span class="badge">'+pendentes().length+'</span>':'';
+    return '<button class="'+(TAB===t[0]?'active':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+b+'</button>';}).join('');
+  if(TAB==='lancar')renderLancar(); else if(TAB==='aprovar')renderAprovar(); else if(TAB==='otb')renderOTB();
+  else if(TAB==='pedidos')renderPedidos(); else if(TAB==='limites')renderLimites();
+}
+function go(t){TAB=t;if(t!=='lancar')EDIT=null;render();}
+function distTxt(d){d=d||{};return Object.keys(d).sort().map(function(k){return nomeMes(k)+' '+brl(d[k]);}).join(' · ')||'-';}
+
+function campo(l,inner){return '<div><label>'+l+'</label>'+inner+'</div>';}
+function isoDate(s){if(!s)return '';var m=String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(m)return m[3]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2);m=String(s).match(/^\d{4}-\d{2}-\d{2}/);return m?m[0]:'';}
+function renderLancar(){
+  var p=EDIT||{};
+  var lojaOpts=LOJAS.map(function(l){return '<option value="'+l.id+'" '+(p.loja===l.id?'selected':'')+'>'+l.nome+'</option>';}).join('');
+  el('main').innerHTML='<div class="card"><h2>'+(EDIT?'Editar pedido':'Lançar novo pedido')+'</h2><div class="grid">'+
+    campo('Loja','<select id="f_loja">'+lojaOpts+'</select>')+
+    campo('Marca','<input id="f_marca" value="'+(p.marca||'')+'" placeholder="Ex.: TRUSS">')+
+    campo('Fornecedor','<input id="f_forn" value="'+(p.fornecedor||'')+'">')+
+    campo('Data do pedido','<input id="f_data" type="date" value="'+isoDate(p.data_pedido)+'">')+
+    campo('Valor total (R$)','<input id="f_valor" type="number" step="0.01" value="'+(p.valor_total||'')+'" oninput="prev()">')+
+    campo('Prazo (ex.: 30/60/90)','<input id="f_prazo" value="'+(p.prazo||'')+'" oninput="prev()" placeholder="30/60/90 ou AVISTA">')+
+    campo('Nº parcelas (se sem prazo)','<input id="f_parc" value="'+(p.parcelas||'')+'" oninput="prev()">')+
+    campo('Data base p/ vencimento','<input id="f_base" type="date" value="'+isoDate(p.data_base_venc||p.data_entrega||p.data_pedido)+'" oninput="prev()">')+
+    campo('Previsão de entrega','<input id="f_entrega" type="date" value="'+isoDate(p.data_entrega)+'">')+
+    '</div><label>Observação</label><textarea id="f_obs" rows="2">'+(p.obs||'')+'</textarea>'+
+    '<div class="split-preview" id="split"></div>'+
+    '<div style="margin-top:16px"><button class="btn" onclick="salvar()">'+(EDIT?'Salvar alterações':'Lançar pedido (entra como ATHILA)')+'</button> '+
+    (EDIT?'<button class="btn sec" onclick="go(\'pedidos\')">Cancelar</button>':'')+'</div></div>';
+  prev();
+}
+function prev(){
+  var valor=Number(el('f_valor').value)||0; if(!valor){el('split').textContent='';return;}
+  var d=autoSplit(valor,el('f_prazo').value,el('f_parc').value,el('f_base').value);
+  el('split').innerHTML='Divisão automática: '+Object.keys(d).sort().map(function(k){return '<b>'+nomeMes(k)+'</b> '+brl(d[k]);}).join(' · ');
+}
+async function salvar(){
+  var valor=Number(el('f_valor').value)||0, marca=el('f_marca').value.trim();
+  if(!marca||!valor){toast('Informe marca e valor.');return;}
+  var dist=autoSplit(valor,el('f_prazo').value,el('f_parc').value,el('f_base').value||el('f_entrega').value||el('f_data').value);
+  var row={loja:el('f_loja').value,marca:marca.toUpperCase(),fornecedor:el('f_forn').value,
+    data_pedido:el('f_data').value||null,valor_total:valor,prazo:el('f_prazo').value,parcelas:el('f_parc').value,
+    data_base_venc:el('f_base').value||null,distribuicao:dist,data_entrega:el('f_entrega').value,obs:el('f_obs').value};
+  toast('Salvando…');
+  var err;
+  if(EDIT){ ({error:err}=await sb.from('pedidos').update(row).eq('id',EDIT.id)); if(!err)logAcao('editar_pedido',marca+' / '+row.loja); }
+  else { row.status='ATHILA'; row.lancado_por=DB.email; ({error:err}=await sb.from('pedidos').insert([row])); if(!err)logAcao('lancar_pedido',marca+' / '+row.loja+' R$ '+valor); }
+  if(err){toast('Erro: '+err.message);return;}
+  EDIT=null;TAB='pedidos';toast('Pedido salvo.');carregar();
+}
+
+function renderAprovar(){
+  var ps=pendentes();
+  if(!ps.length){el('main').innerHTML='<div class="card">Nenhum pedido aguardando aprovação. 🎉</div>';return;}
+  el('main').innerHTML='<div class="card"><h2>Aguardando sua aprovação ('+ps.length+')</h2><div style="overflow:auto"><table>'+
+    '<tr><th>Marca</th><th>Loja</th><th>Fornecedor</th><th class="num">Valor</th><th>Prazo</th><th>Meses</th><th>Lançado por</th><th></th></tr>'+
+    ps.map(function(p){return '<tr><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td><td class="mut">'+(p.fornecedor||'-')+'</td>'+
+      '<td class="num">'+brl(p.valor_total)+'</td><td class="mut">'+(p.prazo||'-')+'</td><td class="mut">'+distTxt(p.distribuicao)+'</td>'+
+      '<td class="mut">'+String(p.lancado_por||'').split('@')[0]+'</td>'+
+      '<td class="right"><button class="btn ok" onclick="aprovar(\''+p.id+'\')">Aprovar</button> <button class="btn bad" onclick="rejeitar(\''+p.id+'\')">Rejeitar</button></td></tr>';}).join('')+
+    '</table></div></div>';
+}
+async function mudaStatus(id,novo,acao){
+  var upd={status:novo};
+  if(acao==='aprovar'||acao==='rejeitar'){upd.aprovado_por=DB.email;upd.data_aprovacao=new Date().toISOString();}
+  var {error}=await sb.from('pedidos').update(upd).eq('id',id);
+  if(error){toast('Erro: '+error.message);return;}
+  logAcao(acao||'mudar_status',id+' -> '+novo); carregar();
+}
+function aprovar(id){toast('Aprovando…');mudaStatus(id,'ENVIADO','aprovar');}
+function rejeitar(id){if(!confirm('Rejeitar este pedido?'))return;mudaStatus(id,'REJEITADO','rejeitar');}
+
+function renderOTB(){
+  var html='<div class="card"><h2>Saldo disponível para comprometer (limite − comprometido)</h2>'+
+    '<p class="mut" style="margin-top:-8px">Comprometido = ENVIADO/FATURADO/ENTREGUE. "Em aprovação" = pedidos ATHILA ainda não liberados.</p>';
+  LOJAS.forEach(function(lo){
+    html+='<div class="lojahead">'+lo.nome+'</div><div style="overflow:auto"><table><tr><th>Mês</th><th class="num">Limite</th><th class="num">Comprometido</th><th class="num">Em aprovação</th><th class="num">Disponível</th><th class="num">Disp. se aprovar tudo</th></tr>';
+    DB.meses.forEach(function(m){var c=(DB.otb[lo.id]||{})[m]||{limite:0,comprometido:0,em_aprovacao:0,disponivel:0,disponivel_pos:0};
+      if(!c.limite&&!c.comprometido&&!c.em_aprovacao)return;
+      html+='<tr><td>'+nomeMes(m)+'</td><td class="num">'+brl(c.limite)+'</td><td class="num">'+brl(c.comprometido)+'</td>'+
+        '<td class="num mut">'+brl(c.em_aprovacao)+'</td><td class="num '+(c.disponivel<0?'neg':'pos')+'">'+brl(c.disponivel)+'</td>'+
+        '<td class="num '+(c.disponivel_pos<0?'neg':'')+'">'+brl(c.disponivel_pos)+'</td></tr>';});
+    html+='</table></div>';});
+  el('main').innerHTML=html+'</div>';
+}
+
+function mesDoPedido(p){var m=String(p.data_pedido||'').match(/^(\d{4})-(\d{2})/);return m?m[1]+'-'+m[2]:'0000-00';}
+function renderPedidos(){
+  var ps=DB.pedidos.slice().sort(function(a,b){var ka=mesDoPedido(a),kb=mesDoPedido(b);if(ka!==kb)return ka.localeCompare(kb);return String(a.data_pedido||'').localeCompare(String(b.data_pedido||''));});
+  var body='',grupo=null,soma=0,cnt=0;
+  function fecha(){if(grupo!==null)body+='<tr class="totalrow"><td colspan="3" class="right">TOTAL '+mesExtenso(grupo)+' ('+cnt+')</td><td class="num">'+brl(soma)+'</td><td colspan="4"></td></tr>';}
+  ps.forEach(function(p){var g=mesDoPedido(p);if(g!==grupo){fecha();grupo=g;soma=0;cnt=0;}soma+=Number(p.valor_total)||0;cnt++;
+    body+='<tr><td class="mut">'+fmtData(p.data_pedido)+'</td><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td><td class="num">'+brl(p.valor_total)+'</td>'+
+      '<td><span class="pill s-'+p.status+'">'+p.status+'</span></td><td class="mut">'+distTxt(p.distribuicao)+'</td>'+
+      '<td class="mut">'+String(p.lancado_por||'').split('@')[0]+'</td>'+
+      '<td class="right"><button class="btn sec" onclick="editar(\''+p.id+'\')">Editar</button>'+(DB.isOwner?' '+statusSelect(p):'')+'</td></tr>';});
+  fecha();
+  el('main').innerHTML='<div class="card"><h2>Todos os pedidos ('+ps.length+')</h2><div style="overflow:auto"><table>'+
+    '<tr><th>Data</th><th>Marca</th><th>Loja</th><th class="num">Valor</th><th>Status</th><th>Meses</th><th>Lançado por</th><th></th></tr>'+body+'</table></div></div>';
+}
+function statusSelect(p){return '<select onchange="mudaStatus(\''+p.id+'\',this.value)" style="width:auto;display:inline-block;margin-left:6px">'+STATUS.map(function(s){return '<option '+(p.status===s?'selected':'')+'>'+s+'</option>';}).join('')+'</select>';}
+function editar(id){EDIT=DB.pedidos.filter(function(p){return p.id===id;})[0];TAB='lancar';render();}
+
+function renderLimites(){
+  var lim={};DB.limites.forEach(function(l){lim[l.loja+'|'+l.mes]=l.valor;});
+  var html='<div class="card"><h2>Limite de compra por loja e mês</h2><p class="mut" style="margin-top:-8px">Defina o teto de cada mês. Edite e tecle Enter.</p>';
+  LOJAS.forEach(function(lo){html+='<div class="lojahead">'+lo.nome+'</div><div style="overflow:auto"><table><tr>';
+    DB.meses.forEach(function(m){html+='<th class="num">'+nomeMes(m)+'</th>';});html+='</tr><tr>';
+    DB.meses.forEach(function(m){var v=lim[lo.id+'|'+m]||'';html+='<td><input type="number" step="100" value="'+v+'" style="width:108px" onchange="setLim(\''+lo.id+'\',\''+m+'\',this.value,this)"></td>';});
+    html+='</tr></table></div>';});
+  el('main').innerHTML=html+'</div>';
+}
+async function setLim(loja,mes,v,inp){
+  if(inp)inp.style.borderColor='var(--accent)';
+  var {error}=await sb.from('limites').upsert([{loja:loja,mes:mes,valor:Number(v)||0,atualizado_por:DB.email,data:new Date().toISOString()}],{onConflict:'loja,mes'});
+  if(error){if(inp)inp.style.borderColor='var(--crit)';toast('Erro: '+error.message);return;}
+  if(inp)inp.style.borderColor='';toast('Limite salvo: '+nomeMes(mes));
+  var i=DB.limites.findIndex(function(l){return l.loja===loja&&l.mes===mes;});
+  if(i>=0)DB.limites[i].valor=Number(v)||0; else DB.limites.push({loja:loja,mes:mes,valor:Number(v)||0});
+  DB.otb=computeOTB(DB.pedidos,DB.limites);
+}
+</script>
+</body>
+</html>
