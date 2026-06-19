@@ -108,7 +108,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS';
-var BUILD='ORD-9'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-10'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -228,6 +228,7 @@ function comprometidoMes(jan){
   var out={};
   DB.pedidos.forEach(function(p){
     if(STATUS_A_PAGAR.indexOf(p.status)<0)return;
+    if(p._noERP)return; // FATURADO já lançado no ERP → entra só na linha do ERP, sem duplicar
     if(FILTRO_LOJA!=='TODAS'&&p.loja!==FILTRO_LOJA)return;
     var d=p.distribuicao||{};
     jan.forEach(function(m){var v=Number(d[m])||0;if(v)out[m]=(out[m]||0)+v;});
@@ -253,6 +254,8 @@ function footerPagar(jan,L,G,T){
   } else {
     h+='<tr><td colspan="13" class="mut" style="padding-top:8px">Contas a pagar do ERP indisponível agora (não consegui ler o dashboard de vendas). Mostrando só os pedidos em trânsito.</td></tr>';
   }
+  var nNoErp=DB.pedidos.filter(function(p){return p._noERP&&(FILTRO_LOJA==='TODAS'||p.loja===FILTRO_LOJA);}).length;
+  if(nNoErp) h+='<tr><td colspan="13" class="mut" style="padding-top:6px;font-size:11px">ℹ️ '+nNoErp+' pedido(s) FATURADO já constam no ERP (faturas a pagar por vencimento) — contados só na linha do ERP, sem duplicar.</td></tr>';
   return h;
 }
 /* Quando a loja filtrada é Altamira, separa o total em L1 e L4: cada um = ½ dos pedidos + ERP próprio. */
@@ -285,13 +288,19 @@ function detectarFaturamentos(dd){
   var cm=(dd&&dd.chegadas_mes)||{};
   function norm(s){return String(s||'').toUpperCase().trim();}
   DB.pedidos.forEach(function(p){
-    delete p._nfSug;
-    if(p.status!=='ENVIADO')return; // só pedidos já enviados, aguardando faturamento
-    var lojas=mapLoja[p.loja]||[]; var pm=norm(p.marca); if(!pm||pm==='(SEM MARCA)')return;
-    var cand=[];
-    lojas.forEach(function(L){ (cm[L]||[]).forEach(function(it){ if(norm(it.marca)===pm&&it.data) cand.push(it); }); });
-    if(cand.length){ cand.sort(function(a,b){return String(b.data).localeCompare(String(a.data));}); var c=cand[0];
-      p._nfSug={nf:c.nf,data:c.data,valor:c.valor,n:cand.length}; }
+    delete p._nfSug; delete p._noERP;
+    var pm=norm(p.marca); if(!pm||pm==='(SEM MARCA)')return;
+    var lojas=mapLoja[p.loja]||[];
+    if(p.status==='ENVIADO'){ // sugere faturamento: qualquer NF da marca+loja
+      var cand=[];
+      lojas.forEach(function(L){ (cm[L]||[]).forEach(function(it){ if(norm(it.marca)===pm&&it.data) cand.push(it); }); });
+      if(cand.length){ cand.sort(function(a,b){return String(b.data).localeCompare(String(a.data));}); var c=cand[0];
+        p._nfSug={nf:c.nf,data:c.data,valor:c.valor,n:cand.length}; }
+    } else if(p.status==='FATURADO'){ // se a NF já está LANÇADA no ERP, o ERP já conta (por vencimento) → não duplicar
+      var temLancada=false;
+      lojas.forEach(function(L){ (cm[L]||[]).forEach(function(it){ if(norm(it.marca)===pm&&it.origem==='lancada') temLancada=true; }); });
+      if(temLancada) p._noERP=true;
+    }
   });
 }
 function computeOTB(peds,lims){
@@ -495,7 +504,7 @@ function renderPedidos(){
     var conta=p.status!=='ENTREGUE'; var d=p.distribuicao||{};
     var mtds=jan.map(function(m){var v=conta?(Number(d[m])||0):0;return '<td class="num mut">'+celv(v)+'</td>';}).join('');
     body+='<tr'+(p.status==='APROVADO'?' class="row-alerta"':'')+'><td class="mut">'+fmtData(p.data_pedido)+'</td><td class="mut">'+(p.data_enviado?fmtData(p.data_enviado):'—')+'</td><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td><td class="num">'+brl(p.valor_total)+'</td>'+
-      '<td><span class="pill s-'+p.status+'">'+p.status+'</span></td>'+mtds+
+      '<td><span class="pill s-'+p.status+'">'+p.status+'</span>'+(p._noERP?' <span class="mut" style="font-size:10px" title="NF já lançada no ERP — contada na linha do ERP, não recontada aqui">no ERP</span>':'')+'</td>'+mtds+
       '<td class="right acoes"><button class="btn sec mini" onclick="editar(\''+p.id+'\')">Editar</button>'+(DB.isOwner?' '+statusSelect(p):'')+'</td></tr>';});
   body+=footerPagar(jan,4,1,1);
   var mh=jan.map(function(m){return '<th class="num">'+nomeMes(m)+'</th>';}).join('');
