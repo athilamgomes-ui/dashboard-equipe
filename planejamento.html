@@ -108,7 +108,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-12'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-13'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -302,8 +302,9 @@ function detectarFaturamentos(dd){
     var pm=norm(p.marca); if(!pm||pm==='(SEM MARCA)')return;
     if(p.status!=='ENVIADO'&&p.status!=='FATURADO'&&p.status!=='ENTREGUE')return; // faturamento só faz sentido p/ pedido já enviado
     var lojas=mapLoja[p.loja]||[];
+    var minData=String(p.data_enviado||p.data_pedido||'').slice(0,10); // NF (faturamento) NÃO pode ser anterior ao envio/lançamento — senão é NF de pedido antigo da mesma marca
     var cand=[];
-    lojas.forEach(function(L){ (cm[L]||[]).forEach(function(it){ if(norm(it.marca)===pm&&it.data) cand.push(it); }); });
+    lojas.forEach(function(L){ (cm[L]||[]).forEach(function(it){ var dt=String(it.data||'').slice(0,10); if(norm(it.marca)===pm&&dt&&(!minData||dt>=minData)) cand.push(it); }); });
     if(!cand.length)return;
     cand.sort(function(a,b){return String(b.data).localeCompare(String(a.data));}); // mais recente primeiro
     var c=cand[0];
