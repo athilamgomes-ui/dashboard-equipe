@@ -415,32 +415,8 @@
   </div>
 </div>
 
-<!-- ===== SEÇÃO 2: CONTAS A PAGAR ===== -->
-<div class="section">
-  <div class="section-title"><div class="num">2</div> Contas a Pagar — Planilha (≠ Athila) × ERP Microvix</div>
-
-  <div class="card">
-    <div class="card-title"><span>📋</span> Contas a Pagar por Loja — Status do Pedido ≠ "Athila"/"Entregue" &nbsp;·&nbsp; <span style="color:var(--accent2)">■ Planilha</span> &nbsp;·&nbsp; <span style="color:var(--accent4)">■ ERP</span></div>
-    <div id="cpFonteInfo" style="font-size:11px;color:var(--muted);margin:-4px 0 10px;"></div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr id="cpHeadRow">
-            <th style="text-align:left;min-width:140px;">Loja / Marca</th>
-            <th>Fonte</th>
-            <!-- colunas de meses inseridas via JS a partir de `meses` -->
-            <th class="cp-total-th">Total</th>
-          </tr>
-        </thead>
-        <tbody id="cpTable"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-
 <div class="footer">
-  Dashboard Grupo A.M. Gomes · Dados: Microvix ERP + Drive (Gestão de Compras 2026) · Gerado em <span id="genDate"></span>
+  Dashboard Grupo A.M. Gomes · Dados: Microvix ERP · Gerado em <span id="genDate"></span>
 </div>
 
 <script>
@@ -678,30 +654,6 @@ function renderYoY() {
 }
 renderYoY();
 
-// ─── CONTASPAGAR_INICIO ─── (gerado por build_amgomes.mjs — NÃO editar à mão)
-// ERP: Microvix relatorio_faturas_periodo.asp (faturas por vencimento, coleta Playwright headless).
-// Planilha: Gestao Compras 2026.xlsx (Google Drive) — excluir Status "ATHILA"/"ENTREGUE", ALTAMIRA ÷ 2 (L1+L4).
-// Janela = mês corrente + 4 meses à frente (rola sozinha). Datas reais de cada fonte em cpFontes.
-const cpFontes = { erp: '17/06/2026', planilha: '17/06/2026 18:38' };
-const meses = ['Jun/26','Jul/26','Ago/26','Set/26','Out/26'];
-const erpL1  = [41432, 87713, 55970, 38182, 19474];
-const erpL3  = [37537, 52579, 33835, 27798, 23311];
-const erpL4  = [35315, 81148, 57880, 44554, 34568];
-const erpL5  = [48590, 66594, 52852, 48538, 43173];
-const planAtm   = [0, 35706, 27883, 0, 0]; // total Altamira (≠ Athila/Entregue)
-const planL1    = planAtm.map(v => +(v/2).toFixed(0));   // L1 = metade de Altamira
-const planL4    = planAtm.map(v => +(v/2).toFixed(0));   // L4 = metade de Altamira
-const planL3    = [1714, 8329, 9053, 2076, 0];   // Itaituba
-const planL5    = [0, 2197, 4394, 0, 0];   // Santarém
-// ─── CONTASPAGAR_FIM ───
-
-// Caption de frescor das fontes (espelha cpFontes — preenchido a cada abertura)
-(function(){
-  const el = document.getElementById('cpFonteInfo');
-  if (el && typeof cpFontes === 'object')
-    el.innerHTML = `Fontes — <b>ERP</b> coletado em ${cpFontes.erp} &nbsp;·&nbsp; <b>Planilha</b> (Gestão Compras) lida em ${cpFontes.planilha}`;
-})();
-
 // ─── CHARTS POR LOJA (alinhados com KPI cards) ───────
 // Índices no array: L5=0, L4=1, L1=2, L3=3
 function makeStoreChart(id, idx, color) {
@@ -735,86 +687,6 @@ makeStoreChart('chart_L1', 2, '#d97706');  // L1 Casa Beleza Altamira — rank1
 makeStoreChart('chart_L5', 0, '#6366f1');  // L5 MissBeleza Santarém — rank2
 makeStoreChart('chart_L4', 1, '#dc2626');  // L4 MissBeleza Altamira — rank3
 makeStoreChart('chart_L3', 3, '#0891b2');  // L3 Casa Beleza Itaituba — rank4
-
-// ─── TABLE: CONTAS A PAGAR — TOTAIS POR LOJA ─────────
-const fmt = v => v > 0 ? 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:0}) : '—';
-const sumRow = arr => arr.reduce((a,b) => a+b, 0);
-
-const lojaRows = [
-  { loja: 'Casa da Beleza Altamira (L1)', planVals: planL1, erpVals: erpL1 },
-  { loja: 'MissBeleza Altamira (L4)',     planVals: planL4, erpVals: erpL4 },
-  { loja: 'MissBeleza Itaituba (L3)',     planVals: planL3, erpVals: erpL3 },
-  { loja: 'MissBeleza Santarém (L5)',     planVals: planL5, erpVals: erpL5 },
-];
-
-const tbody = document.getElementById('cpTable');
-
-// Cabeçalho de meses dinâmico (fonte única = `meses`)
-(function(){
-  const head = document.getElementById('cpHeadRow');
-  const totalTh = head && head.querySelector('.cp-total-th');
-  if (head && totalTh) meses.forEach(mlabel => {
-    const th = document.createElement('th');
-    th.textContent = mlabel;
-    head.insertBefore(th, totalTh);
-  });
-})();
-
-lojaRows.forEach(row => {
-  // loja header
-  const th = document.createElement('tr');
-  th.className = 'loja-header';
-  th.innerHTML = `<td colspan="8">${row.loja}</td>`;
-  tbody.appendChild(th);
-
-  // Planilha row
-  const trPlan = document.createElement('tr');
-  const planTotal = sumRow(row.planVals);
-  trPlan.innerHTML = `
-    <td style="padding-left:28px">Total Planilha (≠ Athila)</td>
-    <td class="plan-col" style="font-size:10px;">Planilha</td>
-    ${row.planVals.map(v => `<td class="plan-col">${fmt(v)}</td>`).join('')}
-    <td class="plan-col" style="font-weight:700;">${fmt(planTotal)}</td>
-  `;
-  tbody.appendChild(trPlan);
-
-  // ERP row
-  const trErp = document.createElement('tr');
-  trErp.style.background = 'rgba(255,179,71,0.04)';
-  const erpTotal = sumRow(row.erpVals);
-  trErp.innerHTML = `
-    <td style="padding-left:28px">Total ERP (todas faturas)</td>
-    <td class="erp-col" style="font-size:10px;">ERP</td>
-    ${row.erpVals.map(v => `<td class="erp-col">${fmt(v)}</td>`).join('')}
-    <td class="erp-col" style="font-weight:700;">${fmt(erpTotal)}</td>
-  `;
-  tbody.appendChild(trErp);
-
-  // Total mensal row
-  const totalVals = meses.map((_,i) => row.planVals[i] + row.erpVals[i]);
-  const trTot = document.createElement('tr');
-  trTot.className = 'total-row';
-  trTot.innerHTML = `
-    <td style="padding-left:28px;font-weight:800;">Total Mensal</td>
-    <td style="font-size:10px;color:var(--accent2);font-weight:700;">Plan+ERP</td>
-    ${totalVals.map(v => `<td style="font-weight:800;color:var(--text);">${fmt(v)}</td>`).join('')}
-    <td style="font-weight:800;color:var(--text);">${fmt(sumRow(totalVals))}</td>
-  `;
-  tbody.appendChild(trTot);
-});
-
-// Grand Totals
-const grandPlan = meses.map((_,i) => planL1[i]+planL3[i]+planL4[i]+planL5[i]);
-const grandErp  = meses.map((_,i) => erpL1[i]+erpL3[i]+erpL4[i]+erpL5[i]);
-[
-  { label: 'TOTAL GERAL — Planilha (≠ Athila)', vals: grandPlan, cls: 'plan-col' },
-  { label: 'TOTAL GERAL — ERP',                 vals: grandErp,  cls: 'erp-col'  },
-].forEach(row => {
-  const tr = document.createElement('tr');
-  tr.className = 'total-row';
-  tr.innerHTML = `<td colspan="2" style="font-size:12px;font-weight:800;">${row.label}</td>${row.vals.map(v=>`<td class="${row.cls}">${fmt(v)}</td>`).join('')}<td class="${row.cls}">${fmt(sumRow(row.vals))}</td>`;
-  tbody.appendChild(tr);
-});
 
 // ─── DATETIME ────────────────────────────────────────
 // ⚠️ NUNCA sobrescrever #lastUpdate com a hora atual (new Date()) — isso fazia o
