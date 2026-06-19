@@ -107,12 +107,15 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
-var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS';
-var BUILD='ORD-10'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
+var BUILD='ORD-11'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
 function setFiltro(v){ FILTRO_LOJA=v; render(); }
+function setFiltroMarca(v){ FILTRO_MARCA=v; render(); }
+function marcasDistintas(){ var s={}; DB.pedidos.forEach(function(p){ if(p.marca)s[p.marca]=1; }); return Object.keys(s).sort(); }
+function passaMarca(p){ return FILTRO_MARCA==='TODAS'||p.marca===FILTRO_MARCA; }
 function janela6(){ var h=new Date(),a=[]; for(var i=0;i<6;i++){var d=new Date(h.getFullYear(),h.getMonth()+i,1);a.push(d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2));} return a; }
 
 function brl(v){return (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
@@ -230,6 +233,7 @@ function comprometidoMes(jan){
     if(STATUS_A_PAGAR.indexOf(p.status)<0)return;
     if(p._noERP)return; // FATURADO já lançado no ERP → entra só na linha do ERP, sem duplicar
     if(FILTRO_LOJA!=='TODAS'&&p.loja!==FILTRO_LOJA)return;
+    if(!passaMarca(p))return;
     var d=p.distribuicao||{};
     jan.forEach(function(m){var v=Number(d[m])||0;if(v)out[m]=(out[m]||0)+v;});
   });
@@ -243,8 +247,11 @@ function footerPagar(jan,L,G,T){
   var comp=comprometidoMes(jan);
   var pedJan=jan.reduce(function(s,m){return s+(comp[m]||0);},0);
   var fGp=jan.map(function(m){return '<td class="num">'+celvBR(comp[m])+'</td>';}).join('');
-  var h='<tr class="totalrow" style="border-top:3px solid var(--accent)"><td colspan="'+L+'" class="right">Pedidos em trânsito (enviado + faturado)</td><td class="num">'+brl(pedJan)+'</td><td colspan="'+G+'"></td>'+fGp+'<td colspan="'+T+'"></td></tr>';
-  if(DB.contasERP){
+  var lblTransito=FILTRO_MARCA==='TODAS'?'Pedidos em trânsito (enviado + faturado)':'Pedidos em trânsito — '+FILTRO_MARCA;
+  var h='<tr class="totalrow" style="border-top:3px solid var(--accent)"><td colspan="'+L+'" class="right">'+lblTransito+'</td><td class="num">'+brl(pedJan)+'</td><td colspan="'+G+'"></td>'+fGp+'<td colspan="'+T+'"></td></tr>';
+  if(FILTRO_MARCA!=='TODAS'){
+    h+='<tr><td colspan="13" class="mut" style="padding-top:6px;font-size:11px">ℹ️ Filtrando por marca — o "Contas a pagar no ERP" é por loja (não por marca), então o TOTAL COMPROMETIDO completo aparece só com <b>Todas as marcas</b>.</td></tr>';
+  } else if(DB.contasERP){
     var erpJan=jan.reduce(function(s,m){return s+contasERPmes(m);},0);
     var fEp=jan.map(function(m){return '<td class="num mut">'+celvBR(contasERPmes(m))+'</td>';}).join('');
     var fTt=jan.map(function(m){return '<td class="num"><b>'+celvBR((comp[m]||0)+contasERPmes(m))+'</b></td>';}).join('');
@@ -254,7 +261,7 @@ function footerPagar(jan,L,G,T){
   } else {
     h+='<tr><td colspan="13" class="mut" style="padding-top:8px">Contas a pagar do ERP indisponível agora (não consegui ler o dashboard de vendas). Mostrando só os pedidos em trânsito.</td></tr>';
   }
-  var nNoErp=DB.pedidos.filter(function(p){return p._noERP&&(FILTRO_LOJA==='TODAS'||p.loja===FILTRO_LOJA);}).length;
+  var nNoErp=DB.pedidos.filter(function(p){return p._noERP&&(FILTRO_LOJA==='TODAS'||p.loja===FILTRO_LOJA)&&passaMarca(p);}).length;
   if(nNoErp) h+='<tr><td colspan="13" class="mut" style="padding-top:6px;font-size:11px">ℹ️ '+nNoErp+' pedido(s) FATURADO já constam no ERP (faturas a pagar por vencimento) — contados só na linha do ERP, sem duplicar.</td></tr>';
   return h;
 }
@@ -353,9 +360,14 @@ function render(){
     if(t[0]==='pedidos'&&nAprov)b='<span class="badge warn" title="aprovados aguardando envio">'+nAprov+'</span>';
     return '<button class="'+(TAB===t[0]?'active':'')+'" onclick="go(\''+t[0]+'\')">'+t[1]+b+'</button>';}).join('');
   if(TAB==='lancar'){ el('toolbar').innerHTML=''; }
-  else { el('toolbar').innerHTML='Loja: <select onchange="setFiltro(this.value)" style="width:auto;margin-left:6px;font-weight:600">'+
+  else { var tb='Loja: <select onchange="setFiltro(this.value)" style="width:auto;margin-left:6px;font-weight:600">'+
     '<option value="TODAS"'+(FILTRO_LOJA==='TODAS'?' selected':'')+'>Todas as lojas</option>'+
-    LOJAS.map(function(l){return '<option value="'+l.id+'"'+(FILTRO_LOJA===l.id?' selected':'')+'>'+l.nome+'</option>';}).join('')+'</select>'; }
+    LOJAS.map(function(l){return '<option value="'+l.id+'"'+(FILTRO_LOJA===l.id?' selected':'')+'>'+l.nome+'</option>';}).join('')+'</select>';
+    if(TAB==='pedidos'||TAB==='aprovar'){ var ms=marcasDistintas();
+      tb+=' &nbsp;·&nbsp; Marca: <select onchange="setFiltroMarca(this.value)" style="width:auto;margin-left:6px;font-weight:600">'+
+        '<option value="TODAS"'+(FILTRO_MARCA==='TODAS'?' selected':'')+'>Todas as marcas</option>'+
+        ms.map(function(m){return '<option'+(FILTRO_MARCA===m?' selected':'')+'>'+m+'</option>';}).join('')+'</select>'; }
+    el('toolbar').innerHTML=tb; }
   if(TAB==='lancar')renderLancar(); else if(TAB==='aprovar')renderAprovar(); else if(TAB==='otb')renderOTB();
   else if(TAB==='real')renderReal(); else if(TAB==='pedidos')renderPedidos(); else if(TAB==='limites')renderLimites();
 }
@@ -407,7 +419,7 @@ async function salvar(){
 }
 
 function renderAprovar(){
-  var ps=pendentes().filter(function(p){return FILTRO_LOJA==='TODAS'||p.loja===FILTRO_LOJA;}).sort(function(a,b){return ordData(a).localeCompare(ordData(b));});
+  var ps=pendentes().filter(function(p){return (FILTRO_LOJA==='TODAS'||p.loja===FILTRO_LOJA)&&passaMarca(p);}).sort(function(a,b){return ordData(a).localeCompare(ordData(b));});
   if(!ps.length){el('main').innerHTML='<div class="card">Nenhum pedido aguardando aprovação. 🎉</div>';return;}
   var jan=janela6();
   function celv(v){return v?Math.round(v).toLocaleString('pt-BR'):'';}
@@ -492,7 +504,7 @@ function mesDoPedido(p){var m=String(p.data_pedido||'').match(/^(\d{4})-(\d{2})/
 /* chave de ordenação por data de lançamento (asc, sem-data por último) — usada em Pedidos e Aprovações */
 function ordData(p){var d=String(p.data_pedido||'');return /^\d{4}-\d{2}-\d{2}/.test(d)?d:'9999-99-99';}
 function renderPedidos(){
-  var ps=pedidosVisiveis().filter(function(p){return p.status!=='ATHILA';}).sort(function(a,b){return ordData(a).localeCompare(ordData(b));});
+  var ps=pedidosVisiveis().filter(function(p){return p.status!=='ATHILA'&&passaMarca(p);}).sort(function(a,b){return ordData(a).localeCompare(ordData(b));});
   var jan=janela6();
   function celv(v){return v?Math.round(v).toLocaleString('pt-BR'):'';}
   var aEnviar=ps.filter(function(p){return p.status==='APROVADO';});
