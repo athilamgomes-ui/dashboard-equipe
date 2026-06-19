@@ -108,7 +108,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS';
-var BUILD='ORD-8'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-9'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -178,7 +178,7 @@ async function carregar(){
   DB.realizado=null; DB.realizadoEm='';
   try{
     var rr=await fetch('https://athilamgomes-ui.github.io/dashboard-compras-amgomes/dados.json',{cache:'no-store'});
-    if(rr.ok){ var dd=await rr.json(); DB.realizado=montarRealizado(dd); DB.realizadoEm=dd.gerado_em||''; }
+    if(rr.ok){ var dd=await rr.json(); DB.realizado=montarRealizado(dd); DB.realizadoEm=dd.gerado_em||''; detectarFaturamentos(dd); }
   }catch(e){ DB.realizado=null; }
   DB.contasERP=null;
   try{
@@ -277,6 +277,22 @@ function montarRealizado(dd){
         out[alvo][mes]=(out[alvo][mes]||0)+(Number(cmr[lo][mesN])||0);});});
   });
   return out;
+}
+/* Cruza os pedidos ENVIADO com as NFs faturadas do ERP (chegadas_mes) por marca+loja.
+   Anexa p._nfSug = NF mais recente encontrada → vira sugestão de "recalcular pela data do faturamento". */
+function detectarFaturamentos(dd){
+  var mapLoja={ALTAMIRA:['L1','L4'],ITAITUBA:['L3'],SANTAREM:['L5']};
+  var cm=(dd&&dd.chegadas_mes)||{};
+  function norm(s){return String(s||'').toUpperCase().trim();}
+  DB.pedidos.forEach(function(p){
+    delete p._nfSug;
+    if(p.status!=='ENVIADO')return; // só pedidos já enviados, aguardando faturamento
+    var lojas=mapLoja[p.loja]||[]; var pm=norm(p.marca); if(!pm||pm==='(SEM MARCA)')return;
+    var cand=[];
+    lojas.forEach(function(L){ (cm[L]||[]).forEach(function(it){ if(norm(it.marca)===pm&&it.data) cand.push(it); }); });
+    if(cand.length){ cand.sort(function(a,b){return String(b.data).localeCompare(String(a.data));}); var c=cand[0];
+      p._nfSug={nf:c.nf,data:c.data,valor:c.valor,n:cand.length}; }
+  });
 }
 function computeOTB(peds,lims){
   var meses=DB.meses, limMap={}, out={};
@@ -410,10 +426,21 @@ async function mudaStatus(id,novo,acao){
   var upd={status:novo};
   if(acao==='aprovar'||acao==='rejeitar'){upd.aprovado_por=DB.email;upd.data_aprovacao=new Date().toISOString();}
   if(enviando){ upd.distribuicao=autoSplit(Number(p.valor_total)||0,p.prazo,p.parcelas,''); } // recalcula o contas a pagar a partir da DATA DO ENVIO (hoje) + forma de pagamento, e congela
+  if(novo==='FATURADO'&&p&&p.status!=='FATURADO'){ upd.distribuicao=autoSplit(Number(p.valor_total)||0,p.prazo,p.parcelas,''); } // FATURADO manual: recalcula a partir de HOJE (= data do faturamento informada na mão)
   var {error}=await sb.from('pedidos').update(upd).eq('id',id);
   if(error){toast('Erro: '+error.message);return;}
   if(enviando){ try{ await sb.from('pedidos').update({data_enviado:hojeISO()}).eq('id',id); }catch(e){} } // best-effort: grava a data do envio (ignora se a coluna ainda não existe)
   logAcao(acao||'mudar_status',id+' -> '+novo); carregar();
+}
+/* Aplica o faturamento detectado no ERP: recalcula as parcelas a partir da data de emissão da NF e marca FATURADO. */
+async function aplicarFaturamento(id,dataNF){
+  var p=DB.pedidos.filter(function(x){return x.id===id;})[0]; if(!p)return;
+  if(!confirm('Recalcular as parcelas de "'+p.marca+' ('+lojaNome(p.loja)+')" a partir do faturamento ('+fmtData(dataNF)+') e marcar como FATURADO?'))return;
+  var dist=autoSplit(Number(p.valor_total)||0,p.prazo,p.parcelas,dataNF);
+  toast('Aplicando faturamento…');
+  var {error}=await sb.from('pedidos').update({status:'FATURADO',distribuicao:dist}).eq('id',id);
+  if(error){toast('Erro: '+error.message);return;}
+  logAcao('faturar_erp',p.marca+' / '+p.loja+' (NF emit '+dataNF+')'); carregar();
 }
 function aprovar(id){toast('Aprovando…');mudaStatus(id,'APROVADO','aprovar');}
 function rejeitar(id){if(!confirm('Rejeitar este pedido?'))return;mudaStatus(id,'REJEITADO','rejeitar');}
@@ -461,6 +488,8 @@ function renderPedidos(){
   function celv(v){return v?Math.round(v).toLocaleString('pt-BR'):'';}
   var aEnviar=ps.filter(function(p){return p.status==='APROVADO';});
   var banner=aEnviar.length?'<div class="alerta-box">🔔 <b>'+aEnviar.length+'</b> pedido(s) APROVADO(S) aguardando ENVIO — envie ao fornecedor e mude o status para <b>ENVIADO</b> (só entram no total comprometido depois de enviados): '+aEnviar.map(function(p){return p.marca+' · '+lojaNome(p.loja);}).join('   |   ')+'</div>':'';
+  var faturaSug=ps.filter(function(p){return p._nfSug;});
+  var bannerFat=faturaSug.length?'<div class="alerta-box" style="border-left-color:var(--accent);background:#eef2ff;color:#3730a3">📄 <b>'+faturaSug.length+'</b> pedido(s) ENVIADO com NF faturada detectada no ERP — clique para recalcular as parcelas pela <b>data do faturamento</b> e marcar FATURADO:<br>'+faturaSug.map(function(p){return '<button class="btn mini" style="margin:4px 4px 0 0;background:var(--accent);color:#fff" onclick="aplicarFaturamento(\''+p.id+'\',\''+p._nfSug.data+'\')" title="'+(p._nfSug.n>1?p._nfSug.n+' NFs da marca — usando a mais recente; confira o nº':'NF '+p._nfSug.nf)+'">'+p.marca+' · '+lojaNome(p.loja)+' · NF '+p._nfSug.nf+' · '+fmtData(p._nfSug.data)+(p._nfSug.n>1?' ⚠️':'')+'</button>';}).join('')+'</div>':'';
   var body='';
   ps.forEach(function(p){
     var conta=p.status!=='ENTREGUE'; var d=p.distribuicao||{};
@@ -471,8 +500,8 @@ function renderPedidos(){
   body+=footerPagar(jan,4,1,1);
   var mh=jan.map(function(m){return '<th class="num">'+nomeMes(m)+'</th>';}).join('');
   el('main').innerHTML='<div class="card"><h2>Pedidos ('+ps.length+')</h2>'+
-    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">Ordenados pela <b>data de lançamento</b> — o mais antigo primeiro. A coluna <b>Enviado em</b> mostra quando a equipe enviou (mede a agilidade: lançamento → envio). Ao marcar um pedido como <b>ENVIADO</b>, os meses são recalculados pela data do envio + forma de pagamento. Colunas de mês = valor que vence em cada um dos próximos 6 meses (R$, arredondado); pedidos ENTREGUE não exibem valores nos meses. O bloco final mostra o <b>total comprometido</b> = pedidos em trânsito (enviado + faturado) + contas a pagar já lançado no ERP (por vencimento) — o MESMO total da aba Aprovações. 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
-    banner+
+    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">Ordenados pela <b>data de lançamento</b> — o mais antigo primeiro. A coluna <b>Enviado em</b> mostra quando a equipe enviou (mede a agilidade: lançamento → envio). Ao marcar <b>ENVIADO</b>, os meses são recalculados pela data do envio; ao <b>FATURADO</b> (ou aplicando a NF detectada no ERP), pela data do faturamento — que é o que realmente vale. Colunas de mês = valor que vence em cada um dos próximos 6 meses (R$, arredondado); pedidos ENTREGUE não exibem valores nos meses. O bloco final mostra o <b>total comprometido</b> = pedidos em trânsito (enviado + faturado) + contas a pagar já lançado no ERP (por vencimento) — o MESMO total da aba Aprovações. 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
+    banner+bannerFat+
     '<div style="overflow:auto"><table>'+
     '<tr><th>Data</th><th>Enviado em</th><th>Marca</th><th>Loja</th><th class="num">Valor</th><th>Status</th>'+mh+'<th class="acoes"></th></tr>'+body+'</table></div></div>';
 }
