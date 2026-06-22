@@ -132,6 +132,7 @@ async function validarLogin(usuario, senha) {
     await page.click("#lmxta-login-btn-autenticar");
 
     // Espera redirect pra v4 OU erro de credenciais — loga URL e snippet a cada 1s
+    let empresaClicada = false;
     for (let i = 0; i < 30; i++) {
       await page.waitForTimeout(1000);
       const snapshot = await page.evaluate(() => ({
@@ -145,6 +146,21 @@ async function validarLogin(usuario, senha) {
       if (url.includes("/v4/") && !url.toLowerCase().includes("login")) return true;
       // qualquer URL em linx.microvix.com.br pós-login que NÃO seja erp.microvix.com.br também serve
       if (url.includes("linx.microvix.com.br") && !url.includes("erp.microvix.com.br") && !url.toLowerCase().includes("login")) return true;
+      // Tela "Selecione uma empresa" → clicar empresa 1 (login OK; igual aos scripts de coleta)
+      if (!empresaClicada && url.includes("erp.microvix.com.br")) {
+        const clicou = await page.evaluate(() => {
+          const links = [...document.querySelectorAll(".company-link")];
+          if (!links.length) return false;
+          const emp1 = links.find(a => /^\s*1\s*[-–—]/.test(a.textContent || ""));
+          (emp1 || links[0]).click();
+          return true;
+        }).catch(() => false);
+        if (clicou) {
+          empresaClicada = true;
+          console.log("  → tela de seleção de empresa detectada (login OK), clicando empresa 1...");
+          continue;
+        }
+      }
       const erro = /senha.*incorreta|usu[áa]rio.*inv[áa]lid|credenciais.*inv[áa]lid|n[ãa]o.*encontrad|autentica.*falh/i.test(snapshot.body || "");
       if (erro) {
         console.log("  ❌ erro detectado no body");
