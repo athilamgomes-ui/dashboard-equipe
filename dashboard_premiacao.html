@@ -1226,9 +1226,11 @@ function setDecisaoMeta(mesKey, lojaKey, decisao) {
   const all = loadDecisoesMeta();
   all[_decisaoKey(mesKey, lojaKey)] = {...decisao, em: new Date().toISOString()};
   localStorage.setItem('ajustes_meta_decisoes', JSON.stringify(all));
-  // ⚠️ localStorage é por-device. Pra vendedora ver no celular dela, sync via Worker.
-  // Tipo 'ignorado' não tem metas[] — não precisa enviar (default original já vale).
+  // ⚠️ localStorage é por-device. Persistir nos dois stores compartilhados:
+  // Supabase (fonte da verdade, durável) + Worker (fallback). Tipo 'ignorado'
+  // não tem metas[] — não precisa enviar (default original já vale).
   if (decisao.tipo !== 'ignorado' && Array.isArray(decisao.metas)) {
+    salvarMetasSupabase(mesKey, lojaKey, decisao.metas); // ← fonte da verdade
     try {
       fetch(`${WORKER_URL}/metas-loja`, {
         method: 'POST',
@@ -2126,6 +2128,49 @@ function getSemanaCorrente() {
 
 const WORKER_URL = 'https://premiacao-amgomes.nhf6t85hdk.workers.dev';
 
+// ─── SUPABASE — fonte da verdade durável das metas semanais ──────────────────
+// Mesmo projeto do planejamento de compras. anon key é PÚBLICA por design
+// (segurança = RLS aberto pra anon, igual ao planejamento sem-login).
+// As metas mudam toda semana (redistribuição dinâmica do Athila); gravar aqui
+// garante que nenhum ajuste se perca entre dispositivos/agente (incidente
+// 23/06: meta real da S3 sumiu por ficar só no localStorage). Tabela:
+// metas_semanais (mes,loja,semana,meta) — ver supabase_metas_semanais.sql.
+const SUPA_URL = 'https://valhewbvjwdkkvuejrxa.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4';
+function _supaHeaders(extra) {
+  return {apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', ...(extra||{})};
+}
+// Upsert das metas ajustadas (uma linha por semana). Chamado em setDecisaoMeta.
+async function salvarMetasSupabase(mes, loja, metas) {
+  const rows = (metas||[]).filter(m => typeof m.nova === 'number')
+    .map(m => ({mes, loja, semana: m.id, meta: Math.round(m.nova)}));
+  if (!rows.length) return;
+  try {
+    await fetch(`${SUPA_URL}/rest/v1/metas_semanais?on_conflict=mes,loja,semana`, {
+      method: 'POST',
+      headers: _supaHeaders({Prefer: 'resolution=merge-duplicates,return=minimal'}),
+      body: JSON.stringify(rows)
+    });
+  } catch(e) { console.warn('[supa metas] upsert falhou:', e); }
+}
+// Lê todas as metas do mês. Aplica em DADOS (Supabase é autoritativo).
+async function lerEAplicarMetasSupabase(mes) {
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/metas_semanais?mes=eq.${mes}&select=loja,semana,meta`, {headers: _supaHeaders(), cache: 'no-store'});
+    if (!r.ok) return false;
+    const rows = await r.json();
+    if (!Array.isArray(rows) || !rows.length) return false;
+    for (const row of rows) {
+      const ld = DADOS[mes]?.[row.loja];
+      if (ld && Array.isArray(ld.semanas)) {
+        const sem = ld.semanas.find(s => s.id === row.semana);
+        if (sem && typeof row.meta === 'number') sem.meta = row.meta;
+      }
+    }
+    return true;
+  } catch(e) { console.warn('[supa metas] leitura falhou:', e); return false; }
+}
+
 function loadSugestoesOverrides() {
   // {id: {status, texto_editado, em}} salvo no localStorage do athila
   return JSON.parse(localStorage.getItem('sugestoes_overrides') || '{}');
@@ -2770,6 +2815,8 @@ async function initDashboard() {
     // Sem isso, um ajuste feito em outro dispositivo (ou pelo agente) não
     // aparecia neste navegador — só o localStorage local valia.
     aplicarMetasWorkerNoDADOS(metasLoja);
+    // Supabase é AUTORITATIVO — aplicado por último, vence Worker e localStorage.
+    await lerEAplicarMetasSupabase(curMes);
     // Retornos aprovados vêm SÓ do Worker — sem mistura com sugestões.
     window.__FEEDBACK_RETORNOS = retornos;
 

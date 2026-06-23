@@ -879,6 +879,11 @@ function mostrarPwaBannerSeAplicavel() {
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 
 const WORKER_URL = 'https://premiacao-amgomes.nhf6t85hdk.workers.dev';
+// Supabase (mesmo projeto do planejamento de compras) — fonte da verdade das
+// metas semanais. anon key pública por design (segurança = RLS). Ver
+// supabase_metas_semanais.sql. O app só LÊ as metas daqui (quem escreve é o painel).
+const SUPA_URL = 'https://valhewbvjwdkkvuejrxa.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4';
 
 const PARAMS = new URLSearchParams(window.location.search);
 const LOJA_KEY = (PARAMS.get('l') || 'L1').toUpperCase();
@@ -1825,6 +1830,30 @@ async function init() {
     }
   } catch (e) {
     console.warn('[init] /metas-loja falhou — usando defaults hardcoded:', e);
+  }
+
+  // Supabase é a FONTE DA VERDADE das metas (durável, compartilhada com o
+  // painel e o agente). Aplicado DEPOIS do Worker → vence. As metas mudam toda
+  // semana (redistribuição dinâmica); sem isso um ajuste se perdia (incidente
+  // 23/06 com a meta da S3). Ver supabase_metas_semanais.sql.
+  try {
+    const _h = new Date();
+    const _mk = _h.getFullYear() + '-' + String(_h.getMonth()+1).padStart(2,'0');
+    const r = await fetch(`${SUPA_URL}/rest/v1/metas_semanais?mes=eq.${_mk}&loja=eq.${LOJA_KEY}&select=semana,meta`, {headers: {apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY}, cache: 'no-store'});
+    if (r.ok) {
+      const rows = await r.json();
+      const hist = VENDAS_HIST[LOJA_KEY];
+      const ld = DADOS_LOJA[LOJA_KEY];
+      for (const row of (rows || [])) {
+        if (hist && Array.isArray(hist.semanas)) {
+          const sem = hist.semanas.find(s => s.id === row.semana);
+          if (sem && typeof row.meta === 'number') sem.meta = row.meta;
+        }
+        if (ld && row.semana === ld.semana_atual && typeof row.meta === 'number') ld.meta_semana = row.meta;
+      }
+    }
+  } catch (e) {
+    console.warn('[init] supabase metas falhou — usando Worker/hardcoded:', e);
   }
 
   // Aplica overrides de aprovação que vieram do Worker (athila aprovou recentemente)
