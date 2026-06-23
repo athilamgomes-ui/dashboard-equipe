@@ -65,9 +65,30 @@
   <div class="ctrls card">
     <div><label>Loja</label><br><select id="loja"></select></div>
     <div><label>Margem padrão</label><br><input type="number" id="margemPadrao" step="1" min="0" max="80"> <span class="muted">%</span></div>
-    <div class="toggle" id="creditoWrap" style="display:none"><label><input type="checkbox" id="abaterCredito" class="chk"> abater crédito ICMS (Lucro Real)</label></div>
+    <div class="toggle" id="creditoWrap" style="display:none"><label><input type="checkbox" id="abaterCredito" class="chk"> abater crédito ICMS <span class="muted" id="credHint"></span></label></div>
     <div style="flex:1"></div>
+    <button class="btn sec" id="btnConfig">⚙️ Configurar custos</button>
     <div class="muted" id="geradoEm"></div>
+  </div>
+
+  <div class="card" id="configPanel" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <strong>⚙️ Configurar custos por loja</strong>
+      <span class="muted" style="font-size:12px">salvo neste navegador · sobrepõe os padrões</span>
+    </div>
+    <div style="overflow:auto">
+      <table style="font-size:13px">
+        <thead><tr>
+          <th class="l">Loja</th><th>Imposto venda %</th><th>Custo fixo %</th><th>Cartão %</th>
+          <th>Comissão %</th><th>Outros %</th><th>Crédito ICMS % (Lucro Real)</th>
+        </tr></thead>
+        <tbody id="configBody"></tbody>
+      </table>
+    </div>
+    <div class="row" style="margin-top:10px;justify-content:flex-end">
+      <button class="btn sec" id="btnReset">Restaurar padrões</button>
+      <button class="btn" id="btnSalvarConfig">Salvar</button>
+    </div>
   </div>
 
   <div class="grid2">
@@ -115,20 +136,56 @@ async function carregar(){
     fetch("precificacao_params.json?v="+Date.now()).then(r=>r.json()),
   ]);
   DADOS=d; PARAMS=p;
+  mergeConfigLocal();
   elMargem.value = Math.round((p.margem._default||0.15)*100);
-  document.getElementById("geradoEm").textContent = "Coletado em "+new Date(d.gerado_em).toLocaleString("pt-BR");
+  const dEnt = d.dias_entrega!=null ? ` · entregas (ENTREGUE) dos últimos ${d.dias_entrega} dias` : "";
+  document.getElementById("geradoEm").textContent = "Coletado em "+new Date(d.gerado_em).toLocaleString("pt-BR")+dEnt;
   elLoja.innerHTML = LOJAS.map(L=>`<option value="${L}">${L} — ${(p.lojas[L]||{}).nome||L}</option>`).join("");
   elLoja.value=lojaAtual;
   syncCreditoToggle();
   renderNfes();
 }
 
+const CFG_KEY="precificacao_cfg_v1";
+function mergeConfigLocal(){
+  let ov={}; try{ ov=JSON.parse(localStorage.getItem(CFG_KEY)||"{}"); }catch(e){}
+  for(const L of LOJAS){ if(ov[L]&&PARAMS.lojas[L]) Object.assign(PARAMS.lojas[L], ov[L]); }
+}
 function syncCreditoToggle(){
   const cfg=PARAMS.lojas[lojaAtual]||{};
   const wrap=document.getElementById("creditoWrap");
-  if(cfg.regime==="lucro_real"){ wrap.style.display=""; document.getElementById("abaterCredito").checked=!!cfg.abater_credito_icms; }
-  else wrap.style.display="none";
+  if(cfg.regime==="lucro_real"){
+    wrap.style.display="";
+    document.getElementById("abaterCredito").checked=!!cfg.abater_credito_icms;
+    const a=cfg.aliquota_credito_icms||0;
+    document.getElementById("credHint").textContent = a>0 ? `(${(a*100).toFixed(0)}%)` : "(defina a % em ⚙️ Configurar)";
+  } else wrap.style.display="none";
 }
+
+// ===== Painel de configuração (por loja, persiste no navegador) =====
+const CAMPOS=[["imposto","Imposto venda"],["custo_fixo","Custo fixo"],["cartao","Cartão"],["comissao","Comissão"],["outros","Outros"],["aliquota_credito_icms","Crédito ICMS"]];
+function renderConfig(){
+  document.getElementById("configBody").innerHTML = LOJAS.map(L=>{
+    const c=PARAMS.lojas[L]||{};
+    const cell=campo=>`<td><input type="number" class="mono cfg-in" data-l="${L}" data-c="${campo}" step="0.1" min="0" value="${((custoPct(c,campo)||0)*100).toFixed(1)}"></td>`;
+    return `<tr><td class="l"><b>${L}</b> · ${c.nome||""} <span class="muted">(${c.regime==='simples'?'Simples':'Lucro Real'})</span></td>`+
+      cell("imposto")+cell("custo_fixo")+cell("cartao")+cell("comissao")+cell("outros")+
+      `<td>${c.regime==='lucro_real'?`<input type="number" class="mono cfg-in" data-l="${L}" data-c="aliquota_credito_icms" step="0.5" min="0" value="${((c.aliquota_credito_icms||0)*100).toFixed(1)}">`:'<span class="muted">—</span>'}</td></tr>`;
+  }).join("");
+}
+function salvarConfig(){
+  const ov={};
+  document.querySelectorAll(".cfg-in").forEach(inp=>{
+    const L=inp.dataset.l, c=inp.dataset.c, v=parseFloat(inp.value);
+    if(!isNaN(v)){ (ov[L]=ov[L]||{})[c]=v/100; }
+  });
+  localStorage.setItem(CFG_KEY, JSON.stringify(ov));
+  mergeConfigLocal(); syncCreditoToggle(); renderItens();
+  document.getElementById("configPanel").style.display="none";
+}
+document.getElementById("btnConfig").onclick=()=>{ const p=document.getElementById("configPanel"); const show=p.style.display==="none"; if(show) renderConfig(); p.style.display=show?"":"none"; };
+document.getElementById("btnSalvarConfig").onclick=salvarConfig;
+document.getElementById("btnReset").onclick=()=>{ localStorage.removeItem(CFG_KEY); location.reload(); };
 
 function margemMarca(marca){
   const m=PARAMS.margem;
@@ -151,10 +208,11 @@ function arredonda90(p){
   if(cand < p - 1e-9) cand += 1;
   return Math.round(cand*100)/100;
 }
+function custoPct(cfg,campo){ const g=PARAMS.globais||{}; return cfg[campo]!=null?cfg[campo]:(g[campo]||0); }
 function calc(item, margem){
-  const cfg=PARAMS.lojas[lojaAtual]||{}, g=PARAMS.globais||{};
+  const cfg=PARAMS.lojas[lojaAtual]||{};
   const custo=custoEfetivo(item);
-  const fixos = (cfg.imposto||0)+(g.cartao||0)+(g.comissao||0)+(g.outros||0)+(cfg.custo_fixo||0);
+  const fixos = (cfg.imposto||0)+custoPct(cfg,"cartao")+custoPct(cfg,"comissao")+custoPct(cfg,"outros")+(cfg.custo_fixo||0);
   const div = 1-fixos-margem;
   if(div<=0) return {erro:true, custo, preco:null, precoBruto:null, markup:null, margemReal:null};
   const precoBruto = custo/div;
@@ -184,9 +242,9 @@ function paramsBar(){
     `<span>Regime: <b>${cfg.regime==='simples'?'Simples Nacional':'Lucro Real'}</b></span>`+
     `<span>Imposto venda: <b>${pct(cfg.imposto)}</b></span>`+
     `<span>Custo fixo: <b>${pct(cfg.custo_fixo)}</b></span>`+
-    `<span>Cartão: <b>${pct(g.cartao)}</b></span>`+
-    `<span>Comissão: <b>${pct(g.comissao)}</b></span>`+
-    `<span>Outros: <b>${pct(g.outros)}</b></span>`;
+    `<span>Cartão: <b>${pct(custoPct(cfg,'cartao'))}</b></span>`+
+    `<span>Comissão: <b>${pct(custoPct(cfg,'comissao'))}</b></span>`+
+    `<span>Outros: <b>${pct(custoPct(cfg,'outros'))}</b></span>`;
 }
 
 function itemKey(nf,it){ return lojaAtual+"|"+nf.id+"|"+it.cprod+"|"+it.descricao; }

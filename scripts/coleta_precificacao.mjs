@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
- * coleta_precificacao.mjs — coleta as NFes PENDENTES (últimos 45d, ainda NÃO lançadas no
- * ERP) por loja, com detalhe fiscal por item, para a rotina de PRECIFICAÇÃO. 100% headless
- * (reusa microvix_auth + perfil persistente + Keychain). NÃO grava nada no ERP — só lê.
+ * coleta_precificacao.mjs — coleta NFes (com detalhe fiscal por item) das marcas×lojas que
+ * têm pedido ENTREGUE recente (últimos DIAS_ENTREGA dias) no Planejamento de Compras (Supabase).
+ * Para a rotina de PRECIFICAÇÃO. 100% headless (reusa microvix_auth + perfil + Keychain).
+ * NÃO grava nada no ERP — só lê. A janela de NF é ampla (90d) pois a NF pode ser emitida
+ * dias antes da entrega; quem filtra é o cruzamento com os pedidos ENTREGUE.
  *
  * Saída: /Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_dados.json
  *   { gerado_em, lojas: { L1:[nfe...], L3, L4, L5 } }
@@ -26,13 +28,38 @@ const PROFILE_DIR = join(homedir(), ".claude", "microvix-profile");
 const OUT = "/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_dados.json";
 const FORN_MARCAS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/compras/fornecedor_marcas.json", "utf8"));
 
+const SUPABASE_URL = "https://valhewbvjwdkkvuejrxa.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4";
+
 const log = m => process.stderr.write(`[precos] ${m}\n`);
 const EMPRESAS = [1, 3, 4, 10];
 const EMP_TO_LOJA = { 1: "L1", 3: "L3", 4: "L4", 10: "L5" };
+const LOJA_TO_GROUP = { L1: "ALTAMIRA", L4: "ALTAMIRA", L3: "ITAITUBA", L5: "SANTAREM" };
+const MARCA_ALIAS = { GAMA: ["BRASITECH"] }; // pedido marca → marcas de NF equivalentes (fornecedor fatura com outro nome)
 const URL_NFE = "https://linx.microvix.com.br/gestor_web/produtos/entrada_nfe/index.html";
 const HOJE = new Date();
 const ANO = HOJE.getFullYear();
-const CUTOFF_DIAS = 45; // só NFes recentes (45d)
+const CUTOFF_DIAS = 90;       // janela ampla p/ achar a NF (a NF pode ser dias antes da entrega)
+const DIAS_ENTREGA = Number(process.env.DIAS_ENTREGA) || 2; // só pedidos ENTREGUE com data_entrega nos últimos N dias (regra do usuário; override p/ teste: DIAS_ENTREGA=14 node ...)
+const norm = s => String(s || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+// pedidos ENTREGUE (últimos DIAS_ENTREGA dias) no Planejamento → set de "GRUPO|MARCA" alvo
+async function alvosEntregues() {
+  const since = new Date(HOJE.getTime() - DIAS_ENTREGA * 86400000).toISOString().slice(0, 10);
+  const url = `${SUPABASE_URL}/rest/v1/pedidos?status=eq.ENTREGUE&data_entrega=gte.${since}&select=loja,marca,valor_total,data_entrega`;
+  const r = await fetch(url, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+  if (!r.ok) throw new Error("supabase pedidos " + r.status);
+  const peds = await r.json();
+  const set = new Set();
+  for (const p of peds) {
+    const g = norm(p.loja), m = norm(p.marca);
+    if (!g || !m) continue;
+    set.add(g + "|" + m);
+    (MARCA_ALIAS[m] || []).forEach(a => set.add(g + "|" + norm(a)));
+  }
+  log(`pedidos ENTREGUE (≤${DIAS_ENTREGA}d, desde ${since}): ${peds.length} → ${set.size} alvos (grupo|marca)`);
+  return set;
+}
 
 // fornecedor (CNPJ ou nome) → marca; multi-marca ('+') ou desconhecido → null
 function fornBrand(emit) {
@@ -83,6 +110,8 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
     for (let i = 0; i < 30; i++) { token = await page.evaluate(() => localStorage.getItem("token_api")).catch(() => null); if (token) break; await page.waitForTimeout(500); }
     if (!token) throw new Error("token_api indisponível");
 
+    const alvos = await alvosEntregues();
+
     const raw = await page.evaluate(async (empresas) => {
       const pad = n => String(n).padStart(2, "0");
       const now = new Date(); const d90 = new Date(now.getTime() - 90 * 86400000);
@@ -94,7 +123,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         try {
           const r = await fetch(base + "/api/NfeEntrada/ObterListaNFesPendentesPorEmpresa", {
             method: "POST", headers: { Authorization: token, "Content-Type": "application/json" },
-            body: JSON.stringify({ IdEmpresa: E, DataInicial: iso(d90), DataFinal: iso(now), Status: "Validos" }),
+            body: JSON.stringify({ IdEmpresa: E, DataInicial: iso(d90), DataFinal: iso(now), Status: "Todos" }), // "Todos" inclui as já lançadas (com detalhe de itens) — necessário p/ casar com ENTREGUE
           });
           res[String(E)] = JSON.parse(await r.text());
         } catch (e) { res[String(E)] = { NFes: [], _erro: String(e) }; }
@@ -114,11 +143,14 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         let dt; try { dt = new Date(String(de).replace("Z", "+00:00")); } catch { continue; }
         if (dt.getFullYear() !== ANO) continue;
         if (dt < cutoff) continue;
-        if (nfe.LancadaNoMicrovix) continue; // só PENDENTES (ainda não deram entrada no ERP)
         if (!keepNfe(nfe)) continue;
         const emit = nfe.DadosEmitente || {};
         if (fornIgnorado(emit.Nome)) continue;
         const marcaForn = fornBrand(emit);
+        // SÓ NFes de marca×loja que tenham pedido ENTREGUE recente no Planejamento
+        if (!marcaForn) continue;
+        const chave = (LOJA_TO_GROUP[loja] || "") + "|" + norm(marcaForn);
+        if (!alvos.has(chave)) continue;
         const itens = (nfe.Produtos || []).map(p => {
           const valorBase = num(p.ValorTotalLiquido) || (num(p.ValorBruto) - num(p.ValorDesconto));
           const custoTotal = valorBase + num(p.ValorFrete) + num(p.ValorSeguro) + num(p.ValorOutrasDespesas) + num(p.vIPI) + num(p.ValorICMSST) + num(p.ValorFCPST);
@@ -163,7 +195,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       log(`${loja}: ${kept} NFes mantidas (de ${nfes.length})`);
     }
 
-    const payload = { gerado_em: new Date().toISOString(), cutoff_dias: CUTOFF_DIAS, lojas };
+    const payload = { gerado_em: new Date().toISOString(), cutoff_dias: CUTOFF_DIAS, dias_entrega: DIAS_ENTREGA, lojas };
     writeFileSync(OUT, JSON.stringify(payload, null, 2));
     log(`OK → ${OUT} (${totItens} itens em ${Object.values(lojas).reduce((s, a) => s + a.length, 0)} NFes)`);
   } catch (e) {
