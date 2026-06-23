@@ -124,7 +124,7 @@
 
 <script>
 const LOJAS = ["L1","L3","L4","L5"];
-let DADOS=null, PARAMS=null, lojaAtual="L1", nfeSel=null, overrides={}; // overrides[itemKey]=margem%
+let DADOS=null, PARAMS=null, lojaAtual="L1", nfeSel=null, overrides={}, precoOver={}; // overrides[k]=margem(frac); precoOver[k]=preço manual
 
 const brl = v => (v==null||isNaN(v))?"—":v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const pct = v => (v==null||isNaN(v))?"—":(v*100).toFixed(1)+"%";
@@ -253,37 +253,61 @@ function renderItens(){
     const k=itemKey(nf,it);
     const margem = overrides[k]!=null ? overrides[k] : margemMarca(it.marca);
     const r=calc(it,margem);
-    const margClass = r.erro?'crit':'';
+    const f=finais(it,k,margem,r);              // preço/markup/margem finais (considera edição manual)
+    const manual = precoOver[k]!=null;
+    const pa = it.preco_atual;
+    const delta = (pa!=null && f.preco!=null) ? (f.preco-pa) : null;
     return `<tr>
       <td class="l desc" title="${it.descricao}">${it.descricao}<div class="muted" style="font-size:11px">cód ${it.cprod}${it.ean&&it.ean!=='SEM GTIN'?' · '+it.ean:''}</div></td>
       <td class="l">${it.marca||'<span class="muted">—</span>'}</td>
       <td class="mono">${it.qtd}</td>
       <td class="mono" title="CST ${it.cst||'—'} · ICMS ${it.icms_pct!=null?it.icms_pct+'%':'—'}${it.credito_icms_pct>0?' · crédito de ICMS aplicado':' · com ST/sem crédito'}">${brl(r.custo)}${(()=>{const cr=creditoItem(it);return cr>0?` <span class="pill l" style="font-size:10px">crédito −${(cr*100).toFixed(0)}% ICMS</span>`:'';})()}</td>
-      <td><input type="number" class="mono margin-in" data-k="${k}" step="0.5" min="0" max="80" value="${(margem*100).toFixed(1)}"></td>
-      <td class="mono preco">${r.erro?'<span style="color:var(--crit)">soma % ≥ 100</span>':brl(r.preco)}</td>
-      <td class="mono">${r.markup?r.markup.toFixed(2)+'×':'—'}</td>
-      <td class="mono" style="color:var(--ok)">${pct(r.margemReal)}</td>
-      <td class="mono muted">—</td>
+      <td><input type="number" class="mono margin-in" data-k="${k}" step="0.5" min="0" max="80" value="${((manual?f.margemReal:margem)*100).toFixed(1)}" title="editar margem recalcula o preço"></td>
+      <td>${r.erro?'<span style="color:var(--crit)">soma % ≥ 100</span>':`<input type="text" class="mono preco-in" data-k="${k}" value="${f.preco!=null?f.preco.toFixed(2):''}" title="editar preço fixa este valor (margem recalculada)" style="width:84px;text-align:right;font-weight:700;color:${manual?'#b45309':'var(--indigo-d)'};${manual?'background:#fffbeb;':''}">`}</td>
+      <td class="mono">${f.markup?f.markup.toFixed(2)+'×':'—'}</td>
+      <td class="mono" style="color:var(--ok)">${pct(f.margemReal)}</td>
+      <td class="mono" title="${pa!=null?'Preço atual no ERP':'sem preço no ERP'}">${pa!=null?brl(pa):'<span class="muted">—</span>'}${delta!=null?` <span class="muted" style="font-size:11px">(${delta>=0?'+':''}${brl(delta)})</span>`:''}</td>
     </tr>`;
   }).join("");
   document.getElementById("tbody").innerHTML=rows;
   document.querySelectorAll(".margin-in").forEach(inp=>inp.onchange=()=>{
+    delete precoOver[inp.dataset.k];                       // editar margem volta ao modo margem
     overrides[inp.dataset.k]=parseFloat(inp.value)/100; renderItens();
   });
+  document.querySelectorAll(".preco-in").forEach(inp=>inp.onchange=()=>{
+    const v=parseFloat(String(inp.value).replace(/\./g,"").replace(",","."))||parseFloat(inp.value);
+    if(!isNaN(v)&&v>0) precoOver[inp.dataset.k]=v; else delete precoOver[inp.dataset.k];
+    renderItens();
+  });
+}
+// margem real a partir de um preço final (manual ou calculado)
+function margemDoPreco(item, preco){
+  const cfg=PARAMS.lojas[lojaAtual]||{}, g=PARAMS.globais||{};
+  const custo=custoEfetivo(item);
+  const fixos=(cfg.imposto||0)+custoPct(cfg,"cartao")+custoPct(cfg,"comissao")+custoPct(cfg,"outros")+(cfg.custo_fixo||0);
+  if(!preco) return null;
+  return (preco*(1-fixos)-custo)/preco;
+}
+// valores finais considerando preço manual (precoOver) se houver
+function finais(item,k,margem,r){
+  if(r.erro) return {preco:null,markup:null,margemReal:margem};
+  if(precoOver[k]!=null){ const p=precoOver[k]; return {preco:p, markup:p/r.custo, margemReal:margemDoPreco(item,p)}; }
+  return {preco:r.preco, markup:r.markup, margemReal:r.margemReal};
 }
 
 function linhasExport(){
   const arr=DADOS.lojas[lojaAtual]||[]; const nf=arr[nfeSel]; if(!nf) return [];
   return nf.itens.map(it=>{
     const k=itemKey(nf,it); const margem=overrides[k]!=null?overrides[k]:margemMarca(it.marca);
-    const r=calc(it,margem);
+    const r=calc(it,margem); const f=finais(it,k,margem,r);
     const cfg=PARAMS.lojas[lojaAtual]||{};
     return {Loja:lojaAtual, Tabela_ERP:cfg.tabela_preco||"", NF:nf.numero, Fornecedor:nf.fornecedor, Codigo:it.cprod, EAN:it.ean,
       Descricao:it.descricao, Marca:it.marca||"", Qtd:it.qtd, CST:it.cst||"", ICMS_pct:it.icms_pct!=null?it.icms_pct:"",
       Credito_ICMS_aplicado_pct:+(creditoItem(it)*100).toFixed(1),
-      Custo_unit_cheio:+(r.custo||0).toFixed(4), Margem_pct:+(margem*100).toFixed(1),
-      Preco_sugerido:r.preco!=null?+r.preco.toFixed(2):"", Markup:r.markup?+r.markup.toFixed(2):"",
-      Margem_liquida_pct:r.margemReal!=null?+(r.margemReal*100).toFixed(1):""};
+      Custo_unit_cheio:+(r.custo||0).toFixed(4), Margem_pct:+(f.margemReal*100).toFixed(1),
+      Preco_atual_ERP:it.preco_atual!=null?+it.preco_atual.toFixed(2):"",
+      Preco_sugerido:f.preco!=null?+f.preco.toFixed(2):"", Editado_manual:precoOver[k]!=null?"SIM":"",
+      Markup:f.markup?+f.markup.toFixed(2):"", Margem_liquida_pct:f.margemReal!=null?+(f.margemReal*100).toFixed(1):""};
   });
 }
 document.getElementById("btnXlsx").onclick=()=>{

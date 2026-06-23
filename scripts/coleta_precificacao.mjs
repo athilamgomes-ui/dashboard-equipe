@@ -28,6 +28,8 @@ const PROFILE_DIR = join(homedir(), ".claude", "microvix-profile");
 const OUT = "/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_dados.json";
 const FORN_MARCAS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/compras/fornecedor_marcas.json", "utf8"));
 const ICMS_UF = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_icms_estados.json", "utf8"));
+const PARAMS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_params.json", "utf8"));
+const URL_LISTA_PRECOS = "https://linx.microvix.com.br/gestor_web/produtos/relatorio_lista_precos.asp";
 
 const SUPABASE_URL = "https://valhewbvjwdkkvuejrxa.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4";
@@ -110,6 +112,57 @@ function keepNfe(nfe) {
   return true;
 }
 const num = v => { const n = Number(v); return isNaN(n) ? 0 : n; };
+
+// Preço de venda atual no ERP (Estoque > Relatórios > Lista de Preços, produtos ativos somente).
+// Roda o relatório por empresa+tabela e devolve mapa {codigo: preco_venda} só dos códigos pedidos.
+async function relatorioPrecosErp(page, empresa, tabelaNome, eans) {
+  await gotoRetry(page, URL_LISTA_PRECOS);
+  await page.waitForSelector("#empresas_" + empresa, { timeout: 20000 });
+  await page.waitForTimeout(800);
+  const baseline = await page.evaluate(() => document.querySelectorAll("table tr").length).catch(() => 0);
+  const tabUsada = await page.evaluate(({ empresa, tabelaNome }) => {
+    [1, 3, 4, 9, 10, 11].forEach(i => { const e = document.getElementById("empresas_" + i); if (e) e.checked = (i === empresa); });
+    document.querySelectorAll("input[name=visao]").forEach(r => r.checked = (r.value === "A")); // analítica
+    const a = document.getElementById("ativa"); if (a) a.checked = true;
+    const d = document.getElementById("desativa"); if (d) d.checked = false;                  // ativos somente
+    const bar = document.getElementById("barras"); if (bar) bar.checked = true;               // exibir código de barras (p/ casar EAN)
+    // escolher a tabela de preço pelo nome (ex.: "Tabela padrão"); fallback: 1ª opção
+    const tp = document.getElementById("tabela_preco");
+    let usada = null;
+    if (tp) {
+      const alvo = String(tabelaNome || "").toLowerCase().replace(/tabela/i, "").trim();
+      let opt = [...tp.options].find(o => alvo && (o.text || "").toLowerCase().includes(alvo));
+      if (!opt) opt = [...tp.options].find(o => /padr/i.test(o.text || "")) || tp.options[0];
+      if (opt) { tp.value = opt.value; usada = opt.text; }
+    }
+    return usada;
+  }, { empresa, tabelaNome });
+  await page.waitForTimeout(300);
+  await page.evaluate(() => { const b = document.getElementById("btnGerarRelatorio"); if (b) b.click(); });
+  // aguarda a tabela crescer e estabilizar
+  let last = -1, stable = 0; const t0 = Date.now();
+  while (Date.now() - t0 < 120000) {
+    await page.waitForTimeout(1500);
+    const n = await page.evaluate(() => document.querySelectorAll("table tr").length).catch(() => 0);
+    if (n > baseline + 30) { if (n === last) { if (++stable >= 3) break; } else stable = 0; last = n; }
+  }
+  const precos = await page.evaluate((eans) => {
+    const want = new Set(eans);
+    const parse = v => { v = String(v || "").trim().replace(/\./g, "").replace(",", "."); const n = parseFloat(v); return isNaN(n) ? null : n; };
+    const out = {};
+    for (const v of document.querySelectorAll('input[name^="valor_"]')) {
+      const tr = v.closest("tr"); if (!tr) continue;
+      let ean = null;
+      const a = [...tr.querySelectorAll("a")].find(x => /codebars/i.test(x.getAttribute("href") || ""));
+      if (a) ean = (a.textContent || "").trim();
+      if (!ean) { for (const td of tr.cells) { const t = (td.textContent || "").trim(); if (/^\d{8,14}$/.test(t)) { ean = t; break; } } }
+      if (!ean || !want.has(ean)) continue;
+      const p = parse(v.value); if (p != null && out[ean] == null) out[ean] = p;
+    }
+    return out;
+  }, [...eans]);
+  return { tabela: tabUsada, precos };
+}
 
 async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
   let err;
@@ -198,6 +251,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
             custo_cheio_total: Math.round(custoTotal * 100) / 100,
             custo_unit_cheio: Math.round((custoTotal / qtd) * 10000) / 10000,
             cst: null, icms_pct: null, credito_icms_pct: 0, // preenchidos depois via BuscarDetalhesNFe
+            preco_atual: null, // preço de venda atual no ERP (preenchido depois via Lista de Preços)
           };
         });
         if (!itens.length) continue;
@@ -261,6 +315,24 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         }
       }
       log(`detalhe fiscal: ${ids.length} NFes; itens c/ crédito ICMS=${comCredito}, sem crédito (ST/0%)=${comST}, sem info=${semInfo}`);
+    }
+
+    // ===== Preço de venda atual no ERP (Lista de Preços), por empresa/tabela =====
+    for (const L of Object.keys(lojas)) {
+      if (!lojas[L].length) continue;
+      const empresa = (PARAMS.lojas[L] || {}).empresa;
+      const tabelaNome = (PARAMS.lojas[L] || {}).tabela_preco;
+      const eans = new Set();
+      for (const nf of lojas[L]) for (const it of nf.itens) if (it.ean && it.ean !== "SEM GTIN") eans.add(it.ean);
+      if (!empresa || !eans.size) continue;
+      try {
+        const { tabela, precos } = await relatorioPrecosErp(page, empresa, tabelaNome, eans);
+        let achou = 0;
+        for (const nf of lojas[L]) for (const it of nf.itens) {
+          if (it.ean && precos[it.ean] != null) { it.preco_atual = precos[it.ean]; achou++; }
+        }
+        log(`preços ERP ${L} (emp ${empresa}, ${tabela || "?"}): ${achou}/${eans.size} EANs`);
+      } catch (e) { log(`preços ERP ${L} FALHOU: ${String(e.message || e).split("\n")[0]}`); }
     }
 
     const payload = { gerado_em: new Date().toISOString(), cutoff_dias: CUTOFF_DIAS, dias_entrega: DIAS_ENTREGA, lojas };
