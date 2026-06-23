@@ -108,7 +108,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-13'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-14'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -183,7 +183,7 @@ async function carregar(){
   DB.realizado=null; DB.realizadoEm='';
   try{
     var rr=await fetch('https://athilamgomes-ui.github.io/dashboard-compras-amgomes/dados.json',{cache:'no-store'});
-    if(rr.ok){ var dd=await rr.json(); DB.realizado=montarRealizado(dd); DB.realizadoEm=dd.gerado_em||''; detectarFaturamentos(dd); }
+    if(rr.ok){ var dd=await rr.json(); DB.realizado=montarRealizado(dd); DB.realizadoEm=dd.gerado_em||''; detectarFaturamentos(dd); await autoAvancarStatus(); }
   }catch(e){ DB.realizado=null; }
   DB.contasERP=null;
   try{
@@ -298,20 +298,42 @@ function detectarFaturamentos(dd){
   var cm=(dd&&dd.chegadas_mes)||{};
   function norm(s){return String(s||'').toUpperCase().trim();}
   DB.pedidos.forEach(function(p){
-    delete p._nfSug; delete p._noERP; delete p._dataFat; delete p._nfMatch;
-    var pm=norm(p.marca); if(!pm||pm==='(SEM MARCA)')return;
+    delete p._noERP; delete p._dataFat; delete p._nfMatch; delete p._temLancada;
     if(p.status!=='ENVIADO'&&p.status!=='FATURADO'&&p.status!=='ENTREGUE')return; // faturamento só faz sentido p/ pedido já enviado
-    var lojas=mapLoja[p.loja]||[];
-    var minData=String(p.data_enviado||p.data_pedido||'').slice(0,10); // NF (faturamento) NÃO pode ser anterior ao envio/lançamento — senão é NF de pedido antigo da mesma marca
+    var pm=norm(p.marca), pv=Number(p.valor_total)||0, lojas=mapLoja[p.loja]||[];
+    var minData=String(p.data_enviado||p.data_pedido||'').slice(0,10); // NF (faturamento) NÃO pode ser anterior ao envio/lançamento
     var cand=[];
-    lojas.forEach(function(L){ (cm[L]||[]).forEach(function(it){ var dt=String(it.data||'').slice(0,10); if(norm(it.marca)===pm&&dt&&(!minData||dt>=minData)) cand.push(it); }); });
+    lojas.forEach(function(L){ (cm[L]||[]).forEach(function(it){
+      var dt=String(it.data||'').slice(0,10); if(!dt||(minData&&dt<minData))return;
+      var marcaMatch=pm&&pm!=='(SEM MARCA)'&&norm(it.marca)===pm;
+      var valMatch=pv>0&&Math.abs((Number(it.valor)||0)-pv)/pv<=0.02; // casa por valor (pega NF que o ERP marcou "(sem marca)")
+      if(marcaMatch||valMatch) cand.push({it:it,dt:dt,vm:valMatch}); }); });
     if(!cand.length)return;
-    cand.sort(function(a,b){return String(b.data).localeCompare(String(a.data));}); // mais recente primeiro
-    var c=cand[0];
-    p._dataFat=c.data; p._nfMatch=c.nf; // data de faturamento (emissão da NF) derivada do ERP
-    if(p.status==='ENVIADO'){ p._nfSug={nf:c.nf,data:c.data,valor:c.valor,n:cand.length}; } // sugere marcar FATURADO
-    else if(p.status==='FATURADO'){ if(cand.some(function(it){return it.origem==='lancada';})) p._noERP=true; } // NF já lançada no ERP → não duplicar
+    cand.sort(function(a,b){ if(a.vm!==b.vm)return a.vm?-1:1; return b.dt.localeCompare(a.dt); }); // prioriza casamento por valor, depois mais recente
+    var best=cand[0].it, temLancada=cand.some(function(c){return c.it.origem==='lancada';});
+    p._dataFat=best.data; p._nfMatch=best; p._temLancada=temLancada; // data de faturamento (emissão da NF) derivada do ERP
+    if(p.status==='FATURADO'&&temLancada) p._noERP=true; // NF já lançada no ERP → não duplicar
   });
+}
+/* Avança o status pelo ERP: NF emitida (pendente) → FATURADO; NF lançada (deu entrada) → ENTREGUE.
+   Recalcula as parcelas a partir da data de faturamento. Só avança (nunca regride). */
+async function autoAvancarStatus(){
+  var rank={ATHILA:0,APROVADO:1,ENVIADO:2,FATURADO:3,ENTREGUE:4,REJEITADO:-1};
+  var claims={}; // quantos pedidos (não terminais) reivindicam cada NF
+  DB.pedidos.forEach(function(p){ if(p._nfMatch&&(p.status==='ENVIADO'||p.status==='FATURADO')) claims[p._nfMatch.nf]=(claims[p._nfMatch.nf]||0)+1; });
+  var ups=[]; DB._autoAv=[]; DB._ambiguo=[];
+  DB.pedidos.forEach(function(p){
+    if(!p._nfMatch)return; if(p.status!=='ENVIADO'&&p.status!=='FATURADO')return;
+    var alvo=p._temLancada?'ENTREGUE':'FATURADO';
+    if(rank[alvo]<=rank[p.status])return;
+    if(claims[p._nfMatch.nf]>1){ DB._ambiguo.push({marca:p.marca,loja:p.loja,nf:p._nfMatch.nf}); return; } // mesma NF casa com +1 pedido → não avança sozinho (ambíguo)
+    var nfDt=String(p._nfMatch.data).slice(0,10);
+    var nova=autoSplit(Number(p.valor_total)||0,p.prazo,p.parcelas,nfDt); // parcelas a partir do faturamento
+    DB._autoAv.push({marca:p.marca,loja:p.loja,de:p.status,para:alvo,nf:p._nfMatch.nf,data:nfDt});
+    p.status=alvo; p.distribuicao=nova;
+    ups.push(sb.from('pedidos').update({status:alvo,distribuicao:nova}).eq('id',p.id));
+  });
+  if(ups.length){ try{ await Promise.all(ups); logAcao('auto_avancar_erp',DB._autoAv.map(function(a){return a.marca+'/'+a.loja+' '+a.de+'->'+a.para;}).join(', ')); }catch(e){} }
 }
 function computeOTB(peds,lims){
   var meses=DB.meses, limMap={}, out={};
@@ -512,8 +534,10 @@ function renderPedidos(){
   function celv(v){return v?Math.round(v).toLocaleString('pt-BR'):'';}
   var aEnviar=ps.filter(function(p){return p.status==='APROVADO';});
   var banner=aEnviar.length?'<div class="alerta-box">🔔 <b>'+aEnviar.length+'</b> pedido(s) APROVADO(S) aguardando ENVIO — envie ao fornecedor e mude o status para <b>ENVIADO</b> (só entram no total comprometido depois de enviados): '+aEnviar.map(function(p){return p.marca+' · '+lojaNome(p.loja);}).join('   |   ')+'</div>':'';
-  var faturaSug=ps.filter(function(p){return p._nfSug;});
-  var bannerFat=faturaSug.length?'<div class="alerta-box" style="border-left-color:var(--accent);background:#eef2ff;color:#3730a3">📄 <b>'+faturaSug.length+'</b> pedido(s) ENVIADO com NF faturada detectada no ERP — clique para recalcular as parcelas pela <b>data do faturamento</b> e marcar FATURADO:<br>'+faturaSug.map(function(p){return '<button class="btn mini" style="margin:4px 4px 0 0;background:var(--accent);color:#fff" onclick="aplicarFaturamento(\''+p.id+'\',\''+p._nfSug.data+'\')" title="'+(p._nfSug.n>1?p._nfSug.n+' NFs da marca — usando a mais recente; confira o nº':'NF '+p._nfSug.nf)+'">'+p.marca+' · '+lojaNome(p.loja)+' · NF '+p._nfSug.nf+' · '+fmtData(p._nfSug.data)+(p._nfSug.n>1?' ⚠️':'')+'</button>';}).join('')+'</div>':'';
+  var bannerFat=(DB._autoAv&&DB._autoAv.length)?'<div class="alerta-box" style="border-left-color:var(--ok);background:#ecfdf5;color:#065f46">✅ <b>'+DB._autoAv.length+'</b> pedido(s) atualizados automaticamente pelo ERP nesta carga (NF emitida→FATURADO, NF lançada→ENTREGUE): '+DB._autoAv.map(function(a){return a.marca+' ('+lojaNome(a.loja)+') '+a.de+'→<b>'+a.para+'</b> · NF '+a.nf+' '+fmtData(a.data);}).join('   |   ')+'</div>':'';
+  var ambNFs={}; (DB._ambiguo||[]).forEach(function(a){ambNFs[a.nf]=a;});
+  var ambList=Object.keys(ambNFs);
+  var bannerAmb=ambList.length?'<div class="alerta-box">⚠️ <b>'+ambList.length+'</b> NF(s) que casam com mais de um pedido (mesma marca/valor) — NÃO avancei sozinho pra não errar; confira e ajuste o status na mão: '+ambList.map(function(nf){var a=ambNFs[nf];return a.marca+' ('+lojaNome(a.loja)+') · NF '+nf;}).join('   |   ')+'</div>':'';
   var body='';
   ps.forEach(function(p){
     var conta=p.status!=='ENTREGUE'; var d=p.distribuicao||{};
@@ -527,7 +551,7 @@ function renderPedidos(){
   var mh=jan.map(function(m){return '<th class="num">'+nomeMes(m)+'</th>';}).join('');
   el('main').innerHTML='<div class="card"><h2>Pedidos ('+ps.length+')</h2>'+
     '<p class="mut" style="margin:-8px 0 12px;font-weight:600">Ordenados pela <b>data de lançamento</b> — o mais antigo primeiro. As colunas <b>Enviado em</b> e <b>Faturado em</b> (esta vinda das NFes do ERP) mostram o trâmite com os dias de cada etapa: lançamento → envio → faturamento. Ao marcar <b>ENVIADO</b>, os meses são recalculados pela data do envio; ao <b>FATURADO</b> (ou aplicando a NF detectada no ERP), pela data do faturamento — que é o que realmente vale. Colunas de mês = valor que vence em cada um dos próximos 6 meses (R$, arredondado); pedidos ENTREGUE não exibem valores nos meses. O bloco final mostra o <b>total comprometido</b> = pedidos em trânsito (enviado + faturado) + contas a pagar já lançado no ERP (por vencimento) — o MESMO total da aba Aprovações. 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
-    banner+bannerFat+
+    banner+bannerFat+bannerAmb+
     '<div style="overflow:auto"><table>'+
     '<tr><th>Data</th><th>Enviado em</th><th>Faturado em</th><th>Marca</th><th>Loja</th><th class="num">Valor</th><th>Status</th>'+mh+'<th class="acoes"></th></tr>'+body+'</table></div></div>';
 }
