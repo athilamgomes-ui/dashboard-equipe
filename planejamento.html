@@ -101,6 +101,7 @@ var WEB3FORMS_KEY = '65791c8f-eab3-4e7a-91bf-ce645c273332';  // avisa o aprovado
 /* ================================================== */
 
 var LOJAS=[{id:'ALTAMIRA',nome:'Altamira (L1+L4)'},{id:'ITAITUBA',nome:'Itaituba (L3)'},{id:'SANTAREM',nome:'Santarém (L5)'}];
+var MARCA_ALIAS={'GAMA':['BRASITECH']}; // pedido marca (UPPER) → outras marcas de NF que também são desta marca (fornecedor que fatura com nome diferente)
 var STATUS=['ATHILA','APROVADO','ENVIADO','FATURADO','ENTREGUE','REJEITADO'];
 var STATUS_COMPROMETE=['ENVIADO','FATURADO','ENTREGUE'];   // OTB
 var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o caixa. APROVADO NÃO entra (aprovado mas ainda não enviado — só conta quando vira ENVIADO). ATHILA=não aprovado, ENTREGUE=já recebido.
@@ -108,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-16'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-17'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -306,7 +307,7 @@ function detectarFaturamentos(dd){
     lojas.forEach(function(L){ (cm[L]||[]).forEach(function(it){
       var dt=String(it.data||'').slice(0,10); if(!dt||(minData&&dt<minData))return;
       var nfM=norm(it.marca);
-      var marcaMatch=pm&&pm!=='(SEM MARCA)'&&nfM===pm;
+      var marcaMatch=pm&&pm!=='(SEM MARCA)'&&(nfM===pm||(MARCA_ALIAS[pm]&&MARCA_ALIAS[pm].indexOf(nfM)>=0)); // alias: ex. NF "Brasitech" casa com pedido "Gama"
       var valMatch=(nfM===''||nfM==='(SEM MARCA)')&&pv>0&&Math.abs((Number(it.valor)||0)-pv)/pv<=0.02; // valor SÓ vale quando a NF NÃO tem marca identificada (senão pega NF de outra marca por coincidência de valor)
       if(marcaMatch||valMatch) cand.push({it:it,dt:dt,mm:marcaMatch}); }); });
     if(!cand.length)return;
