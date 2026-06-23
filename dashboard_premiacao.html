@@ -2056,7 +2056,8 @@ function salvarAvaliacao(idSug, resultado, comentario) {
   };
   if (idx >= 0) local[idx] = reg; else local.push(reg);
   localStorage.setItem('avaliacoes_premiacao', JSON.stringify(local));
-  // Envia pro Worker
+  // Escrita-dupla: Supabase (durável) + Worker (fallback)
+  supaUpsert('sugestoes_avaliacoes', {id_sugestao: reg.id_sugestao, resultado: reg.resultado, comentario: reg.comentario||'', em: new Date().toISOString()}, 'id_sugestao');
   fetch(`${WORKER_URL}/avaliacao`, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -2090,7 +2091,8 @@ function salvarRetornoFeedback(idSug, loja, vendedora) {
   const cache = window.__FEEDBACK_RETORNOS;
   const idx = cache.findIndex(r => r.id_sugestao === idSug && r.loja === loja && r.vendedora === vendedora);
   if (idx >= 0) cache[idx] = reg; else cache.push(reg);
-  // Envia ao Worker
+  // Escrita-dupla: Supabase (durável) + Worker (fallback)
+  supaUpsert('feedback_retornos', {id_sugestao: reg.id_sugestao, loja: reg.loja, vendedora: reg.vendedora, status: reg.status, texto: reg.texto||'', em: new Date().toISOString()}, 'id_sugestao,loja,vendedora');
   fetch(`${WORKER_URL}/feedback-retorno`, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -2153,6 +2155,39 @@ async function salvarMetasSupabase(mes, loja, metas) {
     });
   } catch(e) { console.warn('[supa metas] upsert falhou:', e); }
 }
+// ── Camada genérica Supabase (escrita-dupla + leitura com fallback) ──
+// Escrita: grava no Supabase (durável) E no Worker → nada se perde.
+// Leitura: junta os dois (dedup por chave, registro mais recente vence) →
+// durante a transição nenhum dado some, mesmo o que ainda só está no Worker.
+async function supaUpsert(table, rows, onConflict) {
+  const arr = Array.isArray(rows) ? rows : [rows];
+  if (!arr.length) return false;
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}` + (onConflict ? `?on_conflict=${onConflict}` : ''), {
+      method: 'POST', headers: _supaHeaders({Prefer: 'resolution=merge-duplicates,return=minimal'}),
+      body: JSON.stringify(arr)
+    });
+    return r.ok;
+  } catch(e) { console.warn(`[supa ${table}] upsert falhou:`, e); return false; }
+}
+async function supaSelect(table, query) {
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${query || 'select=*'}`, {headers: _supaHeaders(), cache: 'no-store'});
+    if (!r.ok) return null;
+    return await r.json();
+  } catch(e) { console.warn(`[supa ${table}] select falhou:`, e); return null; }
+}
+// Junta itens do Worker + Supabase, dedup por keyFn, mais recente (em) vence.
+function mergeItens(workerItems, supaItems, keyFn) {
+  const map = new Map();
+  for (const it of (workerItems || [])) map.set(keyFn(it), it);
+  for (const it of (supaItems || [])) {
+    const k = keyFn(it), cur = map.get(k);
+    if (!cur || new Date(it.em||0) >= new Date(cur.em||0)) map.set(k, it);
+  }
+  return [...map.values()];
+}
+
 // Lê todas as metas do mês. Aplica em DADOS (Supabase é autoritativo).
 async function lerEAplicarMetasSupabase(mes) {
   try {
@@ -2177,6 +2212,8 @@ function loadSugestoesOverrides() {
 }
 
 async function enviarOverrideWorker(idSug, reg) {
+  // Escrita-dupla: Supabase (durável) + Worker (fallback)
+  supaUpsert('sugestoes_overrides', {id_sugestao: idSug, status: reg.status, texto_editado: reg.texto_editado||null, prazo: reg.prazo||null, em: new Date().toISOString()}, 'id_sugestao');
   try {
     await fetch(`${WORKER_URL}/override`, {
       method: 'POST',
@@ -2794,18 +2831,25 @@ async function initDashboard() {
   setMes(curMes); // sincroniza seletor + cabeçalho com o mês corrente e renderiza
   // Em paralelo busca tudo do Worker
   try {
-    const [oR, aR, fR, rR, mR] = await Promise.all([
+    const [oR, aR, fR, rR, mR,
+           oS, aS, fS, rS] = await Promise.all([
       fetch(`${WORKER_URL}/overrides`, {cache: 'no-store'}),
       fetch(`${WORKER_URL}/avaliacoes`, {cache: 'no-store'}),
       fetch(`${WORKER_URL}/feedbacks`, {cache: 'no-store'}),
       fetch(`${WORKER_URL}/feedback-retornos`, {cache: 'no-store'}).catch(() => ({json: async () => ({items:[]})})),
       fetch(`${WORKER_URL}/metas-loja`, {cache: 'no-store'}).catch(() => ({json: async () => ({items:[]})})),
+      // Supabase em paralelo (cada um null se falhar/tabela não existe ainda)
+      supaSelect('sugestoes_overrides'),
+      supaSelect('sugestoes_avaliacoes'),
+      supaSelect('feedbacks'),
+      supaSelect('feedback_retornos'),
     ]);
-    const overrides = (await oR.json()).items || [];
-    const avaliacoes = (await aR.json()).items || [];
-    const feedbacks = (await fR.json()).items || [];
-    const retornos = (await rR.json()).items || [];
-    const metasLoja = (await mR.json()).items || [];
+    // Junta Worker + Supabase (mais recente vence) → nada some na transição.
+    const overrides  = mergeItens((await oR.json()).items, oS, x => x.id_sugestao);
+    const avaliacoes = mergeItens((await aR.json()).items, aS, x => x.id_sugestao);
+    const feedbacks  = mergeItens((await fR.json()).items, fS, x => `${x.id_sugestao}|${x.loja}|${x.vendedora}`);
+    const retornos   = mergeItens((await rR.json()).items, rS, x => `${x.id_sugestao}|${x.loja}|${x.vendedora}`);
+    const metasLoja  = (await mR.json()).items || [];
 
     // ── AJUSTES DE META (compartilhados via Worker) ──
     // O Worker é a fonte da verdade dos ajustes de meta: recebe tanto os que o

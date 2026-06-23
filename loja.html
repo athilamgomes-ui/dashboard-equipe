@@ -424,7 +424,8 @@ function confirmarFoto() {
   const isDono = sessionStorage.getItem('modo_dono') === '1';
   if (!isDono) {
     localStorage.setItem('foto_perfil_' + LOJA_KEY + '_' + currentUser, fotoPreviewBase64);
-    // Tenta enviar pro Worker (best effort - foto pode ser grande)
+    // Escrita-dupla: Supabase (durável) + Worker (fallback)
+    supaUpsert('fotos', {loja: LOJA_KEY, vendedora: currentUser, foto: fotoPreviewBase64, em: new Date().toISOString()}, 'loja,vendedora');
     fetch(`${WORKER_URL}/foto`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -770,6 +771,8 @@ function salvarAvatar() {
   if (!isDono) {
     // Vendedora real: persiste em localStorage e Worker
     localStorage.setItem('avatar_config_' + LOJA_KEY + '_' + currentUser, JSON.stringify(avatarConfig));
+    // Escrita-dupla: Supabase (durável) + Worker (fallback)
+    supaUpsert('avatares', {loja: LOJA_KEY, vendedora: currentUser, config: avatarConfig, em: new Date().toISOString()}, 'loja,vendedora');
     fetch(`${WORKER_URL}/avatar`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -884,6 +887,37 @@ const WORKER_URL = 'https://premiacao-amgomes.nhf6t85hdk.workers.dev';
 // supabase_metas_semanais.sql. O app só LÊ as metas daqui (quem escreve é o painel).
 const SUPA_URL = 'https://valhewbvjwdkkvuejrxa.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4';
+function _supaHeaders(extra) {
+  return {apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY, 'Content-Type': 'application/json', ...(extra||{})};
+}
+// Escrita-dupla (Supabase + Worker) e leitura com merge — mesma camada do painel.
+async function supaUpsert(table, rows, onConflict) {
+  const arr = Array.isArray(rows) ? rows : [rows];
+  if (!arr.length) return false;
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}` + (onConflict ? `?on_conflict=${onConflict}` : ''), {
+      method: 'POST', headers: _supaHeaders({Prefer: 'resolution=merge-duplicates,return=minimal'}),
+      body: JSON.stringify(arr)
+    });
+    return r.ok;
+  } catch(e) { console.warn(`[supa ${table}] upsert falhou:`, e); return false; }
+}
+async function supaSelect(table, query) {
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${query || 'select=*'}`, {headers: _supaHeaders(), cache: 'no-store'});
+    if (!r.ok) return null;
+    return await r.json();
+  } catch(e) { console.warn(`[supa ${table}] select falhou:`, e); return null; }
+}
+function mergeItens(workerItems, supaItems, keyFn) {
+  const map = new Map();
+  for (const it of (workerItems || [])) map.set(keyFn(it), it);
+  for (const it of (supaItems || [])) {
+    const k = keyFn(it), cur = map.get(k);
+    if (!cur || new Date(it.em||0) >= new Date(cur.em||0)) map.set(k, it);
+  }
+  return [...map.values()];
+}
 
 const PARAMS = new URLSearchParams(window.location.search);
 const LOJA_KEY = (PARAMS.get('l') || 'L1').toUpperCase();
@@ -1856,14 +1890,17 @@ async function init() {
     console.warn('[init] supabase metas falhou — usando Worker/hardcoded:', e);
   }
 
-  // Aplica overrides de aprovação que vieram do Worker (athila aprovou recentemente)
+  // Aplica overrides de aprovação (Athila aprovou/editou/rejeitou).
+  // Junta Worker + Supabase (mais recente vence) → aprovação nunca some.
   try {
-    const r = await fetch(`${WORKER_URL}/overrides`, {cache: 'no-store'});
-    const data = await r.json();
-    const itens = data.items || [];
+    const [wr, sup] = await Promise.all([
+      fetch(`${WORKER_URL}/overrides`, {cache: 'no-store'}).then(r=>r.json()).catch(()=>({items:[]})),
+      supaSelect('sugestoes_overrides'),
+    ]);
+    const itens = mergeItens(wr.items, sup, x => x.id_sugestao);
     if (itens.length > 0) aplicarOverridesNaSUGESTOES(itens);
   } catch (e) {
-    console.warn('[init] worker /overrides falhou - usando SUGESTOES inline:', e);
+    console.warn('[init] /overrides falhou - usando SUGESTOES inline:', e);
   }
 
   // Retornos do dono pros feedbacks da vendedora — renderizados na aba 🎯 Meu Progresso.
@@ -1872,12 +1909,14 @@ async function init() {
   // Não há mais PRESET pré-aprovado — isso permitia que textos do sistema aparecessem
   // pra vendedoras como se fosse o Athila.
   try {
-    const r = await fetch(`${WORKER_URL}/feedback-retornos`, {cache: 'no-store'});
-    const data = await r.json();
-    window.__RETORNOS_DONO = (data.items || []).filter(x => x.loja === LOJA_KEY);
+    const [wr, sup] = await Promise.all([
+      fetch(`${WORKER_URL}/feedback-retornos`, {cache: 'no-store'}).then(r=>r.json()).catch(()=>({items:[]})),
+      supaSelect('feedback_retornos', `loja=eq.${LOJA_KEY}`),
+    ]);
+    window.__RETORNOS_DONO = mergeItens(wr.items, sup, x => `${x.id_sugestao}|${x.loja}|${x.vendedora}`).filter(x => x.loja === LOJA_KEY);
   } catch (e) {
     window.__RETORNOS_DONO = [];
-    console.warn('[init] /feedback-retornos falhou — sem retornos disponíveis até Athila aprovar e Worker estar deployado:', e);
+    console.warn('[init] /feedback-retornos falhou — sem retornos disponíveis:', e);
   }
 
   // Sincroniza quizzes respondidos do Worker. Sem isso, vendedora que respondeu
@@ -1886,9 +1925,11 @@ async function init() {
   // No boot currentUser ainda é null (login ainda não aconteceu) — cachemos
   // globalmente e aplicamos em enterApp().
   try {
-    const qr = await fetch(`${WORKER_URL}/quizzes`, {cache: 'no-store'});
-    const qd = await qr.json();
-    window.__QUIZZES_REMOTOS = (qd.items || []).filter(q => q.loja === LOJA_KEY);
+    const [wr, sup] = await Promise.all([
+      fetch(`${WORKER_URL}/quizzes`, {cache: 'no-store'}).then(r=>r.json()).catch(()=>({items:[]})),
+      supaSelect('quizzes', `loja=eq.${LOJA_KEY}`),
+    ]);
+    window.__QUIZZES_REMOTOS = mergeItens(wr.items, sup, q => `${q.loja}|${q.vendedora}|${q.semana}`).filter(q => q.loja === LOJA_KEY);
   } catch (e) {
     window.__QUIZZES_REMOTOS = [];
     console.warn('[init] /quizzes falhou — só localStorage vai contar:', e);
@@ -1918,9 +1959,11 @@ async function init() {
   // mensagem mais recente da loja substitui a do mensagem_gerente.json.
   // Texto vazio publicado = gerente removeu a mensagem (não mostra nada).
   try {
-    const r = await fetch(`${WORKER_URL}/mensagem-gerente`, {cache: 'no-store'});
-    const data = await r.json();
-    const minha = (data.items || []).find(x => x.loja === LOJA_KEY);
+    const [wr, sup] = await Promise.all([
+      fetch(`${WORKER_URL}/mensagem-gerente`, {cache: 'no-store'}).then(r=>r.json()).catch(()=>({items:[]})),
+      supaSelect('mensagens_gerente', `loja=eq.${LOJA_KEY}`),
+    ]);
+    const minha = mergeItens(wr.items, sup, x => x.loja).find(x => x.loja === LOJA_KEY);
     if (minha) {
       mensagensDB[LOJA_KEY] = minha.texto
         ? {mensagem: minha.texto, por: minha.por, atualizado_em: _fmtDataMsg(minha.em)}
@@ -2307,16 +2350,22 @@ async function publicarMensagemGerente() {
   const texto = (input?.value || '').trim();
   status.innerHTML = '<span style="color:var(--muted)">enviando…</span>';
   try {
-    const r = await fetch(`${WORKER_URL}/mensagem-gerente`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({loja: LOJA_KEY, por: currentUser, texto})
-    });
-    const data = await r.json();
-    if (!data.ok) throw new Error(data.error || 'falha ao publicar');
+    const agora = new Date().toISOString();
+    // Escrita-dupla: Supabase (durável, primário) + Worker (fallback).
+    // Sucesso se QUALQUER um gravar.
+    const okSupa = await supaUpsert('mensagens_gerente', {loja: LOJA_KEY, por: currentUser, texto, em: agora}, 'loja');
+    let okWorker = false;
+    try {
+      const r = await fetch(`${WORKER_URL}/mensagem-gerente`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({loja: LOJA_KEY, por: currentUser, texto})
+      });
+      okWorker = r.ok && (await r.json()).ok;
+    } catch(e) { console.warn('[msg-gerente] worker falhou:', e); }
+    if (!okSupa && !okWorker) throw new Error('nenhum backend respondeu');
     // Atualiza localmente pra gerente ver na hora (equipe vê na próxima abertura)
     mensagensDB[LOJA_KEY] = texto
-      ? {mensagem: texto, por: currentUser, atualizado_em: _fmtDataMsg(data.salvo.em)}
+      ? {mensagem: texto, por: currentUser, atualizado_em: _fmtDataMsg(agora)}
       : {};
     renderContent();
     // renderContent recria o DOM — re-acha o status pra confirmar
@@ -2537,6 +2586,8 @@ function getMeuFeedback(idSug) {
 }
 
 async function enviarFeedbackWorker(reg) {
+  // Escrita-dupla: Supabase (durável) + Worker (fallback)
+  supaUpsert('feedbacks', {id_sugestao: reg.id_sugestao, loja: reg.loja, vendedora: reg.vendedora, acao: reg.acao, comentario: reg.comentario||'', em: reg.em || new Date().toISOString()}, 'id_sugestao,loja,vendedora');
   try {
     await fetch(`${WORKER_URL}/feedback`, {
       method: 'POST',
@@ -3053,7 +3104,8 @@ function marcarQuizPassou(semanaId, acertos) {
   const pending = JSON.parse(localStorage.getItem('quiz_respostas') || '[]');
   pending.push({loja: LOJA_KEY, vendedora: currentUser, semana: semanaComMes, em: new Date().toISOString()});
   localStorage.setItem('quiz_respostas', JSON.stringify(pending));
-  // Envia pro Worker (athila vê instantaneamente)
+  // Escrita-dupla: Supabase (durável) + Worker (fallback)
+  supaUpsert('quizzes', {loja: LOJA_KEY, vendedora: currentUser, semana: semanaComMes, acertos: acertos || 0, em: new Date().toISOString()}, 'loja,vendedora,semana');
   fetch(`${WORKER_URL}/quiz`, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
