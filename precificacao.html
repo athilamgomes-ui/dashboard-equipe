@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Precificação — Grupo A.M. Gomes</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --bg:#f0f4f8; --card:#fff; --ink:#1e293b; --muted:#64748b; --line:#e2e8f0;
+    --indigo:#6366f1; --indigo-d:#4f46e5; --ok:#059669; --warn:#d97706; --crit:#dc2626;
+    --okbg:#ecfdf5; --warnbg:#fffbeb; --critbg:#fef2f2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  header{background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;padding:18px 22px}
+  header h1{margin:0;font-size:20px;font-weight:700}
+  header .sub{opacity:.9;font-size:13px;margin-top:3px}
+  .wrap{max-width:1280px;margin:0 auto;padding:18px}
+  .row{display:flex;gap:14px;flex-wrap:wrap}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .ctrls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  label{font-size:12px;color:var(--muted);font-weight:600}
+  select,input[type=number]{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+  input[type=number]{width:74px;text-align:right}
+  .pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700}
+  .pill.t{background:var(--warnbg);color:var(--warn)}
+  .pill.l{background:var(--okbg);color:var(--ok)}
+  .grid2{display:grid;grid-template-columns:360px 1fr;gap:14px;align-items:start}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+  .nfe-list{max-height:70vh;overflow:auto}
+  .nfe{padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:.12s}
+  .nfe:hover{border-color:var(--indigo)}
+  .nfe.sel{border-color:var(--indigo);background:#eef2ff;box-shadow:0 0 0 2px #e0e7ff}
+  .nfe .top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .nfe .forn{font-weight:700;font-size:13px}
+  .nfe .meta{color:var(--muted);font-size:12px;margin-top:2px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;position:sticky;top:0;background:#fff;z-index:1}
+  td.l,th.l{text-align:left}
+  .desc{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .params{font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+  .params b{color:var(--ink)}
+  .btn{background:var(--indigo);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-weight:700;cursor:pointer}
+  .btn:hover{background:var(--indigo-d)}
+  .btn.sec{background:#fff;color:var(--indigo);border:1px solid var(--indigo)}
+  .muted{color:var(--muted)}
+  .right{text-align:right}
+  .tbl-wrap{max-height:64vh;overflow:auto}
+  .mono{font-variant-numeric:tabular-nums}
+  .preco{font-weight:700;color:var(--indigo-d)}
+  .toggle{display:flex;align-items:center;gap:6px}
+  .empty{padding:40px;text-align:center;color:var(--muted)}
+  .chk{accent-color:var(--indigo)}
+  .search{flex:1;min-width:160px;text-align:left;width:auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>💰 Precificação por NF-e</h1>
+  <div class="sub">Selecione a nota que entrou → o sistema sugere o preço de venda garantindo a margem líquida. Fase 1: cálculo + aprovação + exportação (sem gravar no ERP).</div>
+</header>
+<div class="wrap">
+  <div class="ctrls card">
+    <div><label>Loja</label><br><select id="loja"></select></div>
+    <div><label>Margem padrão</label><br><input type="number" id="margemPadrao" step="1" min="0" max="80"> <span class="muted">%</span></div>
+    <div class="toggle" id="creditoWrap" style="display:none"><label><input type="checkbox" id="abaterCredito" class="chk"> abater crédito ICMS (Lucro Real)</label></div>
+    <div style="flex:1"></div>
+    <div class="muted" id="geradoEm"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong>NF-es recentes</strong><span class="muted" id="nfeCount"></span>
+      </div>
+      <div class="nfe-list" id="nfeList"></div>
+    </div>
+
+    <div class="card">
+      <div id="paramsBar" class="params"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0">
+        <strong id="itensTitulo">Itens</strong>
+        <div class="row">
+          <button class="btn sec" id="btnCsv">⬇️ CSV</button>
+          <button class="btn" id="btnXlsx">📥 Exportar lista aprovada (XLSX)</button>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table id="tbl">
+          <thead><tr>
+            <th class="l">Produto</th><th class="l">Marca</th><th>Qtd</th>
+            <th>Custo unit. (cheio)</th><th>Margem %</th><th>Preço sugerido</th>
+            <th>Markup</th><th>Marg. líq.</th><th>Preço atual ERP</th>
+          </tr></thead>
+          <tbody id="tbody"><tr><td colspan="9" class="empty">Selecione uma NF-e ao lado.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const LOJAS = ["L1","L3","L4","L5"];
+let DADOS=null, PARAMS=null, lojaAtual="L1", nfeSel=null, overrides={}; // overrides[itemKey]=margem%
+
+const brl = v => (v==null||isNaN(v))?"—":v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const pct = v => (v==null||isNaN(v))?"—":(v*100).toFixed(1)+"%";
+const elLoja=document.getElementById("loja"), elMargem=document.getElementById("margemPadrao");
+
+async function carregar(){
+  const [d,p] = await Promise.all([
+    fetch("precificacao_dados.json?v="+Date.now()).then(r=>r.json()),
+    fetch("precificacao_params.json?v="+Date.now()).then(r=>r.json()),
+  ]);
+  DADOS=d; PARAMS=p;
+  elMargem.value = Math.round((p.margem._default||0.15)*100);
+  document.getElementById("geradoEm").textContent = "Coletado em "+new Date(d.gerado_em).toLocaleString("pt-BR");
+  elLoja.innerHTML = LOJAS.map(L=>`<option value="${L}">${L} — ${(p.lojas[L]||{}).nome||L}</option>`).join("");
+  elLoja.value=lojaAtual;
+  syncCreditoToggle();
+  renderNfes();
+}
+
+function syncCreditoToggle(){
+  const cfg=PARAMS.lojas[lojaAtual]||{};
+  const wrap=document.getElementById("creditoWrap");
+  if(cfg.regime==="lucro_real"){ wrap.style.display=""; document.getElementById("abaterCredito").checked=!!cfg.abater_credito_icms; }
+  else wrap.style.display="none";
+}
+
+function margemMarca(marca){
+  const m=PARAMS.margem;
+  if(marca && m._por_marca && m._por_marca[marca]!=null) return m._por_marca[marca];
+  return (parseFloat(elMargem.value)/100) || m._default || 0.15;
+}
+
+function custoEfetivo(item){
+  const cfg=PARAMS.lojas[lojaAtual]||{};
+  let c=item.custo_unit_cheio;
+  if(cfg.regime==="lucro_real" && document.getElementById("abaterCredito").checked){
+    c = c*(1-(cfg.aliquota_credito_icms||0));
+  }
+  return c;
+}
+
+function calc(item, margem){
+  const cfg=PARAMS.lojas[lojaAtual]||{}, g=PARAMS.globais||{};
+  const custo=custoEfetivo(item);
+  const somaPct = (cfg.imposto||0)+(g.cartao||0)+(g.comissao||0)+(g.outros||0)+(cfg.custo_fixo||0)+margem;
+  const div = 1-somaPct;
+  if(div<=0) return {erro:true, custo, preco:null, markup:null, margemReal:null};
+  const preco = custo/div;
+  const lucro = preco*(1-(cfg.imposto||0)-(g.cartao||0)-(g.comissao||0)-(g.outros||0)-(cfg.custo_fixo||0)) - custo;
+  return {custo, preco, markup:preco/custo, margemReal:lucro/preco};
+}
+
+function renderNfes(){
+  const arr=(DADOS.lojas[lojaAtual]||[]);
+  document.getElementById("nfeCount").textContent=arr.length+" NF-es (90d)";
+  const html=arr.map((nf,i)=>`
+    <div class="nfe ${nfeSel===i?'sel':''}" data-i="${i}">
+      <div class="top"><span class="forn">${nf.fornecedor||"—"}</span>
+        <span class="pill ${nf.lancada?'l':'t'}">${nf.lancada?'lançada':'em trânsito'}</span></div>
+      <div class="meta">NF ${nf.numero} · ${nf.data_emissao.split("-").reverse().join("/")} · ${nf.itens.length} itens · ${brl(nf.valor)}${nf.itens[0]&&nf.itens[0].marca?` · ${nf.itens[0].marca}`:''}</div>
+    </div>`).join("") || `<div class="empty">Nenhuma NF-e nos últimos 90 dias.</div>`;
+  document.getElementById("nfeList").innerHTML=html;
+  document.querySelectorAll(".nfe").forEach(el=>el.onclick=()=>{nfeSel=+el.dataset.i; renderNfes(); renderItens();});
+  if(nfeSel!=null && !arr[nfeSel]) nfeSel=null;
+}
+
+function paramsBar(){
+  const cfg=PARAMS.lojas[lojaAtual]||{}, g=PARAMS.globais||{};
+  document.getElementById("paramsBar").innerHTML=
+    `<span>Tabela ERP: <b>${cfg.tabela_preco||'—'}</b></span>`+
+    `<span>Regime: <b>${cfg.regime==='simples'?'Simples Nacional':'Lucro Real'}</b></span>`+
+    `<span>Imposto venda: <b>${pct(cfg.imposto)}</b></span>`+
+    `<span>Custo fixo: <b>${pct(cfg.custo_fixo)}</b></span>`+
+    `<span>Cartão: <b>${pct(g.cartao)}</b></span>`+
+    `<span>Comissão: <b>${pct(g.comissao)}</b></span>`+
+    `<span>Outros: <b>${pct(g.outros)}</b></span>`;
+}
+
+function itemKey(nf,it){ return lojaAtual+"|"+nf.id+"|"+it.cprod+"|"+it.descricao; }
+
+function renderItens(){
+  paramsBar();
+  const arr=DADOS.lojas[lojaAtual]||[]; const nf=arr[nfeSel];
+  if(!nf){ document.getElementById("tbody").innerHTML=`<tr><td colspan="9" class="empty">Selecione uma NF-e ao lado.</td></tr>`; document.getElementById("itensTitulo").textContent="Itens"; return; }
+  document.getElementById("itensTitulo").textContent=`Itens — NF ${nf.numero} · ${nf.fornecedor}`;
+  const rows=nf.itens.map((it,j)=>{
+    const k=itemKey(nf,it);
+    const margem = overrides[k]!=null ? overrides[k] : margemMarca(it.marca);
+    const r=calc(it,margem);
+    const margClass = r.erro?'crit':'';
+    return `<tr>
+      <td class="l desc" title="${it.descricao}">${it.descricao}<div class="muted" style="font-size:11px">cód ${it.cprod}${it.ean&&it.ean!=='SEM GTIN'?' · '+it.ean:''}</div></td>
+      <td class="l">${it.marca||'<span class="muted">—</span>'}</td>
+      <td class="mono">${it.qtd}</td>
+      <td class="mono">${brl(r.custo)}</td>
+      <td><input type="number" class="mono margin-in" data-k="${k}" step="0.5" min="0" max="80" value="${(margem*100).toFixed(1)}"></td>
+      <td class="mono preco">${r.erro?'<span style="color:var(--crit)">soma % ≥ 100</span>':brl(r.preco)}</td>
+      <td class="mono">${r.markup?r.markup.toFixed(2)+'×':'—'}</td>
+      <td class="mono" style="color:var(--ok)">${pct(r.margemReal)}</td>
+      <td class="mono muted">—</td>
+    </tr>`;
+  }).join("");
+  document.getElementById("tbody").innerHTML=rows;
+  document.querySelectorAll(".margin-in").forEach(inp=>inp.onchange=()=>{
+    overrides[inp.dataset.k]=parseFloat(inp.value)/100; renderItens();
+  });
+}
+
+function linhasExport(){
+  const arr=DADOS.lojas[lojaAtual]||[]; const nf=arr[nfeSel]; if(!nf) return [];
+  return nf.itens.map(it=>{
+    const k=itemKey(nf,it); const margem=overrides[k]!=null?overrides[k]:margemMarca(it.marca);
+    const r=calc(it,margem);
+    const cfg=PARAMS.lojas[lojaAtual]||{};
+    return {Loja:lojaAtual, Tabela_ERP:cfg.tabela_preco||"", NF:nf.numero, Fornecedor:nf.fornecedor, Codigo:it.cprod, EAN:it.ean,
+      Descricao:it.descricao, Marca:it.marca||"", Qtd:it.qtd,
+      Custo_unit_cheio:+(r.custo||0).toFixed(4), Margem_pct:+(margem*100).toFixed(1),
+      Preco_sugerido:r.preco!=null?+r.preco.toFixed(2):"", Markup:r.markup?+r.markup.toFixed(2):"",
+      Margem_liquida_pct:r.margemReal!=null?+(r.margemReal*100).toFixed(1):""};
+  });
+}
+document.getElementById("btnXlsx").onclick=()=>{
+  const rows=linhasExport(); if(!rows.length){alert("Selecione uma NF-e.");return;}
+  const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"Precos");
+  const nf=DADOS.lojas[lojaAtual][nfeSel];
+  XLSX.writeFile(wb,`precos_${lojaAtual}_NF${nf.numero}.xlsx`);
+};
+document.getElementById("btnCsv").onclick=()=>{
+  const rows=linhasExport(); if(!rows.length){alert("Selecione uma NF-e.");return;}
+  const head=Object.keys(rows[0]).join(";");
+  const body=rows.map(r=>Object.values(r).map(v=>String(v).replace(/;/g,",")).join(";")).join("\n");
+  const blob=new Blob(["﻿"+head+"\n"+body],{type:"text/csv"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  const nf=DADOS.lojas[lojaAtual][nfeSel]; a.download=`precos_${lojaAtual}_NF${nf.numero}.csv`; a.click();
+};
+
+elLoja.onchange=()=>{lojaAtual=elLoja.value; nfeSel=null; syncCreditoToggle(); renderNfes(); renderItens();};
+elMargem.onchange=()=>renderItens();
+document.getElementById("abaterCredito").onchange=()=>renderItens();
+carregar();
+</script>
+</body>
+</html>

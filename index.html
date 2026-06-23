@@ -25,7 +25,7 @@
   --bg:#f0f4f8; --card:#ffffff; --card2:#f8fafc;
   --text:#0f172a; --text2:#334155; --muted:#64748b; --border:#e2e8f0;
   --accent:#6366f1;
-  --premiacao:#f59e0b; --vendas:#6366f1; --compras:#0891b2; --planej:#3b82f6;
+  --premiacao:#f59e0b; --vendas:#6366f1; --compras:#0891b2; --planej:#3b82f6; --precos:#059669;
   --shadow:0 1px 3px rgba(15,23,42,.06), 0 6px 20px rgba(15,23,42,.05);
   --shadow-hover:0 6px 16px rgba(15,23,42,.10), 0 14px 40px rgba(15,23,42,.08);
 }
@@ -66,7 +66,7 @@ body{
 .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);border-color:color-mix(in srgb,var(--c) 35%,var(--border))}
 .card:active{transform:scale(.985)}
 .card.premiacao{--c:var(--premiacao)} .card.vendas{--c:var(--vendas)}
-.card.compras{--c:var(--compras)} .card.planej{--c:var(--planej)}
+.card.compras{--c:var(--compras)} .card.planej{--c:var(--planej)} .card.precos{--c:var(--precos)}
 .card-icon{
   width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;
   font-size:26px;margin-bottom:14px;
@@ -189,6 +189,18 @@ footer .dot{color:var(--accent)}
       <span class="chip">Pedidos</span>
       <span class="chip">Aprovação</span>
       <span class="chip">OTB</span>
+    </div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a href="precificacao.html" class="card precos">
+    <span class="card-icon">💰</span>
+    <div class="card-title">Precificação</div>
+    <div class="card-desc">Selecione a NF-e que entrou e o sistema sugere o preço de venda garantindo a margem líquida, por loja.</div>
+    <div class="card-chips">
+      <span class="chip">NF-e</span>
+      <span class="chip">Margem</span>
+      <span class="chip">Preço sugerido</span>
     </div>
     <span class="card-arrow">→</span>
   </a>
