@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-21'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-22'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -302,39 +302,62 @@ function montarRealizado(dd){
 /* Cruza os pedidos ENVIADO com as NFs faturadas do ERP (chegadas_mes) por marca+loja.
    Anexa p._nfSug = NF mais recente encontrada → vira sugestão de "recalcular pela data do faturamento". */
 function agruparNfesPorLoja(lista){ var o={L1:[],L3:[],L4:[],L5:[]}; lista.forEach(function(x){ if(o[x.loja]) o[x.loja].push(x); }); return o; }
+/* Acha o subconjunto de NFs cuja SOMA ≈ alvo (fornecedor divide 1 pedido em N notas, ex. Brasitech/Gama).
+   Retorna {items,sum,cnt} preferindo MENOS NFs e soma mais próxima; null se nada dentro de 2%. */
+function bestSubsetSum(cands,target){
+  if(!cands.length||target<=0)return null;
+  var n=Math.min(cands.length,12), best=null;
+  for(var mask=1;mask<(1<<n);mask++){
+    var sum=0,cnt=0,items=[];
+    for(var i=0;i<n;i++){ if(mask&(1<<i)){ sum+=Number(cands[i].it.valor)||0; cnt++; items.push(cands[i]); } }
+    if(Math.abs(sum-target)/target<=0.02){ var diff=Math.abs(sum-target);
+      if(!best||cnt<best.cnt||(cnt===best.cnt&&diff<best.diff)) best={items:items,sum:sum,cnt:cnt,diff:diff}; }
+  }
+  return best;
+}
 function detectarFaturamentos(dd){
   var mapLoja={ALTAMIRA:['L1','L4'],ITAITUBA:['L3'],SANTAREM:['L5']};
   var cm=(dd&&dd.chegadas_mes)||{};
   function norm(s){return String(s||'').toUpperCase().trim();}
-  DB.pedidos.forEach(function(p){ delete p._noERP; delete p._dataFat; delete p._nfMatch; delete p._temLancada; delete p._forte; });
-  var claimed={}; // NFs já "reservadas" por um pedido FATURADO/ENTREGUE — não reatribuir a outro
-  function achar(p){
+  DB.pedidos.forEach(function(p){ delete p._noERP; delete p._dataFat; delete p._nfMatch; delete p._temLancada; delete p._forte; delete p._nfsAll; });
+  var claimed={}; // NFs já "reservadas" por um pedido FATURADO/ENTREGUE
+  function candidatas(p){
     var pm=norm(p.marca), pv=Number(p.valor_total)||0, lojas=mapLoja[p.loja]||[];
-    var minData=String(p.data_enviado||p.data_pedido||'').slice(0,10); // NF (faturamento) não pode ser anterior ao envio/lançamento
-    var cand=[];
+    var minData=String(p.data_enviado||p.data_pedido||'').slice(0,10), out=[];
     lojas.forEach(function(L){ (cm[L]||[]).forEach(function(it){
-      if(claimed[it.nf])return; // NF já reservada por outro pedido
+      if(claimed[it.nf])return;
       var dt=String(it.data||'').slice(0,10); if(!dt||(minData&&dt<minData))return;
       var nfM=norm(it.marca);
-      var marcaMatch=pm&&pm!=='(SEM MARCA)'&&(nfM===pm||(MARCA_ALIAS[pm]&&MARCA_ALIAS[pm].indexOf(nfM)>=0)); // alias: ex. NF "Brasitech" casa com pedido "Gama"
-      var valMatch=(nfM===''||nfM==='(SEM MARCA)')&&pv>0&&Math.abs((Number(it.valor)||0)-pv)/pv<=0.02; // valor SÓ quando a NF não tem marca identificada
-      if(marcaMatch||valMatch) cand.push({it:it,dt:dt,mm:marcaMatch}); }); });
-    if(!cand.length)return null;
-    cand.sort(function(a,b){
-      if(a.mm!==b.mm)return a.mm?-1:1;                                                   // 1º: casamento por MARCA
-      var da=Math.abs((Number(a.it.valor)||0)-pv), db=Math.abs((Number(b.it.valor)||0)-pv);
-      if(Math.abs(da-db)>0.01)return da-db;                                              // 2º: valor mais PRÓXIMO (não a mais recente!)
-      return b.dt.localeCompare(a.dt); });                                              // 3º: mais recente
-    return cand[0];
+      var marcaMatch=pm&&pm!=='(SEM MARCA)'&&(nfM===pm||(MARCA_ALIAS[pm]&&MARCA_ALIAS[pm].indexOf(nfM)>=0)); // alias: NF "Brasitech" casa com pedido "Gama"
+      var valMatch=(nfM===''||nfM==='(SEM MARCA)')&&pv>0&&Math.abs((Number(it.valor)||0)-pv)/pv<=0.02;
+      if(marcaMatch||valMatch) out.push({it:it,dt:dt,mm:marcaMatch}); }); });
+    return out;
   }
-  function aplicar(p,bc){ var best=bc.it, pv=Number(p.valor_total)||0, nfVal=Number(best.valor)||0;
-    p._dataFat=best.data; p._nfMatch=best; p._temLancada=(best.origem==='lancada');
-    p._forte=bc.mm && pv>0 && Math.abs(nfVal-pv)/pv<=0.15;
-    if(p.status==='FATURADO'&&best.origem==='lancada'&&p._forte) p._noERP=true; }
-  // 1) FATURADO/ENTREGUE primeiro — RESERVAM a NF deles (não pode ser roubada por um ENVIADO)
-  DB.pedidos.forEach(function(p){ if(p.status!=='FATURADO'&&p.status!=='ENTREGUE')return; var bc=achar(p); if(bc){ aplicar(p,bc); claimed[bc.it.nf]=true; } });
-  // 2) ENVIADO — só pega NF ainda não reservada
-  DB.pedidos.forEach(function(p){ if(p.status!=='ENVIADO')return; var bc=achar(p); if(bc) aplicar(p,bc); });
+  function mkMatch(items,mm){
+    var nfs=items.map(function(c){return c.it.nf;});
+    var valor=Math.round(items.reduce(function(a,c){return a+(Number(c.it.valor)||0);},0)*100)/100;
+    var data=items.map(function(c){return String(c.it.data).slice(0,10);}).sort().slice(-1)[0]; // a mais recente das NFs
+    var lancadas=items.every(function(c){return c.it.origem==='lancada';});
+    return {nfs:nfs,nf:nfs.join('+'),valor:valor,data:data,lancadas:lancadas,mm:mm};
+  }
+  function escolher(p){
+    var pv=Number(p.valor_total)||0, cand=candidatas(p); if(!cand.length)return null;
+    var mcands=cand.filter(function(c){return c.mm;});
+    var combo=bestSubsetSum(mcands,pv);                       // 1) marca: combinação (1 ou N NFs) que SOMA o pedido
+    if(combo)return mkMatch(combo.items,true);
+    if(mcands.length){ mcands.sort(function(a,b){return Math.abs((Number(a.it.valor)||0)-pv)-Math.abs((Number(b.it.valor)||0)-pv);}); return mkMatch([mcands[0]],true); } // 2) marca: NF única mais próxima (vira sugestão se valor distante)
+    var sem=cand.filter(function(c){return !c.mm;}); if(sem.length){ sem.sort(function(a,b){return Math.abs((Number(a.it.valor)||0)-pv)-Math.abs((Number(b.it.valor)||0)-pv);}); return mkMatch([sem[0]],false); } // 3) sem-marca: valor próximo
+    return null;
+  }
+  function aplicar(p,m){ var pv=Number(p.valor_total)||0;
+    p._nfMatch={nf:m.nf,data:m.data,valor:m.valor,origem:m.lancadas?'lancada':'pendente'};
+    p._nfsAll=m.nfs; p._dataFat=m.data; p._temLancada=m.lancadas;
+    p._forte=m.mm && pv>0 && Math.abs(m.valor-pv)/pv<=0.15;
+    if(p.status==='FATURADO'&&m.lancadas&&p._forte) p._noERP=true; }
+  // 1) FATURADO/ENTREGUE reservam TODAS as NFs deles (combinação inclusa)
+  DB.pedidos.forEach(function(p){ if(p.status!=='FATURADO'&&p.status!=='ENTREGUE')return; var m=escolher(p); if(m){ aplicar(p,m); m.nfs.forEach(function(nf){claimed[nf]=true;}); } });
+  // 2) ENVIADO — só pega NF não reservada
+  DB.pedidos.forEach(function(p){ if(p.status!=='ENVIADO')return; var m=escolher(p); if(m) aplicar(p,m); });
 }
 /* Avança o status pelo ERP: NF emitida (pendente) → FATURADO; NF lançada (deu entrada) → ENTREGUE.
    Recalcula as parcelas a partir da data de faturamento. Só avança (nunca regride). */
