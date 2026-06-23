@@ -27,6 +27,7 @@ import { garantirSessao } from "./microvix_auth.mjs";
 const PROFILE_DIR = join(homedir(), ".claude", "microvix-profile");
 const OUT = "/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_dados.json";
 const FORN_MARCAS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/compras/fornecedor_marcas.json", "utf8"));
+const ICMS_UF = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_icms_estados.json", "utf8"));
 
 const SUPABASE_URL = "https://valhewbvjwdkkvuejrxa.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4";
@@ -46,14 +47,19 @@ const norm = s => String(s || "").toUpperCase().normalize("NFD").replace(/[\u030
 // CST/CSOSN que indicam ICMS por Substitui\u00e7\u00e3o Tribut\u00e1ria (ST) \u2192 SEM cr\u00e9dito a abater
 const CST_ST = new Set(["10", "30", "60", "70", "90"]);
 const CSOSN_ST = new Set(["201", "202", "203", "500", "900"]);
-// cr\u00e9dito de ICMS por item (regra do usu\u00e1rio, Lucro Real): com ST \u2192 0; sem ST \u2192 % de ICMS real da NF (\u22487% nacional / 4% importado)
-function creditoIcmsItem(tx, icmsStValor) {
+// cr\u00e9dito de ICMS por item (Lucro Real): com ST \u2192 0; sen\u00e3o \u2192 % de ICMS REAL destacado na NF.
+// Fallback (NF sem ICMS destacado e fornecedor n\u00e3o-Simples): al\u00edquota interestadual pela UF de origem.
+function creditoIcmsItem(tx, icmsStValor, uf) {
   if (!tx) return 0;
   const cst = String(tx.cst || "").padStart(2, "0").slice(-2);
   const csosn = String(tx.csosn || "");
   const temST = (Number(icmsStValor) > 0) || CST_ST.has(cst) || CSOSN_ST.has(csosn);
   if (temST) return 0;
-  return Math.max(0, Number(tx.icms_pct) || 0) / 100;
+  const pct = tx.icms_pct;
+  if (pct != null && isFinite(Number(pct))) return Math.max(0, Number(pct)) / 100; // ICMS real da NF (preferencial)
+  if (csosn) return 0;                                   // fornecedor Simples sem ICMS destacado \u2192 sem cr\u00e9dito
+  if (uf && ICMS_UF.por_uf[uf] != null) return ICMS_UF.por_uf[uf]; // fallback por estado de origem
+  return ICMS_UF.default || 0;
 }
 
 // pedidos ENTREGUE (últimos DIAS_ENTREGA dias) no Planejamento → set de "GRUPO|MARCA" alvo
@@ -227,21 +233,24 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
               const cod = String(p.Codigo || "");
               if (cod && !map[cod]) map[cod] = { cst: p.CST, csosn: p.CSOSN, icms_pct: p.PercentualICMS };
             }
-            out[id] = map;
-          } catch (e) { out[id] = {}; }
+            const uf = (((js.Emitente || {}).EnderecoEmitente) || {}).UF || null;
+            out[id] = { uf, prod: map };
+          } catch (e) { out[id] = { uf: null, prod: {} }; }
         }
         return out;
       }, ids);
 
       let comCredito = 0, comST = 0, semInfo = 0;
       for (const L of Object.keys(lojas)) for (const nf of lojas[L]) {
-        const map = det[nf.id] || {};
+        const d = det[nf.id] || { uf: null, prod: {} };
+        nf.uf = d.uf;
+        const map = d.prod || {};
         for (const it of nf.itens) {
           const tx = map[it.cprod];
           if (!tx) { semInfo++; continue; }
           it.cst = tx.cst != null ? String(tx.cst) : (tx.csosn != null ? "CSOSN " + tx.csosn : null);
           it.icms_pct = Number(tx.icms_pct) || 0;
-          it.credito_icms_pct = creditoIcmsItem(tx, it.icms_st);
+          it.credito_icms_pct = creditoIcmsItem(tx, it.icms_st, d.uf);
           if (it.credito_icms_pct > 0) comCredito++; else comST++;
         }
       }

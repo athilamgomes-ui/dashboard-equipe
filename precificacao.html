@@ -65,7 +65,7 @@
   <div class="ctrls card">
     <div><label>Loja</label><br><select id="loja"></select></div>
     <div><label>Margem padrão</label><br><input type="number" id="margemPadrao" step="1" min="0" max="80"> <span class="muted">%</span></div>
-    <div class="toggle" id="creditoWrap" style="display:none"><label><input type="checkbox" id="abaterCredito" class="chk"> abater crédito ICMS <span class="muted" id="credHint"></span></label></div>
+    <div id="credInfo" class="muted" style="font-size:12px;max-width:280px"></div>
     <div style="flex:1"></div>
     <button class="btn sec" id="btnConfig">⚙️ Configurar custos</button>
     <div class="muted" id="geradoEm"></div>
@@ -153,16 +153,13 @@ function mergeConfigLocal(){
 }
 function syncCreditoToggle(){
   const cfg=PARAMS.lojas[lojaAtual]||{};
-  const wrap=document.getElementById("creditoWrap");
-  if(cfg.regime==="lucro_real"){
-    wrap.style.display="";
-    document.getElementById("abaterCredito").checked=!!cfg.abater_credito_icms;
-    document.getElementById("credHint").textContent = "(por item: ICMS da NF; com ST = 0)";
-  } else wrap.style.display="none";
+  document.getElementById("credInfo").innerHTML = cfg.regime==="lucro_real"
+    ? "🟢 <b>Crédito de ICMS automático</b> pela NF (por item; com ST = 0). Já descontado do custo."
+    : "Simples Nacional — sem crédito de ICMS.";
 }
 
 // ===== Painel de configuração (por loja, persiste no navegador) =====
-const CAMPOS=[["imposto","Imposto venda"],["custo_fixo","Custo fixo"],["cartao","Cartão"],["comissao","Comissão"],["outros","Outros"],["aliquota_credito_icms","Crédito ICMS"]];
+const CAMPOS=[["imposto","Imposto venda"],["custo_fixo","Custo fixo"],["cartao","Cartão"],["comissao","Comissão"],["outros","Outros"]];
 function renderConfig(){
   document.getElementById("configBody").innerHTML = LOJAS.map(L=>{
     const c=PARAMS.lojas[L]||{};
@@ -191,11 +188,11 @@ function margemMarca(marca){
   return (parseFloat(elMargem.value)/100) || m._default || 0.15;
 }
 
-function creditoAtivo(){ return document.getElementById("abaterCredito").checked; }
-// crédito de ICMS por ITEM (CST/ICMS da NF): só Lucro Real e só quando o toggle está ligado
+// crédito de ICMS por ITEM, AUTOMÁTICO pela NF: só Lucro Real (Simples não credita).
+// Lido do ICMS real destacado na nota: com ST = 0; senão = % do item. Sem toggle, sem digitação.
 function creditoItem(item){
   const cfg=PARAMS.lojas[lojaAtual]||{};
-  if(cfg.regime!=="lucro_real" || !creditoAtivo()) return 0;
+  if(cfg.regime!=="lucro_real") return 0;
   return Number(item.credito_icms_pct)||0;
 }
 function custoEfetivo(item){ return item.custo_unit_cheio*(1-creditoItem(item)); }
@@ -226,7 +223,7 @@ function renderNfes(){
     <div class="nfe ${nfeSel===i?'sel':''}" data-i="${i}">
       <div class="top"><span class="forn">${nf.fornecedor||"—"}</span>
         <span class="pill ${nf.lancada?'l':'t'}">${nf.lancada?'lançada':'em trânsito'}</span></div>
-      <div class="meta">NF ${nf.numero} · ${nf.data_emissao.split("-").reverse().join("/")} · ${nf.itens.length} itens · ${brl(nf.valor)}${nf.itens[0]&&nf.itens[0].marca?` · ${nf.itens[0].marca}`:''}</div>
+      <div class="meta">NF ${nf.numero}${nf.uf?` · ${nf.uf}`:''} · ${nf.data_emissao.split("-").reverse().join("/")} · ${nf.itens.length} itens · ${brl(nf.valor)}${nf.itens[0]&&nf.itens[0].marca?` · ${nf.itens[0].marca}`:''}</div>
     </div>`).join("") || `<div class="empty">Nenhuma NF-e nos últimos 90 dias.</div>`;
   document.getElementById("nfeList").innerHTML=html;
   document.querySelectorAll(".nfe").forEach(el=>el.onclick=()=>{nfeSel=+el.dataset.i; renderNfes(); renderItens();});
@@ -261,7 +258,7 @@ function renderItens(){
       <td class="l desc" title="${it.descricao}">${it.descricao}<div class="muted" style="font-size:11px">cód ${it.cprod}${it.ean&&it.ean!=='SEM GTIN'?' · '+it.ean:''}</div></td>
       <td class="l">${it.marca||'<span class="muted">—</span>'}</td>
       <td class="mono">${it.qtd}</td>
-      <td class="mono" title="CST ${it.cst||'—'} · ICMS ${it.icms_pct!=null?it.icms_pct+'%':'—'}${it.credito_icms_pct>0?'':' · com ST/sem crédito'}">${brl(r.custo)}${(()=>{const cr=creditoItem(it);return cr>0?` <span class="muted" style="font-size:11px">(−${(cr*100).toFixed(0)}% ICMS)</span>`:'';})()}</td>
+      <td class="mono" title="CST ${it.cst||'—'} · ICMS ${it.icms_pct!=null?it.icms_pct+'%':'—'}${it.credito_icms_pct>0?' · crédito de ICMS aplicado':' · com ST/sem crédito'}">${brl(r.custo)}${(()=>{const cr=creditoItem(it);return cr>0?` <span class="pill l" style="font-size:10px">crédito −${(cr*100).toFixed(0)}% ICMS</span>`:'';})()}</td>
       <td><input type="number" class="mono margin-in" data-k="${k}" step="0.5" min="0" max="80" value="${(margem*100).toFixed(1)}"></td>
       <td class="mono preco">${r.erro?'<span style="color:var(--crit)">soma % ≥ 100</span>':brl(r.preco)}</td>
       <td class="mono">${r.markup?r.markup.toFixed(2)+'×':'—'}</td>
@@ -307,7 +304,6 @@ document.getElementById("btnCsv").onclick=()=>{
 
 elLoja.onchange=()=>{lojaAtual=elLoja.value; nfeSel=null; syncCreditoToggle(); renderNfes(); renderItens();};
 elMargem.onchange=()=>renderItens();
-document.getElementById("abaterCredito").onchange=()=>renderItens();
 carregar();
 </script>
 </body>
