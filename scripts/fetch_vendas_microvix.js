@@ -27,10 +27,11 @@ const EMPRESAS = [1, 3, 4, 10];
 // Alcione (L1) saiu em jun/2026 mas é mantida na lista pra capturar vendas
 // residuais que ela fez nos primeiros dias do mês (atribuídas a ela, não a Outros).
 // Bárbara (L1), Débora+Elianna (L4) entraram em jun/2026.
+// Elianna dispensada em 23/06/2026 — removida (vendas residuais caem em "Outros").
 const VENDEDORAS = {
   L1: ["Tatiane", "Rayra", "Alcione", "Sofia", "Bárbara"],
   L3: ["Ana Mira", "Raimunda", "Brunna", "Naila"],
-  L4: ["Tanaia", "Josilene", "Bruna F.", "Rosana", "Débora", "Elianna"],
+  L4: ["Tanaia", "Josilene", "Bruna F.", "Rosana", "Débora"],
   L5: ["Rayssa", "Joyce", "Rosiene", "Karina", "Lucas"],
 };
 
@@ -41,11 +42,9 @@ function semAcento(s) {
 }
 
 // Nomes que no ERP estão grafados DIFERENTE do canônico (não basta acento).
-// Descoberto 12/06/2026: cadastro da Elianna é "ELIANNA" → includes("ELIANE")
-// falha e as vendas dela caíam em "Outros". Adicionar aqui quando o cadastro
-// do ERP divergir do nome usado no painel/app.
+// Adicionar aqui quando o cadastro do ERP divergir do nome usado no painel/app.
+// (Elianna saiu em 23/06; alias removido junto.)
 const ALIAS_ERP = {
-  "Elianna": ["ELIANNA"],
 };
 
 /**

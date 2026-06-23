@@ -244,7 +244,7 @@ const LOJAS_BASE = {
   L3: { nome:'Miss Beleza Itaituba', cor:'#00d4aa',
         vendedoras:['Ana Mira','Raimunda','Brunna','Naila'] },
   L4: { nome:'MissBeleza Altamira', cor:'#7c5cfc',
-        vendedoras:['Tanaia','Josilene','Bruna F.','Rosana','Débora','Elianna'] },
+        vendedoras:['Tanaia','Josilene','Bruna F.','Rosana','Débora'] },
   L5: { nome:'MissBeleza Santarém', cor:'#ef4444',
         vendedoras:['Rayssa','Joyce','Rosiene','Karina','Lucas'] },
 };
@@ -455,7 +455,7 @@ const DADOS = {
         S1:{Outros:130,Tanaia:2042,'Bruna F.':10900,Rosana:3778,Débora:6649,Elianna:3799},S2:{Tanaia:1534,'Bruna F.':14263,Rosana:4963,Débora:6543,Elianna:3277},S3:{Outros:4251,Tanaia:3064,'Bruna F.':10287,Rosana:5598,Débora:5776,Elianna:95},S4:{Tanaia:231,'Bruna F.':1086,Rosana:519,Débora:859,Outros:440},
       },
       marcasA_loja: {S1:25.1,S2:22.3,S3:24.3,S4:16},
-      marcasA_indiv: {Tanaia:31.6,'Bruna F.':24.3,Rosana:19.5,Débora:24.6,Elianna:23.4},
+      marcasA_indiv: {Tanaia:31.6,'Bruna F.':24.3,Rosana:19.5,Débora:24.6},
       tickets: { S1:{Outros:3,Tanaia:26,'Bruna F.':144,Rosana:62,Débora:90,Elianna:62},S2:{Tanaia:21,'Bruna F.':181,Rosana:66,Débora:80,Elianna:62},S3:{Outros:51,Tanaia:34,'Bruna F.':104,Rosana:69,Débora:72,Elianna:4},S4:{Tanaia:2,'Bruna F.':16,Rosana:3,Débora:10,Outros:7} },
       pecas:   { S1:{Outros:5,Tanaia:60,'Bruna F.':327,Rosana:169,Débora:265,Elianna:144},S2:{Tanaia:53,'Bruna F.':426,Rosana:411,Débora:183,Elianna:138},S3:{Outros:124,Tanaia:81,'Bruna F.':349,Rosana:289,Débora:157,Elianna:6},S4:{Tanaia:4,'Bruna F.':47,Rosana:5,Débora:26,Outros:13} },
       cmv:     { S1:{Tanaia:54.9,'Bruna F.':61,Rosana:53.6,Débora:69.5,Elianna:40.7},S2:{Tanaia:36,'Bruna F.':39.3,Rosana:78.1,Débora:51.3,Elianna:46.1},S3:{Tanaia:31.6,'Bruna F.':36.3,Rosana:43.5,Débora:40.1,Elianna:48.4},S4:{Tanaia:11.4,'Bruna F.':46.8,Rosana:45.1,Débora:37.5} },
@@ -505,7 +505,6 @@ const VENDEDORAS_META = {
   'Bruna F.': {loja:'L4', badges:[]},
   'Rosana':   {loja:'L4', badges:['nova']},
   'Débora':   {loja:'L4', badges:['nova']},  // entrou jun/2026
-  'Elianna':   {loja:'L4', badges:['nova']},  // entrou jun/2026
   'Rayssa':   {loja:'L5', badges:[]},
   'Joyce':    {loja:'L5', badges:[]},
   'Rosiene':  {loja:'L5', badges:['gerente']},
@@ -755,7 +754,7 @@ const SUGESTOES = {
        prazo:'curto', status:'pendente'},
       {id:'2026-W25-L4-02', escopo:'vendedora', loja:'L4', vendedora:'Bruna F.', tipo:'cliente_recorrente', meta_alvo:'vendas_individuais',
        titulo:'Bruna F. — manter o ritmo e dividir o conhecimento',
-       descricao:'Você é a maior vendedora da loja com folga (R$25k no mês). Pra não depender só de você, a missão da semana é ensinar: quando a Rosana, a Débora e a Elianna (novas) perguntarem como você aborda e oferece marca A, conte sem segredo. Quando a equipe toda vende como você, a loja chega nos 30% de marca A e o prêmio sobe pra todas.',
+       descricao:'Você é a maior vendedora da loja com folga (R$25k no mês). Pra não depender só de você, a missão da semana é ensinar: quando a Rosana e a Débora (novas) perguntarem como você aborda e oferece marca A, conte sem segredo. Quando a equipe toda vende como você, a loja chega nos 30% de marca A e o prêmio sobe pra todas.',
        prazo:'curto', status:'pendente'},
       {id:'2026-W25-L4-03', escopo:'vendedora', loja:'L4', vendedora:'Rosana', tipo:'treinamento', meta_alvo:'vendas_individuais',
        titulo:'Rosana (nova) — firmar o crescimento das Marcas A',
