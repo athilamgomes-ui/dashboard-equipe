@@ -42,6 +42,7 @@ const HOJE = new Date();
 const ANO = HOJE.getFullYear();
 const CUTOFF_DIAS = 90;       // janela ampla p/ achar a NF (a NF pode ser dias antes da entrega)
 const DIAS_ENTREGA = Number(process.env.DIAS_ENTREGA) || 2; // só pedidos ENTREGUE com data_entrega nos últimos N dias (regra do usuário; override p/ teste: DIAS_ENTREGA=14 node ...)
+const NF_FILTER = process.env.NF ? String(process.env.NF).trim() : null; // teste: NF=9341 node ... → puxa só essa NF, ignora o filtro ENTREGUE
 const norm = s => String(s || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
 // CST/CSOSN que indicam ICMS por Substitui\u00e7\u00e3o Tribut\u00e1ria (ST) \u2192 SEM cr\u00e9dito a abater
@@ -129,7 +130,8 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
     for (let i = 0; i < 30; i++) { token = await page.evaluate(() => localStorage.getItem("token_api")).catch(() => null); if (token) break; await page.waitForTimeout(500); }
     if (!token) throw new Error("token_api indisponível");
 
-    const alvos = await alvosEntregues();
+    const alvos = NF_FILTER ? null : await alvosEntregues();
+    if (NF_FILTER) log(`MODO TESTE: puxando só a NF ${NF_FILTER} (ignorando filtro ENTREGUE)`);
 
     const raw = await page.evaluate(async (empresas) => {
       const pad = n => String(n).padStart(2, "0");
@@ -166,10 +168,14 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         const emit = nfe.DadosEmitente || {};
         if (fornIgnorado(emit.Nome)) continue;
         const marcaForn = fornBrand(emit);
-        // SÓ NFes de marca×loja que tenham pedido ENTREGUE recente no Planejamento
-        if (!marcaForn) continue;
-        const chave = (LOJA_TO_GROUP[loja] || "") + "|" + norm(marcaForn);
-        if (!alvos.has(chave)) continue;
+        if (NF_FILTER) {
+          if (String(nfe.Numero) !== NF_FILTER) continue; // modo teste: só a NF pedida
+        } else {
+          // SÓ NFes de marca×loja que tenham pedido ENTREGUE recente no Planejamento
+          if (!marcaForn) continue;
+          const chave = (LOJA_TO_GROUP[loja] || "") + "|" + norm(marcaForn);
+          if (!alvos.has(chave)) continue;
+        }
         const itens = (nfe.Produtos || []).map(p => {
           const valorBase = num(p.ValorTotalLiquido) || (num(p.ValorBruto) - num(p.ValorDesconto));
           const custoTotal = valorBase + num(p.ValorFrete) + num(p.ValorSeguro) + num(p.ValorOutrasDespesas) + num(p.vIPI) + num(p.ValorICMSST) + num(p.ValorFCPST);
