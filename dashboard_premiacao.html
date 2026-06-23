@@ -1274,6 +1274,36 @@ function aplicarDecisoesSalvasNoDADOS() {
 // Aplica IMEDIATAMENTE (síncrono) — antes do primeiro render.
 aplicarDecisoesSalvasNoDADOS();
 
+// Aplica ajustes de meta vindos do Worker (compartilhados entre dispositivos
+// e com o agente). Worker vence por semana. Espelha no localStorage (merge por
+// semana) pra o estado da UI ficar consistente. Chamado no initDashboard após
+// o fetch do Worker.
+function aplicarMetasWorkerNoDADOS(items) {
+  if (!Array.isArray(items) || !items.length) return;
+  const all = loadDecisoesMeta();
+  for (const it of items) {
+    if (!it || !Array.isArray(it.metas)) continue;
+    const ld = DADOS[it.mes]?.[it.loja];
+    if (ld && Array.isArray(ld.semanas)) {
+      for (const m of it.metas) {
+        const sem = ld.semanas.find(s => s.id === m.id);
+        if (sem && typeof m.nova === 'number') sem.meta = m.nova;
+      }
+    }
+    // Espelha no localStorage — merge por semana (preserva semanas que só
+    // existem localmente; Worker sobrescreve as que ele tem).
+    const key = `${it.mes}|${it.loja}`;
+    const existing = all[key];
+    const merged = (existing && Array.isArray(existing.metas)) ? existing.metas.slice() : [];
+    for (const m of it.metas) {
+      const i = merged.findIndex(x => x.id === m.id);
+      if (i >= 0) merged[i] = m; else merged.push(m);
+    }
+    all[key] = {tipo: it.tipo || 'custom', metas: merged, em: it.em || existing?.em};
+  }
+  localStorage.setItem('ajustes_meta_decisoes', JSON.stringify(all));
+}
+
 function renderAjusteMeta(mesKey, lojaKey, ld) {
   // Se já tem decisão registrada pra esse (mês, loja), não mostra o card
   if (getDecisaoMeta(mesKey, lojaKey)) return '';
@@ -2720,16 +2750,27 @@ async function initDashboard() {
   setMes(curMes); // sincroniza seletor + cabeçalho com o mês corrente e renderiza
   // Em paralelo busca tudo do Worker
   try {
-    const [oR, aR, fR, rR] = await Promise.all([
+    const [oR, aR, fR, rR, mR] = await Promise.all([
       fetch(`${WORKER_URL}/overrides`, {cache: 'no-store'}),
       fetch(`${WORKER_URL}/avaliacoes`, {cache: 'no-store'}),
       fetch(`${WORKER_URL}/feedbacks`, {cache: 'no-store'}),
       fetch(`${WORKER_URL}/feedback-retornos`, {cache: 'no-store'}).catch(() => ({json: async () => ({items:[]})})),
+      fetch(`${WORKER_URL}/metas-loja`, {cache: 'no-store'}).catch(() => ({json: async () => ({items:[]})})),
     ]);
     const overrides = (await oR.json()).items || [];
     const avaliacoes = (await aR.json()).items || [];
     const feedbacks = (await fR.json()).items || [];
     const retornos = (await rR.json()).items || [];
+    const metasLoja = (await mR.json()).items || [];
+
+    // ── AJUSTES DE META (compartilhados via Worker) ──
+    // O Worker é a fonte da verdade dos ajustes de meta: recebe tanto os que o
+    // Athila faz no painel (setDecisaoMeta POSTa) quanto os que o agente
+    // sincroniza. Aplicamos por cima do DADOS (por semana, Worker vence) e
+    // espelhamos no localStorage pra o estado da UI (botão resetar) bater.
+    // Sem isso, um ajuste feito em outro dispositivo (ou pelo agente) não
+    // aparecia neste navegador — só o localStorage local valia.
+    aplicarMetasWorkerNoDADOS(metasLoja);
     // Retornos aprovados vêm SÓ do Worker — sem mistura com sugestões.
     window.__FEEDBACK_RETORNOS = retornos;
 
