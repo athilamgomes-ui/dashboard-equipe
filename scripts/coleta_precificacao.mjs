@@ -29,6 +29,7 @@ const OUT = "/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_dados.
 const FORN_MARCAS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/compras/fornecedor_marcas.json", "utf8"));
 const ICMS_UF = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_icms_estados.json", "utf8"));
 const PARAMS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_params.json", "utf8"));
+const MARCA_IDS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/compras/marca_ids.json", "utf8"));
 const URL_LISTA_PRECOS = "https://linx.microvix.com.br/gestor_web/produtos/relatorio_lista_precos.asp";
 
 const SUPABASE_URL = "https://valhewbvjwdkkvuejrxa.supabase.co";
@@ -47,6 +48,25 @@ const DIAS_ENTREGA = Number(process.env.DIAS_ENTREGA) || 2; // só pedidos ENTRE
 const NF_FILTER = process.env.NF ? String(process.env.NF).trim() : null; // teste: NF=9341 node ... → puxa só essa NF, ignora o filtro ENTREGUE
 const PROC_SKIP_PRECO = process.env.SKIP_PRECO === "1"; // pula a coleta de preço atual do ERP (debug rápido)
 const norm = s => String(s || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+// marca (normalizada) \u2192 c\u00f3digos no ERP (ex.: PROBELLE \u2192 ["858","366"])
+const MARCA_TO_CODES = {};
+for (const [nome, v] of Object.entries(MARCA_IDS)) {
+  if (nome.startsWith("_")) continue;
+  MARCA_TO_CODES[norm(nome)] = (Array.isArray(v) ? v : [v]).map(String);
+}
+// tokens p/ casar descri\u00e7\u00e3o (sem acento; separa letra/d\u00edgito: "20VOL"\u2192["20","VOL"]; descarta ru\u00eddo)
+const STOP_TOK = new Set(["ML", "UN", "G", "KG", "DE", "DA", "DO", "C", "P"]);
+function descTokens(s) {
+  return String(s || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Z0-9]+/g, " ").replace(/([A-Z])(\d)/g, "$1 $2").replace(/(\d)([A-Z])/g, "$1 $2")
+    .split(/\s+/).filter(t => t && !STOP_TOK.has(t));
+}
+function matchScore(aTok, bTok) {
+  if (!aTok.length) return 0;
+  const b = new Set(bTok); let hit = 0;
+  for (const t of aTok) if (b.has(t)) hit++;
+  return hit / aTok.length; // fra\u00e7\u00e3o dos tokens da NF presentes na descri\u00e7\u00e3o do ERP
+}
 
 // CST/CSOSN que indicam ICMS por Substitui\u00e7\u00e3o Tribut\u00e1ria (ST) \u2192 SEM cr\u00e9dito a abater
 const CST_ST = new Set(["10", "30", "60", "70", "90"]);
@@ -115,19 +135,25 @@ function keepNfe(nfe) {
 const num = v => { const n = Number(v); return isNaN(n) ? 0 : n; };
 
 // Preço de venda atual no ERP (Estoque > Relatórios > Lista de Preços, produtos ativos somente).
-// Roda o relatório por empresa+tabela e devolve mapa {codigo: preco_venda} só dos códigos pedidos.
-async function relatorioPrecosErp(page, empresa, tabelaNome, eans) {
+// Filtra por marca (códigos) p/ relatório pequeno e completo; devolve as linhas [{cod,ean,desc,preco}].
+async function relatorioPrecosErp(page, empresa, tabelaNome, marcaCodes) {
   await gotoRetry(page, URL_LISTA_PRECOS);
   await page.waitForSelector("#empresas_" + empresa, { timeout: 20000 });
   await page.waitForTimeout(800);
   const baseline = await page.evaluate(() => document.querySelectorAll("table tr").length).catch(() => 0);
-  const tabUsada = await page.evaluate(({ empresa, tabelaNome }) => {
+  const tabUsada = await page.evaluate(({ empresa, tabelaNome, marcaCodes }) => {
     [1, 3, 4, 9, 10, 11].forEach(i => { const e = document.getElementById("empresas_" + i); if (e) e.checked = (i === empresa); });
     document.querySelectorAll("input[name=visao]").forEach(r => r.checked = (r.value === "A")); // analítica
     const a = document.getElementById("ativa"); if (a) a.checked = true;
     const d = document.getElementById("desativa"); if (d) d.checked = false;                  // ativos somente
     const bar = document.getElementById("barras"); if (bar) bar.checked = true;               // exibir código de barras (p/ casar EAN)
-    // escolher a tabela de preço pelo nome (ex.: "Tabela padrão"); fallback: 1ª opção
+    // filtrar por marca — injeta a opção e seleciona via .value (validado no probe; NÃO chamar refresh, reseta)
+    const ms = document.getElementById("marcas");
+    if (ms && marcaCodes && marcaCodes.length) {
+      const c = String(marcaCodes[0]);
+      if (![...ms.options].some(o => o.value === c)) { const o = document.createElement("option"); o.value = c; o.text = "marca " + c; ms.add(o); }
+      ms.value = c;
+    }
     const tp = document.getElementById("tabela_preco");
     let usada = null;
     if (tp) {
@@ -137,32 +163,30 @@ async function relatorioPrecosErp(page, empresa, tabelaNome, eans) {
       if (opt) { tp.value = opt.value; usada = opt.text; }
     }
     return usada;
-  }, { empresa, tabelaNome });
+  }, { empresa, tabelaNome, marcaCodes });
   await page.waitForTimeout(300);
   await page.evaluate(() => { const b = document.getElementById("btnGerarRelatorio"); if (b) b.click(); });
-  // aguarda a tabela crescer e estabilizar
   let last = -1, stable = 0; const t0 = Date.now();
   while (Date.now() - t0 < 120000) {
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(1200);
     const n = await page.evaluate(() => document.querySelectorAll("table tr").length).catch(() => 0);
-    if (n > baseline + 30) { if (n === last) { if (++stable >= 3) break; } else stable = 0; last = n; }
+    if (n !== last) { last = n; stable = 0; } else if (++stable >= 4) break;
   }
-  const precos = await page.evaluate((eans) => {
-    const want = new Set(eans);
+  const rows = await page.evaluate(() => {
     const parse = v => { v = String(v || "").trim().replace(/\./g, "").replace(",", "."); const n = parseFloat(v); return isNaN(n) ? null : n; };
-    const out = {};
+    const out = [];
     for (const v of document.querySelectorAll('input[name^="valor_"]')) {
       const tr = v.closest("tr"); if (!tr) continue;
-      let ean = null;
-      const a = [...tr.querySelectorAll("a")].find(x => /codebars/i.test(x.getAttribute("href") || ""));
+      const cod = (tr.querySelector('input[name^="codigo_"]') || {}).value || "";
+      let ean = null; const a = [...tr.querySelectorAll("a")].find(x => /codebars/i.test(x.getAttribute("href") || ""));
       if (a) ean = (a.textContent || "").trim();
-      if (!ean) { for (const td of tr.cells) { const t = (td.textContent || "").trim(); if (/^\d{8,14}$/.test(t)) { ean = t; break; } } }
-      if (!ean || !want.has(ean)) continue;
-      const p = parse(v.value); if (p != null && out[ean] == null) out[ean] = p;
+      const desc = (tr.cells[1] && tr.cells[1].textContent || "").trim();
+      const p = parse(v.value);
+      if (p != null) out.push({ cod, ean, desc, preco: p });
     }
     return out;
-  }, [...eans]);
-  return { tabela: tabUsada, precos };
+  });
+  return { tabela: tabUsada, rows };
 }
 
 async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
@@ -334,23 +358,38 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       log(`XML por item: ${nfList.length} NFes; c/ crédito ICMS=${comCredito}, sem crédito (ST/CEST/0%)=${comST}, sem info=${semInfo}`);
     }
 
-    // ===== Preço de venda atual no ERP (Lista de Preços), por empresa/tabela =====
+    // ===== Preço de venda atual no ERP (Lista de Preços), por LOJA × MARCA =====
+    // Filtra o relatório pela marca (códigos do ERP) e casa cada item por EAN, senão por descrição.
     for (const L of Object.keys(lojas)) {
       if (PROC_SKIP_PRECO) break;
       if (!lojas[L].length) continue;
       const empresa = (PARAMS.lojas[L] || {}).empresa;
       const tabelaNome = (PARAMS.lojas[L] || {}).tabela_preco;
-      const eans = new Set();
-      for (const nf of lojas[L]) for (const it of nf.itens) if (it.ean && it.ean !== "SEM GTIN") eans.add(it.ean);
-      if (!empresa || !eans.size) continue;
-      try {
-        const { tabela, precos } = await relatorioPrecosErp(page, empresa, tabelaNome, eans);
-        let achou = 0;
-        for (const nf of lojas[L]) for (const it of nf.itens) {
-          if (it.ean && precos[it.ean] != null) { it.preco_atual = precos[it.ean]; achou++; }
-        }
-        log(`preços ERP ${L} (emp ${empresa}, ${tabela || "?"}): ${achou}/${eans.size} EANs`);
-      } catch (e) { log(`preços ERP ${L} FALHOU: ${String(e.message || e).split("\n")[0]}`); }
+      if (!empresa) continue;
+      // agrupar itens por marca
+      const porMarca = {};
+      for (const nf of lojas[L]) for (const it of nf.itens) {
+        const codes = MARCA_TO_CODES[norm(it.marca)];
+        if (!codes) continue;
+        (porMarca[norm(it.marca)] = porMarca[norm(it.marca)] || { codes, itens: [] }).itens.push(it);
+      }
+      for (const [mk, g] of Object.entries(porMarca)) {
+        try {
+          const { tabela, rows } = await relatorioPrecosErp(page, empresa, tabelaNome, g.codes);
+          const porEan = {}; for (const r of rows) if (r.ean) porEan[r.ean] = r.preco;
+          const filtroOk = rows.length > 0 && rows.length < 3000; // se trouxe o catálogo todo, NÃO casar por descrição (evita cruzar marcas)
+          const rowsTok = filtroOk ? rows.map(r => ({ ...r, tok: descTokens(r.desc) })) : [];
+          let porEanN = 0, porDescN = 0;
+          for (const it of g.itens) {
+            if (it.ean && porEan[it.ean] != null) { it.preco_atual = porEan[it.ean]; porEanN++; continue; }
+            if (!filtroOk) continue; // sem filtro de marca confiável → só EAN
+            const tk = descTokens(it.descricao); let best = null, bestS = 0;
+            for (const r of rowsTok) { const s = matchScore(tk, r.tok); if (s > bestS) { bestS = s; best = r; } }
+            if (best && bestS >= 0.6) { it.preco_atual = best.preco; porDescN++; }
+          }
+          log(`preços ERP ${L}/${mk} (emp ${empresa}, ${tabela || "?"}, ${rows.length} prod, filtro=${filtroOk ? "ok" : "FALHOU→só EAN"}): ${porEanN} EAN + ${porDescN} desc / ${g.itens.length}`);
+        } catch (e) { log(`preços ERP ${L}/${mk} FALHOU: ${String(e.message || e).split("\n")[0]}`); }
+      }
     }
 
     const payload = { gerado_em: new Date().toISOString(), cutoff_dias: CUTOFF_DIAS, dias_entrega: DIAS_ENTREGA, lojas };
