@@ -142,7 +142,7 @@ async function coletaPendentes(page) {
       if (!keepNfe(nfe)) continue;
       const emit = nfe.DadosEmitente || {};
       if (fornIgnorado(emit.Nome)) continue;
-      const valor = (nfe.ValorTotalNota || 0) || (nfe.Produtos || []).reduce((a, p) => a + (p.ValorBruto || 0), 0);
+      const valor = (nfe.ValorAPagar || nfe.Valor || 0) || (nfe.Produtos || []).reduce((a, p) => a + (p.ValorBruto || 0), 0); // valor LÍQUIDO a pagar da nota (ValorTotalNota não existe nessa API)
       out.push({ loja, nf: String(nfe.Numero || ""), marca: fornBrand(emit) || "(sem marca)", data: de.slice(0, 10), valor: Math.round(valor * 100) / 100, origem: "pendente", fornecedor: emit.Nome || "" });
       kept++;
     }
