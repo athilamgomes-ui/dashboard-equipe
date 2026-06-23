@@ -45,6 +45,7 @@ const ANO = HOJE.getFullYear();
 const CUTOFF_DIAS = 90;       // janela ampla p/ achar a NF (a NF pode ser dias antes da entrega)
 const DIAS_ENTREGA = Number(process.env.DIAS_ENTREGA) || 2; // só pedidos ENTREGUE com data_entrega nos últimos N dias (regra do usuário; override p/ teste: DIAS_ENTREGA=14 node ...)
 const NF_FILTER = process.env.NF ? String(process.env.NF).trim() : null; // teste: NF=9341 node ... → puxa só essa NF, ignora o filtro ENTREGUE
+const PROC_SKIP_PRECO = process.env.SKIP_PRECO === "1"; // pula a coleta de preço atual do ERP (debug rápido)
 const norm = s => String(s || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
 // CST/CSOSN que indicam ICMS por Substitui\u00e7\u00e3o Tribut\u00e1ria (ST) \u2192 SEM cr\u00e9dito a abater
@@ -258,6 +259,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         totItens += itens.length;
         lojas[loja].push({
           id: nfe.Id,
+          chave_nfe: String(nfe.Chave || ""),
           numero: String(nfe.Numero || ""),
           serie: String(nfe.Serie || ""),
           fornecedor: String(emit.Nome || ""),
@@ -275,50 +277,66 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       log(`${loja}: ${kept} NFes mantidas (de ${nfes.length})`);
     }
 
-    // ===== Enriquecer com CST/ICMS% por item (BuscarDetalhesNFe) p/ crédito de ICMS por produto =====
-    const ids = [];
-    for (const L of Object.keys(lojas)) for (const nf of lojas[L]) ids.push(nf.id);
-    if (ids.length) {
-      const det = await page.evaluate(async (ids) => {
+    // ===== Enriquecer lendo o XML da NFe, PRODUTO POR PRODUTO (fonte autoritativa) =====
+    // Crédito de ICMS por item: só se NÃO for ST. ST = CST 10/30/60/70, ICMS-ST destacado, OU tem CEST.
+    const nfList = [];
+    for (const L of Object.keys(lojas)) for (const nf of lojas[L]) nfList.push({ id: nf.id, chave: nf.chave_nfe, doc: nf.cnpj });
+    if (nfList.length) {
+      const det = await page.evaluate(async (nfList) => {
         const token = localStorage.getItem("token_api");
         const base = (localStorage.getItem("url_fiscal_api") || "").replace(/\/$/, "");
-        const url = base + "/api/NfeEntrada/BuscarDetalhesNFe";
+        const H = { Authorization: token, "Content-Type": "application/json" };
+        const tag = (s, t) => { const m = s.match(new RegExp("<" + t + "\\b[^>]*>([\\s\\S]*?)</" + t + ">")); return m ? m[1].trim() : null; };
         const out = {};
-        for (const id of ids) {
+        for (const nf of nfList) {
           try {
-            const r = await fetch(url, { method: "POST", headers: { Authorization: token, "Content-Type": "application/json" }, body: JSON.stringify({ IdNfe: id }) });
-            const js = JSON.parse(await r.text());
-            const map = {};
-            for (const p of (js.Produtos || [])) {
-              const cod = String(p.Codigo || "");
-              if (cod && !map[cod]) map[cod] = { cst: p.CST, csosn: p.CSOSN, icms_pct: p.PercentualICMS };
+            let chave = nf.chave, doc = nf.doc;
+            if (!chave) { const d = await (await fetch(base + "/api/NfeEntrada/BuscarDetalhesNFe", { method: "POST", headers: H, body: JSON.stringify({ IdNfe: nf.id }) })).json(); chave = d.ChaveNFe; doc = doc || (d.Emitente || {}).Documento; }
+            const r = await fetch(base + "/api/NfeEntrada/BaixarNFe", { method: "POST", headers: H, body: JSON.stringify({ IdNfe: nf.id, ChaveNFe: chave, DocumentoEmitente: doc }) });
+            const xml = await r.text();
+            const uf = (() => { const e = xml.match(/<enderEmit>([\s\S]*?)<\/enderEmit>/); return e ? tag(e[1], "UF") : null; })();
+            const prod = {};
+            for (const d of (xml.match(/<det\b[\s\S]*?<\/det>/g) || [])) {
+              const cProd = tag(d, "cProd"); if (!cProd) continue;
+              const vProd = parseFloat(tag(d, "vProd") || "0");
+              const cest = tag(d, "CEST");
+              const icmsBlk = (d.match(/<ICMS>([\s\S]*?)<\/ICMS>/) || [])[1] || "";
+              const grpTag = (icmsBlk.match(/<ICMS(\w+)>/) || [])[1] || "";
+              const cst = tag(icmsBlk, "CST"); const csosn = tag(icmsBlk, "CSOSN");
+              const vICMS = parseFloat(tag(icmsBlk, "vICMS") || "0");
+              const pICMS = parseFloat(tag(icmsBlk, "pICMS") || "0");
+              const vICMSST = parseFloat(tag(icmsBlk, "vICMSST") || "0");
+              prod[cProd] = { cst, csosn, grpTag, orig: tag(icmsBlk, "orig"), vICMS, pICMS, vICMSST, vProd, cest };
             }
-            const uf = (((js.Emitente || {}).EnderecoEmitente) || {}).UF || null;
-            out[id] = { uf, prod: map };
-          } catch (e) { out[id] = { uf: null, prod: {} }; }
+            out[nf.id] = { uf, prod };
+          } catch (e) { out[nf.id] = { uf: null, prod: {}, erro: String(e).slice(0, 80) }; }
         }
         return out;
-      }, ids);
+      }, nfList);
 
+      const CST_ST_X = new Set(["10", "30", "60", "70"]);
       let comCredito = 0, comST = 0, semInfo = 0;
       for (const L of Object.keys(lojas)) for (const nf of lojas[L]) {
         const d = det[nf.id] || { uf: null, prod: {} };
         nf.uf = d.uf;
-        const map = d.prod || {};
         for (const it of nf.itens) {
-          const tx = map[it.cprod];
-          if (!tx) { semInfo++; continue; }
-          it.cst = tx.cst != null ? String(tx.cst) : (tx.csosn != null ? "CSOSN " + tx.csosn : null);
-          it.icms_pct = Number(tx.icms_pct) || 0;
-          it.credito_icms_pct = creditoIcmsItem(tx, it.icms_st, d.uf);
+          const tx = (d.prod || {})[it.cprod];
+          if (!tx) { semInfo++; it.cst = null; it.icms_pct = null; it.credito_icms_pct = 0; continue; }
+          const cstN = String(tx.cst || "").padStart(2, "0").slice(-2);
+          const temST = CST_ST_X.has(cstN) || (Number(tx.vICMSST) > 0) || !!tx.cest; // CEST = produto ST
+          it.cst = tx.cst != null ? (tx.orig != null ? tx.orig + tx.cst : tx.cst) : (tx.csosn != null ? "CSOSN " + tx.csosn : null);
+          it.icms_pct = Number(tx.pICMS) || 0;
+          it.st = temST; it.cest = tx.cest || null;
+          it.credito_icms_pct = (!temST && Number(tx.vICMS) > 0 && tx.vProd > 0) ? (tx.vICMS / tx.vProd) : 0;
           if (it.credito_icms_pct > 0) comCredito++; else comST++;
         }
       }
-      log(`detalhe fiscal: ${ids.length} NFes; itens c/ crédito ICMS=${comCredito}, sem crédito (ST/0%)=${comST}, sem info=${semInfo}`);
+      log(`XML por item: ${nfList.length} NFes; c/ crédito ICMS=${comCredito}, sem crédito (ST/CEST/0%)=${comST}, sem info=${semInfo}`);
     }
 
     // ===== Preço de venda atual no ERP (Lista de Preços), por empresa/tabela =====
     for (const L of Object.keys(lojas)) {
+      if (PROC_SKIP_PRECO) break;
       if (!lojas[L].length) continue;
       const empresa = (PARAMS.lojas[L] || {}).empresa;
       const tabelaNome = (PARAMS.lojas[L] || {}).tabela_preco;
