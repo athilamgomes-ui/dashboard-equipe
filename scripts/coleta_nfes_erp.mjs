@@ -211,34 +211,43 @@ async function gravarSupabase(lista) {
   if (!r.ok) throw new Error("supabase " + r.status + " " + (await r.text()).slice(0, 300));
 }
 
-// ===== MAIN =====
+// ===== MAIN (com retry interno: login do ERP às vezes trava no v4/home) =====
+async function runOnce() {
+  const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true, viewport: { width: 1400, height: 900 } });
+  const page = ctx.pages()[0] || (await ctx.newPage());
+  try {
+    await garantirSessao(page, { log });
+    const pend = await coletaPendentes(page);
+    let lanc = [];
+    try { lanc = await coletaLancadas(page); } catch (e) { log(`lançadas FALHOU (segue só com pendentes): ${e.message}`); }
+    const lancKeys = new Set(lanc.map(x => x.loja + "|" + x.nf));
+    const lista = lanc.concat(pend.filter(p => !lancKeys.has(p.loja + "|" + p.nf)));
+    log(`total: ${lista.length} (pendentes ${pend.length}, lançadas ${lanc.length})`);
+    if (FILE_MODE) {
+      writeFileSync("/tmp/nfes_erp.json", JSON.stringify({ atualizado_em: new Date().toISOString(), dados: lista }, null, 1));
+      log("gravado /tmp/nfes_erp.json");
+    } else {
+      await gravarSupabase(lista);
+      log("gravado no Supabase (nfes_erp)");
+    }
+    await ctx.close().catch(() => {});
+    return true;
+  } catch (e) {
+    await ctx.close().catch(() => {});
+    throw e;
+  }
+}
+
 const t0 = Date.now();
 log(`launch headless (file=${FILE_MODE})...`);
-const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true, viewport: { width: 1400, height: 900 } });
-const page = ctx.pages()[0] || (await ctx.newPage());
-try { await garantirSessao(page, { log }); }
-catch (e) { log(`garantirSessao falhou: ${e.code || ""} ${e.message}`); await ctx.close().catch(() => {}); process.exit(e.code === "NO_CREDS" || e.code === "LOGIN_FAIL" ? 2 : 1); }
-
-try {
-  const pend = await coletaPendentes(page);
-  let lanc = [];
-  try { lanc = await coletaLancadas(page); } catch (e) { log(`lançadas FALHOU (segue só com pendentes): ${e.message}`); }
-  // lançada tem prioridade sobre pendente da mesma (loja,nf)
-  const lancKeys = new Set(lanc.map(x => x.loja + "|" + x.nf));
-  const lista = lanc.concat(pend.filter(p => !lancKeys.has(p.loja + "|" + p.nf)));
-  log(`total: ${lista.length} (pendentes ${pend.length}, lançadas ${lanc.length})`);
-  if (FILE_MODE) {
-    writeFileSync("/tmp/nfes_erp.json", JSON.stringify({ atualizado_em: new Date().toISOString(), dados: lista }, null, 1));
-    log("gravado /tmp/nfes_erp.json");
-  } else {
-    await gravarSupabase(lista);
-    log("gravado no Supabase (nfes_erp)");
+let ok = false;
+for (let i = 1; i <= 4; i++) {
+  try { await runOnce(); ok = true; break; }
+  catch (e) {
+    if (e.code === "NO_CREDS" || e.code === "LOGIN_FAIL") { log(`creds/login: ${e.message}`); process.exit(2); }
+    log(`tentativa ${i}/4 falhou: ${(e.message || "").split("\n")[0]} — ${i < 4 ? `retry em ${i * 20}s` : "desisto"}`);
+    if (i < 4) await new Promise(r => setTimeout(r, i * 20000));
   }
-  log(`OK em ${((Date.now() - t0) / 1000).toFixed(1)}s`);
-  await ctx.close().catch(() => {});
-  process.exit(0);
-} catch (e) {
-  log(`FALHA: ${e.message}`);
-  await ctx.close().catch(() => {});
-  process.exit(1);
 }
+log(`${ok ? "OK" : "FALHOU"} em ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+process.exit(ok ? 0 : 1);

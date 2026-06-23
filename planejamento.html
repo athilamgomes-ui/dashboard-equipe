@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-19'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-20'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -230,7 +230,7 @@ function distIgual(a,b){a=a||{};b=b||{};var ka=Object.keys(a),kb=Object.keys(b);
 async function recomputarPendentes(){
   var mudados=[];
   DB.pedidos.forEach(function(p){ if(p.status!=='ATHILA'&&p.status!=='APROVADO')return; // ainda não enviados rolam de hoje
-    var nova=autoSplit(Number(p.valor_total)||0,p.prazo,p.parcelas,''); // base vazia = hoje
+    var nova=autoSplit(valApagar(p.valor_total,p.entrada),p.prazo,p.parcelas,''); // base vazia = hoje
     if(!distIgual(p.distribuicao,nova)){ p.distribuicao=nova; mudados.push(p); } });
   if(mudados.length) try{ await Promise.all(mudados.map(function(p){return sb.from('pedidos').update({distribuicao:p.distribuicao}).eq('id',p.id);})); }catch(e){}
 }
@@ -342,7 +342,7 @@ async function autoAvancarStatus(){
     g.sort(function(a,b){ var da=Math.abs((Number(a.valor_total)||0)-nfVal), db=Math.abs((Number(b.valor_total)||0)-nfVal); if(da!==db)return da-db; return String(a.id).localeCompare(String(b.id)); });
     var p=g[0], alvo=p._temLancada?'ENTREGUE':'FATURADO';
     var nfDt=String(p._nfMatch.data).slice(0,10), va=Number(p.valor_total)||0, vd=nfVal>0?nfVal:va;
-    var nova=autoSplit(vd,p.prazo,p.parcelas,nfDt);
+    var nova=autoSplit(valApagar(vd,p.entrada),p.prazo,p.parcelas,nfDt);
     DB._autoAv.push({marca:p.marca,loja:p.loja,de:p.status,para:alvo,nf:nf,data:nfDt,va:va,vd:vd});
     p.status=alvo; p.distribuicao=nova; p.valor_total=vd;
     ups.push(sb.from('pedidos').update({status:alvo,distribuicao:nova,valor_total:vd}).eq('id',p.id));
@@ -359,7 +359,7 @@ async function aplicarSug(id){
   var p=DB.pedidos.filter(function(x){return x.id===id;})[0]; if(!p)return;
   if(!confirm(p.marca+' ('+lojaNome(p.loja)+'): '+s.de+' → '+s.para+' pela NF '+s.nf+' de '+fmtData(s.data)+'?\n\nO valor do pedido passa de '+brl(s.va)+' para '+brl(s.valor)+' (valor da NF). Confirme só se a NF é deste pedido.'))return;
   var vd=s.valor>0?s.valor:(Number(p.valor_total)||0);
-  var nova=autoSplit(vd,p.prazo,p.parcelas,s.data);
+  var nova=autoSplit(valApagar(vd,p.entrada),p.prazo,p.parcelas,s.data);
   toast('Aplicando…');
   var {error}=await sb.from('pedidos').update({status:s.para,distribuicao:nova,valor_total:vd}).eq('id',id);
   if(error){toast('Erro: '+error.message);return;}
@@ -431,6 +431,7 @@ function distTxt(d){d=d||{};return Object.keys(d).sort().map(function(k){return 
 
 function campo(l,inner){return '<div><label>'+l+'</label>'+inner+'</div>';}
 function isoDate(s){if(!s)return '';var m=String(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(m)return m[3]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2);m=String(s).match(/^\d{4}-\d{2}-\d{2}/);return m?m[0]:'';}
+function valApagar(valor,ent){ return Math.max(0,(Number(valor)||0)-(Number(ent)||0)); } // contas a pagar = valor − entrada já paga
 function renderLancar(){
   var p=EDIT||{};
   var lojaOpts=LOJAS.map(function(l){return '<option value="'+l.id+'" '+(p.loja===l.id?'selected':'')+'>'+l.nome+'</option>';}).join('');
@@ -440,6 +441,7 @@ function renderLancar(){
     campo('Fornecedor','<input id="f_forn" value="'+(p.fornecedor||'')+'">')+
     campo('Data do pedido','<input id="f_data" type="date" value="'+isoDate(p.data_pedido)+'">')+
     campo('Valor total (R$)','<input id="f_valor" type="number" step="0.01" value="'+(p.valor_total||'')+'" oninput="prev()">')+
+    campo('Entrada paga (R$)','<input id="f_entrada" type="number" step="0.01" value="'+(p.entrada||'')+'" oninput="prev()" placeholder="0 se não houver">')+
     campo('Prazo (ex.: 30/60/90)','<input id="f_prazo" value="'+(p.prazo||'')+'" oninput="prev()" placeholder="30/60/90 ou AVISTA">')+
     campo('Nº parcelas (se sem prazo)','<input id="f_parc" value="'+(p.parcelas||'')+'" oninput="prev()">')+
     campo('Data base p/ vencimento','<input id="f_base" type="date" value="'+isoDate(p.data_base_venc||p.data_entrega||p.data_pedido)+'" oninput="prev()">')+
@@ -452,23 +454,26 @@ function renderLancar(){
 }
 function prev(){
   var valor=Number(el('f_valor').value)||0; if(!valor){el('split').textContent='';return;}
+  var ent=Number(el('f_entrada').value)||0, ap=valApagar(valor,ent);
   var ehPendente=!EDIT||EDIT.status==='ATHILA'||EDIT.status==='APROVADO';
-  var d=autoSplit(valor,el('f_prazo').value,el('f_parc').value, ehPendente?'':el('f_base').value);
-  el('split').innerHTML=(ehPendente?'Divisão a partir de HOJE (recalcula sozinha até ser ENVIADO; congela na data do envio): ':'Divisão automática: ')+Object.keys(d).sort().map(function(k){return '<b>'+nomeMes(k)+'</b> '+brl(d[k]);}).join(' · ');
+  var d=autoSplit(ap,el('f_prazo').value,el('f_parc').value, ehPendente?'':el('f_base').value);
+  el('split').innerHTML=(ehPendente?'Divisão a partir de HOJE (recalcula sozinha até ser ENVIADO; congela na data do envio): ':'Divisão automática: ')+(ent>0?'<span class="mut">entrada '+brl(ent)+' abatida → a pagar '+brl(ap)+': </span>':'')+Object.keys(d).sort().map(function(k){return '<b>'+nomeMes(k)+'</b> '+brl(d[k]);}).join(' · ');
 }
 async function salvar(){
   var valor=Number(el('f_valor').value)||0, marca=el('f_marca').value.trim();
   if(!marca||!valor){toast('Informe marca e valor.');return;}
+  var ent=Number(el('f_entrada').value)||0, ap=valApagar(valor,ent);
   var ehPendente=!EDIT||EDIT.status==='ATHILA'||EDIT.status==='APROVADO'; // ainda não enviado conta de hoje (rolling); ENVIADO+ usa a data base informada
-  var dist=autoSplit(valor,el('f_prazo').value,el('f_parc').value, ehPendente?'':(el('f_base').value||el('f_entrega').value||el('f_data').value));
+  var dist=autoSplit(ap,el('f_prazo').value,el('f_parc').value, ehPendente?'':(el('f_base').value||el('f_entrega').value||el('f_data').value)); // distribui só o que fica A PAGAR (valor − entrada)
   var row={loja:el('f_loja').value,marca:marca.toUpperCase(),fornecedor:el('f_forn').value,
     data_pedido:el('f_data').value||null,valor_total:valor,prazo:el('f_prazo').value,parcelas:el('f_parc').value,
     data_base_venc:el('f_base').value||null,distribuicao:dist,data_entrega:el('f_entrega').value,obs:el('f_obs').value};
   toast('Salvando…');
-  var err;
+  var err, pid=EDIT?EDIT.id:null;
   if(EDIT){ ({error:err}=await sb.from('pedidos').update(row).eq('id',EDIT.id)); if(!err)logAcao('editar_pedido',marca+' / '+row.loja); }
-  else { row.status='ATHILA'; row.lancado_por=DB.email; ({error:err}=await sb.from('pedidos').insert([row])); if(!err){logAcao('lancar_pedido',marca+' / '+row.loja+' R$ '+valor); notificarAprovador(row);} }
+  else { row.status='ATHILA'; row.lancado_por=DB.email; var ins=await sb.from('pedidos').insert([row]).select('id').maybeSingle(); err=ins.error; pid=ins.data&&ins.data.id; if(!err){logAcao('lancar_pedido',marca+' / '+row.loja+' R$ '+valor); notificarAprovador(row);} }
   if(err){toast('Erro: '+err.message);return;}
+  if(pid){ try{ await sb.from('pedidos').update({entrada:ent}).eq('id',pid); }catch(e){} } // best-effort: grava a entrada (ignora se a coluna ainda não existe)
   var destino=(EDIT&&EDIT.status==='ATHILA')?'aprovar':'pedidos';
   EDIT=null;TAB=destino;toast('Pedido salvo.');carregar();
 }
@@ -501,8 +506,8 @@ async function mudaStatus(id,novo,acao){
   var enviando=novo==='ENVIADO'&&p&&p.status!=='ENVIADO';
   var upd={status:novo};
   if(acao==='aprovar'||acao==='rejeitar'){upd.aprovado_por=DB.email;upd.data_aprovacao=new Date().toISOString();}
-  if(enviando){ upd.distribuicao=autoSplit(Number(p.valor_total)||0,p.prazo,p.parcelas,''); } // recalcula o contas a pagar a partir da DATA DO ENVIO (hoje) + forma de pagamento, e congela
-  if(novo==='FATURADO'&&p&&p.status!=='FATURADO'){ upd.distribuicao=autoSplit(Number(p.valor_total)||0,p.prazo,p.parcelas,''); } // FATURADO manual: recalcula a partir de HOJE (= data do faturamento informada na mão)
+  if(enviando){ upd.distribuicao=autoSplit(valApagar(p.valor_total,p.entrada),p.prazo,p.parcelas,''); } // recalcula o contas a pagar a partir da DATA DO ENVIO (hoje) + forma de pagamento, e congela
+  if(novo==='FATURADO'&&p&&p.status!=='FATURADO'){ upd.distribuicao=autoSplit(valApagar(p.valor_total,p.entrada),p.prazo,p.parcelas,''); } // FATURADO manual: recalcula a partir de HOJE (= data do faturamento informada na mão)
   var {error}=await sb.from('pedidos').update(upd).eq('id',id);
   if(error){toast('Erro: '+error.message);return;}
   if(enviando){ try{ await sb.from('pedidos').update({data_enviado:hojeISO()}).eq('id',id); }catch(e){} } // best-effort: grava a data do envio (ignora se a coluna ainda não existe)
@@ -573,7 +578,7 @@ function renderPedidos(){
     var mtds=jan.map(function(m){var v=conta?(Number(d[m])||0):0;return '<td class="num mut">'+celv(v)+'</td>';}).join('');
     var cEnv=p.data_enviado?fmtData(p.data_enviado)+deltaTxt(p.data_pedido,p.data_enviado):'—';
     var cFat=p._dataFat?fmtData(p._dataFat)+deltaTxt(p.data_enviado,p._dataFat):'—';
-    body+='<tr'+(p.status==='APROVADO'?' class="row-alerta"':'')+'><td class="mut">'+fmtData(p.data_pedido)+'</td><td class="mut">'+cEnv+'</td><td class="mut">'+cFat+'</td><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td><td class="num">'+brl(p.valor_total)+'</td>'+
+    body+='<tr'+(p.status==='APROVADO'?' class="row-alerta"':'')+'><td class="mut">'+fmtData(p.data_pedido)+'</td><td class="mut">'+cEnv+'</td><td class="mut">'+cFat+'</td><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td><td class="num">'+brl(p.valor_total)+(Number(p.entrada)>0?'<br><span class="mut" style="font-size:10px" title="entrada já paga, abatida do contas a pagar">−entr '+brl(p.entrada)+'</span>':'')+'</td>'+
       '<td><span class="pill s-'+p.status+'">'+p.status+'</span>'+(p._noERP?' <span class="mut" style="font-size:10px" title="NF já lançada no ERP — contada na linha do ERP, não recontada aqui">no ERP</span>':'')+'</td>'+mtds+
       '<td class="right acoes"><button class="btn sec mini" onclick="editar(\''+p.id+'\')">Editar</button>'+(DB.isOwner?' '+statusSelect(p):'')+'</td></tr>';});
   body+=footerPagar(jan,5,1,1);
