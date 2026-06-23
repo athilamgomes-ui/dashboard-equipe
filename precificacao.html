@@ -80,7 +80,7 @@
       <table style="font-size:13px">
         <thead><tr>
           <th class="l">Loja</th><th>Imposto venda %</th><th>Custo fixo %</th><th>Cartão %</th>
-          <th>Comissão %</th><th>Outros %</th><th>Crédito ICMS % (Lucro Real)</th>
+          <th>Comissão %</th><th>Outros %</th>
         </tr></thead>
         <tbody id="configBody"></tbody>
       </table>
@@ -157,8 +157,7 @@ function syncCreditoToggle(){
   if(cfg.regime==="lucro_real"){
     wrap.style.display="";
     document.getElementById("abaterCredito").checked=!!cfg.abater_credito_icms;
-    const a=cfg.aliquota_credito_icms||0;
-    document.getElementById("credHint").textContent = a>0 ? `(${(a*100).toFixed(0)}%)` : "(defina a % em ⚙️ Configurar)";
+    document.getElementById("credHint").textContent = "(por item: ICMS da NF; com ST = 0)";
   } else wrap.style.display="none";
 }
 
@@ -169,8 +168,7 @@ function renderConfig(){
     const c=PARAMS.lojas[L]||{};
     const cell=campo=>`<td><input type="number" class="mono cfg-in" data-l="${L}" data-c="${campo}" step="0.1" min="0" value="${((custoPct(c,campo)||0)*100).toFixed(1)}"></td>`;
     return `<tr><td class="l"><b>${L}</b> · ${c.nome||""} <span class="muted">(${c.regime==='simples'?'Simples':'Lucro Real'})</span></td>`+
-      cell("imposto")+cell("custo_fixo")+cell("cartao")+cell("comissao")+cell("outros")+
-      `<td>${c.regime==='lucro_real'?`<input type="number" class="mono cfg-in" data-l="${L}" data-c="aliquota_credito_icms" step="0.5" min="0" value="${((c.aliquota_credito_icms||0)*100).toFixed(1)}">`:'<span class="muted">—</span>'}</td></tr>`;
+      cell("imposto")+cell("custo_fixo")+cell("cartao")+cell("comissao")+cell("outros")+`</tr>`;
   }).join("");
 }
 function salvarConfig(){
@@ -193,14 +191,14 @@ function margemMarca(marca){
   return (parseFloat(elMargem.value)/100) || m._default || 0.15;
 }
 
-function custoEfetivo(item){
+function creditoAtivo(){ return document.getElementById("abaterCredito").checked; }
+// crédito de ICMS por ITEM (CST/ICMS da NF): só Lucro Real e só quando o toggle está ligado
+function creditoItem(item){
   const cfg=PARAMS.lojas[lojaAtual]||{};
-  let c=item.custo_unit_cheio;
-  if(cfg.regime==="lucro_real" && document.getElementById("abaterCredito").checked){
-    c = c*(1-(cfg.aliquota_credito_icms||0));
-  }
-  return c;
+  if(cfg.regime!=="lucro_real" || !creditoAtivo()) return 0;
+  return Number(item.credito_icms_pct)||0;
 }
+function custoEfetivo(item){ return item.custo_unit_cheio*(1-creditoItem(item)); }
 
 // arredonda PARA CIMA até terminar em ,90 (nunca abaixo do preço calculado → margem ≥ alvo)
 function arredonda90(p){
@@ -263,7 +261,7 @@ function renderItens(){
       <td class="l desc" title="${it.descricao}">${it.descricao}<div class="muted" style="font-size:11px">cód ${it.cprod}${it.ean&&it.ean!=='SEM GTIN'?' · '+it.ean:''}</div></td>
       <td class="l">${it.marca||'<span class="muted">—</span>'}</td>
       <td class="mono">${it.qtd}</td>
-      <td class="mono">${brl(r.custo)}</td>
+      <td class="mono" title="CST ${it.cst||'—'} · ICMS ${it.icms_pct!=null?it.icms_pct+'%':'—'}${it.credito_icms_pct>0?'':' · com ST/sem crédito'}">${brl(r.custo)}${(()=>{const cr=creditoItem(it);return cr>0?` <span class="muted" style="font-size:11px">(−${(cr*100).toFixed(0)}% ICMS)</span>`:'';})()}</td>
       <td><input type="number" class="mono margin-in" data-k="${k}" step="0.5" min="0" max="80" value="${(margem*100).toFixed(1)}"></td>
       <td class="mono preco">${r.erro?'<span style="color:var(--crit)">soma % ≥ 100</span>':brl(r.preco)}</td>
       <td class="mono">${r.markup?r.markup.toFixed(2)+'×':'—'}</td>
@@ -284,7 +282,8 @@ function linhasExport(){
     const r=calc(it,margem);
     const cfg=PARAMS.lojas[lojaAtual]||{};
     return {Loja:lojaAtual, Tabela_ERP:cfg.tabela_preco||"", NF:nf.numero, Fornecedor:nf.fornecedor, Codigo:it.cprod, EAN:it.ean,
-      Descricao:it.descricao, Marca:it.marca||"", Qtd:it.qtd,
+      Descricao:it.descricao, Marca:it.marca||"", Qtd:it.qtd, CST:it.cst||"", ICMS_pct:it.icms_pct!=null?it.icms_pct:"",
+      Credito_ICMS_aplicado_pct:+(creditoItem(it)*100).toFixed(1),
       Custo_unit_cheio:+(r.custo||0).toFixed(4), Margem_pct:+(margem*100).toFixed(1),
       Preco_sugerido:r.preco!=null?+r.preco.toFixed(2):"", Markup:r.markup?+r.markup.toFixed(2):"",
       Margem_liquida_pct:r.margemReal!=null?+(r.margemReal*100).toFixed(1):""};

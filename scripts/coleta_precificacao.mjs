@@ -43,6 +43,19 @@ const CUTOFF_DIAS = 90;       // janela ampla p/ achar a NF (a NF pode ser dias 
 const DIAS_ENTREGA = Number(process.env.DIAS_ENTREGA) || 2; // só pedidos ENTREGUE com data_entrega nos últimos N dias (regra do usuário; override p/ teste: DIAS_ENTREGA=14 node ...)
 const norm = s => String(s || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
+// CST/CSOSN que indicam ICMS por Substitui\u00e7\u00e3o Tribut\u00e1ria (ST) \u2192 SEM cr\u00e9dito a abater
+const CST_ST = new Set(["10", "30", "60", "70", "90"]);
+const CSOSN_ST = new Set(["201", "202", "203", "500", "900"]);
+// cr\u00e9dito de ICMS por item (regra do usu\u00e1rio, Lucro Real): com ST \u2192 0; sem ST \u2192 % de ICMS real da NF (\u22487% nacional / 4% importado)
+function creditoIcmsItem(tx, icmsStValor) {
+  if (!tx) return 0;
+  const cst = String(tx.cst || "").padStart(2, "0").slice(-2);
+  const csosn = String(tx.csosn || "");
+  const temST = (Number(icmsStValor) > 0) || CST_ST.has(cst) || CSOSN_ST.has(csosn);
+  if (temST) return 0;
+  return Math.max(0, Number(tx.icms_pct) || 0) / 100;
+}
+
 // pedidos ENTREGUE (últimos DIAS_ENTREGA dias) no Planejamento → set de "GRUPO|MARCA" alvo
 async function alvosEntregues() {
   const since = new Date(HOJE.getTime() - DIAS_ENTREGA * 86400000).toISOString().slice(0, 10);
@@ -172,6 +185,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
             fcp_st: num(p.ValorFCPST),
             custo_cheio_total: Math.round(custoTotal * 100) / 100,
             custo_unit_cheio: Math.round((custoTotal / qtd) * 10000) / 10000,
+            cst: null, icms_pct: null, credito_icms_pct: 0, // preenchidos depois via BuscarDetalhesNFe
           };
         });
         if (!itens.length) continue;
@@ -193,6 +207,45 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       // mais recentes primeiro
       lojas[loja].sort((a, b) => (a.data_emissao < b.data_emissao ? 1 : -1));
       log(`${loja}: ${kept} NFes mantidas (de ${nfes.length})`);
+    }
+
+    // ===== Enriquecer com CST/ICMS% por item (BuscarDetalhesNFe) p/ crédito de ICMS por produto =====
+    const ids = [];
+    for (const L of Object.keys(lojas)) for (const nf of lojas[L]) ids.push(nf.id);
+    if (ids.length) {
+      const det = await page.evaluate(async (ids) => {
+        const token = localStorage.getItem("token_api");
+        const base = (localStorage.getItem("url_fiscal_api") || "").replace(/\/$/, "");
+        const url = base + "/api/NfeEntrada/BuscarDetalhesNFe";
+        const out = {};
+        for (const id of ids) {
+          try {
+            const r = await fetch(url, { method: "POST", headers: { Authorization: token, "Content-Type": "application/json" }, body: JSON.stringify({ IdNfe: id }) });
+            const js = JSON.parse(await r.text());
+            const map = {};
+            for (const p of (js.Produtos || [])) {
+              const cod = String(p.Codigo || "");
+              if (cod && !map[cod]) map[cod] = { cst: p.CST, csosn: p.CSOSN, icms_pct: p.PercentualICMS };
+            }
+            out[id] = map;
+          } catch (e) { out[id] = {}; }
+        }
+        return out;
+      }, ids);
+
+      let comCredito = 0, comST = 0, semInfo = 0;
+      for (const L of Object.keys(lojas)) for (const nf of lojas[L]) {
+        const map = det[nf.id] || {};
+        for (const it of nf.itens) {
+          const tx = map[it.cprod];
+          if (!tx) { semInfo++; continue; }
+          it.cst = tx.cst != null ? String(tx.cst) : (tx.csosn != null ? "CSOSN " + tx.csosn : null);
+          it.icms_pct = Number(tx.icms_pct) || 0;
+          it.credito_icms_pct = creditoIcmsItem(tx, it.icms_st);
+          if (it.credito_icms_pct > 0) comCredito++; else comST++;
+        }
+      }
+      log(`detalhe fiscal: ${ids.length} NFes; itens c/ crédito ICMS=${comCredito}, sem crédito (ST/0%)=${comST}, sem info=${semInfo}`);
     }
 
     const payload = { gerado_em: new Date().toISOString(), cutoff_dias: CUTOFF_DIAS, dias_entrega: DIAS_ENTREGA, lojas };
