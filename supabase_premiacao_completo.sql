@@ -91,21 +91,37 @@ create table if not exists public.fotos (
 
 -- ════════════════════════════════════════════════════════════════════════
 -- RLS aberto pra anon em TODAS (mesmo padrão sem-login do planejamento)
+-- Comandos explícitos (sem bloco DO/$$ — evita bug do editor do Supabase).
 -- ════════════════════════════════════════════════════════════════════════
-do $$
-declare t text;
-begin
-  foreach t in array array[
-    'metas_semanais','sugestoes_overrides','sugestoes_avaliacoes','feedbacks',
-    'feedback_retornos','quizzes','mensagens_gerente','avatares','fotos'
-  ] loop
-    execute format('alter table public.%I enable row level security', t);
-    execute format('drop policy if exists %I_anon_all on public.%I', t, t);
-    execute format(
-      'create policy %I_anon_all on public.%I for all to anon using (true) with check (true)',
-      t, t);
-  end loop;
-end $$;
+alter table public.metas_semanais       enable row level security;
+alter table public.sugestoes_overrides  enable row level security;
+alter table public.sugestoes_avaliacoes enable row level security;
+alter table public.feedbacks            enable row level security;
+alter table public.feedback_retornos    enable row level security;
+alter table public.quizzes              enable row level security;
+alter table public.mensagens_gerente    enable row level security;
+alter table public.avatares             enable row level security;
+alter table public.fotos                enable row level security;
+
+drop policy if exists metas_semanais_anon_all       on public.metas_semanais;
+drop policy if exists sugestoes_overrides_anon_all   on public.sugestoes_overrides;
+drop policy if exists sugestoes_avaliacoes_anon_all  on public.sugestoes_avaliacoes;
+drop policy if exists feedbacks_anon_all             on public.feedbacks;
+drop policy if exists feedback_retornos_anon_all     on public.feedback_retornos;
+drop policy if exists quizzes_anon_all               on public.quizzes;
+drop policy if exists mensagens_gerente_anon_all     on public.mensagens_gerente;
+drop policy if exists avatares_anon_all              on public.avatares;
+drop policy if exists fotos_anon_all                 on public.fotos;
+
+create policy metas_semanais_anon_all       on public.metas_semanais       for all to anon using (true) with check (true);
+create policy sugestoes_overrides_anon_all   on public.sugestoes_overrides   for all to anon using (true) with check (true);
+create policy sugestoes_avaliacoes_anon_all  on public.sugestoes_avaliacoes  for all to anon using (true) with check (true);
+create policy feedbacks_anon_all             on public.feedbacks             for all to anon using (true) with check (true);
+create policy feedback_retornos_anon_all     on public.feedback_retornos     for all to anon using (true) with check (true);
+create policy quizzes_anon_all               on public.quizzes               for all to anon using (true) with check (true);
+create policy mensagens_gerente_anon_all     on public.mensagens_gerente     for all to anon using (true) with check (true);
+create policy avatares_anon_all              on public.avatares              for all to anon using (true) with check (true);
+create policy fotos_anon_all                 on public.fotos                 for all to anon using (true) with check (true);
 
 -- ════════════════════════════════════════════════════════════════════════
 -- SEED das metas atuais de junho/2026 (S3/S4 já ajustadas)
