@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * coleta_precificacao.mjs — coleta as ÚLTIMAS NFes de entrada (90d) por loja, com detalhe
- * fiscal por item, para a rotina de PRECIFICAÇÃO. 100% headless (reusa microvix_auth +
- * perfil persistente + Keychain). NÃO grava nada no ERP — só lê.
+ * coleta_precificacao.mjs — coleta as NFes PENDENTES (últimos 45d, ainda NÃO lançadas no
+ * ERP) por loja, com detalhe fiscal por item, para a rotina de PRECIFICAÇÃO. 100% headless
+ * (reusa microvix_auth + perfil persistente + Keychain). NÃO grava nada no ERP — só lê.
  *
  * Saída: /Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_dados.json
  *   { gerado_em, lojas: { L1:[nfe...], L3, L4, L5 } }
@@ -32,7 +32,7 @@ const EMP_TO_LOJA = { 1: "L1", 3: "L3", 4: "L4", 10: "L5" };
 const URL_NFE = "https://linx.microvix.com.br/gestor_web/produtos/entrada_nfe/index.html";
 const HOJE = new Date();
 const ANO = HOJE.getFullYear();
-const CUTOFF_DIAS = 90;
+const CUTOFF_DIAS = 45; // só NFes recentes (45d)
 
 // fornecedor (CNPJ ou nome) → marca; multi-marca ('+') ou desconhecido → null
 function fornBrand(emit) {
@@ -114,6 +114,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         let dt; try { dt = new Date(String(de).replace("Z", "+00:00")); } catch { continue; }
         if (dt.getFullYear() !== ANO) continue;
         if (dt < cutoff) continue;
+        if (nfe.LancadaNoMicrovix) continue; // só PENDENTES (ainda não deram entrada no ERP)
         if (!keepNfe(nfe)) continue;
         const emit = nfe.DadosEmitente || {};
         if (fornIgnorado(emit.Nome)) continue;

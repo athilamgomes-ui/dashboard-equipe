@@ -145,15 +145,22 @@ function custoEfetivo(item){
   return c;
 }
 
+// arredonda PARA CIMA até terminar em ,90 (nunca abaixo do preço calculado → margem ≥ alvo)
+function arredonda90(p){
+  let cand = Math.floor(p) + 0.90;
+  if(cand < p - 1e-9) cand += 1;
+  return Math.round(cand*100)/100;
+}
 function calc(item, margem){
   const cfg=PARAMS.lojas[lojaAtual]||{}, g=PARAMS.globais||{};
   const custo=custoEfetivo(item);
-  const somaPct = (cfg.imposto||0)+(g.cartao||0)+(g.comissao||0)+(g.outros||0)+(cfg.custo_fixo||0)+margem;
-  const div = 1-somaPct;
-  if(div<=0) return {erro:true, custo, preco:null, markup:null, margemReal:null};
-  const preco = custo/div;
-  const lucro = preco*(1-(cfg.imposto||0)-(g.cartao||0)-(g.comissao||0)-(g.outros||0)-(cfg.custo_fixo||0)) - custo;
-  return {custo, preco, markup:preco/custo, margemReal:lucro/preco};
+  const fixos = (cfg.imposto||0)+(g.cartao||0)+(g.comissao||0)+(g.outros||0)+(cfg.custo_fixo||0);
+  const div = 1-fixos-margem;
+  if(div<=0) return {erro:true, custo, preco:null, precoBruto:null, markup:null, margemReal:null};
+  const precoBruto = custo/div;
+  const preco = arredonda90(precoBruto);                       // preço de etiqueta (,90)
+  const lucro = preco*(1-fixos) - custo;                       // margem real do preço arredondado
+  return {custo, preco, precoBruto, markup:preco/custo, margemReal:lucro/preco};
 }
 
 function renderNfes(){
