@@ -8,10 +8,10 @@
   },
   "_tabelas_doc": "No ERP os preços ficam em Estoque > Relatórios > Lista de Preço (Ajustes de preço / Preços de venda / Produtos ativos). Cada loja aplica numa tabela. L1 e L4 compartilham a Tabela padrão (mesmo preço).",
   "lojas": {
-    "L1": { "nome": "Casa da Beleza Altamira", "empresa": 1, "regime": "lucro_real", "imposto": 0.19, "custo_fixo": 0.191, "abater_credito_icms": false, "aliquota_credito_icms": 0.0, "tabela_preco": "Tabela padrão" },
-    "L3": { "nome": "Casa da Beleza Itaituba", "empresa": 3, "regime": "simples", "imposto": 0.19, "custo_fixo": 0.191, "abater_credito_icms": false, "aliquota_credito_icms": 0.0, "tabela_preco": "Tabela Itaituba" },
+    "L1": { "nome": "Casa da Beleza Altamira", "empresa": 1, "regime": "lucro_real", "imposto": 0.19, "custo_fixo": 0.20, "abater_credito_icms": false, "aliquota_credito_icms": 0.0, "tabela_preco": "Tabela padrão" },
+    "L3": { "nome": "Casa da Beleza Itaituba", "empresa": 3, "regime": "simples", "imposto": 0.19, "custo_fixo": 0.20, "abater_credito_icms": false, "aliquota_credito_icms": 0.0, "tabela_preco": "Tabela Itaituba" },
     "L4": { "nome": "MissBeleza Altamira", "empresa": 4, "regime": "lucro_real", "imposto": 0.19, "custo_fixo": 0.191, "abater_credito_icms": false, "aliquota_credito_icms": 0.0, "tabela_preco": "Tabela padrão" },
-    "L5": { "nome": "MissBeleza Santarem", "empresa": 10, "regime": "lucro_real", "imposto": 0.19, "custo_fixo": 0.191, "abater_credito_icms": false, "aliquota_credito_icms": 0.0, "tabela_preco": "Tabela Santarém" }
+    "L5": { "nome": "MissBeleza Santarem", "empresa": 10, "regime": "lucro_real", "imposto": 0.19, "custo_fixo": 0.20, "abater_credito_icms": false, "aliquota_credito_icms": 0.0, "tabela_preco": "Tabela Santarém" }
   },
   "margem": {
     "_default": 0.15,
