@@ -105,7 +105,8 @@
         <strong id="itensTitulo">Itens</strong>
         <div class="row">
           <button class="btn sec" id="btnCsv">⬇️ CSV</button>
-          <button class="btn" id="btnXlsx">📥 Exportar lista aprovada (XLSX)</button>
+          <button class="btn sec" id="btnXlsx">📥 XLSX</button>
+          <button class="btn" id="btnTxtErp" title="Gera o .txt p/ importar em Estoque > Lista de Preços > Arquivo para atualização de valores">📤 Arquivo p/ ERP (.txt)</button>
         </div>
       </div>
       <div class="tbl-wrap">
@@ -339,6 +340,30 @@ document.getElementById("btnCsv").onclick=()=>{
   const blob=new Blob(["﻿"+head+"\n"+body],{type:"text/csv"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
   const nf=DADOS.lojas[lojaAtual][nfeSel]; a.download=`precos_${lojaAtual}_NF${nf.numero}.csv`; a.click();
+};
+
+// Gera o .txt p/ importar no ERP (Estoque > Lista de Preços > "Arquivo para atualização de valores").
+// Formato: "codigo;preco" (vírgula decimal). Só itens com correspondência EXATA por código (match_tipo='ean'),
+// usando o código interno do ERP (cod_erp) → no ERP, marcar "Código de Produto".
+document.getElementById("btnTxtErp").onclick=()=>{
+  const arr=DADOS.lojas[lojaAtual]||[]; const nf=arr[nfeSel];
+  if(!nf){alert("Selecione uma NF-e.");return;}
+  const linhas=[]; let exatos=0, aprox=0, semcod=0, erro=0;
+  for(const it of nf.itens){
+    const k=itemKey(nf,it); const margem=overrides[k]!=null?overrides[k]:margemMarca(it.marca);
+    const r=calc(it,margem); const f=finais(it,k,margem,r);
+    if(f.erro||f.preco==null){erro++; continue;}
+    if(it.match_tipo==='ean' && it.cod_erp){ linhas.push(`${it.cod_erp};${f.preco.toFixed(2).replace('.',',')}`); exatos++; }
+    else if(it.match_tipo==='desc') aprox++;
+    else semcod++;
+  }
+  if(!linhas.length){alert("Nenhum item com correspondência exata por código para gerar o arquivo.");return;}
+  const blob=new Blob([linhas.join("\n")+"\n"],{type:"text/plain"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download=`precos_${lojaAtual}_NF${nf.numero}.txt`; a.click();
+  alert(`Arquivo gerado: ${exatos} itens (correspondência exata por código).\n`+
+        `Fora do arquivo: ${aprox} por descrição (aproximados, revisar) · ${semcod} sem código · ${erro} sem preço.\n\n`+
+        `No ERP: Estoque > Relatórios > Lista de Preços > marque "Ajuste de Preços" > "Arquivo para atualização de valores" > selecione o arquivo, marque "Código de Produto", Validar e Upload. Empresa: ${(PARAMS.lojas[lojaAtual]||{}).empresa} · Tabela: ${(PARAMS.lojas[lojaAtual]||{}).tabela_preco}.`);
 };
 
 elLoja.onchange=()=>{lojaAtual=elLoja.value; nfeSel=null; syncCreditoToggle(); renderNfes(); renderItens();};
