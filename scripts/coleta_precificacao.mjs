@@ -21,11 +21,15 @@
 import { chromium } from "playwright";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, rmSync, statSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { garantirSessao } from "./microvix_auth.mjs";
 
 const PROFILE_DIR = join(homedir(), ".claude", "microvix-profile");
-const OUT = "/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_dados.json";
+const REPO = "/Users/elkgomes/Desktop/claude/dashboard-equipe";
+const OUT = REPO + "/precificacao_dados.json";
+const CRON = process.env.PUSH === "1";      // modo agendado: trava + git push
+const LOCKDIR = "/tmp/precificacao_update.lock.d";
 const FORN_MARCAS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/compras/fornecedor_marcas.json", "utf8"));
 const ICMS_UF = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_icms_estados.json", "utf8"));
 const PARAMS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_params.json", "utf8"));
@@ -220,6 +224,10 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
 }
 
 (async () => {
+  if (CRON) { // trava p/ não sobrepor execuções agendadas (limpa lock órfão > 30min)
+    try { if (Date.now() - statSync(LOCKDIR).mtimeMs > 30 * 60000) rmSync(LOCKDIR, { recursive: true, force: true }); } catch {}
+    try { mkdirSync(LOCKDIR); } catch { log("já em execução — saindo"); process.exit(30); }
+  }
   const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true, viewport: { width: 1400, height: 900 } });
   const page = ctx.pages()[0] || (await ctx.newPage());
   try {
@@ -423,10 +431,18 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
     const payload = { gerado_em: new Date().toISOString(), cutoff_dias: CUTOFF_DIAS, dias_entrega: DIAS_ENTREGA, lojas };
     writeFileSync(OUT, JSON.stringify(payload, null, 2));
     log(`OK → ${OUT} (${totItens} itens em ${totNfes} NFes)`);
+    if (CRON) { // publica no GitHub Pages (só se mudou)
+      try {
+        const ch = execSync("git status --porcelain precificacao_dados.json", { cwd: REPO }).toString().trim();
+        if (ch) { execSync("git add precificacao_dados.json && git commit -q -m 'precificacao: dados (coleta agendada)' && git push -q origin main", { cwd: REPO }); log("publicado no GitHub Pages"); }
+        else log("sem mudança — nada a publicar");
+      } catch (e) { log("git push falhou: " + String(e.message || e).split("\n")[0]); }
+    }
   } catch (e) {
     log(`FALHA: ${String(e.message || e).split("\n")[0]}`);
     process.exitCode = e.code === "NO_CREDS" || e.code === "LOGIN_FAIL" ? 2 : 1;
   } finally {
     await ctx.close();
+    if (CRON) { try { rmSync(LOCKDIR, { recursive: true, force: true }); } catch {} }
   }
 })();
