@@ -34,6 +34,11 @@ function kcRead(service) {
 }
 
 export function getCredenciais() {
+  // CI / servidor (GitHub Actions): credenciais vêm de env vars (secrets).
+  // Local (Mac): vêm do Keychain. Env tem prioridade quando presente.
+  if (process.env.MICROVIX_USER && process.env.MICROVIX_PASS) {
+    return { usuario: process.env.MICROVIX_USER, senha: process.env.MICROVIX_PASS };
+  }
   const usuario = kcRead(KC_SVC_USER);
   const senha = kcRead(KC_SVC_PWD);
   if (!usuario || !senha) {

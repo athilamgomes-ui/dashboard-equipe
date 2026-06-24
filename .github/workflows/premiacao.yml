@@ -1,0 +1,54 @@
+name: Coleta premiação (Microvix → premiacao_dados.json)
+
+# Roda na NUVEM (GitHub Actions), independente do Mac do Athila.
+# Coleta vendas + Marcas A do Microvix e commita premiacao_dados.json.
+# Horários em UTC. Brasil (BRT) = UTC-3. 8/12/15/18h BRT = 11/15/18/21h UTC.
+on:
+  schedule:
+    - cron: '0 11,15,18,21 * * 1-6'   # seg-sáb, 8/12/15/18h BRT
+  workflow_dispatch: {}                # permite rodar manual no botão "Run workflow"
+
+# Permite o job commitar de volta no repo.
+permissions:
+  contents: write
+
+# Evita duas execuções ao mesmo tempo (corrida de escrita).
+concurrency:
+  group: premiacao-coleta
+  cancel-in-progress: false
+
+jobs:
+  coleta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instala dependências + Playwright (Chromium)
+        working-directory: scripts
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Coleta (Etapa 1 vendas + Etapa 2 Marcas A)
+        working-directory: scripts
+        env:
+          MICROVIX_USER: ${{ secrets.MICROVIX_USER }}
+          MICROVIX_PASS: ${{ secrets.MICROVIX_PASS }}
+        run: node coleta_premiacao_ci.mjs
+
+      - name: Commita premiacao_dados.json (só se mudou)
+        run: |
+          git config user.name  "premiacao-bot"
+          git config user.email "premiacao-bot@users.noreply.github.com"
+          if git diff --quiet -- premiacao_dados.json; then
+            echo "Sem mudança nos dados — nada a commitar."
+          else
+            git add premiacao_dados.json
+            git commit -m "dados premiação $(date -u -d '-3 hour' '+%d/%m %H:%M') (GitHub Actions)"
+            git push
+          fi
