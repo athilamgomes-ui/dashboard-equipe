@@ -17,7 +17,7 @@
     "_default": 0.15,
     "_por_marca": {}
   },
-  "_st_entrada_doc": "ICMS-ST antecipado na ENTRADA, somado ao custo do produto SÓ quando o item é ST e a NF NÃO veio com ST já retido. % por UF de origem da nota (regra do usuário 23/06).",
+  "_st_entrada_doc": "ICMS-ST antecipado na ENTRADA, somado ao custo do produto SEMPRE que o item for ST (determinado por NCM x CST do XML). % por UF de origem da nota (regra do usuário 23/06).",
   "st_entrada_por_uf": {
     "SP": 0.21, "RJ": 0.21, "ES": 0.21, "MG": 0.21,
     "GO": 0.18,

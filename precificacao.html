@@ -196,10 +196,9 @@ function creditoItem(item){
   if(cfg.regime!=="lucro_real") return 0;
   return Number(item.credito_icms_pct)||0;
 }
-// ICMS-ST antecipado na entrada (% por UF), somado ao custo só se ST e a NF não veio com ST retido
+// ICMS-ST antecipado na entrada (% por UF), somado ao custo SEMPRE que o produto for ST (NCM × CST do XML)
 function stEntradaPct(item){
-  if(!item.st) return 0;
-  if(Number(item.icms_st)>0) return 0;            // ST já retido na NF → já está no custo
+  if(!item.st) return 0;                           // só produto ST recebe o ST de entrada
   const t=(PARAMS.st_entrada_por_uf)||{};
   const r = t[item._uf];
   return (r!=null?r:(t._default||0));
