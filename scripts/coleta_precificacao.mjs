@@ -418,9 +418,11 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       }
     }
 
+    const totNfes = Object.values(lojas).reduce((s, a) => s + a.length, 0);
+    if (totNfes === 0) { log("0 NFes coletadas — PRESERVANDO arquivo anterior (não sobrescreve)."); process.exitCode = 10; await ctx.close(); return; }
     const payload = { gerado_em: new Date().toISOString(), cutoff_dias: CUTOFF_DIAS, dias_entrega: DIAS_ENTREGA, lojas };
     writeFileSync(OUT, JSON.stringify(payload, null, 2));
-    log(`OK → ${OUT} (${totItens} itens em ${Object.values(lojas).reduce((s, a) => s + a.length, 0)} NFes)`);
+    log(`OK → ${OUT} (${totItens} itens em ${totNfes} NFes)`);
   } catch (e) {
     log(`FALHA: ${String(e.message || e).split("\n")[0]}`);
     process.exitCode = e.code === "NO_CREDS" || e.code === "LOGIN_FAIL" ? 2 : 1;
