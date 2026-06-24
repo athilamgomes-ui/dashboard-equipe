@@ -30,7 +30,15 @@ const FORN_MARCAS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/comp
 const ICMS_UF = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_icms_estados.json", "utf8"));
 const PARAMS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_params.json", "utf8"));
 const MARCA_IDS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/compras/marca_ids.json", "utf8"));
+const ST_PA = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/st_pa_ncm.json", "utf8"));
+const ST_NCM = (ST_PA.ncm_st || []).map(String).sort((a, b) => b.length - a.length); // prefixos mais longos primeiro
 const URL_LISTA_PRECOS = "https://linx.microvix.com.br/gestor_web/produtos/relatorio_lista_precos.asp";
+// produto é ST no PA se o NCM (8 díg.) começa com algum código da lista SEFA-PA
+function ncmEhST(ncm) {
+  const n = String(ncm || "").replace(/\D/g, "");
+  if (!n) return false;
+  return ST_NCM.some(c => n.startsWith(c));
+}
 
 const SUPABASE_URL = "https://valhewbvjwdkkvuejrxa.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4";
@@ -135,58 +143,71 @@ function keepNfe(nfe) {
 const num = v => { const n = Number(v); return isNaN(n) ? 0 : n; };
 
 // Preço de venda atual no ERP (Estoque > Relatórios > Lista de Preços, produtos ativos somente).
-// Filtra por marca (códigos) p/ relatório pequeno e completo; devolve as linhas [{cod,ean,desc,preco}].
+// Filtra por marca (códigos); devolve [{cod,ean,desc,preco}]. Tenta até 3x (o filtro de marca às vezes falha).
 async function relatorioPrecosErp(page, empresa, tabelaNome, marcaCodes) {
-  await gotoRetry(page, URL_LISTA_PRECOS);
-  await page.waitForSelector("#empresas_" + empresa, { timeout: 20000 });
-  await page.waitForTimeout(800);
-  const baseline = await page.evaluate(() => document.querySelectorAll("table tr").length).catch(() => 0);
-  const tabUsada = await page.evaluate(({ empresa, tabelaNome, marcaCodes }) => {
-    [1, 3, 4, 9, 10, 11].forEach(i => { const e = document.getElementById("empresas_" + i); if (e) e.checked = (i === empresa); });
-    document.querySelectorAll("input[name=visao]").forEach(r => r.checked = (r.value === "A")); // analítica
-    const a = document.getElementById("ativa"); if (a) a.checked = true;
-    const d = document.getElementById("desativa"); if (d) d.checked = false;                  // ativos somente
-    const bar = document.getElementById("barras"); if (bar) bar.checked = true;               // exibir código de barras (p/ casar EAN)
-    // filtrar por marca — injeta a opção e seleciona via .value (validado no probe; NÃO chamar refresh, reseta)
-    const ms = document.getElementById("marcas");
-    if (ms && marcaCodes && marcaCodes.length) {
-      const c = String(marcaCodes[0]);
-      if (![...ms.options].some(o => o.value === c)) { const o = document.createElement("option"); o.value = c; o.text = "marca " + c; ms.add(o); }
-      ms.value = c;
-    }
-    const tp = document.getElementById("tabela_preco");
-    let usada = null;
-    if (tp) {
-      const alvo = String(tabelaNome || "").toLowerCase().replace(/tabela/i, "").trim();
-      let opt = [...tp.options].find(o => alvo && (o.text || "").toLowerCase().includes(alvo));
-      if (!opt) opt = [...tp.options].find(o => /padr/i.test(o.text || "")) || tp.options[0];
-      if (opt) { tp.value = opt.value; usada = opt.text; }
-    }
-    return usada;
-  }, { empresa, tabelaNome, marcaCodes });
-  await page.waitForTimeout(300);
-  await page.evaluate(() => { const b = document.getElementById("btnGerarRelatorio"); if (b) b.click(); });
-  let last = -1, stable = 0; const t0 = Date.now();
-  while (Date.now() - t0 < 120000) {
+  let melhor = { tabela: null, rows: [] };
+  for (let tent = 1; tent <= 3; tent++) {
+    await gotoRetry(page, URL_LISTA_PRECOS);
+    await page.waitForSelector("#empresas_" + empresa, { timeout: 20000 });
+    await page.waitForTimeout(1000);
+    const tabUsada = await page.evaluate(({ empresa, tabelaNome, marcaCodes }) => {
+      [1, 3, 4, 9, 10, 11].forEach(i => { const e = document.getElementById("empresas_" + i); if (e) e.checked = (i === empresa); });
+      document.querySelectorAll("input[name=visao]").forEach(r => r.checked = (r.value === "A"));
+      const a = document.getElementById("ativa"); if (a) a.checked = true;
+      const d = document.getElementById("desativa"); if (d) d.checked = false;
+      const bar = document.getElementById("barras"); if (bar) bar.checked = true;
+      const ms = document.getElementById("marcas");
+      if (ms && marcaCodes && marcaCodes.length) {
+        const c = String(marcaCodes[0]);
+        if (![...ms.options].some(o => o.value === c)) { const o = document.createElement("option"); o.value = c; o.text = "marca " + c; ms.add(o); }
+        [...ms.options].forEach(o => o.selected = (o.value === c)); ms.value = c;
+      }
+      const tp = document.getElementById("tabela_preco");
+      let usada = null;
+      if (tp) {
+        const alvo = String(tabelaNome || "").toLowerCase().replace(/tabela/i, "").trim();
+        let opt = [...tp.options].find(o => alvo && (o.text || "").toLowerCase().includes(alvo));
+        if (!opt) opt = [...tp.options].find(o => /padr/i.test(o.text || "")) || tp.options[0];
+        if (opt) { tp.value = opt.value; usada = opt.text; }
+      }
+      return usada;
+    }, { empresa, tabelaNome, marcaCodes });
     await page.waitForTimeout(1200);
-    const n = await page.evaluate(() => document.querySelectorAll("table tr").length).catch(() => 0);
-    if (n !== last) { last = n; stable = 0; } else if (++stable >= 4) break;
-  }
-  const rows = await page.evaluate(() => {
-    const parse = v => { v = String(v || "").trim().replace(/\./g, "").replace(",", "."); const n = parseFloat(v); return isNaN(n) ? null : n; };
-    const out = [];
-    for (const v of document.querySelectorAll('input[name^="valor_"]')) {
-      const tr = v.closest("tr"); if (!tr) continue;
-      const cod = (tr.querySelector('input[name^="codigo_"]') || {}).value || "";
-      let ean = null; const a = [...tr.querySelectorAll("a")].find(x => /codebars/i.test(x.getAttribute("href") || ""));
-      if (a) ean = (a.textContent || "").trim();
-      const desc = (tr.cells[1] && tr.cells[1].textContent || "").trim();
-      const p = parse(v.value);
-      if (p != null) out.push({ cod, ean, desc, preco: p });
+    // re-assertar a marca imediatamente antes de gerar (JS/widget às vezes reseta) e disparar
+    await page.evaluate((marcaCodes) => {
+      const ms = document.getElementById("marcas");
+      if (ms && marcaCodes && marcaCodes.length) {
+        const c = String(marcaCodes[0]);
+        if (![...ms.options].some(o => o.value === c)) { const o = document.createElement("option"); o.value = c; o.text = "marca " + c; ms.add(o); }
+        [...ms.options].forEach(o => o.selected = (o.value === c)); ms.value = c;
+      }
+      const b = document.getElementById("btnGerarRelatorio"); if (b) b.click();
+    }, marcaCodes);
+    let last = -1, stable = 0; const t0 = Date.now();
+    while (Date.now() - t0 < 120000) {
+      await page.waitForTimeout(1200);
+      const n = await page.evaluate(() => document.querySelectorAll("table tr").length).catch(() => 0);
+      if (n !== last) { last = n; stable = 0; } else if (++stable >= 4) break;
     }
-    return out;
-  });
-  return { tabela: tabUsada, rows };
+    const rows = await page.evaluate(() => {
+      const parse = v => { v = String(v || "").trim().replace(/\./g, "").replace(",", "."); const n = parseFloat(v); return isNaN(n) ? null : n; };
+      const out = [];
+      for (const v of document.querySelectorAll('input[name^="valor_"]')) {
+        const tr = v.closest("tr"); if (!tr) continue;
+        const cod = (tr.querySelector('input[name^="codigo_"]') || {}).value || "";
+        let ean = null; const a = [...tr.querySelectorAll("a")].find(x => /codebars/i.test(x.getAttribute("href") || ""));
+        if (a) ean = (a.textContent || "").trim();
+        const desc = (tr.cells[1] && tr.cells[1].textContent || "").trim();
+        const p = parse(v.value);
+        if (p != null) out.push({ cod, ean, desc, preco: p });
+      }
+      return out;
+    });
+    if (rows.length > melhor.rows.length || (melhor.rows.length === 0)) melhor = { tabela: tabUsada, rows };
+    if (rows.length > 0 && rows.length < 3000) { melhor = { tabela: tabUsada, rows }; break; } // filtro funcionou
+    log(`  filtro marca falhou (tent ${tent}/3, ${rows.length} prod) — retry`);
+  }
+  return melhor;
 }
 
 async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
@@ -330,7 +351,8 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
               const vICMS = parseFloat(tag(icmsBlk, "vICMS") || "0");
               const pICMS = parseFloat(tag(icmsBlk, "pICMS") || "0");
               const vICMSST = parseFloat(tag(icmsBlk, "vICMSST") || "0");
-              prod[cProd] = { cst, csosn, grpTag, orig: tag(icmsBlk, "orig"), vICMS, pICMS, vICMSST, vProd, cest };
+              const ncm = tag(d, "NCM");
+              prod[cProd] = { cst, csosn, grpTag, orig: tag(icmsBlk, "orig"), vICMS, pICMS, vICMSST, vProd, cest, ncm };
             }
             out[nf.id] = { uf, prod };
           } catch (e) { out[nf.id] = { uf: null, prod: {}, erro: String(e).slice(0, 80) }; }
@@ -345,17 +367,24 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         nf.uf = d.uf;
         for (const it of nf.itens) {
           const tx = (d.prod || {})[it.cprod];
-          if (!tx) { semInfo++; it.cst = null; it.icms_pct = null; it.credito_icms_pct = 0; continue; }
+          if (!tx) { semInfo++; it.cst = null; it.icms_pct = null; it.ncm = null; it.st = false; it.st_motivo = null; it.credito_icms_pct = 0; continue; }
           const cstN = String(tx.cst || "").padStart(2, "0").slice(-2);
-          const temST = CST_ST_X.has(cstN) || (Number(tx.vICMSST) > 0) || !!tx.cest; // CEST = produto ST
+          const ncm = String(tx.ncm || "").replace(/\D/g, "");
+          const stPorNcm = ncmEhST(ncm);                                    // PRIMÁRIO: NCM na lista SEFA-PA
+          const sinalNF = CST_ST_X.has(cstN) || Number(tx.vICMSST) > 0 || !!tx.cest; // fallback: sinais da NF
+          const temST = stPorNcm || sinalNF;
           it.cst = tx.cst != null ? (tx.orig != null ? tx.orig + tx.cst : tx.cst) : (tx.csosn != null ? "CSOSN " + tx.csosn : null);
           it.icms_pct = Number(tx.pICMS) || 0;
-          it.st = temST; it.cest = tx.cest || null;
+          it.ncm = ncm || null; it.cest = tx.cest || null;
+          it.st = temST;
+          it.st_motivo = stPorNcm ? "ncm" : (sinalNF ? "nf" : null); // "nf" = NF sinaliza ST mas NCM fora da lista → revisar
           it.credito_icms_pct = (!temST && Number(tx.vICMS) > 0 && tx.vProd > 0) ? (tx.vICMS / tx.vProd) : 0;
           if (it.credito_icms_pct > 0) comCredito++; else comST++;
         }
       }
-      log(`XML por item: ${nfList.length} NFes; c/ crédito ICMS=${comCredito}, sem crédito (ST/CEST/0%)=${comST}, sem info=${semInfo}`);
+      const revisar = [];
+      for (const L of Object.keys(lojas)) for (const nf of lojas[L]) for (const it of nf.itens) if (it.st_motivo === "nf") revisar.push(it.ncm);
+      log(`XML por item: ${nfList.length} NFes; c/ crédito=${comCredito}, ST sem crédito=${comST}, sem info=${semInfo}; ST só por sinal-NF (revisar NCM)=${revisar.length}`);
     }
 
     // ===== Preço de venda atual no ERP (Lista de Preços), por LOJA × MARCA =====
