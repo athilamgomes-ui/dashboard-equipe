@@ -297,7 +297,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
             custo_cheio_total: Math.round(custoTotal * 100) / 100,
             custo_unit_cheio: Math.round((custoTotal / qtd) * 10000) / 10000,
             cst: null, icms_pct: null, credito_icms_pct: 0, // preenchidos depois via BuscarDetalhesNFe
-            preco_atual: null, // preço de venda atual no ERP (preenchido depois via Lista de Preços)
+            preco_atual: null, cod_erp: null, match_tipo: null, // preço/código internos do ERP (preenchidos via Lista de Preços)
           };
         });
         if (!itens.length) continue;
@@ -405,16 +405,17 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       for (const [mk, g] of Object.entries(porMarca)) {
         try {
           const { tabela, rows } = await relatorioPrecosErp(page, empresa, tabelaNome, g.codes);
-          const porEan = {}; for (const r of rows) if (r.ean) porEan[r.ean] = r.preco;
+          const porEan = {}; for (const r of rows) if (r.ean) porEan[r.ean] = r;
           const filtroOk = rows.length > 0 && rows.length < 3000; // se trouxe o catálogo todo, NÃO casar por descrição (evita cruzar marcas)
           const rowsTok = filtroOk ? rows.map(r => ({ ...r, tok: descTokens(r.desc) })) : [];
           let porEanN = 0, porDescN = 0;
           for (const it of g.itens) {
-            if (it.ean && porEan[it.ean] != null) { it.preco_atual = porEan[it.ean]; porEanN++; continue; }
+            if (it.ean && porEan[it.ean] != null) { const r = porEan[it.ean]; it.preco_atual = r.preco; it.cod_erp = r.cod; it.match_tipo = "ean"; porEanN++; continue; }
             if (!filtroOk) continue; // sem filtro de marca confiável → só EAN
             const tk = descTokens(it.descricao); let best = null, bestS = 0;
             for (const r of rowsTok) { const s = matchScore(tk, r.tok); if (s > bestS) { bestS = s; best = r; } }
-            if (best && bestS >= 0.6) { it.preco_atual = best.preco; porDescN++; }
+            if (best && bestS >= 0.6) { it.preco_atual = best.preco; it.cod_erp = best.cod; it.match_tipo = "desc"; }  // aproximado — NÃO auto-gravar
+            porDescN += (best && bestS >= 0.6) ? 1 : 0;
           }
           log(`preços ERP ${L}/${mk} (emp ${empresa}, ${tabela || "?"}, ${rows.length} prod, filtro=${filtroOk ? "ok" : "FALHOU→só EAN"}): ${porEanN} EAN + ${porDescN} desc / ${g.itens.length}`);
         } catch (e) { log(`preços ERP ${L}/${mk} FALHOU: ${String(e.message || e).split("\n")[0]}`); }
