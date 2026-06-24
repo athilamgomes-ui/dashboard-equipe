@@ -406,18 +406,14 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         try {
           const { tabela, rows } = await relatorioPrecosErp(page, empresa, tabelaNome, g.codes);
           const porEan = {}; for (const r of rows) if (r.ean) porEan[r.ean] = r;
-          const filtroOk = rows.length > 0 && rows.length < 3000; // se trouxe o catálogo todo, NÃO casar por descrição (evita cruzar marcas)
-          const rowsTok = filtroOk ? rows.map(r => ({ ...r, tok: descTokens(r.desc) })) : [];
-          let porEanN = 0, porDescN = 0;
+          let porEanN = 0;
           for (const it of g.itens) {
-            if (it.ean && porEan[it.ean] != null) { const r = porEan[it.ean]; it.preco_atual = r.preco; it.cod_erp = r.cod; it.match_tipo = "ean"; porEanN++; continue; }
-            if (!filtroOk) continue; // sem filtro de marca confiável → só EAN
-            const tk = descTokens(it.descricao); let best = null, bestS = 0;
-            for (const r of rowsTok) { const s = matchScore(tk, r.tok); if (s > bestS) { bestS = s; best = r; } }
-            if (best && bestS >= 0.6) { it.preco_atual = best.preco; it.cod_erp = best.cod; it.match_tipo = "desc"; }  // aproximado — NÃO auto-gravar
-            porDescN += (best && bestS >= 0.6) ? 1 : 0;
+            // associação SOMENTE por EAN (código de barras) — exata, sem aproximação por descrição
+            if (it.ean && it.ean !== "SEM GTIN" && porEan[it.ean] != null) {
+              const r = porEan[it.ean]; it.preco_atual = r.preco; it.cod_erp = r.cod; it.match_tipo = "ean"; porEanN++;
+            }
           }
-          log(`preços ERP ${L}/${mk} (emp ${empresa}, ${tabela || "?"}, ${rows.length} prod, filtro=${filtroOk ? "ok" : "FALHOU→só EAN"}): ${porEanN} EAN + ${porDescN} desc / ${g.itens.length}`);
+          log(`preços ERP ${L}/${mk} (emp ${empresa}, ${tabela || "?"}, ${rows.length} prod): ${porEanN}/${g.itens.length} associados por EAN`);
         } catch (e) { log(`preços ERP ${L}/${mk} FALHOU: ${String(e.message || e).split("\n")[0]}`); }
       }
     }
