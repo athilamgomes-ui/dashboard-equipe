@@ -261,10 +261,12 @@ function paramsBar(){
 
 function itemKey(nf,it){ return lojaAtual+"|"+nf.id+"|"+it.cprod+"|"+it.descricao; }
 // status de correspondência com o ERP (entra no .txt automático ou é manual)
+// Associação por EAN: o ERP localiza o produto por QUALQUER código de barras cadastrado (confirmado:
+// os 114 EANs da NF foram achados na validação por Código de Barras). Verde = tem EAN; vermelho = sem EAN.
+function temEan(it){ return !!(it.ean && it.ean!=='SEM GTIN'); }
 function statusErp(it){
-  if(it.match_tipo==='ean'&&it.ean) return '<span style="color:var(--ok);font-weight:700">✓ associado</span>';
-  const m = (!it.ean||it.ean==='SEM GTIN') ? 'produto sem EAN na NF' : 'EAN não cadastrado no ERP';
-  return `<span style="color:var(--crit);font-weight:700">✗ não associado — corrigir cadastro (${m})</span>`;
+  if(temEan(it)) return '<span style="color:var(--ok);font-weight:700">✓ associável (EAN)</span>'+(it.preco_atual!=null?'':' <span class="muted" style="font-weight:400">· preço atual —</span>');
+  return '<span style="color:var(--crit);font-weight:700">✗ sem EAN na NF — cadastrar no ERP</span>';
 }
 
 function renderItens(){
@@ -360,16 +362,16 @@ document.getElementById("btnTxtErp").onclick=()=>{
   for(const it of nf.itens){
     const k=itemKey(nf,it); const margem=overrides[k]!=null?overrides[k]:margemMarca(it.marca);
     const r=calc(it,margem); const f=finais(it,k,margem,r);
-    if(it.match_tipo!=='ean'||!it.ean){naoassoc++; continue;}
+    if(!temEan(it)){naoassoc++; continue;}            // só os sem EAN ficam de fora
     if(f.erro||f.preco==null){erro++; continue;}
     linhas.push(`${it.ean};${f.preco.toFixed(2).replace('.',',')}`); assoc++;
   }
-  if(!linhas.length){alert("Nenhum item associado por EAN ainda. Corrija os cadastros (itens em vermelho) e clique em Atualizar associação.");return;}
+  if(!linhas.length){alert("Nenhum item com EAN para gerar o arquivo.");return;}
   const blob=new Blob([linhas.join("\n")+"\n"],{type:"text/plain"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
   a.download=`precos_${lojaAtual}_NF${nf.numero}.txt`; a.click();
-  alert(`Arquivo gerado: ${assoc} produtos associados (por EAN).`+
-        (naoassoc?`\n⚠ ${naoassoc} ainda NÃO associados (vermelhos) — corrija o cadastro e clique em "Atualizar associação".`:` 🎉 Todos associados!`)+
+  alert(`Arquivo gerado: ${assoc} produtos (por EAN/código de barras).`+
+        (naoassoc?`\n⚠ ${naoassoc} sem EAN na NF (vermelhos) — cadastrar no ERP à mão.`:` 🎉 Todos com EAN!`)+
         (erro?`\n${erro} sem preço.`:``)+
         `\n\nNo ERP: Estoque > Relatórios > Lista de Preços > "Ajuste de Preços" > "Arquivo para atualização de valores" > selecione o arquivo, marque "Código de Barras", Validar e Upload. Empresa ${(PARAMS.lojas[lojaAtual]||{}).empresa} · ${(PARAMS.lojas[lojaAtual]||{}).tabela_preco}.`);
 };
@@ -380,16 +382,16 @@ document.getElementById("btnPendentes").onclick=()=>{
   if(!nf){alert("Selecione uma NF-e.");return;}
   const rows=[];
   for(const it of nf.itens){
-    if(it.match_tipo==='ean'&&it.ean) continue; // associados já vão no .txt
+    if(temEan(it)) continue; // com EAN já vão no .txt
     const k=itemKey(nf,it); const margem=overrides[k]!=null?overrides[k]:margemMarca(it.marca);
     const r=calc(it,margem); const f=finais(it,k,margem,r);
     rows.push({
-      Motivo: (!it.ean||it.ean==='SEM GTIN') ? "produto sem EAN na NF — cadastrar EAN no produto" : "EAN não cadastrado no ERP — adicionar este EAN ao produto",
+      Motivo: "produto sem EAN na NF — cadastrar EAN no produto",
       Codigo_fornecedor: it.cprod, EAN: it.ean||"", Descricao: it.descricao, Marca: it.marca||"", NCM: it.ncm||"",
       Preco_sugerido: f.preco!=null?+f.preco.toFixed(2):"", ST: it.st?"SIM":""
     });
   }
-  if(!rows.length){alert("Não há pendentes — todos os produtos estão associados. 🎉");return;}
+  if(!rows.length){alert("Não há pendentes — todos os produtos têm EAN e entram no arquivo. 🎉");return;}
   const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,"Pendentes");
   XLSX.writeFile(wb,`pendentes_${lojaAtual}_NF${nf.numero}.xlsx`);
