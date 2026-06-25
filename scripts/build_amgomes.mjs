@@ -25,10 +25,10 @@ const HTML = join(__dirname, "..", "dashboard_amgomes.html");
 // ── Config (editável) ──
 const META_MENSAL = { L1: 140000, L3: 80000, L4: 140000, L5: 90000 };
 const LOJA = {
-  L1: { emp: "1",  nome: "Casa Beleza Altamira",  cor: "#d97706", chart: "chart_L1", chartTitle: "Casa ATM" },
-  L3: { emp: "3",  nome: "Casa Beleza Itaituba",  cor: "#0891b2", chart: "chart_L3", chartTitle: "Casa Itaituba" },
-  L4: { emp: "4",  nome: "MissBeleza Altamira",   cor: "#dc2626", chart: "chart_L4", chartTitle: "MB Altamira" },
-  L5: { emp: "10", nome: "MissBeleza Santarém",   cor: "#6366f1", chart: "chart_L5", chartTitle: "MB Santarém" },
+  L1: { emp: "1",  nome: "Casa Beleza Altamira",  cor: "#d97706", chart: "chart_L1", chartTitle: "Casa ATM",      vendTitle: "Casa Altamira" },
+  L3: { emp: "3",  nome: "Casa Beleza Itaituba",  cor: "#0891b2", chart: "chart_L3", chartTitle: "Casa Itaituba", vendTitle: "Casa Itaituba" },
+  L4: { emp: "4",  nome: "MissBeleza Altamira",   cor: "#dc2626", chart: "chart_L4", chartTitle: "MB Altamira",   vendTitle: "MB Altamira" },
+  L5: { emp: "10", nome: "MissBeleza Santarém",   cor: "#6366f1", chart: "chart_L5", chartTitle: "MB Santarém",   vendTitle: "MB Santarém" },
 };
 const ORDEM_ARR = ["L5", "L4", "L1", "L3"];   // ordem dos arrays faturado/maiAcum/metas e idx do chart
 const IDX = { L5: 0, L4: 1, L1: 2, L3: 3 };
@@ -204,6 +204,47 @@ html = html.replace(/labels: \[[^\]]*Acum[^\]]*\],/,
 `<!-- CHARTSGRID_INICIO --> <!-- ordem = ranking dos KPIs (gerado por build_amgomes.mjs) -->
   <div class="grid4">
 ${cards}
+  </div>
+  `;
+    html = html.slice(0, iIni) + novoGrid + html.slice(iFim);
+  }
+}
+
+// ── 4c) Cards de Vendedores (DOM) na MESMA ordem do ranking (corresponde aos KPIs/gráficos) ──
+{
+  const iIni = html.indexOf("<!-- VENDGRID_INICIO -->");
+  const iFim = html.indexOf("<!-- VENDGRID_FIM -->");
+  if (iIni < 0 || iFim < 0) {
+    log("aviso: marcadores VENDGRID ausentes — ordem das tabelas de vendedores não sincronizada.");
+  } else {
+    // janela m12 = 12 meses terminando no mês anterior (ex.: jun → Jun/25–Mai/26)
+    const prevM = mesIdx === 0 ? 11 : mesIdx - 1;
+    const prevY = mesIdx === 0 ? aaaa - 1 : aaaa;
+    let sM = prevM - 11, sY = prevY;
+    while (sM < 0) { sM += 12; sY -= 1; }
+    const m12Label = `${MES_ABBR[sM]}/${String(sY).slice(2)}–${MES_ABBR[prevM]}/${String(prevY).slice(2)}`;
+    const th = (extra, txt, ti) =>
+      `          <th style="text-align:${extra};padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;${extra === "left" ? "text-transform:uppercase;" : ""}"${ti ? ` title="${ti}"` : ""}>${txt}</th>`;
+    const cards = ranking.map(m =>
+`    <div class="card" style="padding:14px;">
+      <div class="card-title" style="margin-bottom:10px;"><span>👤</span> Vendedores · ${m.vendTitle}</div>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr style="border-bottom:1px solid var(--border);">
+${th("left", "Vendedor")}
+${th("right", "Venda")}
+${th("right", "Tkt")}
+${th("right", "TM")}
+          <th style="text-align:right;padding:3px 4px;color:var(--accent);font-size:10px;font-weight:600;" title="Média mensal dos últimos 12 meses (${m12Label})">Méd 12M</th>
+        </tr></thead>
+        <tbody id="vend_${m.loja}" style="font-size:11px;"></tbody>
+      </table>
+    </div>`).join("\n\n");
+    const novoGrid =
+`<!-- VENDGRID_INICIO --> <!-- ordem = ranking dos KPIs (gerado por build_amgomes.mjs) -->
+  <div class="grid4" style="margin-bottom:16px;">
+
+${cards}
+
   </div>
   `;
     html = html.slice(0, iIni) + novoGrid + html.slice(iFim);
