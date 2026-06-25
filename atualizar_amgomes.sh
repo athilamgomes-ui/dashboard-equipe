@@ -65,6 +65,17 @@ if [ "$PRECISA_FULL" = "1" ]; then
   fi
 fi
 
+# ── 2.7) Top 10 marcas por loja (unidades vendidas no ANO) ──
+# Coleta YTD via relatório de saldo (Playwright headless). Se falhar, o build PRESERVA o quadro anterior.
+TM_OK=0
+for t in 1 2; do
+  if node coleta_top_marcas.mjs > /tmp/topmarcas_out.json.tmp 2>/tmp/topmarcas_err.txt && [ -s /tmp/topmarcas_out.json.tmp ]; then
+    mv /tmp/topmarcas_out.json.tmp /tmp/topmarcas_out.json; TM_OK=1; break
+  fi
+  rm -f /tmp/topmarcas_out.json.tmp; log "coleta top marcas tentativa $t falhou — retry em $((t*30))s"; sleep $((t*30))
+done
+[ "$TM_OK" = "1" ] && log "top marcas (ano) OK" || log "AVISO: top marcas falhou — build PRESERVA quadro anterior."
+
 # ── 3) Build (render determinístico de todos os blocos) ──
 cp "$HTML" /tmp/amgomes_pre_build.html
 if ! node build_amgomes.mjs /tmp/lojas_out.json /tmp/vend_out.json; then

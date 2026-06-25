@@ -241,7 +241,7 @@
   </div>
   <div class="header-right">
     <div class="date-badge">📅 01–25/06/2026 — acumulado do mês</div>
-    <div class="last-update" id="lastUpdate">Atualizado em 25/06/2026 às 11:02</div>
+    <div class="last-update" id="lastUpdate">Atualizado em 25/06/2026 às 11:21</div>
   </div>
 </div>
 
@@ -413,86 +413,265 @@
   <!-- CHARTSGRID_FIM -->
 </div>
 
-<!-- ===== SEÇÃO 2: TOP 10 MARCAS ===== -->
+<!-- ===== SEÇÃO 2: TOP 10 MARCAS POR LOJA ===== -->
 <div class="section">
-  <div class="section-title"><div class="num">2</div> Top 10 Marcas — mais vendidas por quantidade de itens (4 lojas)</div>
-  <div class="card">
-    <div class="card-title"><span>🏷️</span> Ranking por unidades vendidas &nbsp;·&nbsp; <span id="topMarcasPeriodo" style="text-transform:none;letter-spacing:0;font-weight:500;color:var(--muted2);">unidades vendidas de 26/04/2026 a 25/06/2026</span></div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th style="text-align:left;width:44px;">#</th>
-          <th style="text-align:left;">Marca</th>
-          <th style="text-align:right;width:90px;">Unidades</th>
-          <th style="text-align:left;min-width:150px;">Volume relativo</th>
+  <div class="section-title"><div class="num">2</div> Top 10 Marcas por Loja — mais vendidas por quantidade de itens</div>
+  <div style="font-size:11px;color:var(--muted2);margin:-6px 0 14px;line-height:1.5;">Unidades vendidas no ano · período <span id="topMarcasPeriodo">01/01/2026 a 25/06/2026</span> &nbsp;·&nbsp; <i>Santa Clara exclui as lixas (dadas como troco, inflavam a contagem)</i></div>
+<!-- TOPMARCAS_INICIO --> <!-- ordem = ranking dos KPIs (gerado por build_amgomes.mjs) -->
+  <div class="grid4">
+    <div class="card" style="padding:14px;">
+      <div class="card-title" style="margin-bottom:10px;"><span>🏷️</span> MB Santarém</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead><tr style="border-bottom:1px solid var(--border);">
+          <th style="text-align:left;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">#</th>
+          <th style="text-align:left;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;">Marca</th>
+          <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Itens</th>
         </tr></thead>
-        <tbody id="topMarcasTable">
-<!-- TOPMARCAS_INICIO -->
+        <tbody>
           <tr>
-            <td style="font-weight:800;color:#f59e0b;">🥇</td>
-            <td style="font-weight:600;">Santa Clara</td>
-            <td style="text-align:right;font-weight:700;">5.495</td>
-            <td><div style="background:var(--border);border-radius:5px;height:9px;overflow:hidden;"><div style="width:100%;height:100%;background:#f59e0b;border-radius:5px;"></div></div></td>
+            <td style="padding:4px 4px;width:24px;color:#f59e0b;font-weight:800;">🥇</td>
+            <td style="padding:4px 4px;font-weight:600;">Santa Clara</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">1.535</td>
           </tr>
           <tr>
-            <td style="font-weight:800;color:#94a3b8;">🥈</td>
-            <td style="font-weight:600;">Beauty Color</td>
-            <td style="text-align:right;font-weight:700;">1.393</td>
-            <td><div style="background:var(--border);border-radius:5px;height:9px;overflow:hidden;"><div style="width:25%;height:100%;background:#94a3b8;border-radius:5px;"></div></div></td>
+            <td style="padding:4px 4px;width:24px;color:#94a3b8;font-weight:800;">🥈</td>
+            <td style="padding:4px 4px;font-weight:600;">Itallian Hair</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">873</td>
           </tr>
           <tr>
-            <td style="font-weight:800;color:#cd7f32;">🥉</td>
-            <td style="font-weight:600;">Itallian</td>
-            <td style="text-align:right;font-weight:700;">1.337</td>
-            <td><div style="background:var(--border);border-radius:5px;height:9px;overflow:hidden;"><div style="width:24%;height:100%;background:#cd7f32;border-radius:5px;"></div></div></td>
+            <td style="padding:4px 4px;width:24px;color:#cd7f32;font-weight:800;">🥉</td>
+            <td style="padding:4px 4px;font-weight:600;">Otimo Bijuterias</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">739</td>
           </tr>
           <tr>
-            <td style="font-weight:800;color:#6366f1;">4º</td>
-            <td style="font-weight:600;">Otimo</td>
-            <td style="text-align:right;font-weight:700;">989</td>
-            <td><div style="background:var(--border);border-radius:5px;height:9px;overflow:hidden;"><div style="width:18%;height:100%;background:#6366f1;border-radius:5px;"></div></div></td>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">4º</td>
+            <td style="padding:4px 4px;font-weight:600;">Impala</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">708</td>
           </tr>
           <tr>
-            <td style="font-weight:800;color:#6366f1;">5º</td>
-            <td style="font-weight:600;">Yama</td>
-            <td style="text-align:right;font-weight:700;">849</td>
-            <td><div style="background:var(--border);border-radius:5px;height:9px;overflow:hidden;"><div style="width:15%;height:100%;background:#6366f1;border-radius:5px;"></div></div></td>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">5º</td>
+            <td style="padding:4px 4px;font-weight:600;">Dafu</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">483</td>
           </tr>
           <tr>
-            <td style="font-weight:800;color:#6366f1;">6º</td>
-            <td style="font-weight:600;">Marco Boni</td>
-            <td style="text-align:right;font-weight:700;">840</td>
-            <td><div style="background:var(--border);border-radius:5px;height:9px;overflow:hidden;"><div style="width:15%;height:100%;background:#6366f1;border-radius:5px;"></div></div></td>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">6º</td>
+            <td style="padding:4px 4px;font-weight:600;">Ruby Rose</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">383</td>
           </tr>
           <tr>
-            <td style="font-weight:800;color:#6366f1;">7º</td>
-            <td style="font-weight:600;">Depil Bella</td>
-            <td style="text-align:right;font-weight:700;">664</td>
-            <td><div style="background:var(--border);border-radius:5px;height:9px;overflow:hidden;"><div style="width:12%;height:100%;background:#6366f1;border-radius:5px;"></div></div></td>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">7º</td>
+            <td style="padding:4px 4px;font-weight:600;">Beauty Color</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">355</td>
           </tr>
           <tr>
-            <td style="font-weight:800;color:#6366f1;">8º</td>
-            <td style="font-weight:600;">Kiss</td>
-            <td style="text-align:right;font-weight:700;">659</td>
-            <td><div style="background:var(--border);border-radius:5px;height:9px;overflow:hidden;"><div style="width:12%;height:100%;background:#6366f1;border-radius:5px;"></div></div></td>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">8º</td>
+            <td style="padding:4px 4px;font-weight:600;">Zgy</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">342</td>
           </tr>
           <tr>
-            <td style="font-weight:800;color:#6366f1;">9º</td>
-            <td style="font-weight:600;">Hair Extrattus</td>
-            <td style="text-align:right;font-weight:700;">629</td>
-            <td><div style="background:var(--border);border-radius:5px;height:9px;overflow:hidden;"><div style="width:11%;height:100%;background:#6366f1;border-radius:5px;"></div></div></td>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">9º</td>
+            <td style="padding:4px 4px;font-weight:600;">Inoar</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">319</td>
           </tr>
           <tr>
-            <td style="font-weight:800;color:#6366f1;">10º</td>
-            <td style="font-weight:600;">CBB</td>
-            <td style="text-align:right;font-weight:700;">627</td>
-            <td><div style="background:var(--border);border-radius:5px;height:9px;overflow:hidden;"><div style="width:11%;height:100%;background:#6366f1;border-radius:5px;"></div></div></td>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">10º</td>
+            <td style="padding:4px 4px;font-weight:600;">Kiss New York</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">317</td>
           </tr>
-          <!-- TOPMARCAS_FIM -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" style="padding:14px;">
+      <div class="card-title" style="margin-bottom:10px;"><span>🏷️</span> Casa Altamira</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead><tr style="border-bottom:1px solid var(--border);">
+          <th style="text-align:left;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">#</th>
+          <th style="text-align:left;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;">Marca</th>
+          <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Itens</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:#f59e0b;font-weight:800;">🥇</td>
+            <td style="padding:4px 4px;font-weight:600;">Impala</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">1.444</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:#94a3b8;font-weight:800;">🥈</td>
+            <td style="padding:4px 4px;font-weight:600;">Itallian Hair</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">1.304</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:#cd7f32;font-weight:800;">🥉</td>
+            <td style="padding:4px 4px;font-weight:600;">Santa Clara</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">1.263</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">4º</td>
+            <td style="padding:4px 4px;font-weight:600;">Beauty Color</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">917</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">5º</td>
+            <td style="padding:4px 4px;font-weight:600;">Otimo Bijuterias</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">695</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">6º</td>
+            <td style="padding:4px 4px;font-weight:600;">Marco Boni</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">686</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">7º</td>
+            <td style="padding:4px 4px;font-weight:600;">Yamá</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">591</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">8º</td>
+            <td style="padding:4px 4px;font-weight:600;">Hair Extrattus</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">551</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">9º</td>
+            <td style="padding:4px 4px;font-weight:600;">Widi Care</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">535</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">10º</td>
+            <td style="padding:4px 4px;font-weight:600;">Natum Profissional</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">508</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" style="padding:14px;">
+      <div class="card-title" style="margin-bottom:10px;"><span>🏷️</span> MB Altamira</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead><tr style="border-bottom:1px solid var(--border);">
+          <th style="text-align:left;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">#</th>
+          <th style="text-align:left;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;">Marca</th>
+          <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Itens</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:#f59e0b;font-weight:800;">🥇</td>
+            <td style="padding:4px 4px;font-weight:600;">Impala</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">1.741</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:#94a3b8;font-weight:800;">🥈</td>
+            <td style="padding:4px 4px;font-weight:600;">Itallian Hair</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">1.470</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:#cd7f32;font-weight:800;">🥉</td>
+            <td style="padding:4px 4px;font-weight:600;">Santa Clara</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">1.468</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">4º</td>
+            <td style="padding:4px 4px;font-weight:600;">Marco Boni</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">881</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">5º</td>
+            <td style="padding:4px 4px;font-weight:600;">Beauty Color</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">875</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">6º</td>
+            <td style="padding:4px 4px;font-weight:600;">Yamá</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">597</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">7º</td>
+            <td style="padding:4px 4px;font-weight:600;">Natum Profissional</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">518</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">8º</td>
+            <td style="padding:4px 4px;font-weight:600;">Hair Extrattus</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">492</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">9º</td>
+            <td style="padding:4px 4px;font-weight:600;">Widi Care</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">476</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">10º</td>
+            <td style="padding:4px 4px;font-weight:600;">Otimo Bijuterias</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">470</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" style="padding:14px;">
+      <div class="card-title" style="margin-bottom:10px;"><span>🏷️</span> Casa Itaituba</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead><tr style="border-bottom:1px solid var(--border);">
+          <th style="text-align:left;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">#</th>
+          <th style="text-align:left;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;">Marca</th>
+          <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Itens</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:#f59e0b;font-weight:800;">🥇</td>
+            <td style="padding:4px 4px;font-weight:600;">Santa Clara</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">1.464</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:#94a3b8;font-weight:800;">🥈</td>
+            <td style="padding:4px 4px;font-weight:600;">Impala</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">1.166</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:#cd7f32;font-weight:800;">🥉</td>
+            <td style="padding:4px 4px;font-weight:600;">Dafu</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">546</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">4º</td>
+            <td style="padding:4px 4px;font-weight:600;">Otimo Bijuterias</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">432</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">5º</td>
+            <td style="padding:4px 4px;font-weight:600;">Itallian Hair</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">431</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">6º</td>
+            <td style="padding:4px 4px;font-weight:600;">5 Cinco</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">429</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">7º</td>
+            <td style="padding:4px 4px;font-weight:600;">Cbb</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">413</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">8º</td>
+            <td style="padding:4px 4px;font-weight:600;">Importados</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">354</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">9º</td>
+            <td style="padding:4px 4px;font-weight:600;">Hair Extrattus</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">333</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 4px;width:24px;color:var(--muted);font-weight:800;">10º</td>
+            <td style="padding:4px 4px;font-weight:600;">Depil Bella</td>
+            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">315</td>
+          </tr>
         </tbody>
       </table>
     </div>
   </div>
+  <!-- TOPMARCAS_FIM -->
 </div>
 
 <div class="footer">
