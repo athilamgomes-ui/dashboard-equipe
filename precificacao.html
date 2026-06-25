@@ -108,7 +108,6 @@
           <button class="btn sec" id="btnCsv">⬇️ CSV</button>
           <button class="btn sec" id="btnXlsx">📥 XLSX</button>
           <button class="btn" id="btnTxtErp" title="Gera o .txt p/ importar em Estoque > Lista de Preços > Arquivo para atualização de valores">📤 Arquivo p/ ERP (.txt)</button>
-          <button class="btn sec" id="btnPendentes" title="Baixa a lista dos itens que NÃO entram no .txt (fazer manualmente no ERP)">⚠️ Pendentes (manual)</button>
         </div>
       </div>
       <div class="tbl-wrap">
@@ -374,27 +373,6 @@ document.getElementById("btnTxtErp").onclick=()=>{
         (naoassoc?`\n⚠ ${naoassoc} sem EAN na NF (vermelhos) — cadastrar no ERP à mão.`:` 🎉 Todos com EAN!`)+
         (erro?`\n${erro} sem preço.`:``)+
         `\n\nNo ERP: Estoque > Relatórios > Lista de Preços > "Ajuste de Preços" > "Arquivo para atualização de valores" > selecione o arquivo, marque "Código de Barras", Validar e Upload. Empresa ${(PARAMS.lojas[lojaAtual]||{}).empresa} · ${(PARAMS.lojas[lojaAtual]||{}).tabela_preco}.`);
-};
-
-// Lista dos itens que NÃO entram no .txt (fazer manualmente no ERP): por descrição (aproximados) + sem código.
-document.getElementById("btnPendentes").onclick=()=>{
-  const arr=DADOS.lojas[lojaAtual]||[]; const nf=arr[nfeSel];
-  if(!nf){alert("Selecione uma NF-e.");return;}
-  const rows=[];
-  for(const it of nf.itens){
-    if(temEan(it)) continue; // com EAN já vão no .txt
-    const k=itemKey(nf,it); const margem=overrides[k]!=null?overrides[k]:margemMarca(it.marca);
-    const r=calc(it,margem); const f=finais(it,k,margem,r);
-    rows.push({
-      Motivo: "produto sem EAN na NF — cadastrar EAN no produto",
-      Codigo_fornecedor: it.cprod, EAN: it.ean||"", Descricao: it.descricao, Marca: it.marca||"", NCM: it.ncm||"",
-      Preco_sugerido: f.preco!=null?+f.preco.toFixed(2):"", ST: it.st?"SIM":""
-    });
-  }
-  if(!rows.length){alert("Não há pendentes — todos os produtos têm EAN e entram no arquivo. 🎉");return;}
-  const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,"Pendentes");
-  XLSX.writeFile(wb,`pendentes_${lojaAtual}_NF${nf.numero}.xlsx`);
 };
 
 // Recarrega os dados da última coleta (reassocia produtos cujo cadastro foi corrigido no ERP),
