@@ -21,6 +21,7 @@ import { dirname, join } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const HTML = join(__dirname, "..", "dashboard_amgomes.html");
+const COMPRAS_DADOS = "/Users/elkgomes/Desktop/claude/compras/dados.json"; // fonte do Top 10 marcas (unidades vendidas)
 
 // ── Config (editável) ──
 const META_MENSAL = { L1: 140000, L3: 80000, L4: 140000, L5: 90000 };
@@ -297,6 +298,47 @@ ${linhasLoja("L5")}
 };
 `;
   html = html.slice(0, iIni) + novoVend + html.slice(iFim);
+}
+
+// ── 7) Top 10 Marcas por unidades vendidas (lê compras/dados.json) ──
+{
+  const iIni = html.indexOf("<!-- TOPMARCAS_INICIO -->");
+  const iFim = html.indexOf("<!-- TOPMARCAS_FIM -->");
+  let dados = null;
+  try { dados = JSON.parse(fs.readFileSync(COMPRAS_DADOS, "utf8")); } catch { /* ausente */ }
+  if (iIni < 0 || iFim < 0) {
+    log("aviso: marcadores TOPMARCAS ausentes — quadro não atualizado.");
+  } else if (!dados || !Array.isArray(dados.marcas)) {
+    log("aviso: compras/dados.json indisponível — Top 10 marcas PRESERVADO (não atualizado).");
+  } else {
+    const LJ = ["L1", "L3", "L4", "L5"];
+    const top = dados.marcas
+      .map(m => ({ marca: String(m.marca || "").trim(),
+        un: (m.produtos || []).reduce((a, p) => a + LJ.reduce((s, L) => s + ((p[L] && p[L].vendas) || 0), 0), 0) }))
+      .filter(x => x.un > 0 && x.marca && !/sem marca/i.test(x.marca))
+      .sort((a, b) => b.un - a.un)
+      .slice(0, 10);
+    const max = top.length ? top[0].un : 1;
+    const MED = ["🥇", "🥈", "🥉"];
+    const COR = ["#f59e0b", "#94a3b8", "#cd7f32"];
+    const rows = top.map((m, i) => {
+      const w = Math.max(3, Math.round((m.un / max) * 100));
+      const cor = COR[i] || "#6366f1";
+      return `          <tr>
+            <td style="font-weight:800;color:${cor};">${MED[i] || (i + 1) + "º"}</td>
+            <td style="font-weight:600;">${m.marca}</td>
+            <td style="text-align:right;font-weight:700;">${fmtMil(m.un)}</td>
+            <td><div style="background:var(--border);border-radius:5px;height:9px;overflow:hidden;"><div style="width:${w}%;height:100%;background:${cor};border-radius:5px;"></div></div></td>
+          </tr>`;
+    }).join("\n");
+    html = html.slice(0, iIni) + `<!-- TOPMARCAS_INICIO -->\n${rows}\n          ` + html.slice(iFim);
+    const p = dados.periodo || {};
+    if (p.venda_ini && p.venda_fim) {
+      html = html.replace(/(<span id="topMarcasPeriodo"[^>]*>)[^<]*(<\/span>)/,
+        `$1unidades vendidas de ${p.venda_ini} a ${p.venda_fim}$2`);
+    }
+    log(`Top 10 marcas: ${top.slice(0, 3).map(m => `${m.marca}(${m.un})`).join(", ")}…`);
+  }
 }
 
 fs.writeFileSync(HTML, html);
