@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-23'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-24'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -338,7 +338,7 @@ function detectarFaturamentos(dd){
     var valor=Math.round(items.reduce(function(a,c){return a+(Number(c.it.valor)||0);},0)*100)/100;
     var data=items.map(function(c){return String(c.it.data).slice(0,10);}).sort().slice(-1)[0]; // a mais recente das NFs
     var lancadas=items.every(function(c){return c.it.origem==='lancada';});
-    var dl=items.filter(function(c){return c.it.origem==='lancada';}).map(function(c){return String(c.it.data).slice(0,10);}).sort().slice(-1)[0]||''; // data de lançamento no ERP (entrada) — só das NFs já lançadas
+    var dl=items.filter(function(c){return c.it.origem==='lancada'&&c.it.data_lcto;}).map(function(c){return String(c.it.data_lcto).slice(0,10);}).sort().slice(-1)[0]||''; // data de LANÇAMENTO no ERP (campo Lçto = entrada feita pela equipe), distinta da emissão/faturamento
     return {nfs:nfs,nf:nfs.join('+'),valor:valor,data:data,lancadas:lancadas,dataLanc:dl,mm:mm};
   }
   function escolher(p){

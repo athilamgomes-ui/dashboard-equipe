@@ -195,7 +195,7 @@ async function coletaLancadas(page) {
     const lctoDate = dl ? new Date(dl.iso + "T12:00:00") : null;
     if (!lctoDate || lctoDate < CUTOFF) continue;       // lançadas nos últimos 45d
     if (de.ano !== ANO) continue;
-    out.push({ loja, nf: n.doc, marca: fornBrand({ Nome: n.forn }) || "(sem marca)", data: de.iso, valor: parseNumBR(n.valor), origem: "lancada", fornecedor: n.forn });
+    out.push({ loja, nf: n.doc, marca: fornBrand({ Nome: n.forn }) || "(sem marca)", data: de.iso, data_lcto: dl.iso, valor: parseNumBR(n.valor), origem: "lancada", fornecedor: n.forn });
   }
   log(`lançadas: ${out.length} (${notas.length} brutas)`);
   return out;
