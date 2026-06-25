@@ -25,10 +25,10 @@ const HTML = join(__dirname, "..", "dashboard_amgomes.html");
 // ── Config (editável) ──
 const META_MENSAL = { L1: 140000, L3: 80000, L4: 140000, L5: 90000 };
 const LOJA = {
-  L1: { emp: "1",  nome: "Casa Beleza Altamira",  cor: "#d97706", chart: "chart_L1" },
-  L3: { emp: "3",  nome: "Casa Beleza Itaituba",  cor: "#0891b2", chart: "chart_L3" },
-  L4: { emp: "4",  nome: "MissBeleza Altamira",   cor: "#dc2626", chart: "chart_L4" },
-  L5: { emp: "10", nome: "MissBeleza Santarém",   cor: "#6366f1", chart: "chart_L5" },
+  L1: { emp: "1",  nome: "Casa Beleza Altamira",  cor: "#d97706", chart: "chart_L1", chartTitle: "Casa ATM" },
+  L3: { emp: "3",  nome: "Casa Beleza Itaituba",  cor: "#0891b2", chart: "chart_L3", chartTitle: "Casa Itaituba" },
+  L4: { emp: "4",  nome: "MissBeleza Altamira",   cor: "#dc2626", chart: "chart_L4", chartTitle: "MB Altamira" },
+  L5: { emp: "10", nome: "MissBeleza Santarém",   cor: "#6366f1", chart: "chart_L5", chartTitle: "MB Santarém" },
 };
 const ORDEM_ARR = ["L5", "L4", "L1", "L3"];   // ordem dos arrays faturado/maiAcum/metas e idx do chart
 const IDX = { L5: 0, L4: 1, L1: 2, L3: 3 };
@@ -185,6 +185,29 @@ html = html.replace(/labels: \[[^\]]*Acum[^\]]*\],/,
     `makeStoreChart('${m.chart}', ${IDX[m.loja]}, '${m.cor}');  // ${m.loja} ${m.nome} — rank${m.rank}`
   ).join("\n");
   html = html.replace(/(makeStoreChart\('chart_L\d+', \d+, '#[0-9a-fA-F]+'\);[^\n]*\n?){4}/, novoCharts + "\n");
+}
+
+// ── 4b) Cards dos gráficos (DOM) na MESMA ordem do ranking dos KPIs (lojas correspondem 1-a-1) ──
+{
+  const iIni = html.indexOf("<!-- CHARTSGRID_INICIO -->");
+  const iFim = html.indexOf("<!-- CHARTSGRID_FIM -->");
+  if (iIni < 0 || iFim < 0) {
+    log("aviso: marcadores CHARTSGRID ausentes — ordem dos gráficos não sincronizada.");
+  } else {
+    const yy2 = String(aaaa).slice(2);
+    const cards = ranking.map(m =>
+`    <div class="card">
+      <div class="card-title"><span>📊</span> ${m.chartTitle} · ${mesAntLabel}/${yy2} · ${mesLabel} Acum · Meta</div>
+      <div style="position:relative;height:180px;"><canvas id="${m.chart}"></canvas></div>
+    </div>`).join("\n");
+    const novoGrid =
+`<!-- CHARTSGRID_INICIO --> <!-- ordem = ranking dos KPIs (gerado por build_amgomes.mjs) -->
+  <div class="grid4">
+${cards}
+  </div>
+  `;
+    html = html.slice(0, iIni) + novoGrid + html.slice(iFim);
+  }
 }
 
 // ── 5) Vendedores (preserva m12 por nome) ──
