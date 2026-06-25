@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-22'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-23'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -319,7 +319,7 @@ function detectarFaturamentos(dd){
   var mapLoja={ALTAMIRA:['L1','L4'],ITAITUBA:['L3'],SANTAREM:['L5']};
   var cm=(dd&&dd.chegadas_mes)||{};
   function norm(s){return String(s||'').toUpperCase().trim();}
-  DB.pedidos.forEach(function(p){ delete p._noERP; delete p._dataFat; delete p._nfMatch; delete p._temLancada; delete p._forte; delete p._nfsAll; });
+  DB.pedidos.forEach(function(p){ delete p._noERP; delete p._dataFat; delete p._dataLanc; delete p._nfMatch; delete p._temLancada; delete p._forte; delete p._nfsAll; });
   var claimed={}; // NFs já "reservadas" por um pedido FATURADO/ENTREGUE
   function candidatas(p){
     var pm=norm(p.marca), pv=Number(p.valor_total)||0, lojas=mapLoja[p.loja]||[];
@@ -338,7 +338,8 @@ function detectarFaturamentos(dd){
     var valor=Math.round(items.reduce(function(a,c){return a+(Number(c.it.valor)||0);},0)*100)/100;
     var data=items.map(function(c){return String(c.it.data).slice(0,10);}).sort().slice(-1)[0]; // a mais recente das NFs
     var lancadas=items.every(function(c){return c.it.origem==='lancada';});
-    return {nfs:nfs,nf:nfs.join('+'),valor:valor,data:data,lancadas:lancadas,mm:mm};
+    var dl=items.filter(function(c){return c.it.origem==='lancada';}).map(function(c){return String(c.it.data).slice(0,10);}).sort().slice(-1)[0]||''; // data de lançamento no ERP (entrada) — só das NFs já lançadas
+    return {nfs:nfs,nf:nfs.join('+'),valor:valor,data:data,lancadas:lancadas,dataLanc:dl,mm:mm};
   }
   function escolher(p){
     var pv=Number(p.valor_total)||0, cand=candidatas(p); if(!cand.length)return null;
@@ -351,7 +352,7 @@ function detectarFaturamentos(dd){
   }
   function aplicar(p,m){ var pv=Number(p.valor_total)||0;
     p._nfMatch={nf:m.nf,data:m.data,valor:m.valor,origem:m.lancadas?'lancada':'pendente'};
-    p._nfsAll=m.nfs; p._dataFat=m.data; p._temLancada=m.lancadas;
+    p._nfsAll=m.nfs; p._dataFat=m.data; p._dataLanc=m.dataLanc; p._temLancada=m.lancadas;
     p._forte=m.mm && pv>0 && Math.abs(m.valor-pv)/pv<=0.15;
     if(p.status==='FATURADO'&&m.lancadas&&p._forte) p._noERP=true; }
   // 1) FATURADO/ENTREGUE reservam TODAS as NFs deles (combinação inclusa)
@@ -611,16 +612,17 @@ function renderPedidos(){
     var mtds=jan.map(function(m){var v=conta?(Number(d[m])||0):0;return '<td class="num mut">'+celv(v)+'</td>';}).join('');
     var cEnv=p.data_enviado?fmtData(p.data_enviado)+deltaTxt(p.data_pedido,p.data_enviado):'—';
     var cFat=p._dataFat?fmtData(p._dataFat)+deltaTxt(p.data_enviado,p._dataFat):'—';
-    body+='<tr'+(p.status==='APROVADO'?' class="row-alerta"':'')+'><td class="mut">'+fmtData(p.data_pedido)+'</td><td class="mut">'+cEnv+'</td><td class="mut">'+cFat+'</td><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td><td class="num">'+brl(p.valor_total)+(Number(p.entrada)>0?'<br><span class="mut" style="font-size:10px" title="entrada já paga, abatida do contas a pagar">−entr '+brl(p.entrada)+'</span>':'')+'</td>'+
+    var cLanc=p._dataLanc?fmtData(p._dataLanc)+deltaTxt(p._dataFat,p._dataLanc):'—';
+    body+='<tr'+(p.status==='APROVADO'?' class="row-alerta"':'')+'><td class="mut">'+fmtData(p.data_pedido)+'</td><td class="mut">'+cEnv+'</td><td class="mut">'+cFat+'</td><td class="mut">'+cLanc+'</td><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td><td class="num">'+brl(p.valor_total)+(Number(p.entrada)>0?'<br><span class="mut" style="font-size:10px" title="entrada já paga, abatida do contas a pagar">−entr '+brl(p.entrada)+'</span>':'')+'</td>'+
       '<td><span class="pill s-'+p.status+'">'+p.status+'</span>'+(p._noERP?' <span class="mut" style="font-size:10px" title="NF já lançada no ERP — contada na linha do ERP, não recontada aqui">no ERP</span>':'')+'</td>'+mtds+
       '<td class="right acoes"><button class="btn sec mini" onclick="editar(\''+p.id+'\')">Editar</button>'+(DB.isOwner?' '+statusSelect(p):'')+'</td></tr>';});
-  body+=footerPagar(jan,5,1,1);
+  body+=footerPagar(jan,6,1,1);
   var mh=jan.map(function(m){return '<th class="num">'+nomeMes(m)+'</th>';}).join('');
   el('main').innerHTML='<div class="card"><h2>Pedidos ('+ps.length+')</h2>'+
-    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">Ordenados pela <b>data de lançamento</b> — o mais antigo primeiro. As colunas <b>Enviado em</b> e <b>Faturado em</b> (esta vinda das NFes do ERP) mostram o trâmite com os dias de cada etapa: lançamento → envio → faturamento. Ao marcar <b>ENVIADO</b>, os meses são recalculados pela data do envio; ao <b>FATURADO</b> (ou aplicando a NF detectada no ERP), pela data do faturamento — que é o que realmente vale. Colunas de mês = valor que vence em cada um dos próximos 6 meses (R$, arredondado); pedidos ENTREGUE não exibem valores nos meses. O bloco final mostra o <b>total comprometido</b> = pedidos em trânsito (enviado + faturado) + contas a pagar já lançado no ERP (por vencimento) — o MESMO total da aba Aprovações.'+(DB.nfesEm?' <span style="color:var(--ok)">NFes do ERP atualizadas '+fmtData(DB.nfesEm)+(String(DB.nfesEm).slice(11,16)?' '+String(DB.nfesEm).slice(11,16):'')+'.</span>':'')+' 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
+    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">Ordenados pela <b>data de lançamento</b> — o mais antigo primeiro. As colunas <b>Enviado em</b>, <b>Faturado em</b> e <b>Lançado em</b> (estas vindas das NFes do ERP) mostram o trâmite com os dias de cada etapa: lançamento → envio → faturamento → entrada no ERP. <b>Lançado em</b> = data em que a NF deu entrada (lançamento) no ERP. Ao marcar <b>ENVIADO</b>, os meses são recalculados pela data do envio; ao <b>FATURADO</b> (ou aplicando a NF detectada no ERP), pela data do faturamento — que é o que realmente vale. Colunas de mês = valor que vence em cada um dos próximos 6 meses (R$, arredondado); pedidos ENTREGUE não exibem valores nos meses. O bloco final mostra o <b>total comprometido</b> = pedidos em trânsito (enviado + faturado) + contas a pagar já lançado no ERP (por vencimento) — o MESMO total da aba Aprovações.'+(DB.nfesEm?' <span style="color:var(--ok)">NFes do ERP atualizadas '+fmtData(DB.nfesEm)+(String(DB.nfesEm).slice(11,16)?' '+String(DB.nfesEm).slice(11,16):'')+'.</span>':'')+' 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
     banner+bannerFat+bannerSug+
     '<div style="overflow:auto"><table>'+
-    '<tr><th>Data</th><th>Enviado em</th><th>Faturado em</th><th>Marca</th><th>Loja</th><th class="num">Valor</th><th>Status</th>'+mh+'<th class="acoes"></th></tr>'+body+'</table></div></div>';
+    '<tr><th>Data</th><th>Enviado em</th><th>Faturado em</th><th>Lançado em</th><th>Marca</th><th>Loja</th><th class="num">Valor</th><th>Status</th>'+mh+'<th class="acoes"></th></tr>'+body+'</table></div></div>';
 }
 function statusSelect(p){return '<select onchange="mudaStatus(\''+p.id+'\',this.value)" style="width:auto;display:inline-block;margin-left:6px">'+STATUS.map(function(s){return '<option '+(p.status===s?'selected':'')+'>'+s+'</option>';}).join('')+'</select>';}
 function editar(id){EDIT=DB.pedidos.filter(function(p){return p.id===id;})[0];TAB='lancar';render();}
