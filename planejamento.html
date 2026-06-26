@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-24'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-25'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -194,27 +194,25 @@ async function carregar(){
   if(!cm){ cm=comprasChegadas; DB.nfesEm=DB.realizadoEm; } // fallback: feed diário do Compras
   if(cm){ detectarFaturamentos({chegadas_mes:cm}); await autoAvancarStatus(); }
   DB.contasERP=null;
-  try{
-    var cr=await fetch('https://athilamgomes-ui.github.io/dashboard-equipe/dashboard_amgomes.html',{cache:'no-store'});
-    if(cr.ok){ DB.contasERP=parseContasERP(await cr.text()); }
+  try{ var cpr=await sb.from('contas_pagar_erp').select('dados,atualizado_em').eq('id',1).maybeSingle();
+    if(cpr&&cpr.data&&cpr.data.dados&&Array.isArray(cpr.data.dados.meses)&&cpr.data.dados.meses.length){
+      DB.contasERP=parseContasERP(cpr.data.dados, cpr.data.atualizado_em); }
   }catch(e){ DB.contasERP=null; }
   render();
 }
-/* Lê o bloco CONTASPAGAR (faturas a pagar por vencimento, fonte ERP) do dashboard de vendas público.
-   Usa só os arrays erpLx — a parte de planilha (planLx) é o que ESTE app substitui, então ignoramos. */
-function parseContasERP(html){
-  var seg=html.split('CONTASPAGAR_INICIO')[1]; if(!seg)return null; seg=seg.split('CONTASPAGAR_FIM')[0];
-  function arr(n){var m=seg.match(new RegExp(n+'\\s*=\\s*\\[([^\\]]*)\\]'));return m?m[1].split(',').map(function(x){return Number(x.trim())||0;}):null;}
-  var mm=seg.match(/meses\s*=\s*\[([^\]]*)\]/); if(!mm)return null;
-  var labels=mm[1].split(',').map(function(x){return x.replace(/['"\s]/g,'');}).filter(Boolean);
-  var e1=arr('erpL1'),e3=arr('erpL3'),e4=arr('erpL4'),e5=arr('erpL5'); if(!e1)return null;
-  var fm=seg.match(/erp:\s*'([^']+)'/); var em=fm?fm[1]:'';
+/* Lê o blob de CONTAS A PAGAR (faturas por vencimento, fonte ERP) da tabela Supabase contas_pagar_erp,
+   alimentada pelo coletor fetch_faturas_pagar.mjs (headless). Substitui a fonte antiga (bloco CONTASPAGAR
+   do dashboard de VENDAS, removido em 19/06/2026). Blob = {meses:[...], L1:[...], L3, L4, L5, geradoEm}. */
+function parseContasERP(blob, atualizado){
+  var meses=blob.meses||[]; if(!meses.length)return null;
+  var e1=blob.L1||[],e3=blob.L3||[],e4=blob.L4||[],e5=blob.L5||[];
   var ab=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
   var out={ALTAMIRA:{},ITAITUBA:{},SANTAREM:{},L1:{},L4:{}};
-  labels.forEach(function(lbl,i){var p=lbl.toLowerCase().split('/');var mi=ab.indexOf(p[0]);if(mi<0)return;
+  meses.forEach(function(lbl,i){var p=String(lbl).toLowerCase().split('/');var mi=ab.indexOf(p[0]);if(mi<0)return;
     var k='20'+p[1]+'-'+('0'+(mi+1)).slice(-2);
     out.L1[k]=e1[i]||0; out.L4[k]=e4[i]||0;
     out.ALTAMIRA[k]=(e1[i]||0)+(e4[i]||0); out.ITAITUBA[k]=e3[i]||0; out.SANTAREM[k]=e5[i]||0;});
+  var em=blob.geradoEm||(atualizado?String(atualizado).slice(0,10).split('-').reverse().join('/'):'');
   return {dados:out, em:em};
 }
 function contasERPmes(m){
@@ -270,7 +268,7 @@ function footerPagar(jan,L,G,T){
       '<tr class="totalrow" style="background:#eef2ff"><td colspan="'+L+'" class="right">= TOTAL COMPROMETIDO (trânsito + ERP)</td><td class="num"><b>'+brl(pedJan+erpJan)+'</b></td><td colspan="'+G+'"></td>'+fTt+'<td colspan="'+T+'"></td></tr>'+
       breakdownAltamira(jan,comp,L,G,T);
   } else {
-    h+='<tr><td colspan="'+TOTAL+'" class="mut" style="padding-top:8px">Contas a pagar do ERP indisponível agora (não consegui ler o dashboard de vendas). Mostrando só os pedidos em trânsito.</td></tr>';
+    h+='<tr><td colspan="'+TOTAL+'" class="mut" style="padding-top:8px">Contas a pagar do ERP indisponível agora (a coleta de faturas ainda não rodou). Mostrando só os pedidos em trânsito.</td></tr>';
   }
   var nNoErp=DB.pedidos.filter(function(p){return p._noERP&&(FILTRO_LOJA==='TODAS'||p.loja===FILTRO_LOJA)&&passaMarca(p);}).length;
   if(nNoErp) h+='<tr><td colspan="'+TOTAL+'" class="mut" style="padding-top:6px;font-size:11px">ℹ️ '+nNoErp+' pedido(s) FATURADO já constam no ERP (faturas a pagar por vencimento) — contados só na linha do ERP, sem duplicar.</td></tr>';

@@ -54,7 +54,22 @@ const URL_FATURAS = "https://linx.microvix.com.br/gestor_web/financeiro/relatori
 const URL_ERP     = "https://erp.microvix.com.br/";
 const URL_HOME    = "https://linx.microvix.com.br/v4/home/index.asp";
 
+// Grava no Supabase por padrão (tabela contas_pagar_erp, 1 linha id=1). --file = só stdout (debug).
+const FILE_MODE = process.argv.includes("--file");
+const SUPABASE_URL = "https://valhewbvjwdkkvuejrxa.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4";
+
 const log = (...a) => console.error("[faturas]", ...a);
+
+async function gravarSupabase(out) {
+  const body = JSON.stringify({ id: 1, dados: out, atualizado_em: new Date().toISOString() });
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/contas_pagar_erp`, {
+    method: "POST",
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal" },
+    body,
+  });
+  if (!r.ok) throw new Error("supabase " + r.status + " " + (await r.text()).slice(0, 300));
+}
 
 /** Login na empresa com o número informado */
 async function loginEmpresa(page, empresaId) {
@@ -263,6 +278,10 @@ async function main() {
     L1: arr("L1"), L3: arr("L3"), L4: arr("L4"), L5: arr("L5"),
   };
   console.log(JSON.stringify(out, null, 2));
+  if (!FILE_MODE) {
+    try { await gravarSupabase(out); log("gravado no Supabase (contas_pagar_erp)"); }
+    catch (e) { log("ERRO ao gravar no Supabase:", e.message); }
+  }
 }
 
 main().catch(err => {
