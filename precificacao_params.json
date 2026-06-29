@@ -8,10 +8,58 @@
   },
   "_tabelas_doc": "No ERP os precos ficam em Estoque > Relatorios > Lista de Preco (Ajustes de preco / Precos de venda / Produtos ativos). Cada loja aplica numa tabela. L1 e L4 compartilham a Tabela padrao (mesmo preco).",
   "lojas": {
-    "L1": { "nome": "Casa da Beleza Altamira", "empresa": 1, "regime": "lucro_real", "imposto": 0.19, "custo_fixo": 0.20, "cartao": 0.02, "comissao": 0.01, "outros": 0.02, "abater_credito_icms": false, "aliquota_credito_icms": 0.0, "tabela_preco": "Tabela padrão" },
-    "L3": { "nome": "Casa da Beleza Itaituba", "empresa": 3, "regime": "simples", "imposto": 0.19, "custo_fixo": 0.20, "cartao": 0.02, "comissao": 0.01, "outros": 0.02, "abater_credito_icms": false, "aliquota_credito_icms": 0.0, "tabela_preco": "Tabela Itaituba" },
-    "L4": { "nome": "MissBeleza Altamira", "empresa": 4, "regime": "lucro_real", "imposto": 0.19, "custo_fixo": 0.191, "cartao": 0.02, "comissao": 0.01, "outros": 0.02, "abater_credito_icms": false, "aliquota_credito_icms": 0.0, "tabela_preco": "Tabela padrão" },
-    "L5": { "nome": "MissBeleza Santarem", "empresa": 10, "regime": "lucro_real", "imposto": 0.19, "custo_fixo": 0.20, "cartao": 0.02, "comissao": 0.01, "outros": 0.02, "abater_credito_icms": false, "aliquota_credito_icms": 0.0, "tabela_preco": "Tabela Santarém" }
+    "L1": {
+      "nome": "Casa da Beleza Altamira",
+      "empresa": 1,
+      "regime": "lucro_real",
+      "imposto": 0.19,
+      "custo_fixo": 0.2,
+      "cartao": 0.02,
+      "comissao": 0.01,
+      "outros": 0.02,
+      "abater_credito_icms": false,
+      "aliquota_credito_icms": 0.0,
+      "tabela_preco": "Tabela Altamira"
+    },
+    "L3": {
+      "nome": "Casa da Beleza Itaituba",
+      "empresa": 3,
+      "regime": "simples",
+      "imposto": 0.19,
+      "custo_fixo": 0.2,
+      "cartao": 0.02,
+      "comissao": 0.01,
+      "outros": 0.02,
+      "abater_credito_icms": false,
+      "aliquota_credito_icms": 0.0,
+      "tabela_preco": "Tabela padrão"
+    },
+    "L4": {
+      "nome": "MissBeleza Altamira",
+      "empresa": 4,
+      "regime": "lucro_real",
+      "imposto": 0.19,
+      "custo_fixo": 0.191,
+      "cartao": 0.02,
+      "comissao": 0.01,
+      "outros": 0.02,
+      "abater_credito_icms": false,
+      "aliquota_credito_icms": 0.0,
+      "tabela_preco": "Tabela Altamira"
+    },
+    "L5": {
+      "nome": "MissBeleza Santarem",
+      "empresa": 10,
+      "regime": "lucro_real",
+      "imposto": 0.19,
+      "custo_fixo": 0.2,
+      "cartao": 0.02,
+      "comissao": 0.01,
+      "outros": 0.02,
+      "abater_credito_icms": false,
+      "aliquota_credito_icms": 0.0,
+      "tabela_preco": "Tabela padrão"
+    }
   },
   "margem": {
     "_default": 0.15,
@@ -19,7 +67,10 @@
   },
   "_st_entrada_doc": "ICMS-ST antecipado na ENTRADA, somado ao custo do produto SEMPRE que o item for ST (determinado por NCM x CST do XML). % por UF de origem da nota (regra do usuário 23/06).",
   "st_entrada_por_uf": {
-    "SP": 0.21, "RJ": 0.21, "ES": 0.21, "MG": 0.21,
+    "SP": 0.21,
+    "RJ": 0.21,
+    "ES": 0.21,
+    "MG": 0.21,
     "GO": 0.18,
     "_default": 0.21
   }
