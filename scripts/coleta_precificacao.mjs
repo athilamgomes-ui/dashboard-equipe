@@ -57,7 +57,7 @@ const HOJE = new Date();
 const ANO = HOJE.getFullYear();
 const CUTOFF_DIAS = 90;       // janela ampla p/ achar a NF (a NF pode ser dias antes da entrega)
 const DIAS_ENTREGA = Number(process.env.DIAS_ENTREGA) || 2; // só pedidos ENTREGUE com data_entrega nos últimos N dias (regra do usuário; override p/ teste: DIAS_ENTREGA=14 node ...)
-const NF_FILTER = process.env.NF ? String(process.env.NF).trim() : null; // teste: NF=9341 node ... → puxa só essa NF, ignora o filtro ENTREGUE
+const NF_FILTER = process.env.NF ? String(process.env.NF).split(",").map(s => s.trim()).filter(Boolean) : null; // teste: NF=9341 ou NF=684024,684025 node ... → puxa só essa(s) NF(s), ignora o filtro ENTREGUE
 const PROC_SKIP_PRECO = process.env.SKIP_PRECO === "1"; // pula a coleta de preço atual do ERP (debug rápido)
 const norm = s => String(s || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 // marca (normalizada) \u2192 c\u00f3digos no ERP (ex.: PROBELLE \u2192 ["858","366"])
@@ -154,7 +154,7 @@ async function relatorioPrecosErp(page, empresa, tabelaNome, marcaCodes) {
     await gotoRetry(page, URL_LISTA_PRECOS);
     await page.waitForSelector("#empresas_" + empresa, { timeout: 20000 });
     await page.waitForTimeout(1000);
-    const tabUsada = await page.evaluate(({ empresa, tabelaNome, marcaCodes }) => {
+    const tabInfo = await page.evaluate(({ empresa, tabelaNome, marcaCodes }) => {
       [1, 3, 4, 9, 10, 11].forEach(i => { const e = document.getElementById("empresas_" + i); if (e) e.checked = (i === empresa); });
       document.querySelectorAll("input[name=visao]").forEach(r => r.checked = (r.value === "A"));
       const a = document.getElementById("ativa"); if (a) a.checked = true;
@@ -167,15 +167,20 @@ async function relatorioPrecosErp(page, empresa, tabelaNome, marcaCodes) {
         [...ms.options].forEach(o => o.selected = (o.value === c)); ms.value = c;
       }
       const tp = document.getElementById("tabela_preco");
-      let usada = null;
+      let usada = null, opcoes = null, casou = false;
       if (tp) {
-        const alvo = String(tabelaNome || "").toLowerCase().replace(/tabela/i, "").trim();
-        let opt = [...tp.options].find(o => alvo && (o.text || "").toLowerCase().includes(alvo));
+        const semAcento = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+        const alvo = semAcento(tabelaNome).replace(/tabela/g, "").trim();
+        opcoes = [...tp.options].map(o => o.text);
+        let opt = [...tp.options].find(o => alvo && semAcento(o.text).includes(alvo));
+        if (opt) casou = true;
         if (!opt) opt = [...tp.options].find(o => /padr/i.test(o.text || "")) || tp.options[0];
         if (opt) { tp.value = opt.value; usada = opt.text; }
       }
-      return usada;
+      return { usada, opcoes, casou };
     }, { empresa, tabelaNome, marcaCodes });
+    if (tabInfo && !tabInfo.casou) log(`  ⚠️ tabela "${tabelaNome}" NÃO encontrada (emp ${empresa}) — usando "${tabInfo.usada}". Opções: ${(tabInfo.opcoes || []).join(" | ")}`);
+    const tabUsada = (tabInfo && tabInfo.usada) || null;
     await page.waitForTimeout(1200);
     // re-assertar a marca imediatamente antes de gerar (JS/widget às vezes reseta) e disparar
     await page.evaluate((marcaCodes) => {
@@ -276,7 +281,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         if (fornIgnorado(emit.Nome)) continue;
         const marcaForn = fornBrand(emit);
         if (NF_FILTER) {
-          if (String(nfe.Numero) !== NF_FILTER) continue; // modo teste: só a NF pedida
+          if (!NF_FILTER.includes(String(nfe.Numero))) continue; // modo teste: só a(s) NF(s) pedida(s)
         } else {
           // SÓ NFes de marca×loja que tenham pedido ENTREGUE recente no Planejamento
           if (!marcaForn) continue;
