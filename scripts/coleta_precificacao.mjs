@@ -465,7 +465,12 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
     const totNfes = Object.values(lojas).reduce((s, a) => s + a.length, 0);
     const totRaw = EMPRESAS.reduce((s, E) => s + (((raw[String(E)] || {}).NFes || []).length), 0);
     if (totNfes === 0 && totRaw === 0) { log("API não retornou NFes (provável falha de sessão) — PRESERVANDO arquivo anterior."); process.exitCode = 10; await ctx.close(); return; }
-    if (totNfes === 0) log("nenhuma entrada nos últimos " + DIAS_ENTRADA + "d — gravando fila vazia (tela limpa).");
+    if (totNfes === 0) log("nenhuma entrada nos últimos " + DIAS_ENTRADA + "d — fila vazia (tela limpa).");
+    // só grava/publica se o CONTEÚDO das NFes mudou (ignora gerado_em) — evita commit a cada 15 min só pelo timestamp
+    const lojasStr = JSON.stringify(lojas);
+    let mudou = true;
+    try { mudou = JSON.stringify(JSON.parse(readFileSync(OUT, "utf8")).lojas) !== lojasStr; } catch {}
+    if (!mudou) { log(`sem mudança de conteúdo (${totNfes} NFes) — não regrava nem publica.`); await ctx.close(); if (CRON) { try { rmSync(LOCKDIR, { recursive: true, force: true }); } catch {} } return; }
     const payload = { gerado_em: new Date().toISOString(), cutoff_dias: CUTOFF_DIAS, dias_entrada: DIAS_ENTRADA, lojas };
     writeFileSync(OUT, JSON.stringify(payload, null, 2));
     log(`OK → ${OUT} (${totItens} itens em ${totNfes} NFes)`);
