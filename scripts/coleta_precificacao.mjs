@@ -56,8 +56,13 @@ const URL_NFE = "https://linx.microvix.com.br/gestor_web/produtos/entrada_nfe/in
 const HOJE = new Date();
 const ANO = HOJE.getFullYear();
 const CUTOFF_DIAS = 90;       // janela ampla p/ achar a NF (a NF pode ser dias antes da entrega)
-const DIAS_ENTREGA = Number(process.env.DIAS_ENTREGA) || 2; // só pedidos ENTREGUE com data_entrega nos últimos N dias (regra do usuário; override p/ teste: DIAS_ENTREGA=14 node ...)
-const NF_FILTER = process.env.NF ? String(process.env.NF).split(",").map(s => s.trim()).filter(Boolean) : null; // teste: NF=9341 ou NF=684024,684025 node ... → puxa só essa(s) NF(s), ignora o filtro ENTREGUE
+// GATILHO (29/06/2026): dispara pela ENTRADA da NF no ERP (campo LancadaNoMicrovix da API), não mais pelo status ENTREGUE do Planejamento.
+// Como a API não traz a DATA do lançamento, guardamos em precificacao_lancadas.json quando cada NF foi vista lançada pela 1ª vez e mostramos as dos últimos N dias.
+const DIAS_ENTRADA = Number(process.env.DIAS_ENTRADA || process.env.DIAS_ENTREGA) || 3; // janela (dias) desde que a NF foi detectada lançada no ERP
+const STATE_FILE = REPO + "/precificacao_lancadas.json"; // estado local (gitignored): { "<chave>": "<ISO 1ª vez vista lançada>" }
+const NF_FILTER = process.env.NF ? String(process.env.NF).split(",").map(s => s.trim()).filter(Boolean) : null; // teste: NF=9341 ou NF=684024,684025 node ... → puxa só essa(s) NF(s), ignora o gatilho
+const loadState = () => { try { return JSON.parse(readFileSync(STATE_FILE, "utf8")); } catch { return null; } };
+const saveState = s => { try { writeFileSync(STATE_FILE, JSON.stringify(s, null, 0)); } catch (e) { log("aviso: não salvou estado lançadas: " + e.message); } };
 const PROC_SKIP_PRECO = process.env.SKIP_PRECO === "1"; // pula a coleta de preço atual do ERP (debug rápido)
 const norm = s => String(s || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 // marca (normalizada) \u2192 c\u00f3digos no ERP (ex.: PROBELLE \u2192 ["858","366"])
@@ -98,22 +103,22 @@ function creditoIcmsItem(tx, icmsStValor, uf) {
   return ICMS_UF.default || 0;
 }
 
-// pedidos ENTREGUE (últimos DIAS_ENTREGA dias) no Planejamento → set de "GRUPO|MARCA" alvo
-async function alvosEntregues() {
-  const since = new Date(HOJE.getTime() - DIAS_ENTREGA * 86400000).toISOString().slice(0, 10);
-  const url = `${SUPABASE_URL}/rest/v1/pedidos?status=eq.ENTREGUE&data_entrega=gte.${since}&select=loja,marca,valor_total,data_entrega`;
-  const r = await fetch(url, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
-  if (!r.ok) throw new Error("supabase pedidos " + r.status);
-  const peds = await r.json();
-  const set = new Set();
-  for (const p of peds) {
-    const g = norm(p.loja), m = norm(p.marca);
-    if (!g || !m) continue;
-    set.add(g + "|" + m);
-    (MARCA_ALIAS[m] || []).forEach(a => set.add(g + "|" + norm(a)));
-  }
-  log(`pedidos ENTREGUE (≤${DIAS_ENTREGA}d, desde ${since}): ${peds.length} → ${set.size} alvos (grupo|marca)`);
-  return set;
+// (gatilho antigo por pedido ENTREGUE no Planejamento foi substituído pelo gatilho de ENTRADA no ERP — LancadaNoMicrovix)
+// data de lançamento (entrada) por NF, da tabela nfes_erp do Supabase (coletor próprio, atualiza a cada 2h): { "L5|684024": "2026-06-29" }
+async function dataLctoErp() {
+  const map = {};
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/nfes_erp?select=dados&limit=1`, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+    if (!r.ok) throw new Error("status " + r.status);
+    const rows = await r.json();
+    for (const it of ((rows[0] && rows[0].dados) || [])) {
+      if (it.origem !== "lancada" || !it.data_lcto || !it.nf || !it.loja) continue;
+      const k = it.loja + "|" + String(it.nf).replace(/^0+/, "");
+      if (!map[k] || it.data_lcto > map[k]) map[k] = it.data_lcto; // mantém o lançamento mais recente
+    }
+    log(`data_lcto do nfes_erp: ${Object.keys(map).length} NFs lançadas mapeadas`);
+  } catch (e) { log("aviso: nfes_erp indisponível (" + e.message + ") — usando só o estado local de 1ª-vez-visto"); }
+  return map;
 }
 
 // fornecedor (CNPJ ou nome) → marca; multi-marca ('+') ou desconhecido → null
@@ -134,6 +139,9 @@ function fornIgnorado(nome) {
   const lst = (FORN_MARCAS._ignorar_no_dashboard || {}).por_nome_substring || [];
   return lst.some(s => up.includes(String(s).toUpperCase()));
 }
+// marcas mapeadas mas que NÃO são p/ revenda (uso interno: sacolas etc) → fora da precificação
+const MARCAS_NAO_REVENDA = new Set(["SOLIDER", "MULTIBAG"]);
+const marcaNaoRevenda = mk => MARCAS_NAO_REVENDA.has(norm(mk));
 
 // excluir devoluções/transferências/bonificações/amostras/consignação (não é compra p/ revenda)
 const EXCL_NAT = /(AMOSTRA|REMESSA EM CONSIGNA|BONIFIC|DEVOLU|RETORNO|TRANSFER)/i;
@@ -242,8 +250,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
     for (let i = 0; i < 30; i++) { token = await page.evaluate(() => localStorage.getItem("token_api")).catch(() => null); if (token) break; await page.waitForTimeout(500); }
     if (!token) throw new Error("token_api indisponível");
 
-    const alvos = NF_FILTER ? null : await alvosEntregues();
-    if (NF_FILTER) log(`MODO TESTE: puxando só a NF ${NF_FILTER} (ignorando filtro ENTREGUE)`);
+    if (NF_FILTER) log(`MODO TESTE: puxando só a NF ${NF_FILTER} (ignorando gatilho de entrada)`);
 
     const raw = await page.evaluate(async (empresas) => {
       const pad = n => String(n).padStart(2, "0");
@@ -264,6 +271,25 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       return res;
     }, EMPRESAS);
 
+    // GATILHO POR ENTRADA NO ERP: data de entrada = data_lcto do nfes_erp (autoritativa); fallback = 1ª vez que vimos a NF lançada (estado local), p/ cobrir o lag de até 2h do nfes_erp.
+    const lctoMap = NF_FILTER ? {} : await dataLctoErp();
+    let state = loadState() || {};
+    const nowISO = HOJE.toISOString();
+    const janelaIni = HOJE.getTime() - DIAS_ENTRADA * 86400000;
+    for (const E of EMPRESAS) {
+      const loja = EMP_TO_LOJA[E];
+      for (const nfe of ((raw[String(E)] && raw[String(E)].NFes) || [])) {
+        if (!nfe.LancadaNoMicrovix) continue;
+        const numN = String(nfe.Numero).replace(/^0+/, "");
+        if (lctoMap[loja + "|" + numN]) continue; // já tem data autoritativa, não precisa do estado
+        const ch = String(nfe.Chave || (loja + "-" + nfe.Numero));
+        if (!(ch in state)) state[ch] = nowISO; // 1ª vez vista lançada e ainda sem data_lcto → marca agora
+      }
+    }
+    const podaLim = HOJE.getTime() - 30 * 86400000; // poda estado > 30d
+    for (const k of Object.keys(state)) { const t = Date.parse(state[k]); if (!isNaN(t) && t < podaLim) delete state[k]; }
+    if (!NF_FILTER) saveState(state);
+
     const cutoff = new Date(HOJE.getTime() - CUTOFF_DIAS * 86400000);
     const lojas = { L1: [], L3: [], L4: [], L5: [] };
     let totItens = 0;
@@ -283,10 +309,15 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         if (NF_FILTER) {
           if (!NF_FILTER.includes(String(nfe.Numero))) continue; // modo teste: só a(s) NF(s) pedida(s)
         } else {
-          // SÓ NFes de marca×loja que tenham pedido ENTREGUE recente no Planejamento
-          if (!marcaForn) continue;
-          const chave = (LOJA_TO_GROUP[loja] || "") + "|" + norm(marcaForn);
-          if (!alvos.has(chave)) continue;
+          // GATILHO: NF deve ter dado ENTRADA no ERP (lançada) nos últimos DIAS_ENTRADA dias
+          if (!marcaForn) continue; // sem marca mapeada não dá p/ buscar preço ERP nem precificar com referência
+          if (marcaNaoRevenda(marcaForn)) continue; // sacolas/uso interno não vão p/ precificação
+          if (!nfe.LancadaNoMicrovix) continue;
+          const numN = String(nfe.Numero).replace(/^0+/, "");
+          const ch = String(nfe.Chave || (loja + "-" + nfe.Numero));
+          const entrISO = lctoMap[loja + "|" + numN] || state[ch]; // data_lcto autoritativa OU 1ª-vez-visto
+          const t = Date.parse(entrISO || "");
+          if (isNaN(t) || t < janelaIni) continue;
         }
         const itens = (nfe.Produtos || []).map(p => {
           const valorBase = num(p.ValorTotalLiquido) || (num(p.ValorBruto) - num(p.ValorDesconto));
@@ -432,8 +463,10 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
     }
 
     const totNfes = Object.values(lojas).reduce((s, a) => s + a.length, 0);
-    if (totNfes === 0) { log("0 NFes coletadas — PRESERVANDO arquivo anterior (não sobrescreve)."); process.exitCode = 10; await ctx.close(); return; }
-    const payload = { gerado_em: new Date().toISOString(), cutoff_dias: CUTOFF_DIAS, dias_entrega: DIAS_ENTREGA, lojas };
+    const totRaw = EMPRESAS.reduce((s, E) => s + (((raw[String(E)] || {}).NFes || []).length), 0);
+    if (totNfes === 0 && totRaw === 0) { log("API não retornou NFes (provável falha de sessão) — PRESERVANDO arquivo anterior."); process.exitCode = 10; await ctx.close(); return; }
+    if (totNfes === 0) log("nenhuma entrada nos últimos " + DIAS_ENTRADA + "d — gravando fila vazia (tela limpa).");
+    const payload = { gerado_em: new Date().toISOString(), cutoff_dias: CUTOFF_DIAS, dias_entrada: DIAS_ENTRADA, lojas };
     writeFileSync(OUT, JSON.stringify(payload, null, 2));
     log(`OK → ${OUT} (${totItens} itens em ${totNfes} NFes)`);
     if (CRON) { // publica no GitHub Pages (só se mudou)
