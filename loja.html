@@ -948,13 +948,20 @@ const VENDEDORAS_META = {
   'Rosiene':  {loja:'L5', badges:['gerente']},
   'Karina':   {loja:'L5', badges:['nova']},
   'Lucas':    {loja:'L5', badges:['caixa']},
+  // Desligadas: fora das telas operacionais (sem PIN, não entram no roster ativo
+  // nem em cálculo de semana aberta), MAS preservadas aqui pra integridade do
+  // histórico — seus prêmios das semanas em que participaram ficam congelados em
+  // HISTORICO_PREMIOS e NÃO são recalculados. Ver [[premiacao-imutabilidade-semanas-fechadas]].
+  'Elianna':  {loja:'L4', badges:[], status:'desligada', desde:'2026-06-23'},
 };
+// True se a vendedora foi desligada (não deve aparecer em telas operacionais).
+function isDesligada(nome) { return (VENDEDORAS_META[nome]?.status) === 'desligada'; }
 
 // ⚠️ TIMESTAMP DA COLETA — string ESTÁTICA escrita pela skill a cada execução
 // do cron (formato 'DD/MM/AAAA HH:MM'). O JS só LÊ esse valor pra exibir e
 // calcular "dado velho" — NUNCA sobrescrever com new Date() (bug do timestamp
 // mentiroso: a hora exibida tem que ser a da coleta real, não a do page-load).
-const DADOS_COLETADO_EM = '30/06/2026 11:24';
+const DADOS_COLETADO_EM = '30/06/2026 12:13';
 
 // MOCK DATA — substituir depois pelo carregamento de dados_premiacao.json gerado pelo agente
 // Atualizado pra Jun/2026 S1 em 01/06/2026 (dados parciais 01/06 — segunda; ontem=sáb 30/05)
@@ -1132,6 +1139,44 @@ const HISTORICO_PREMIOS = {
       // S4 meta R$34.449, vendeu R$17.647 = 51%
       _em_pct: {S1:77, S2:69, S3:66, S4:51},
       _pool:   {S1:80, S2:0, S3:0, S4:0},
+    },
+  },
+  '2026-06': {
+    // Snapshot CONGELADO das semanas FECHADAS de junho (S1-S3). IMUTÁVEL.
+    // Gerado 30/06/2026 com o roster ORIGINAL de cada semana (Elianna incluída
+    // em L4 — restaura os valores pré-demissão). S4 fica fora (semana aberta).
+    L1: {
+      'Tatiane': {S1:37, S2:29, S3:93},
+      'Rayra': {S1:32, S2:32, S3:115},
+      'Bárbara': {S1:19, S2:24, S3:72},
+      'Sofia': {S1:12, S2:15, S3:71},
+      _em_pct: {S1:85, S2:85, S3:113},
+      _pool:   {S1:100, S2:100, S3:350},
+    },
+    L3: {
+      'Ana Mira': {S1:21, S2:0, S3:37},
+      'Raimunda': {S1:18, S2:0, S3:56},
+      'Brunna': {S1:17, S2:0, S3:33},
+      'Naila': {S1:24, S2:0, S3:54},
+      _em_pct: {S1:77, S2:65, S3:92},
+      _pool:   {S1:80, S2:0, S3:180},
+    },
+    L4: {
+      'Tanaia': {S1:6, S2:0, S3:43},
+      'Bruna F.': {S1:32, S2:0, S3:145},
+      'Rosana': {S1:11, S2:0, S3:79},
+      'Débora': {S1:20, S2:0, S3:81},
+      'Elianna': {S1:11, S2:0, S3:1},  // desligada 23/06 — registro preservado
+      _em_pct: {S1:76, S2:70, S3:116},
+      _pool:   {S1:80, S2:0, S3:350},
+    },
+    L5: {
+      'Rayssa': {S1:25, S2:15, S3:98},
+      'Joyce': {S1:24, S2:18, S3:106},
+      'Rosiene': {S1:28, S2:26, S3:98},
+      'Karina': {S1:23, S2:21, S3:119},
+      _em_pct: {S1:86, S2:70, S3:150},
+      _pool:   {S1:100, S2:80, S3:420},
     },
   },
 };
@@ -2172,9 +2217,40 @@ function _isCaixa(vendedora) {
   return (VENDEDORAS_META[vendedora]?.badges || []).includes('caixa');
 }
 
+// ─── IMUTABILIDADE: snapshot CONGELADO de semana fechada ─────────────────────
+// Regra (30/06/2026): uma semana, depois de FECHADA, vira registro histórico
+// IMUTÁVEL. O cálculo de cada semana considera apenas as vendedoras ATIVAS
+// naquela semana e os dados existentes na data do fechamento — gravados em
+// HISTORICO_PREMIOS[mês][loja]. Demitir/desativar uma vendedora NÃO recalcula
+// retroativamente nenhuma semana já fechada (os valores ficam congelados aqui).
+// Só um admin, por recálculo manual explícito, pode reescrever esse snapshot.
+function _mesCorrenteKey() {
+  const h = new Date();
+  return h.getFullYear() + '-' + String(h.getMonth() + 1).padStart(2, '0');
+}
+// Retorna o objeto congelado da loja no mês corrente SE a semana já tem snapshot
+// (i.e., está fechada e congelada). null = sem snapshot → cálculo dinâmico.
+function _frozenSem(lojaKey, semId) {
+  const lh = (HISTORICO_PREMIOS[_mesCorrenteKey()] || {})[lojaKey];
+  if (!lh || !lh._pool || lh._pool[semId] === undefined) return null;
+  return lh;
+}
+
 // Retorna {pool, total, em_pct, ma, vendas} pra uma semana de uma loja,
 // ou null se não há dados / loja inexistente.
 function calcSemFechada(lojaKey, semId) {
+  // 1) Semana CONGELADA (fechada) → valores imutáveis do snapshot. Tem prioridade
+  //    sobre o cálculo dinâmico pra que mudança de roster não altere o passado.
+  const fz = _frozenSem(lojaKey, semId);
+  if (fz) {
+    const hist = VENDAS_HIST[lojaKey] || {};
+    const sem = (hist.semanas || []).find(s => s.id === semId) || {id: semId, meta: 0};
+    const vendas = (hist.vendas || {})[semId] || {};                 // só cosmético (contribuição %)
+    const total = Object.values(vendas).reduce((s, v) => s + (v || 0), 0) || null;
+    return {sem, total, em_pct: fz._em_pct[semId] || 0, ma: (hist.marcasA_loja || {})[semId] || 0,
+            pool: fz._pool[semId] || 0, vendas, _frozen: true};
+  }
+  // 2) Semana ainda aberta / sem snapshot → cálculo dinâmico (projeção).
   const hist = VENDAS_HIST[lojaKey];
   if (!hist) return null;
   const sem = (hist.semanas || []).find(s => s.id === semId);
@@ -2193,6 +2269,10 @@ function calcSemFechada(lojaKey, semId) {
 // e a entrada "Outros" da divisão (mas Outros conta no total pra em_pct).
 function calcPremioPendente(lojaKey, semId, vendedora) {
   if (_isCaixa(vendedora)) return 0;
+  // Semana CONGELADA → lê o valor imutável já gravado (não recalcula).
+  const fz = _frozenSem(lojaKey, semId);
+  if (fz) return (fz[vendedora] || {})[semId] || 0;
+  // Dinâmico (semana aberta).
   const c = calcSemFechada(lojaKey, semId);
   if (!c || c.pool <= 0) return 0;
   let totalDistr = 0;
