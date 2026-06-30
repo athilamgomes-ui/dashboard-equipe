@@ -961,7 +961,7 @@ function isDesligada(nome) { return (VENDEDORAS_META[nome]?.status) === 'desliga
 // do cron (formato 'DD/MM/AAAA HH:MM'). O JS só LÊ esse valor pra exibir e
 // calcular "dado velho" — NUNCA sobrescrever com new Date() (bug do timestamp
 // mentiroso: a hora exibida tem que ser a da coleta real, não a do page-load).
-const DADOS_COLETADO_EM = '30/06/2026 18:10';
+const DADOS_COLETADO_EM = '30/06/2026 19:36';
 
 // MOCK DATA — substituir depois pelo carregamento de dados_premiacao.json gerado pelo agente
 // Atualizado pra Jun/2026 S1 em 01/06/2026 (dados parciais 01/06 — segunda; ontem=sáb 30/05)
@@ -1142,45 +1142,45 @@ const HISTORICO_PREMIOS = {
     },
   },
   '2026-06': {
-    // Snapshot CONGELADO das semanas FECHADAS de junho (S1-S3). IMUTÁVEL.
+    // Snapshot CONGELADO das semanas FECHADAS de junho (S1-S4 — mês completo). IMUTÁVEL.
     // Gerado 30/06/2026 com o roster ORIGINAL de cada semana (Elianna incluída
-    // em L4 — restaura os valores pré-demissão). S4 fica fora (semana aberta).
-    // S3 RECALCULADA 30/06 com a META REAL (vigente, ajustada 23/06): L1=38500,
-    // L3=23000, L4=42000, L5=22100. Antes usava a Meta Ideal (25k/15k) → % e
-    // prêmios inflados. Meta Real tem prioridade absoluta. Ver
-    // [[premiacao-meta-real-vs-ideal]] e [[premiacao-imutabilidade-semanas-fechadas]].
+    // em L4 — restaura os valores pré-demissão). TODAS as semanas usam a META REAL.
+    // S3 (vigente 23/06): L1=38500 L3=23000 L4=42000 L5=22100 (antes Ideal 25k/15k → inflado).
+    // S4 CONGELADA 30/06 19:35 (fechamento do mês), Meta Real L1=44100 L3=34400 L4=53100 L5=25000,
+    // cliente 8 (R Maura, R$11.887,58/667pç) EXCLUÍDO da L5. Meta Real tem prioridade absoluta.
+    // Ver [[premiacao-meta-real-vs-ideal]] e [[premiacao-imutabilidade-semanas-fechadas]].
     L1: {
-      'Tatiane': {S1:37, S2:29, S3:21},
-      'Rayra': {S1:32, S2:32, S3:26},
-      'Bárbara': {S1:19, S2:24, S3:17},
-      'Sofia': {S1:12, S2:15, S3:16},
-      _em_pct: {S1:85, S2:85, S3:73},
-      _pool:   {S1:100, S2:100, S3:80},
+      'Tatiane': {S1:37, S2:29, S3:21, S4:55},
+      'Rayra': {S1:32, S2:32, S3:26, S4:52},
+      'Bárbara': {S1:19, S2:24, S3:17, S4:42},
+      'Sofia': {S1:12, S2:15, S3:16, S4:31},
+      _em_pct: {S1:85, S2:85, S3:73, S4:90},
+      _pool:   {S1:100, S2:100, S3:80, S4:180},
     },
     L3: {
-      'Ana Mira': {S1:21, S2:0, S3:0},
-      'Raimunda': {S1:18, S2:0, S3:0},
-      'Brunna': {S1:17, S2:0, S3:0},
-      'Naila': {S1:24, S2:0, S3:0},
-      _em_pct: {S1:77, S2:65, S3:60},
-      _pool:   {S1:80, S2:0, S3:0},
+      'Ana Mira': {S1:21, S2:0, S3:0, S4:0},
+      'Raimunda': {S1:18, S2:0, S3:0, S4:0},
+      'Brunna': {S1:17, S2:0, S3:0, S4:0},
+      'Naila': {S1:24, S2:0, S3:0, S4:0},
+      _em_pct: {S1:77, S2:65, S3:60, S4:62},
+      _pool:   {S1:80, S2:0, S3:0, S4:0},
     },
     L4: {
-      'Tanaia': {S1:6, S2:0, S3:0},
-      'Bruna F.': {S1:32, S2:0, S3:0},
-      'Rosana': {S1:11, S2:0, S3:0},
-      'Débora': {S1:20, S2:0, S3:0},
-      'Elianna': {S1:11, S2:0, S3:0},  // desligada 23/06 — registro preservado
-      _em_pct: {S1:76, S2:70, S3:69},
-      _pool:   {S1:80, S2:0, S3:0},
+      'Tanaia': {S1:6, S2:0, S3:0, S4:0},
+      'Bruna F.': {S1:32, S2:0, S3:0, S4:0},
+      'Rosana': {S1:11, S2:0, S3:0, S4:0},
+      'Débora': {S1:20, S2:0, S3:0, S4:0},
+      'Elianna': {S1:11, S2:0, S3:0, S4:0},  // desligada 23/06 — registro preservado
+      _em_pct: {S1:76, S2:70, S3:69, S4:56},
+      _pool:   {S1:80, S2:0, S3:0, S4:0},
     },
     L5: {
-      'Rayssa': {S1:25, S2:15, S3:66},
-      'Joyce': {S1:24, S2:18, S3:70},
-      'Rosiene': {S1:28, S2:26, S3:65},
-      'Karina': {S1:23, S2:21, S3:79},
-      _em_pct: {S1:86, S2:70, S3:102},
-      _pool:   {S1:100, S2:80, S3:280},
+      'Rayssa': {S1:25, S2:15, S3:66, S4:25},
+      'Joyce': {S1:24, S2:18, S3:70, S4:26},
+      'Rosiene': {S1:28, S2:26, S3:65, S4:25},
+      'Karina': {S1:23, S2:21, S3:79, S4:24},
+      _em_pct: {S1:86, S2:70, S3:102, S4:85},
+      _pool:   {S1:100, S2:80, S3:280, S4:100},
     },
   },
 };
@@ -1219,7 +1219,7 @@ const VENDAS_HIST = {
   L3: {
     semanas: [{id:'S1', meta:20000},{id:'S2', meta:25000},{id:'S3', meta:23000},{id:'S4', meta:34400}],
     vendas: {
-      S1:{Raimunda:3526,'Ana Mira':4059,Naila:4632,Brunna:3245},S2:{Raimunda:5584,'Ana Mira':4503,Naila:3101,Brunna:3115},S3:{Outros:-150,Raimunda:4356,'Ana Mira':2859,Naila:4183,Brunna:2570},S4:{Outros:-15,Raimunda:3880,'Ana Mira':6560,Naila:6300,Brunna:4712},
+      S1:{Raimunda:3526,'Ana Mira':4059,Naila:4632,Brunna:3245},S2:{Raimunda:5584,'Ana Mira':4503,Naila:3101,Brunna:3115},S3:{Outros:-150,Raimunda:4356,'Ana Mira':2859,Naila:4183,Brunna:2570},S4:{Outros:-15,Raimunda:3880,'Ana Mira':6560,Naila:6331,Brunna:4712},
     },
     marcasA_loja: {S1:18.7,S2:15.9,S3:10.5,S4:13.8},
     ontem: {data:'29/06/2026', dia_semana:'segunda', vendas:{'Ana Mira':1254,Naila:796,Brunna:728}},
