@@ -80,6 +80,19 @@ function main() {
   }
   if (!e1) { log(`Etapa 1 falhou após 4 tentativas: ${lastErr?.message}`); process.exit(1); }
 
+  // ── Exclusão cliente 8 (R Maura de Freitas) da L5 ──────────────────────────
+  // Venda entre NOSSAS lojas (uma loja comprando da L5), cai toda no VENDEDOR
+  // PADRAO → bucket "Outros". Não é venda real → descartar de TODOS os totais.
+  // Só L5 (as outras lojas mantêm "Outros" = varejo de vendedora não-cadastrada).
+  // Marcas A da L5 não incluem VENDEDOR PADRAO, então o denominador do % MA
+  // (totais abaixo) já fica correto ao remover o Outros aqui.
+  for (const s of semanas) {
+    const blk = e1.L5?.[s.id];
+    if (blk && blk.Outros) { log(`L5 ${s.id}: excluindo VENDEDOR PADRAO (cliente 8) R$${blk.Outros}`); delete blk.Outros; }
+    if (e1.L5?.[s.id + "_tickets"]) delete e1.L5[s.id + "_tickets"].Outros;
+    if (e1.L5?.[s.id + "_pecas"]) delete e1.L5[s.id + "_pecas"].Outros;
+  }
+
   // ── Etapa 2: % Marcas A da semana corrente (totais da Etapa 1) ──
   const totais = {};
   for (const L of ["L1","L3","L4","L5"]) {
