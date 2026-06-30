@@ -32,8 +32,13 @@ create policy metas_semanais_anon_all
   using (true)
   with check (true);
 
--- Seed com as metas atuais de junho/2026 (estado em 23/06, S3 e S4 já
--- ajustadas). Upsert: se rodar de novo, atualiza sem duplicar.
+-- Seed com a META REAL (vigente) de junho/2026 — confirmada 30/06 contra o
+-- Worker /metas-loja. Regra: TODO cálculo usa a Meta Real, nunca a Ideal
+-- (ver [[premiacao-meta-real-vs-ideal]]). S1/S2 não tiveram reajuste → Real =
+-- Ideal. S3 e S4 foram reajustadas pelo Athila em 23/06 (Real ≠ Ideal):
+--   S3 Real: L1=38500(ideal 25000) L3=23000(15000) L4=42000(25000) L5=22100(15000)
+--   S4 Real: L1=44100(ideal 35000) L3=34400(20000) L4=53100(35000) L5=25000(20000)
+-- Upsert: se rodar de novo, atualiza sem duplicar.
 insert into public.metas_semanais (mes, loja, semana, meta) values
   ('2026-06','L1','S1',36000),
   ('2026-06','L1','S2',44000),
