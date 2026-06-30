@@ -194,12 +194,14 @@ function margemMarca(marca){
 // crédito de ICMS por ITEM, AUTOMÁTICO pela NF: só Lucro Real (Simples não credita).
 // Lido do ICMS real destacado na nota: com ST = 0; senão = % do item. Sem toggle, sem digitação.
 function creditoItem(item){
+  if(item._uf==='PA') return 0;                    // compra DENTRO do estado (PA): imposto de entrada 0% — sem crédito de ICMS
   const cfg=PARAMS.lojas[lojaAtual]||{};
   if(cfg.regime!=="lucro_real") return 0;
   return Number(item.credito_icms_pct)||0;
 }
 // ICMS-ST antecipado na entrada (% por UF), somado ao custo SEMPRE que o produto for ST (NCM × CST do XML)
 function stEntradaPct(item){
+  if(item._uf==='PA') return 0;                    // compra DENTRO do estado (PA): imposto de entrada 0% — sem ST na entrada
   if(!item.st) return 0;                           // só produto ST recebe o ST de entrada
   const t=(PARAMS.st_entrada_por_uf)||{};
   const r = t[item._uf];
