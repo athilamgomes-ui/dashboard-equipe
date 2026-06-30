@@ -48,7 +48,9 @@ fi
 
 # ── 2) YoY mês a mês: light (reusa coleta) ou full (segunda/virada de mês) ──
 PRECISA_FULL=0
-if [ "$DOW" = "1" ]; then
+if [ "${FORCE_FULL:-0}" = "1" ]; then
+  PRECISA_FULL=1; log "FORCE_FULL=1 → full forçado (reprocessa histórico YoY)"
+elif [ "$DOW" = "1" ]; then
   PRECISA_FULL=1; log "segunda-feira → full de segurança"
 else
   node atualiza_fatmensal.mjs light /tmp/lojas_out.json 2>/tmp/fatmensal_err.txt

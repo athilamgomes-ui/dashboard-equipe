@@ -23,10 +23,12 @@ import { chromium } from "playwright";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { garantirSessao } from "./microvix_auth.mjs";
+import { rankingCliente } from "./cliente8_ranking.mjs";
 
 const PROFILE_DIR = join(homedir(), ".claude", "microvix-profile");
 const URL_REL = "https://linx.microvix.com.br/gestor_web/faturamento/relatorio_vendas_lojas.asp";
 const EMP_TO_LOJA = { 1: "L1", 3: "L3", 4: "L4", 10: "L5" };
+const COD_EXCLUIR = "8";   // R MAURA DE FREITAS — venda entre lojas, não conta no total
 
 function logErr(msg) { process.stderr.write(`[mensal] ${msg}\n`); }
 
@@ -116,11 +118,25 @@ for (const { mes, di, df } of periodos) {
     logErr(`  mês ${mes}: tabela não apareceu — gravando 0`);
   }
 
+  // Excluir cliente 8 (R MAURA — venda entre lojas) de cada loja neste mês.
+  // Não-fatal: ranking que falhar subtrai 0 e loga.
+  for (const emp of [1, 3, 4, 10]) {
+    try {
+      const c8 = await rankingCliente(page, emp, di, df, COD_EXCLUIR);
+      if (c8.valor > 0) {
+        porEmp[emp] = Math.max(0, porEmp[emp] - Math.round(c8.valor));
+        logErr(`  mês ${mes} emp${emp}: -cliente${COD_EXCLUIR} R$${c8.valor.toFixed(2)} → ${porEmp[emp]}`);
+      }
+    } catch (e) {
+      logErr(`  mês ${mes} emp${emp}: ranking cliente${COD_EXCLUIR} falhou — mantém valor cheio`);
+    }
+  }
+
   out.L5.push(porEmp[10]);
   out.L4.push(porEmp[4]);
   out.L1.push(porEmp[1]);
   out.L3.push(porEmp[3]);
-  logErr(`  mês ${mes}: L1=${porEmp[1]} L3=${porEmp[3]} L4=${porEmp[4]} L5=${porEmp[10]}`);
+  logErr(`  mês ${mes}: L1=${porEmp[1]} L3=${porEmp[3]} L4=${porEmp[4]} L5=${porEmp[10]} (líq. cliente${COD_EXCLUIR})`);
 }
 
 logErr(`OK em ${((Date.now() - t0) / 1000).toFixed(1)}s`);

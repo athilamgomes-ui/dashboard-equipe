@@ -3,9 +3,11 @@ import { chromium } from "playwright";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { garantirSessao } from "./microvix_auth.mjs";
+import { rankingCliente } from "./cliente8_ranking.mjs";
 
 const PROFILE_DIR = join(homedir(), ".claude", "microvix-profile");
 const URL_REL = "https://linx.microvix.com.br/gestor_web/faturamento/relatorio_vendas_lojas.asp";
+const COD_EXCLUIR = "8";   // R MAURA DE FREITAS — venda entre lojas, não conta no total
 
 function logErr(msg) { process.stderr.write(`[lojas] ${msg}\n`); }
 
@@ -87,6 +89,27 @@ for (const cells of tableRows) {
   if (!m) continue;
   const empId = parseInt(m[1], 10);
   out[empId] = { nome: m[2].trim(), cells };
+}
+
+// ── Excluir cliente 8 (R MAURA — venda entre lojas) do total de cada loja ──
+// Subtrai na FONTE: V.Líquida (cells[5]) e Qtde (cells[1]) viram inteiros já líquidos
+// do cliente 8. Tudo a jusante (build KPIs/maiAcum, fatMensal light) fica consistente.
+// Não-fatal: se o ranking falhar numa loja, mantém o valor original e loga.
+const numBR = s => parseFloat(String(s).replace(/\./g, "").replace(",", ".")) || 0;
+for (const empId of [1, 3, 4, 10]) {
+  const reg = out[empId];
+  if (!reg || !reg.cells) continue;
+  try {
+    const c8 = await rankingCliente(page, empId, di, df, COD_EXCLUIR);
+    if (c8.valor > 0 || c8.qtde > 0) {
+      const vliq0 = numBR(reg.cells[5]), qtd0 = numBR(reg.cells[1]);
+      reg.cells[5] = String(Math.max(0, Math.round(vliq0 - c8.valor)));
+      reg.cells[1] = String(Math.max(0, Math.round(qtd0 - c8.qtde)));
+      logErr(`emp${empId}: -cliente${COD_EXCLUIR} R$${c8.valor.toFixed(2)}/${c8.qtde}pç → V.Líq ${Math.round(vliq0)}→${reg.cells[5]}`);
+    }
+  } catch (e) {
+    logErr(`emp${empId}: ranking cliente${COD_EXCLUIR} falhou (${String(e.message).split("\n")[0].slice(0,60)}) — mantém valor cheio`);
+  }
 }
 
 logErr(`OK em ${((Date.now() - t0) / 1000).toFixed(1)}s`);
