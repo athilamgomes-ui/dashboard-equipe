@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-25'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-26'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -321,7 +321,7 @@ function detectarFaturamentos(dd){
   var claimed={}; // NFs já "reservadas" por um pedido FATURADO/ENTREGUE
   function candidatas(p){
     var pm=norm(p.marca), pv=Number(p.valor_total)||0, lojas=mapLoja[p.loja]||[];
-    var minData=String(p.data_enviado||p.data_pedido||'').slice(0,10), out=[];
+    var minData=String(p.data_pedido||p.data_enviado||'').slice(0,10), out=[]; // piso = data do PEDIDO: a fábrica fatura a NF às vezes 1-2 dias ANTES do clique "Enviado", então usar data_enviado perdia o match. A NF nunca é anterior ao pedido.
     lojas.forEach(function(L){ (cm[L]||[]).forEach(function(it){
       if(claimed[it.nf])return;
       var dt=String(it.data||'').slice(0,10); if(!dt||(minData&&dt<minData))return;
