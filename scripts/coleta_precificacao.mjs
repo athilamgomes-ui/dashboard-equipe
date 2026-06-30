@@ -271,24 +271,36 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       return res;
     }, EMPRESAS);
 
-    // GATILHO POR ENTRADA NO ERP: data de entrada = data_lcto do nfes_erp (autoritativa); fallback = 1ª vez que vimos a NF lançada (estado local), p/ cobrir o lag de até 2h do nfes_erp.
+    // GATILHO POR ENTRADA NO ERP + JANELA DE 3 DIAS A PARTIR DA 1ª APARIÇÃO NA TELA.
+    // state[chave] = data em que a NF apareceu PELA 1ª VEZ na lista de precificação (ISO). A NF fica visível
+    // por DIAS_ENTRADA dias a partir dessa data; depois é removida (não reaparece — o state lembra a data).
+    // data_lcto do nfes_erp serve só p/ decidir se a ENTRADA é recente o bastante p/ uma NF NOVA começar a
+    // aparecer (evita inundar a tela na 1ª execução com lançadas antigas que já foram precificadas).
     const lctoMap = NF_FILTER ? {} : await dataLctoErp();
-    let state = loadState() || {};
-    const nowISO = HOJE.toISOString();
-    const janelaIni = HOJE.getTime() - DIAS_ENTRADA * 86400000;
-    for (const E of EMPRESAS) {
-      const loja = EMP_TO_LOJA[E];
-      for (const nfe of ((raw[String(E)] && raw[String(E)].NFes) || [])) {
-        if (!nfe.LancadaNoMicrovix) continue;
-        const numN = String(nfe.Numero).replace(/^0+/, "");
-        if (lctoMap[loja + "|" + numN]) continue; // já tem data autoritativa, não precisa do estado
-        const ch = String(nfe.Chave || (loja + "-" + nfe.Numero));
-        if (!(ch in state)) state[ch] = nowISO; // 1ª vez vista lançada e ainda sem data_lcto → marca agora
+    const state = loadState() || {};
+    const janelaMs = DIAS_ENTRADA * 86400000;
+    const todayISO = HOJE.toISOString().slice(0, 10);
+    let stateDirty = false;
+    // poda entradas antigas do state (> 30d) p/ não crescer sem limite
+    const podaLim = HOJE.getTime() - 30 * 86400000;
+    for (const k of Object.keys(state)) { const t = Date.parse(state[k]); if (isNaN(t) || t < podaLim) { delete state[k]; stateDirty = true; } }
+    // decide visibilidade por NF; carimba a 1ª aparição
+    const visivel = (loja, nfe) => {
+      if (!nfe.LancadaNoMicrovix) return false;
+      const numN = String(nfe.Numero).replace(/^0+/, "");
+      const ch = String(nfe.Chave || (loja + "-" + nfe.Numero));
+      let desde = state[ch];
+      if (!desde) {
+        // NF nova: só COMEÇA a aparecer com EVIDÊNCIA de entrada recente = data_lcto do nfes_erp ≤ DIAS_ENTRADA.
+        // SEM data_lcto não inicia (pode ser entrada antiga que saiu da janela do nfes_erp; uma entrada de verdade
+        // ganha data_lcto na próxima rodada do coletor de NFes, ≤2h, e aí começa a aparecer).
+        const entISO = lctoMap[loja + "|" + numN];
+        const entMs = entISO ? Date.parse(entISO) : NaN;
+        if (isNaN(entMs) || (HOJE.getTime() - entMs) > janelaMs) return false;
+        desde = todayISO; state[ch] = desde; stateDirty = true; // carimba a 1ª aparição = hoje
       }
-    }
-    const podaLim = HOJE.getTime() - 30 * 86400000; // poda estado > 30d
-    for (const k of Object.keys(state)) { const t = Date.parse(state[k]); if (!isNaN(t) && t < podaLim) delete state[k]; }
-    if (!NF_FILTER) saveState(state);
+      return (HOJE.getTime() - Date.parse(desde)) <= janelaMs; // remove DIAS_ENTRADA dias após aparecer
+    };
 
     const cutoff = new Date(HOJE.getTime() - CUTOFF_DIAS * 86400000);
     const lojas = { L1: [], L3: [], L4: [], L5: [] };
@@ -309,15 +321,10 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         if (NF_FILTER) {
           if (!NF_FILTER.includes(String(nfe.Numero))) continue; // modo teste: só a(s) NF(s) pedida(s)
         } else {
-          // GATILHO: NF deve ter dado ENTRADA no ERP (lançada) nos últimos DIAS_ENTRADA dias
+          // GATILHO: entrada no ERP + visível por DIAS_ENTRADA dias a partir da 1ª aparição (depois some)
           if (!marcaForn) continue; // sem marca mapeada não dá p/ buscar preço ERP nem precificar com referência
           if (marcaNaoRevenda(marcaForn)) continue; // sacolas/uso interno não vão p/ precificação
-          if (!nfe.LancadaNoMicrovix) continue;
-          const numN = String(nfe.Numero).replace(/^0+/, "");
-          const ch = String(nfe.Chave || (loja + "-" + nfe.Numero));
-          const entrISO = lctoMap[loja + "|" + numN] || state[ch]; // data_lcto autoritativa OU 1ª-vez-visto
-          const t = Date.parse(entrISO || "");
-          if (isNaN(t) || t < janelaIni) continue;
+          if (!visivel(loja, nfe)) continue;
         }
         const itens = (nfe.Produtos || []).map(p => {
           const valorBase = num(p.ValorTotalLiquido) || (num(p.ValorBruto) - num(p.ValorDesconto));
@@ -365,6 +372,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       lojas[loja].sort((a, b) => (a.data_emissao < b.data_emissao ? 1 : -1));
       log(`${loja}: ${kept} NFes mantidas (de ${nfes.length})`);
     }
+    if (!NF_FILTER && stateDirty) saveState(state); // persiste 1ª-aparição e poda
 
     // ===== Enriquecer lendo o XML da NFe, PRODUTO POR PRODUTO (fonte autoritativa) =====
     // Crédito de ICMS por item: só se NÃO for ST. ST = CST 10/30/60/70, ICMS-ST destacado, OU tem CEST.
