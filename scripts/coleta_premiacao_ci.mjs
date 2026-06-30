@@ -80,18 +80,37 @@ function main() {
   }
   if (!e1) { log(`Etapa 1 falhou após 4 tentativas: ${lastErr?.message}`); process.exit(1); }
 
-  // ── Exclusão cliente 8 (R Maura de Freitas) da L5 ──────────────────────────
-  // Venda entre NOSSAS lojas (uma loja comprando da L5), cai toda no VENDEDOR
-  // PADRAO → bucket "Outros". Não é venda real → descartar de TODOS os totais.
-  // Só L5 (as outras lojas mantêm "Outros" = varejo de vendedora não-cadastrada).
-  // Marcas A da L5 não incluem VENDEDOR PADRAO, então o denominador do % MA
-  // (totais abaixo) já fica correto ao remover o Outros aqui.
-  for (const s of semanas) {
-    const blk = e1.L5?.[s.id];
-    if (blk && blk.Outros) { log(`L5 ${s.id}: excluindo VENDEDOR PADRAO (cliente 8) R$${blk.Outros}`); delete blk.Outros; }
-    if (e1.L5?.[s.id + "_tickets"]) delete e1.L5[s.id + "_tickets"].Outros;
-    if (e1.L5?.[s.id + "_pecas"]) delete e1.L5[s.id + "_pecas"].Outros;
-  }
+  // ── Exclusão do cliente 8 (R MAURA DE FREITAS) — TODAS as empresas ─────────
+  // Venda entre NOSSAS lojas (uma loja comprando da outra). NÃO é venda real →
+  // descartar do faturamento. Filtro REAL POR CLIENTE (independente do vendedor)
+  // via Ranking de Clientes do ERP (coleta_cliente8.mjs), pra qualquer loja.
+  // Na prática a transferência cai no VENDEDOR PADRAO → bucket "Outros"; subtraí-
+  // mos de lá. Se o valor do cliente 8 exceder o "Outros" (uma vendedora real
+  // registrou parte), zeramos o Outros e logamos pra revisão manual.
+  try {
+    const c8raw = execFileSync("node", [join(__dirname, "coleta_cliente8.mjs"), JSON.stringify(semanas), "8"],
+      { encoding: "utf8", maxBuffer: 50 * 1024 * 1024, stdio: ["ignore", "pipe", "inherit"] });
+    const c8 = JSON.parse(c8raw);
+    for (const L of ["L1", "L3", "L4", "L5"]) {
+      for (const s of semanas) {
+        const v = c8[L]?.[s.id]?.valor || 0;
+        if (!v) continue;
+        const q = c8[L]?.[s.id]?.qtde || 0, nv = c8[L]?.[s.id]?.vendas || 0;
+        const blk = e1[L]?.[s.id], tk = e1[L]?.[s.id + "_tickets"], pc = e1[L]?.[s.id + "_pecas"];
+        const outros = (blk && blk.Outros) || 0;
+        if (outros >= v - 1) {
+          const novo = Math.round(outros - v);
+          if (novo > 1) blk.Outros = novo; else if (blk) delete blk.Outros;
+          if (pc && pc.Outros) { const np = pc.Outros - q; if (np > 0) pc.Outros = np; else delete pc.Outros; }
+          if (tk && tk.Outros) { const nt = tk.Outros - nv; if (nt > 0) tk.Outros = nt; else delete tk.Outros; }
+          log(`${L} ${s.id}: excluído cliente 8 R$${v} (${q}pç) do "Outros"`);
+        } else {
+          log(`⚠️ ${L} ${s.id}: cliente 8 R$${v} > Outros R$${outros} — vendedora real registrou parte, REVISAR MANUALMENTE`);
+          if (blk && blk.Outros) delete blk.Outros;
+        }
+      }
+    }
+  } catch (e) { log(`coleta_cliente8 falhou (segue SEM excluir cliente 8): ${e.message.slice(0, 100)}`); }
 
   // ── Etapa 2: % Marcas A da semana corrente (totais da Etapa 1) ──
   const totais = {};
