@@ -475,7 +475,66 @@ const DADOS = {
       cmv:     { S1:{Rosiene:41.1,Joyce:41.1,Rayssa:47.6,Karina:80},S2:{Rosiene:44.3,Joyce:44.5,Rayssa:42.1,Karina:49.1},S3:{Rosiene:53.7,Joyce:60.2,Rayssa:46,Karina:66.7},S4:{Rosiene:53.1,Joyce:58.6,Rayssa:53.8,Karina:44.1} },
     },
   },
-  '2026-07': null,
+  '2026-07': {
+    // Atualizado 01/07/2026 12:16 (quarta 01/07 — S1 PARCIAL, 1º dia útil do mês, ~4h de venda). Coleta Playwright headless. Cliente 8 (R Maura)=R$0 em jul (sem exclusão). ⚠️ METAS SEMANAIS PROVISÓRIAS = split igual do mensal (÷4) — Athila DEVE cadastrar as metas reais de julho no painel/Supabase. NÃO gravadas no Supabase.
+    semana_atual: 'S1',
+    L1: {
+      meta_mensal: 140000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:35000},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:35000},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:35000},{id:'S4', label:'Semana 4', periodo:'20/07–31/07', meta:35000},
+      ],
+      vendas: {
+        S1:{Rayra:901,Sofia:732,Bárbara:1345},
+      },
+      marcasA_loja: {S1:18.1},
+      marcasA_indiv: {Rayra:30.4,Sofia:29.4,Bárbara:3.7},
+      tickets: { S1:{Rayra:9,Sofia:5,Bárbara:18} },
+      pecas:   { S1:{Rayra:18,Sofia:22,Bárbara:31} },
+      cmv:     { S1:{Rayra:37.4,Sofia:37.7,Bárbara:36.2} },
+    },
+    L3: {
+      meta_mensal: 80000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:20000},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:20000},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:20000},{id:'S4', label:'Semana 4', periodo:'20/07–31/07', meta:20000},
+      ],
+      vendas: {
+        S1:{Raimunda:1573,'Ana Mira':269,Naila:681,Brunna:94},
+      },
+      marcasA_loja: {S1:8.2},
+      marcasA_indiv: {Naila:31.7,Raimunda:0,'Ana Mira':0,Brunna:0},
+      tickets: { S1:{Raimunda:6,'Ana Mira':5,Naila:7,Brunna:2} },
+      pecas:   { S1:{Raimunda:14,'Ana Mira':20,Naila:25,Brunna:15} },
+      cmv:     { S1:{Raimunda:63.5,'Ana Mira':54.5,Naila:42.3} },
+    },
+    L4: {
+      meta_mensal: 140000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:35000},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:35000},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:35000},{id:'S4', label:'Semana 4', periodo:'20/07–31/07', meta:35000},
+      ],
+      vendas: {
+        S1:{Tanaia:123,Josilene:1091,'Bruna F.':1724,Débora:516},
+      },
+      marcasA_loja: {S1:44.3},
+      marcasA_indiv: {Tanaia:48.8,Josilene:41.7,'Bruna F.':56.0,Débora:9.7},
+      tickets: { S1:{Tanaia:2,Josilene:17,'Bruna F.':17,Débora:5} },
+      pecas:   { S1:{Tanaia:3,Josilene:36,'Bruna F.':49,Débora:15} },
+      cmv:     { S1:{Tanaia:35,Josilene:38.7,'Bruna F.':32.1,Débora:48.9} },
+    },
+    L5: {
+      meta_mensal: 90000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:22500},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:22500},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:22500},{id:'S4', label:'Semana 4', periodo:'20/07–31/07', meta:22500},
+      ],
+      vendas: {
+        S1:{Rosiene:1447,Joyce:138,Rayssa:38,Karina:204},
+      },
+      marcasA_loja: {S1:46.1},
+      marcasA_indiv: {Rosiene:58.2,Joyce:0,Rayssa:0,Karina:0},
+      tickets: { S1:{Rosiene:1,Joyce:2,Rayssa:1,Karina:2} },
+      pecas:   { S1:{Rosiene:35,Joyce:9,Rayssa:1,Karina:7} },
+      cmv:     { S1:{Rosiene:31.7,Joyce:45.4,Rayssa:51.1,Karina:49.5} },
+    },
+  },
   '2026-08': null,
   '2026-09': null,
   '2026-10': null,
