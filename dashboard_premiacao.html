@@ -246,7 +246,7 @@ const LOJAS_BASE = {
   L3: { nome:'Miss Beleza Itaituba', cor:'#00d4aa',
         vendedoras:['Ana Mira','Raimunda','Brunna','Naila'] },
   L4: { nome:'MissBeleza Altamira', cor:'#7c5cfc',
-        vendedoras:['Tanaia','Josilene','Bruna F.','Rosana','Débora'] },
+        vendedoras:['Tanaia','Josilene','Bruna F.','Débora'] },
   L5: { nome:'MissBeleza Santarém', cor:'#ef4444',
         vendedoras:['Rayssa','Joyce','Rosiene','Karina','Lucas'] },
 };
@@ -567,7 +567,6 @@ const VENDEDORAS_META = {
   'Tanaia':   {loja:'L4', badges:['gerente','gestante']},
   'Josilene': {loja:'L4', badges:[]},
   'Bruna F.': {loja:'L4', badges:[]},
-  'Rosana':   {loja:'L4', badges:['nova']},
   'Débora':   {loja:'L4', badges:['nova']},  // entrou jun/2026
   'Rayssa':   {loja:'L5', badges:[]},
   'Joyce':    {loja:'L5', badges:[]},
@@ -577,6 +576,7 @@ const VENDEDORAS_META = {
   // Desligada: fora do roster ativo (LOJAS_BASE), mas preservada aqui pra
   // integridade do histórico — prêmios congelados em HISTORICO_PREMIOS.
   'Elianna':  {loja:'L4', badges:[], status:'desligada', desde:'2026-06-23'},
+  'Rosana':   {loja:'L4', badges:[], status:'desligada', desde:'2026-07-04'},
 };
 function isDesligada(nome) { return (VENDEDORAS_META[nome]?.status) === 'desligada'; }
 
@@ -1880,7 +1880,8 @@ const TIPO_LABELS = {
 };
 const ALVO_LABELS = {
   atingir_meta:'Atingir meta', marcas_a:'% Marcas A', ticket_medio:'Ticket médio',
-  conversao:'Conversão', vendas_individuais:'Vendas individuais', crescimento_yoy:'Crescimento vs ano anterior'
+  conversao:'Conversão', vendas_individuais:'Vendas individuais', crescimento_yoy:'Crescimento vs ano anterior',
+  venda_marca:'Venda de marca específica'
 };
 const RES_LABELS = {funcionou:'✓ Funcionou', indiferente:'➖ Indiferente', nao_funcionou:'✗ Não funcionou'};
 
@@ -1899,6 +1900,8 @@ const DEFAULT_THRESHOLDS = {
   vendas_individuais: {tipo:'relativo_pct', funcionou:15, parcial:5},      // +15% funcionou, +5% parcial
   atingir_meta:       {tipo:'meta_pct',     funcionou:100, parcial:90},    // ≥100% funcionou, ≥90% parcial
   marcas_a:           {tipo:'absoluto_pp',  funcionou:5,  parcial:2},      // +5pp / +2pp
+  ticket_medio:       {tipo:'relativo_pct', funcionou:10, parcial:3},      // +10% funcionou, +3% parcial (TM move menos que vendas)
+  venda_marca:        {tipo:'relativo_pct', funcionou:15, parcial:5},      // +15% funcionou, +5% parcial (unidades vendidas da marca)
 };
 
 // ─── ELOGIOS — comparação de crescimento vs mesmo mês do ano anterior ────────
@@ -1946,10 +1949,14 @@ function calcCrescimentoYoY(mesKeyAtual, lojaKey, vendedora) {
 // automaticamente porque a função só sabia mapear 4 semanas específicas e
 // calcAutoMetrics tinha `mesKey = '2026-05'` fixo. Ver [[premiacao_sugestoes_redesign]].
 //
-// Regra (pedido do Athila, 04/07/2026): o motor automático vale SÓ "daqui pra
-// frente" — sugestões geradas ANTES de AUTO_AVALIACAO_DESDE ficam como "legado"
-// (sem avaliação automática; avaliação manual continua opcional pra elas).
-const AUTO_AVALIACAO_DESDE = {ano: 2026, semana: 28}; // primeira semana gerada pelo sistema novo
+// ⚠️ Decisão revista no MESMO DIA (04/07/2026): a ideia original era valer só
+// "daqui pra frente" (AUTO_AVALIACAO_DESDE=W28), sem tocar nas ~27 sugestões já
+// aprovadas e nunca avaliadas (W22/W23/W25). O Athila pediu explicitamente pra
+// avaliar ESSAS TAMBÉM com dado real (não opinião da vendedora) — "buscar dados
+// que mostrem se deu certo ou não". Por isso a trava foi REMOVIDA: o motor agora
+// roda pra qualquer semana ISO (exceto os casos especiais de maio, preservados).
+// Não recongela nada (imutabilidade dos prêmios continua intacta) — só passa a
+// AVALIAR objetivamente sugestões que nunca tinham veredito nenhum.
 
 // Segunda-feira (Date, UTC) de uma semana ISO (ano, semana).
 function _isoWeekParaData(ano, semana) {
@@ -2009,7 +2016,6 @@ function _semIdsDaSugestao(idSug) {
   const wKey = 'W' + String(semana).padStart(2,'0');
   if (especiais[wKey]) return especiais[wKey];
 
-  if (ano < AUTO_AVALIACAO_DESDE.ano || semana < AUTO_AVALIACAO_DESDE.semana) return null; // legado
   return _acharSemanaPorIsoWeek(ano, semana);
 }
 
@@ -2052,9 +2058,30 @@ function _getMetaSem(ld, semId) {
   return (ld?.semanas||[]).find(s => s.id === semId)?.meta || 0;
 }
 
+// ticket_medio = vendas ÷ tickets (nº de vendas/atendimentos que fecharam).
+// Dado já coletado toda semana (ld.tickets[semId]) mas nunca usado no motor
+// automático — adicionado 04/07/2026 pra permitir avaliar sugestões de tipo
+// ticket_medio com dado real em vez de depender só de avaliação manual.
+function _getTicketsPorId(ld, semId) {
+  return ld?.tickets?.[semId] || {};
+}
+function _getTicketsIndiv(ld, semId, vend) {
+  return _getTicketsPorId(ld, semId)[vend] ?? 0;
+}
+function _getTicketsLoja(ld, semId) {
+  return Object.values(_getTicketsPorId(ld, semId)).reduce((s,x)=>s+(x||0), 0);
+}
+// Ticket médio = R$ vendido ÷ nº de tickets. null se não há tickets (não dá pra dividir).
+function _getTicketMedio(ld, semId, vend) {
+  const vendas = vend ? _getVendasIndiv(ld, semId, vend) : _getVendasLoja(ld, semId);
+  const tickets = vend ? _getTicketsIndiv(ld, semId, vend) : _getTicketsLoja(ld, semId);
+  if (!tickets) return null;
+  return vendas / tickets;
+}
+
 function calcAutoMetrics(sug) {
   if (!sug || !sug.meta_alvo) return null;
-  if (!['vendas_individuais','atingir_meta','marcas_a'].includes(sug.meta_alvo)) {
+  if (!['vendas_individuais','atingir_meta','marcas_a','ticket_medio','venda_marca'].includes(sug.meta_alvo)) {
     return {tipo:'nao_rastreavel', meta_alvo:sug.meta_alvo};
   }
   const ids = _semIdsDaSugestao(sug.id);
@@ -2140,6 +2167,44 @@ function calcAutoMetrics(sug) {
       else status = 'nao_funcionou';
     }
   }
+  else if (sug.meta_alvo === 'ticket_medio') {
+    // ticket_medio = R$ vendido ÷ nº de tickets fechados. Adicionado 04/07/2026
+    // (antes dependia 100% de avaliação manual — o dado (ld.tickets) já existia
+    // coletado toda semana, só não era usado no motor automático).
+    const alvo = sug.escopo === 'vendedora' && sug.vendedora ? sug.vendedora : null;
+    baseline = _getTicketMedio(ld, ids.baseline, alvo);
+    resultado = _getTicketMedio(ld, ids.avaliada, alvo);
+    unidade = 'R$';
+    if (baseline !== null && resultado !== null && baseline > 0) {
+      const variacao = (resultado - baseline) / baseline * 100;
+      deltaStr = (variacao >= 0 ? '+' : '') + variacao.toFixed(0) + '%';
+      if (variacao >= th.funcionou) status = 'funcionou';
+      else if (variacao >= th.parcial) status = 'parcial';
+      else status = 'nao_funcionou';
+    }
+  }
+  else if (sug.meta_alvo === 'venda_marca') {
+    // Sugestões concretas por marca (pedido do Athila, 04/07/2026): "aumentar a
+    // venda de marca X essa semana". Compara UNIDADES vendidas da marca na semana
+    // anterior (baseline) vs a semana da sugestão (avaliada). Fonte:
+    // DADOS[mes][loja].vendas_marca[Sx][marca], coletada via
+    // coleta_vendas_marca_semana.mjs (ver SKILL.md seção 5.5). Requer sug.marca.
+    if (!sug.marca) return {tipo:'nao_rastreavel', meta_alvo:sug.meta_alvo};
+    const vm = ld.vendas_marca || {};
+    baseline = (vm[ids.baseline] || {})[sug.marca] ?? null;
+    resultado = (vm[ids.avaliada] || {})[sug.marca] ?? null;
+    unidade = 'un';
+    if (baseline !== null && resultado !== null && baseline > 0) {
+      const variacao = (resultado - baseline) / baseline * 100;
+      deltaStr = (variacao >= 0 ? '+' : '') + variacao.toFixed(0) + '%';
+      if (variacao >= th.funcionou) status = 'funcionou';
+      else if (variacao >= th.parcial) status = 'parcial';
+      else status = 'nao_funcionou';
+    } else if (baseline === null || resultado === null) {
+      // Ainda não coletado (coleta_vendas_marca_semana.mjs não rodou pra essa marca/semana)
+      return {tipo:'nao_rastreavel', meta_alvo:sug.meta_alvo, motivo:'vendas_marca_nao_coletadas'};
+    }
+  }
 
   return {
     tipo:'calculado',
@@ -2207,6 +2272,27 @@ function gerarMensagemFeedback(sug, m) {
     }
     return `Equipe da ${lojaLabel}: % Marcas A em ${m.resultado?.toFixed(1)}% (era ${m.baseline?.toFixed(1)}%). ` +
       `Precisamos rever a abordagem — sugestão: monte mesa de destaque com Marcas A na entrada e oriente a equipe.`;
+  }
+
+  if (sug.meta_alvo === 'venda_marca' && sug.marca) {
+    // "Vocês acataram a sugestão da semana, o resultado: as vendas da marca X
+    // cresceram Y% essa semana comparada com a anterior" — formato pedido pelo
+    // Athila 04/07/2026. Vale pro escopo 'loja' (mensagem pra equipe toda).
+    const alvoLabel = sug.escopo === 'vendedora' && nome ? nome : `Equipe da ${LOJAS_BASE[sug.loja]?.nome || sug.loja}`;
+    const un = (v) => Math.round(v||0) + ' un';
+    if (m.status === 'funcionou') {
+      return `${alvoLabel}: vocês acataram a sugestão da semana — resultado: as vendas de ${sug.marca} ` +
+        `cresceram ${m.deltaStr} essa semana comparada com a anterior (${un(m.baseline)} → ${un(m.resultado)}). ` +
+        `Continuem oferecendo ${sug.marca} primeiro — está funcionando!`;
+    }
+    if (m.status === 'parcial') {
+      return `${alvoLabel}: as vendas de ${sug.marca} subiram ${m.deltaStr} essa semana ` +
+        `(${un(m.baseline)} → ${un(m.resultado)}). Teve efeito, mas dá pra crescer mais — ` +
+        `reforcem oferecer ${sug.marca} pra todo cliente novo.`;
+    }
+    return `${alvoLabel}: as vendas de ${sug.marca} ficaram em ${m.deltaStr} essa semana ` +
+      `(${un(m.baseline)} → ${un(m.resultado)}). Vamos rever a abordagem — talvez precise de mais destaque ` +
+      `no ponto de venda ou reforço na hora de oferecer.`;
   }
 
   return null;
@@ -2799,22 +2885,39 @@ function renderSugestoes() {
 
 // ─── ANÁLISE (4 gráficos + recentes) ─────────────────────────────────────────
 
+// Resultado efetivo de uma sugestão: manual (AVALIACOES) tem prioridade se existir;
+// senão usa o automático (calcAutoMetrics), mapeando 'parcial' → 'indiferente' pro
+// mesmo esquema de 3 baldes. Retorna null se não há veredito nenhum (adicionado
+// 04/07/2026 — antes a Análise só enxergava avaliação manual, ignorando os
+// resultados automáticos, mesmo depois do motor virar generalizado).
+function getResultadoEfetivo(s, avalMap) {
+  const a = avalMap[s.id];
+  if (a) return {resultado: a.resultado, origem: 'manual'};
+  const auto = calcAutoMetrics(s);
+  if (auto && auto.tipo === 'calculado' && auto.status !== null) {
+    const resultado = auto.status === 'parcial' ? 'indiferente' : auto.status;
+    return {resultado, origem: 'automatico', delta: auto.deltaStr};
+  }
+  return null;
+}
+
 function agruparPor(getKey) {
-  // Junta TODAS as sugestões já lançadas (de todas as semanas) com avaliação preenchida
+  // Junta TODAS as sugestões já lançadas (de todas as semanas) com veredito —
+  // manual OU automático (ver getResultadoEfetivo).
   const avalMap = loadAvaliacoes();
   const buckets = {}; // key -> {func, indif, nao}
   Object.values(SUGESTOES).forEach(sem => {
     sem.itens.forEach(s => {
-      const a = avalMap[s.id];
-      if (!a) return;
+      const ef = getResultadoEfetivo(s, avalMap);
+      if (!ef) return;
       const key = getKey(s);
       if (!key) return;
       const arr = Array.isArray(key) ? key : [key];
       arr.forEach(k => {
         if (!buckets[k]) buckets[k] = {func:0, indif:0, nao:0};
-        if (a.resultado === 'funcionou') buckets[k].func++;
-        else if (a.resultado === 'indiferente') buckets[k].indif++;
-        else if (a.resultado === 'nao_funcionou') buckets[k].nao++;
+        if (ef.resultado === 'funcionou') buckets[k].func++;
+        else if (ef.resultado === 'indiferente') buckets[k].indif++;
+        else if (ef.resultado === 'nao_funcionou') buckets[k].nao++;
       });
     });
   });
@@ -2981,15 +3084,28 @@ function renderAnaliseSazonal() {
 
 function renderAnalise() {
   const avalMap = loadAvaliacoes();
-  const totAval = Object.keys(avalMap).length;
 
   // Card de Análise Sazonal sempre aparece no topo (não depende de avaliações)
   const cardSazonal = renderAnaliseSazonal();
 
+  // Junta manual + automático (getResultadoEfetivo) pra contar o total avaliado real.
+  // Antes só contava avalMap (manual) — subestimava, já que a maioria agora vem do
+  // motor automático generalizado (ver [[premiacao_sugestoes_redesign]]).
+  const todasComResultado = [];
+  Object.values(SUGESTOES).forEach(sem => {
+    sem.itens.forEach(s => {
+      const ef = getResultadoEfetivo(s, avalMap);
+      if (ef) todasComResultado.push({s, ef});
+    });
+  });
+  const totAval = todasComResultado.length;
+  const totManual = todasComResultado.filter(x => x.ef.origem === 'manual').length;
+  const totAuto = totAval - totManual;
+
   if (totAval === 0) {
     return cardSazonal + `<div class="analise-empty">
-      <h2 style="color:var(--text);margin-bottom:8px">📊 Nenhuma avaliação subjetiva ainda</h2>
-      <p>Vá em <b>💡 Sugestões</b>, aplique algumas ações na semana e marque o resultado.<br>Os gráficos por tipo/loja/vendedora aparecem aqui assim que você avaliar a primeira sugestão.</p>
+      <h2 style="color:var(--text);margin-bottom:8px">📊 Nenhuma avaliação ainda</h2>
+      <p>Vá em <b>💡 Sugestões</b>, aplique algumas ações na semana e marque o resultado.<br>Os gráficos por tipo/loja/vendedora aparecem aqui assim que houver a primeira avaliação (manual ou automática).</p>
     </div>`;
   }
 
@@ -2998,31 +3114,31 @@ function renderAnalise() {
   const porVend  = agruparPor(s => s.vendedora || null);
   const porAlvo  = agruparPor(s => s.meta_alvo);
 
-  // Recentes (últimas 10)
-  const recents = [];
-  Object.values(SUGESTOES).forEach(sem => {
-    sem.itens.forEach(s => {
-      const a = avalMap[s.id];
-      if (a) recents.push({s, a});
-    });
-  });
-  recents.sort((a,b) => (b.a.avaliado_em||'').localeCompare(a.a.avaliado_em||''));
-  const recentsHtml = recents.slice(0, 10).map(({s,a}) => {
-    const cor = a.resultado==='funcionou'?'var(--green)':a.resultado==='indiferente'?'var(--muted)':'var(--red)';
+  // Recentes (últimas 10) — manuais ordenadas por data; automáticas não têm
+  // "avaliado_em" (são recalculadas em runtime), então entram no fim, sinalizadas.
+  const recentsManual = todasComResultado.filter(x => x.ef.origem === 'manual')
+    .sort((a,b) => (avalMap[b.s.id]?.avaliado_em||'').localeCompare(avalMap[a.s.id]?.avaliado_em||''));
+  const recentsAuto = todasComResultado.filter(x => x.ef.origem === 'automatico');
+  const recentsHtml = [...recentsManual, ...recentsAuto].slice(0, 12).map(({s, ef}) => {
+    const cor = ef.resultado==='funcionou'?'var(--green)':ef.resultado==='indiferente'?'var(--muted)':'var(--red)';
+    const a = avalMap[s.id];
+    const origemTag = ef.origem==='automatico' ? '<span style="font-size:9px;color:var(--blue);margin-left:6px">🤖 auto</span>' : '<span style="font-size:9px;color:var(--muted);margin-left:6px">✍️ manual</span>';
     return `<div class="rec-row">
-      <div class="rec-aval" style="color:${cor}">${RES_LABELS[a.resultado]}</div>
-      <div class="rec-ttl">${s.titulo}${a.comentario?` <span style="color:var(--muted);font-size:11px">— "${a.comentario.slice(0,80)}${a.comentario.length>80?'...':''}"</span>`:''}</div>
-      <div class="rec-data">${a.avaliado_em}</div>
+      <div class="rec-aval" style="color:${cor}">${RES_LABELS[ef.resultado]}${origemTag}</div>
+      <div class="rec-ttl">${s.titulo}${ef.origem==='automatico'&&ef.delta?` <span style="color:var(--muted);font-size:11px">— ${ef.delta}</span>`:''}${a?.comentario?` <span style="color:var(--muted);font-size:11px">— "${a.comentario.slice(0,80)}${a.comentario.length>80?'...':''}"</span>`:''}</div>
+      <div class="rec-data">${a?.avaliado_em || ''}</div>
     </div>`;
   }).join('');
 
   return cardSazonal + `
     <div class="sug-hdr" style="background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(59,130,246,.05));border-color:rgba(34,197,94,.3)">
       <div>
-        <h2 style="color:var(--green)">📊 Análise de Resultados (avaliações manuais)</h2>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">Score = (funcionou × 100 + indiferente × 50) ÷ total · barras mostram volume de avaliações</div>
+        <h2 style="color:var(--green)">📊 Análise de Resultados</h2>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Score = (funcionou × 100 + indiferente × 50) ÷ total · manual + automático (🤖 dado real do ERP)</div>
       </div>
       <div class="pill">Total avaliado: <b>${totAval}</b></div>
+      <div class="pill">🤖 Automático: <b style="color:var(--blue)">${totAuto}</b></div>
+      <div class="pill">✍️ Manual: <b>${totManual}</b></div>
     </div>
     <div class="chart-grid">
       ${renderChartCard('Por tipo de ação', 'Que tipo de iniciativa gera mais resultado', porTipo, k => TIPO_LABELS[k]||k)}

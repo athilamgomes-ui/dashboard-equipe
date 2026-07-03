@@ -941,7 +941,6 @@ const VENDEDORAS_META = {
   'Tanaia':   {loja:'L4', badges:['gerente','gestante']},
   'Josilene': {loja:'L4', badges:[]},
   'Bruna F.': {loja:'L4', badges:[]},
-  'Rosana':   {loja:'L4', badges:['nova']},
   'Débora':   {loja:'L4', badges:['nova']},  // entrou jun/2026
   'Rayssa':   {loja:'L5', badges:[]},
   'Joyce':    {loja:'L5', badges:[]},
@@ -953,6 +952,7 @@ const VENDEDORAS_META = {
   // histórico — seus prêmios das semanas em que participaram ficam congelados em
   // HISTORICO_PREMIOS e NÃO são recalculados. Ver [[premiacao-imutabilidade-semanas-fechadas]].
   'Elianna':  {loja:'L4', badges:[], status:'desligada', desde:'2026-06-23'},
+  'Rosana':   {loja:'L4', badges:[], status:'desligada', desde:'2026-07-04'},
 };
 // True se a vendedora foi desligada (não deve aparecer em telas operacionais).
 function isDesligada(nome) { return (VENDEDORAS_META[nome]?.status) === 'desligada'; }
@@ -1049,10 +1049,6 @@ const DADOS_LOJA = {
       'Bruna F.': {sem:7584, mes:7584, ma_sem:42.2, ma_mes:42.2, melhorias:[
         'Você é a referência da loja em Marcas A (30%) - parabéns. Objetivo agora: manter esse nível e aumentar o volume total. Mais atendimentos = mais venda fechada = mais prêmio.',
         'Você já sabe vender Marca A com naturalidade. Continue assim. Quando suas colegas perguntarem como você faz, conte sem segredo - quanto mais a equipe inteira vender Marca A, mais o prêmio sobe pra todas vocês (loja em 30% leva bônus extra).'
-      ]},
-      'Rosana':   {sem:0, mes:0, ma_sem:0, ma_mes:0, melhorias:[
-        'Você é nova - foco essa semana é aprender, não pressão de bater meta. Plano dessa semana: 1) passar 2 manhãs com Bruna F. (top da loja) observando ela vender, 2) anotar as frases que ela usa pra oferecer marca A, 3) tentar usar essas mesmas frases com seus próprios clientes.',
-        'Marcas A da nossa loja pra você aprender: Truss (faz reconstrução capilar profissional), Itallian (tratamento capilar profissional), Marco Boni (acessórios como escova e prancha). Comece pela Truss - é a que mais vende aqui.'
       ]},
       'Débora':   {sem:6773, mes:6773, ma_sem:30.6, ma_mes:30.6, melhorias:[
         'Bem-vinda à equipe! Primeira semana é aprendizado: aprenda as 3 marcas A da loja (Truss, Itallian, Marco Boni). Saber o que cada uma faz vai te dar segurança pra oferecer pro cliente.',
@@ -1168,7 +1164,7 @@ const HISTORICO_PREMIOS = {
     L4: {
       'Tanaia': {S1:6, S2:0, S3:0, S4:0},
       'Bruna F.': {S1:32, S2:0, S3:0, S4:0},
-      'Rosana': {S1:11, S2:0, S3:0, S4:0},
+      'Rosana': {S1:11, S2:0, S3:0, S4:0},  // desligada 04/07 — registro preservado
       'Débora': {S1:20, S2:0, S3:0, S4:0},
       'Elianna': {S1:11, S2:0, S3:0, S4:0},  // desligada 23/06 — registro preservado
       _em_pct: {S1:76, S2:70, S3:69, S4:56},
