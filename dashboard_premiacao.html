@@ -476,12 +476,15 @@ const DADOS = {
     },
   },
   '2026-07': {
-    // Atualizado 03/07/2026 16:16 (sexta 03/07 — S1 PARCIAL, 3 dias úteis 01–03/07). Coleta Playwright headless. Cliente 8 (R Maura)=R$0 em jul (sem exclusão). ⚠️ METAS SEMANAIS PROVISÓRIAS = split igual do mensal (÷4) — Athila DEVE cadastrar as metas reais de julho no painel/Supabase. NÃO gravadas no Supabase.
+    // Atualizado 03/07/2026 16:16 (sexta 03/07 — S1 PARCIAL, 3 dias úteis 01–03/07). Coleta Playwright headless. Cliente 8 (R Maura)=R$0 em jul (sem exclusão).
+    // METAS SEMANAIS OFICIAIS (04/07/2026, extraídas da Tabela de Premiação/PDF do Athila): julho tem 5 semanas
+    // (01-04/07, 06-11/07, 13-18/07, 20-25/07, 27-31/07) — mês variável, NÃO fixo em 4. Meta Real = Meta Ideal
+    // (nenhum reajuste ainda). L3 meta mensal SUBIU de R$80.000 (jun) pra R$85.000 (jul, confirmado pelo Athila).
     semana_atual: 'S1',
     L1: {
       meta_mensal: 140000,
       semanas: [
-        {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:35000},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:35000},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:35000},{id:'S4', label:'Semana 4', periodo:'20/07–31/07', meta:35000},
+        {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:20000},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:35000},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:30000},{id:'S4', label:'Semana 4', periodo:'20/07–25/07', meta:25000},{id:'S5', label:'Semana 5', periodo:'27/07–31/07', meta:30000},
       ],
       vendas: {
         S1:{Outros:2162,Rayra:6087,Sofia:3910,Bárbara:6194},
@@ -493,9 +496,9 @@ const DADOS = {
       cmv:     { S1:{Rayra:34.7,Sofia:52.1,Bárbara:55.6} },
     },
     L3: {
-      meta_mensal: 80000,
+      meta_mensal: 85000,
       semanas: [
-        {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:20000},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:20000},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:20000},{id:'S4', label:'Semana 4', periodo:'20/07–31/07', meta:20000},
+        {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:10000},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:25000},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:20000},{id:'S4', label:'Semana 4', periodo:'20/07–25/07', meta:10000},{id:'S5', label:'Semana 5', periodo:'27/07–31/07', meta:20000},
       ],
       vendas: {
         S1:{Outros:-26,Raimunda:3495,'Ana Mira':2163,Naila:1887,Brunna:1790},
@@ -509,7 +512,7 @@ const DADOS = {
     L4: {
       meta_mensal: 140000,
       semanas: [
-        {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:35000},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:35000},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:35000},{id:'S4', label:'Semana 4', periodo:'20/07–31/07', meta:35000},
+        {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:20000},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:35000},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:30000},{id:'S4', label:'Semana 4', periodo:'20/07–25/07', meta:25000},{id:'S5', label:'Semana 5', periodo:'27/07–31/07', meta:30000},
       ],
       vendas: {
         S1:{Tanaia:1116,Josilene:4861,'Bruna F.':7369,Débora:6620},
@@ -523,7 +526,7 @@ const DADOS = {
     L5: {
       meta_mensal: 90000,
       semanas: [
-        {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:22500},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:22500},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:22500},{id:'S4', label:'Semana 4', periodo:'20/07–31/07', meta:22500},
+        {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:10000},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:25000},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:20000},{id:'S4', label:'Semana 4', periodo:'20/07–25/07', meta:15000},{id:'S5', label:'Semana 5', periodo:'27/07–31/07', meta:20000},
       ],
       vendas: {
         S1:{Rosiene:3531,Joyce:2409,Rayssa:2995,Karina:2051},
@@ -876,7 +879,7 @@ const AVALIACOES = [
 // Metas futuras (atualizar conforme planejamento)
 const METAS_FUTURAS = {
   '2026-06': {L1:140000,L3:80000,L4:140000,L5:90000},
-  '2026-07': {L1:135000,L3:78000,L4:135000,L5:88000},
+  '2026-07': {L1:140000,L3:85000,L4:140000,L5:90000}, // confirmado 04/07 via Tabela de Premiação/PDF (L3 subiu de 80k pra 85k)
   '2026-08': {L1:135000,L3:78000,L4:135000,L5:88000},
   '2026-09': {L1:130000,L3:75000,L4:130000,L5:85000},
   '2026-10': {L1:140000,L3:80000,L4:140000,L5:90000},
@@ -1130,8 +1133,8 @@ function renderVendsTable(mesKey, lojaKey, ld) {
   const sems = ld.semanas;
   const semAtual = DADOS[mesKey].semana_atual;
 
-  // Colunas: nome | S1 | S2 | S3 | S4 | Total | Prêm.Sem | Prêm.Mensal
-  const cols = 'grid-template-columns:140px repeat(4,90px) 100px 110px 120px';
+  // Colunas: nome | (uma por semana do mês, número variável) | Total | Prêm.Sem | Prêm.Mensal
+  const cols = `grid-template-columns:140px repeat(${sems.length},90px) 100px 110px 120px`;
 
   const semCols = sems.map(s => {
     const c = calcSemana(ld, s.id);

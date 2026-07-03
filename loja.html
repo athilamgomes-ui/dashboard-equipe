@@ -969,7 +969,7 @@ const DADOS_LOJA = {
   L1: {
     nome_loja: 'Casa da Beleza Altamira',
     meta_mensal: 140000,
-    meta_semana: 35000,
+    meta_semana: 20000,
     vendido_semana: 18353,
     vendido_mes: 18353,
     posicao_loja: 2, // 1-4, // 1-4
@@ -998,8 +998,8 @@ const DADOS_LOJA = {
   },
   L3: {
     nome_loja: 'Miss Beleza Itaituba',
-    meta_mensal: 80000,
-    meta_semana: 20000,
+    meta_mensal: 85000,
+    meta_semana: 10000,
     vendido_semana: 9309,
     vendido_mes: 9309,
     posicao_loja: 4, // 1-4, // 1-4
@@ -1029,7 +1029,7 @@ const DADOS_LOJA = {
   L4: {
     nome_loja: 'MissBeleza Altamira',
     meta_mensal: 140000,
-    meta_semana: 35000,
+    meta_semana: 20000,
     vendido_semana: 19966,
     vendido_mes: 19966,
     posicao_loja: 1, // 1-4, // 1-4
@@ -1063,7 +1063,7 @@ const DADOS_LOJA = {
   L5: {
     nome_loja: 'MissBeleza Santarém',
     meta_mensal: 90000,
-    meta_semana: 22500,
+    meta_semana: 10000,
     vendido_semana: 10986,
     vendido_mes: 10986,
     posicao_loja: 3, // 1-4, // 1-4
@@ -1194,10 +1194,11 @@ function _histMes(lojaKey) {
 
 // Semanas do mês corrente
 const SEMANAS_MES = [
-  {id:'S1', label:'Semana 1', periodo:'01/06 a 06/06'},
-  {id:'S2', label:'Semana 2', periodo:'08/06 a 13/06'},
-  {id:'S3', label:'Semana 3', periodo:'15/06 a 20/06'},
-  {id:'S4', label:'Semana 4', periodo:'22/06 a 30/06'},
+  {id:'S1', label:'Semana 1', periodo:'01/07 a 04/07'},
+  {id:'S2', label:'Semana 2', periodo:'06/07 a 11/07'},
+  {id:'S3', label:'Semana 3', periodo:'13/07 a 18/07'},
+  {id:'S4', label:'Semana 4', periodo:'20/07 a 25/07'},
+  {id:'S5', label:'Semana 5', periodo:'27/07 a 31/07'},
 ];
 
 // Prêmios pendentes de desbloqueio via quiz
@@ -1207,9 +1208,11 @@ const SEMANAS_MES = [
 // pendente das semanas fechadas dinâmicamente (em vez de hardcoded).
 // O cron atualiza esses dados toda execução (Etapa 1, junto com DADOS no painel).
 const VENDAS_HIST = {
-  // ⚠️ JULHO/2026 — metas semanais PROVISÓRIAS (mensal÷4). Athila deve cadastrar as reais no painel/Supabase. S1 parcial (01–02/07).
+  // JULHO/2026 — metas semanais OFICIAIS (04/07/2026, Tabela de Premiação/PDF do Athila). Mês de 5 semanas
+  // (01-04/07, 06-11/07, 13-18/07, 20-25/07, 27-31/07) — nº de semanas por mês é VARIÁVEL, decidido pelo Athila
+  // no início do mês. Meta Real = Meta Ideal (sem reajuste ainda). S1 parcial (01–03/07).
   L1: {
-    semanas: [{id:'S1', meta:35000},{id:'S2', meta:35000},{id:'S3', meta:35000},{id:'S4', meta:35000}],
+    semanas: [{id:'S1', meta:20000},{id:'S2', meta:35000},{id:'S3', meta:30000},{id:'S4', meta:25000},{id:'S5', meta:30000}],
     vendas: {
       S1:{Outros:2162,Rayra:6087,Sofia:3910,Bárbara:6194},
     },
@@ -1218,7 +1221,7 @@ const VENDAS_HIST = {
     hoje: {data:'03/07/2026', dia_semana:'sexta', vendas:{Rayra:1284,Sofia:827,Bárbara:2538}},
   },
   L3: {
-    semanas: [{id:'S1', meta:20000},{id:'S2', meta:20000},{id:'S3', meta:20000},{id:'S4', meta:20000}],
+    semanas: [{id:'S1', meta:10000},{id:'S2', meta:25000},{id:'S3', meta:20000},{id:'S4', meta:10000},{id:'S5', meta:20000}],
     vendas: {
       S1:{Outros:-26,Raimunda:3495,'Ana Mira':2163,Naila:1887,Brunna:1790},
     },
@@ -1227,7 +1230,7 @@ const VENDAS_HIST = {
     hoje: {data:'03/07/2026', dia_semana:'sexta', vendas:{Raimunda:530,'Ana Mira':383,Naila:544,Brunna:631}},
   },
   L4: {
-    semanas: [{id:'S1', meta:35000},{id:'S2', meta:35000},{id:'S3', meta:35000},{id:'S4', meta:35000}],
+    semanas: [{id:'S1', meta:20000},{id:'S2', meta:35000},{id:'S3', meta:30000},{id:'S4', meta:25000},{id:'S5', meta:30000}],
     vendas: {
       S1:{Tanaia:1116,Josilene:4861,'Bruna F.':7369,Débora:6620},
     },
@@ -1236,7 +1239,7 @@ const VENDAS_HIST = {
     hoje: {data:'03/07/2026', dia_semana:'sexta', vendas:{Tanaia:138,Josilene:1167,'Bruna F.':2274,Débora:1649}},
   },
   L5: {
-    semanas: [{id:'S1', meta:22500},{id:'S2', meta:22500},{id:'S3', meta:22500},{id:'S4', meta:22500}],
+    semanas: [{id:'S1', meta:10000},{id:'S2', meta:25000},{id:'S3', meta:20000},{id:'S4', meta:15000},{id:'S5', meta:20000}],
     vendas: {
       S1:{Rosiene:3531,Joyce:2409,Rayssa:2995,Karina:2051},
     },
@@ -1267,7 +1270,7 @@ const HIST_MENSAL_VENDAS = {
 const META_MENSAL_HIST = {
   '2026-05': {L1:140000, L3:80000, L4:140000, L5:90000},
   '2026-06': {L1:140000, L3:80000, L4:140000, L5:90000},
-  '2026-07': {L1:140000, L3:80000, L4:140000, L5:90000},
+  '2026-07': {L1:140000, L3:85000, L4:140000, L5:90000},
 };
 
 // ─── SYNC DE METAS COM O PAINEL ──────────────────────────────────────────────
@@ -3389,7 +3392,9 @@ function renderHistoricoPremios() {
       const dadosMes = (HISTORICO_PREMIOS[mk] || {})[LOJA_KEY] || {};
       const meuPremiosMes = dadosMes[currentUser] || {};
       const pctMes = dadosMes._em_pct || {};
-      const semIds = ['S1','S2','S3','S4'];
+      // Nº de semanas por mês é variável (decidido pelo Athila no início do mês) — deriva do
+      // snapshot congelado em vez de assumir 4 fixas.
+      const semIds = Object.keys(pctMes).sort((a,b)=>parseInt(a.slice(1))-parseInt(b.slice(1)));
       let totalMes = 0;
       const rowsMes = semIds.map(sid => {
         const v = meuPremiosMes[sid];
