@@ -2874,7 +2874,17 @@ function renderAnalise() {
 
 // ─── STATE & EVENTOS ─────────────────────────────────────────────────────────
 
-let curMes = '2026-06';
+// Mês corrente detectado automaticamente (antes hardcoded '2026-06' — o painel
+// sempre abria mostrando junho mesmo depois da virada pra julho, escondendo as
+// metas/dados do mês vigente). Fallback pro último mês populado em DADOS caso
+// o cron ainda não tenha criado o bloco do mês corrente.
+let curMes = (function() {
+  const hoje = new Date();
+  const mk = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0');
+  if (DADOS[mk]) return mk;
+  const disponiveis = Object.keys(DADOS).filter(k => DADOS[k]).sort();
+  return disponiveis[disponiveis.length - 1] || '2026-06';
+})();
 let curTab = 'L1';
 
 function setMes(m) {
