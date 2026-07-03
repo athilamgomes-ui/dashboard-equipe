@@ -1776,8 +1776,11 @@ function renderAnual() {
   let thCols = meses.map(m=>`<th>${mesNomes[m]}</th>`).join('');
   let rows = '';
 
+  // Acumulado por loja no ano (todos os meses populados)
+  const acumLoja = {};
   lojas.forEach(lk => {
     const base = LOJAS_BASE[lk];
+    acumLoja[lk] = 0;
     let cells = meses.map(mk => {
       const d = DADOS[mk];
       if (!d || !d[lk]) {
@@ -1788,11 +1791,12 @@ function renderAnual() {
       const fat = ld.semanas.reduce((s,sem)=>{
         return s + Object.values(ld.vendas[sem.id]||{}).reduce((a,v)=>a+(v||0),0);
       },0);
+      acumLoja[lk] += fat;
       const em = ld.meta_mensal > 0 ? fat/ld.meta_mensal*100 : 0;
       const col = em>=100?'cell-green':em>=80?'cell-yellow':'cell-red';
       return `<td class="${col}" title="${fP(em)} da meta">${fR(fat)}<br><small>${fP(em)}</small></td>`;
     }).join('');
-    rows += `<tr><td class="loja-col" style="color:${base.cor}">${base.nome}</td>${cells}</tr>`;
+    rows += `<tr><td class="loja-col" style="color:${base.cor}">${base.nome}</td>${cells}<td style="font-weight:700">${fR(acumLoja[lk])}</td></tr>`;
   });
 
   // Totais por mês
@@ -1808,17 +1812,29 @@ function renderAnual() {
     });
     return `<td>${tot>0?fR(tot):'—'}</td>`;
   }).join('');
+  const acumTotal = lojas.reduce((s,lk)=>s+acumLoja[lk],0);
 
-  // Ranking acumulado de vendedoras (maio)
+  // Ranking acumulado de vendedoras — TODOS os meses populados do ano (era
+  // hardcoded em '2026-05' e ficava desatualizado pra sempre; corrigido 04/07/2026).
+  // Nomes vêm dos próprios dados de vendas (não do roster atual) pra não perder
+  // quem saiu no meio do ano (ex.: Alcione vendeu em maio). Exclui Outros e caixa.
   let rankHtml = '';
   const rankData = {};
-  lojas.forEach(lk => {
-    const d = DADOS['2026-05'];
-    if (!d || !d[lk]) return;
-    const ld = d[lk];
-    LOJAS_BASE[lk].vendedoras.forEach(v => {
-      const tot = ld.semanas.reduce((s,sem)=>s+((ld.vendas[sem.id]||{})[v]||0),0);
-      if (tot > 0) rankData[`${v} (${lk})`] = tot;
+  let ultimoMesComDados = null;
+  meses.forEach(mk => {
+    const d = DADOS[mk];
+    if (!d) return;
+    lojas.forEach(lk => {
+      const ld = d[lk];
+      if (!ld) return;
+      ultimoMesComDados = mk;
+      ld.semanas.forEach(sem => {
+        for (const [v, val] of Object.entries(ld.vendas[sem.id]||{})) {
+          if (v === 'Outros' || isCaixa(v)) continue;
+          const key = `${v} (${lk})`;
+          rankData[key] = (rankData[key]||0) + (val||0);
+        }
+      });
     });
   });
   const ranked = Object.entries(rankData).sort((a,b)=>b[1]-a[1]).slice(0,10);
@@ -1842,12 +1858,12 @@ function renderAnual() {
       <thead><tr><th style="text-align:left">Loja</th>${thCols}<th>Acumulado</th></tr></thead>
       <tbody>
         ${rows}
-        <tr class="grand"><td class="loja-col">TOTAL</td>${totCells}<td>—</td></tr>
+        <tr class="grand"><td class="loja-col">TOTAL</td>${totCells}<td>${fR(acumTotal)}</td></tr>
       </tbody>
     </table>
   </div>
 
-  <div class="sec-ttl">Top 10 vendedoras — Maio 2026</div>
+  <div class="sec-ttl">Top 10 vendedoras — acumulado ${mesNomes[meses[0]]}–${ultimoMesComDados?mesNomes[ultimoMesComDados]:'—'} 2026</div>
   <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;max-width:640px">
     ${rankHtml}
   </div>
@@ -2464,6 +2480,12 @@ function getSemanaCorrente() {
 // Resolve a invisibilidade do backlog: antes, sugestão de semana passada só
 // aparecia em Análise SE já avaliada; sem isso, 40 sugestões (W22-W27) ficaram
 // invisíveis e ninguém percebeu que não estavam sendo avaliadas.
+// A fila só vale de W28/2026 em diante (decisão do Athila 04/07/2026): as 17
+// sugestões antigas sem métrica automática (W22-W27) NÃO precisam de avaliação —
+// o conceito da fila é cobrar avaliação no FIM DO PRAZO de cada sugestão, valendo
+// só pro sistema novo. Não baixar essa constante.
+const FILA_AVALIACAO_DESDE = {ano: 2026, semana: 28};
+
 function getFilaAvaliacaoPendente() {
   const atual = _isoSemanaDeHoje();
   const avalMap = loadAvaliacoes();
@@ -2473,6 +2495,7 @@ function getFilaAvaliacaoPendente() {
     const m = semKey.match(/^(\d{4})-W(\d+)$/);
     if (!m) continue;
     const ano = +m[1], semana = +m[2];
+    if (ano < FILA_AVALIACAO_DESDE.ano || (ano === FILA_AVALIACAO_DESDE.ano && semana < FILA_AVALIACAO_DESDE.semana)) continue; // legado fora da fila
     if (ano > atual.ano || (ano === atual.ano && semana >= atual.semana)) continue; // só semanas fechadas
     (sem.itens || []).forEach(s => {
       // Só faz sentido avaliar o que foi de fato APROVADO (chegou pra equipe).

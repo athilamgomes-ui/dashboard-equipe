@@ -2655,6 +2655,48 @@ function getMinhasSugestoesAprovadas() {
   };
 }
 
+// ─── COBRANÇA DE FEEDBACK NO FIM DO PRAZO (04/07/2026) ──────────────────────
+// Quando o prazo de uma sugestão vence (curto=1 semana, médio=1 mês, longo=3
+// meses a partir da segunda-feira da semana em que foi publicada) e a vendedora
+// ainda NÃO deu feedback (apliquei/tentei/não consegui), a sugestão volta a
+// aparecer pra ela num banner "⏰ Aguardando sua avaliação" na aba Meu Progresso
+// — mesmo que a semana dela já tenha passado. Vale só de W28/2026 em diante
+// (sugestões antigas não são cobradas — decisão do Athila).
+const FEEDBACK_COBRANCA_DESDE = {ano: 2026, semana: 28};
+const PRAZO_DIAS_FEEDBACK = {curto: 7, medio: 30, longo: 90};
+
+function _segundaDaIsoWeek(ano, semana) {
+  const d = new Date(Date.UTC(ano, 0, 1 + (semana - 1) * 7));
+  const dow = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 1 - dow);
+  return d;
+}
+
+function getMinhasPendentesDeFeedback() {
+  const hoje = new Date();
+  const out = [];
+  for (const [semKey, sem] of Object.entries(SUGESTOES)) {
+    const m = semKey.match(/^(\d{4})-W(\d+)$/);
+    if (!m) continue;
+    const ano = +m[1], w = +m[2];
+    if (ano < FEEDBACK_COBRANCA_DESDE.ano || (ano === FEEDBACK_COBRANCA_DESDE.ano && w < FEEDBACK_COBRANCA_DESDE.semana)) continue;
+    for (const s of (sem.itens || [])) {
+      if ((s.status || 'pendente') !== 'aprovada') continue;
+      if (s.tipo === 'elogio') continue; // elogio não pede feedback
+      const minha = (s.escopo === 'vendedora' && s.vendedora === currentUser)
+        || (s.escopo === 'loja' && s.loja === LOJA_KEY)
+        || s.escopo === 'geral';
+      if (!minha) continue;
+      if (getMeuFeedback(s.id)) continue; // já respondeu
+      const dias = PRAZO_DIAS_FEEDBACK[s.prazo || 'curto'] || 7;
+      const deadline = new Date(_segundaDaIsoWeek(ano, w).getTime() + dias * 86400000);
+      if (hoje >= deadline) out.push({s, semKey, deadline});
+    }
+  }
+  out.sort((a, b) => a.deadline - b.deadline); // mais atrasada primeiro
+  return out;
+}
+
 // Aplica overrides do Worker em SUGESTOES inline
 function aplicarOverridesNaSUGESTOES(overrides) {
   for (const sem of Object.values(SUGESTOES)) {
@@ -2996,6 +3038,16 @@ function renderProgresso() {
       <p>As recomendações dessa semana ainda estão sendo aprovadas. Volte aqui mais tarde ou amanhã.</p>
     </div>` : '';
 
+  // Sugestões de semanas passadas com prazo vencido e SEM feedback dela —
+  // voltam a aparecer aqui até ela responder (cobrança de fim de prazo).
+  const pendFb = getMinhasPendentesDeFeedback();
+  const blocoPendentes = pendFb.length > 0 ? `
+    <div class="melhoria-bloco" style="background:linear-gradient(135deg,rgba(234,179,8,.12),rgba(234,179,8,.03));border-color:rgba(234,179,8,.45)">
+      <h3 style="color:var(--yellow)">⏰ Aguardando sua avaliação (${pendFb.length})</h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">O prazo dessas recomendações terminou. Conta pra gestão como foi — leva 10 segundos e ajuda a montar recomendações melhores pra você.</p>
+      ${pendFb.map(x => renderSugCard(x.s)).join('')}
+    </div>` : '';
+
   return `
     ${renderFrescorDados()}
 
@@ -3006,6 +3058,8 @@ function renderProgresso() {
       <div class="metric-row"><span class="lbl">% Marcas A semana</span><span class="val">${fP(me.ma_sem)}</span></div>
       <div class="metric-row"><span class="lbl">% Marcas A mês</span><span class="val">${fP(me.ma_mes)}</span></div>
     </div>
+
+    ${blocoPendentes}
 
     ${renderGraficoMensalVendedora()}
 
