@@ -882,6 +882,113 @@ function mostrarPwaBannerSeAplicavel() {
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 
 const WORKER_URL = 'https://premiacao-amgomes.nhf6t85hdk.workers.dev';
+
+// ─── NOTIFICAÇÕES PUSH (04/07/2026) ──────────────────────────────────────────
+// Chave pública VAPID (par gerado 04/07/2026; a privada vive só como env var
+// no Worker Cloudflare — nunca no repo, que é público).
+const PUSH_VAPID_PUBLIC = 'BLXOIdd3C1uYEQtIg5T5nus4qplGwTLEnLcqpOgLA4JxT7yOSYyn41W9Tk6LbGxDqYZpO0BetzsM1-3xQfmWUDY';
+
+function _pushSuportado() {
+  // No iPhone, PushManager só existe com o app INSTALADO na tela de início
+  // (iOS 16.4+). No Safari comum ou iOS antigo, simplesmente não oferecemos.
+  return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+}
+function _pushChaveRecusa() { return `push_recusado_${LOJA_KEY}_${currentUser}`; }
+
+function _b64urlToU8(s) {
+  const pad = '='.repeat((4 - s.length % 4) % 4);
+  const raw = atob((s + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+// Grava a identidade num cache que o service worker consegue ler quando o push
+// chegar (o SW não tem acesso ao localStorage da página).
+async function _pushGravarIdent() {
+  try {
+    const c = await caches.open('push-ident');
+    await c.put('/__push_ident', new Response(JSON.stringify({ loja: LOJA_KEY, vendedora: currentUser })));
+  } catch (_) {}
+}
+
+// (Re)inscreve o device e sincroniza com o Worker. Idempotente — roda todo boot
+// quando a permissão JÁ está concedida (subscriptions podem rotacionar).
+async function _pushSincronizar() {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: _b64urlToU8(PUSH_VAPID_PUBLIC),
+      });
+    }
+    await _pushGravarIdent();
+    await fetch(`${WORKER_URL}/push-subscribe`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ loja: LOJA_KEY, vendedora: currentUser, sub: sub.toJSON() }),
+    });
+    return true;
+  } catch (e) { console.warn('[push] sync falhou:', e); return false; }
+}
+
+// Decide se o banner de convite deve aparecer. NUNCA re-pergunta:
+//  - permissão 'granted' → sem banner (só re-sincroniza em silêncio)
+//  - permissão 'denied'  → sem banner (o navegador já não deixaria perguntar)
+//  - vendedora tocou "Agora não" → flag no localStorage, sem banner pra sempre
+function _pushDeveMostrarBanner() {
+  if (!_pushSuportado() || !currentUser || currentUser === '_teste') return false;
+  if ((VENDEDORAS_META[currentUser]?.status) === 'desligada') return false;
+  if (Notification.permission !== 'default') return false;
+  if (localStorage.getItem(_pushChaveRecusa())) return false;
+  return true;
+}
+
+async function ativarNotificacoes() {
+  const el = document.getElementById('push-banner');
+  try {
+    const perm = await Notification.requestPermission();  // gesto do usuário: ok no iOS
+    if (perm === 'granted') {
+      const ok = await _pushSincronizar();
+      if (el) el.innerHTML = ok
+        ? '<div style="color:var(--green);font-size:13px;padding:4px 0">✅ Avisos ativados! Você vai receber as novidades por aqui.</div>'
+        : '<div style="color:var(--yellow);font-size:13px;padding:4px 0">⚠️ Quase — não consegui concluir agora, tento de novo na próxima vez que você abrir.</div>';
+      setTimeout(() => { if (el) el.style.display = 'none'; }, 4000);
+    } else {
+      if (el) el.style.display = 'none';  // negou no navegador: ele não deixa re-perguntar
+    }
+  } catch (e) { console.warn('[push] ativar falhou:', e); if (el) el.style.display = 'none'; }
+}
+
+function recusarNotificacoes() {
+  localStorage.setItem(_pushChaveRecusa(), new Date().toISOString());
+  const el = document.getElementById('push-banner');
+  if (el) el.style.display = 'none';
+}
+
+function renderPushBanner() {
+  if (!_pushDeveMostrarBanner()) return '';
+  return `<div id="push-banner" class="card" style="border-left:4px solid var(--blue);background:linear-gradient(135deg,rgba(59,130,246,.10),rgba(59,130,246,.02))">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="font-size:26px">🔔</div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:14px">Quer receber avisos do app?</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Novas recomendações, prêmios liberados e retornos da gestão — direto no seu celular.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button onclick="ativarNotificacoes()" style="flex:1;background:var(--blue);color:#fff;border:none;border-radius:7px;padding:9px;font-size:13px;font-weight:700;cursor:pointer">Ativar avisos</button>
+      <button onclick="recusarNotificacoes()" style="background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:9px 14px;font-size:13px;cursor:pointer">Agora não</button>
+    </div>
+  </div>`;
+}
+
+// Boot silencioso: se a permissão já foi dada algum dia, mantém a inscrição
+// viva e a identidade atualizada — sem mostrar NADA pra vendedora.
+async function initPushSilencioso() {
+  if (!_pushSuportado() || !currentUser || currentUser === '_teste') return;
+  if (Notification.permission === 'granted') await _pushSincronizar();
+}
+
 // Supabase (mesmo projeto do planejamento de compras) — fonte da verdade das
 // metas semanais. anon key pública por design (segurança = RLS). Ver
 // supabase_metas_semanais.sql. O app só LÊ as metas daqui (quem escreve é o painel).
@@ -2108,6 +2215,12 @@ function enterApp() {
   document.getElementById('login').style.display = 'none';
   document.getElementById('app').style.display = '';
 
+  // Push: se a permissão já foi concedida antes, re-sincroniza em silêncio
+  // (zero UI). O convite visível é o renderPushBanner() na aba Hoje — e ele
+  // NUNCA reaparece depois de "Agora não" (localStorage) ou de decisão do
+  // navegador (granted/denied).
+  initPushSilencioso();
+
   // Aplica quizzes respondidos (sincronizados do Worker no boot) ao localStorage.
   // Garante que vendedora que respondeu o quiz em outro dispositivo não veja
   // "Prêmio da semana X está pronto" de novo.
@@ -2536,6 +2649,8 @@ function renderHoje() {
 
   return `
     ${renderFrescorDados()}
+
+    ${renderPushBanner()}
 
     ${souGerente ? renderEditorMensagemGerente(msgGer) : ''}
 

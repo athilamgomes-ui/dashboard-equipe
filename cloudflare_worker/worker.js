@@ -51,6 +51,49 @@ async function listAll(KV, prefix) {
   return items;
 }
 
+// ═══ WEB PUSH (notificações do app das vendedoras, 04/07/2026) ═══════════════
+// Estratégia SEM payload criptografado (dispensa RFC8291): o push enviado é
+// VAZIO — só acorda o service worker do device, que busca GET /push-inbox e
+// monta a notificação com o conteúdo de lá. Só precisamos do VAPID (JWT ES256).
+// Env vars necessárias (Settings → Variables do Worker):
+//   VAPID_PUBLIC_KEY  = base64url do ponto público P-256 (mesma do loja.html)
+//   VAPID_PRIVATE_JWK = JSON do JWK privado (SECRET — nunca commitar; repo é público)
+
+function b64url(buf) {
+  let s = '';
+  const bytes = new Uint8Array(buf);
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function vapidAuthHeader(endpoint, env) {
+  const aud = new URL(endpoint).origin;
+  const header = b64url(new TextEncoder().encode(JSON.stringify({ typ: 'JWT', alg: 'ES256' })));
+  const payload = b64url(new TextEncoder().encode(JSON.stringify({
+    aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: 'mailto:athilamgomes@gmail.com'
+  })));
+  const jwk = JSON.parse(env.VAPID_PRIVATE_JWK);
+  const key = await crypto.subtle.importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, key, new TextEncoder().encode(`${header}.${payload}`));
+  return `vapid t=${header}.${payload}.${b64url(sig)}, k=${env.VAPID_PUBLIC_KEY}`;
+}
+
+// Envia push VAZIO pra uma subscription. Retorna status HTTP do push service.
+async function enviarPushVazio(sub, env) {
+  const auth = await vapidAuthHeader(sub.endpoint, env);
+  const r = await fetch(sub.endpoint, {
+    method: 'POST',
+    headers: { 'Authorization': auth, 'TTL': '86400', 'Urgency': 'normal', 'Content-Length': '0' },
+  });
+  return r.status;
+}
+
+// Hash curto do endpoint pra chavear subscriptions por device.
+async function hashEndpoint(endpoint) {
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(endpoint));
+  return b64url(d).slice(0, 16);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -272,6 +315,92 @@ export default {
       if (method === 'GET' && url.pathname === '/metas-loja') {
         const items = await listAll(KV, 'metas_loja:');
         return jsonResponse(request, { items });
+      }
+
+      // === WEB PUSH: SUBSCRIPTION DO DEVICE ===
+      // Key: push_sub:<loja>:<vendedora>:<hash(endpoint)> — vendedora pode ter
+      // mais de um device. POST idempotente (o app re-sincroniza todo boot).
+      if (method === 'POST' && url.pathname === '/push-subscribe') {
+        const body = await request.json();
+        const { loja, vendedora, sub } = body;
+        if (!loja || !vendedora || !sub || !sub.endpoint) {
+          return jsonResponse(request, { error: 'Campos obrigatorios: loja, vendedora, sub{endpoint}' }, 400);
+        }
+        const h = await hashEndpoint(sub.endpoint);
+        const key = `push_sub:${loja}:${vendedora}:${h}`;
+        await KV.put(key, JSON.stringify({ loja, vendedora, sub, em: new Date().toISOString() }));
+        return jsonResponse(request, { ok: true });
+      }
+
+      if (method === 'POST' && url.pathname === '/push-unsubscribe') {
+        const body = await request.json();
+        const { endpoint } = body;
+        if (!endpoint) return jsonResponse(request, { error: 'Campo obrigatorio: endpoint' }, 400);
+        const h = await hashEndpoint(endpoint);
+        let removidas = 0;
+        let cursor = null;
+        do {
+          const r = await KV.list({ prefix: 'push_sub:', cursor });
+          for (const k of r.keys) {
+            if (k.name.endsWith(':' + h)) { await KV.delete(k.name); removidas++; }
+          }
+          cursor = r.cursor;
+          if (r.list_complete) break;
+        } while (cursor);
+        return jsonResponse(request, { ok: true, removidas });
+      }
+
+      // === WEB PUSH: INBOX (o service worker busca aqui o conteúdo ao acordar) ===
+      // Mensagens individuais (vendedora exata) + da loja inteira (_loja) + gerais (_geral).
+      // TTL de 3 dias no KV — expiram sozinhas.
+      if (method === 'GET' && url.pathname === '/push-inbox') {
+        const loja = url.searchParams.get('loja');
+        const vendedora = url.searchParams.get('vendedora');
+        if (!loja) return jsonResponse(request, { error: 'Param obrigatorio: loja' }, 400);
+        const itens = [];
+        for (const prefix of [
+          vendedora ? `push_inbox:${loja}:${vendedora}:` : null,
+          `push_inbox:${loja}:_loja:`,
+          `push_inbox:_geral:_geral:`,
+        ].filter(Boolean)) {
+          itens.push(...await listAll(KV, prefix));
+        }
+        itens.sort((a, b) => (b.em || '').localeCompare(a.em || ''));
+        return jsonResponse(request, { items: itens.slice(0, 5) });
+      }
+
+      // === WEB PUSH: ENVIAR ===
+      // {titulo, corpo, url?, loja?, vendedora?}
+      //   loja+vendedora → só ela · só loja → equipe da loja · nenhum → todas as lojas.
+      // Grava na inbox (TTL 3d) e dispara push VAZIO pra cada device inscrito.
+      // Subscriptions mortas (404/410 do push service) são removidas na hora.
+      if (method === 'POST' && url.pathname === '/push-send') {
+        if (!env.VAPID_PRIVATE_JWK || !env.VAPID_PUBLIC_KEY) {
+          return jsonResponse(request, { error: 'VAPID nao configurado (env vars)' }, 500);
+        }
+        const body = await request.json();
+        const { titulo, corpo, url: destino, loja, vendedora, tag } = body;
+        if (!titulo || !corpo) return jsonResponse(request, { error: 'Campos obrigatorios: titulo, corpo' }, 400);
+
+        const em = new Date().toISOString();
+        const inboxKey = `push_inbox:${loja || '_geral'}:${vendedora || (loja ? '_loja' : '_geral')}:${Date.now()}`;
+        await KV.put(inboxKey, JSON.stringify({ titulo: String(titulo).slice(0, 80), corpo: String(corpo).slice(0, 240), url: destino || null, tag: tag || inboxKey, em }), { expirationTtl: 259200 });
+
+        const prefix = loja && vendedora ? `push_sub:${loja}:${vendedora}:` : loja ? `push_sub:${loja}:` : 'push_sub:';
+        const subs = await listAll(KV, prefix);
+        let enviadas = 0, mortas = 0, falhas = 0;
+        for (const s of subs) {
+          try {
+            const st = await enviarPushVazio(s.sub, env);
+            if (st === 404 || st === 410) {
+              const h = await hashEndpoint(s.sub.endpoint);
+              await KV.delete(`push_sub:${s.loja}:${s.vendedora}:${h}`);
+              mortas++;
+            } else if (st >= 200 && st < 300) enviadas++;
+            else falhas++;
+          } catch (_) { falhas++; }
+        }
+        return jsonResponse(request, { ok: true, devices: subs.length, enviadas, mortas, falhas });
       }
 
       // === HEALTH CHECK ===

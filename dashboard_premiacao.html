@@ -2437,6 +2437,10 @@ function salvarRetornoFeedback(idSug, loja, vendedora) {
       const btn = event.target;
       btn.textContent = '✓ Salvo';
       setTimeout(() => { btn.textContent = '💾 Salvar retorno'; rerender(); }, 1500);
+      // Avisa a vendedora no celular que a gestão respondeu o feedback dela.
+      const emojiRet = status === 'excelente' ? '⭐' : status === 'reconhecida' ? '👏' : '📨';
+      enviarPush({ loja, vendedora, titulo: `${emojiRet} Retorno da gestão pra você`,
+        corpo: 'O Athila respondeu seu feedback — abre o app pra ler.' });
     } else {
       alert('Falha ao salvar. Tente de novo.');
     }
@@ -2637,6 +2641,42 @@ async function enviarOverrideWorker(idSug, reg) {
   }
 }
 
+// ─── PUSH: avisa a(s) vendedora(s) no celular (04/07/2026) ───────────────────
+// Fire-and-forget: se falhar, não atrapalha o fluxo de aprovação. O Worker grava
+// na inbox e acorda os devices inscritos; quem não ativou avisos só não recebe.
+function enviarPush({ loja, vendedora, titulo, corpo, url }) {
+  try {
+    fetch(`${WORKER_URL}/push-send`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ loja: loja || null, vendedora: vendedora || null, titulo, corpo, url: url || null }),
+    }).catch(e => console.warn('[push-send] falha:', e));
+  } catch (e) { console.warn('[push-send] erro:', e); }
+}
+
+function _acharSugestaoPorId(idSug) {
+  for (const sem of Object.values(SUGESTOES)) {
+    const s = (sem.itens || []).find(x => x.id === idSug);
+    if (s) return s;
+  }
+  return null;
+}
+
+function _pushDeAprovacao(s) {
+  if (!s) return;
+  const ehElogio = s.tipo === 'elogio';
+  const titulo = ehElogio ? '🏆 Você recebeu um reconhecimento!' : '💡 Nova recomendação pra você';
+  if (s.escopo === 'vendedora' && s.vendedora && s.loja) {
+    enviarPush({ loja: s.loja, vendedora: s.vendedora, titulo,
+      corpo: ehElogio ? 'A gestão reconheceu seu resultado — abre o app pra ver!' : 'A gestão aprovou uma recomendação nova pra sua semana. Toca pra ver.' });
+  } else if (s.escopo === 'loja' && s.loja) {
+    enviarPush({ loja: s.loja, titulo: '💡 Nova recomendação pra equipe',
+      corpo: 'Tem recomendação nova aprovada pra loja de vocês essa semana.' });
+  } else if (s.escopo === 'geral') {
+    enviarPush({ titulo: '💡 Nova recomendação pra todas as lojas',
+      corpo: 'Tem recomendação nova aprovada pra essa semana. Toca pra ver.' });
+  }
+}
+
 function aprovarSugestao(idSug, textoEditado, prazo) {
   const ov = loadSugestoesOverrides();
   const reg = {
@@ -2648,6 +2688,7 @@ function aprovarSugestao(idSug, textoEditado, prazo) {
   ov[idSug] = reg;
   localStorage.setItem('sugestoes_overrides', JSON.stringify(ov));
   enviarOverrideWorker(idSug, reg);
+  _pushDeAprovacao(_acharSugestaoPorId(idSug));
   rerender();
 }
 
@@ -2708,13 +2749,31 @@ function aprovarTodasDaSemana() {
   const sem = SUGESTOES[semKey];
   if (!sem) return;
   const ov = loadSugestoesOverrides();
+  const lojasAvisadas = new Set();
+  let teveGeral = false;
   sem.itens.forEach(s => {
     const eff = ov[s.id]?.status || s.status || 'pendente';
     if (eff === 'pendente') {
-      ov[s.id] = {status: 'aprovada', texto_editado: null, em: new Date().toISOString()};
+      const reg = {status: 'aprovada', texto_editado: null, em: new Date().toISOString()};
+      ov[s.id] = reg;
+      // ⚠️ Bug pré-existente corrigido 04/07/2026: a aprovação em massa NÃO
+      // sincronizava com o Worker — ficava só no localStorage deste navegador
+      // e as vendedoras nunca viam as sugestões aprovadas em lote.
+      enviarOverrideWorker(s.id, reg);
+      if (s.escopo === 'geral') teveGeral = true;
+      else if (s.loja) lojasAvisadas.add(s.loja);
     }
   });
   localStorage.setItem('sugestoes_overrides', JSON.stringify(ov));
+  // UM push por loja (não um por sugestão — evita metralhadora de avisos).
+  for (const lk of lojasAvisadas) {
+    enviarPush({ loja: lk, titulo: '💡 Recomendações da semana liberadas',
+      corpo: 'A gestão aprovou as recomendações da semana. Abre o app pra ver as suas.' });
+  }
+  if (teveGeral && lojasAvisadas.size === 0) {
+    enviarPush({ titulo: '💡 Recomendações da semana liberadas',
+      corpo: 'A gestão aprovou as recomendações da semana. Abre o app pra ver as suas.' });
+  }
   rerender();
 }
 
