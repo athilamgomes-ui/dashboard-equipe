@@ -137,6 +137,8 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 .sug-card[data-aval="indiferente"]{border-left:4px solid var(--muted)}
 .sug-card[data-aval="nao_funcionou"]{border-left:4px solid var(--red)}
 .sug-card[data-aval=""]{border-left:4px solid var(--yellow)}
+.sug-card[data-tipo="elogio"]{background:linear-gradient(135deg,rgba(234,179,8,.10),var(--bg2));border-color:rgba(234,179,8,.4)}
+.sug-card[data-tipo="elogio"]{border-left:4px solid #eab308 !important}
 .sug-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11px}
 .sug-chip{padding:2px 8px;border-radius:5px;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.3px;background:var(--bg3);color:var(--muted)}
 .sug-chip.tipo{background:rgba(124,92,252,.15);color:#a78bfa}
@@ -1873,11 +1875,12 @@ function renderAnual() {
 const TIPO_LABELS = {
   script_venda:'Script de venda', treinamento:'Treinamento', marca:'Marca/Curva A',
   layout:'Layout/Vitrine', atendimento:'Atendimento', ticket_medio:'Ticket médio',
-  meta:'Gestão de meta', comunicacao:'Comunicação', cliente_recorrente:'Cliente recorrente'
+  meta:'Gestão de meta', comunicacao:'Comunicação', cliente_recorrente:'Cliente recorrente',
+  elogio:'🏆 Elogio/Reconhecimento'
 };
 const ALVO_LABELS = {
   atingir_meta:'Atingir meta', marcas_a:'% Marcas A', ticket_medio:'Ticket médio',
-  conversao:'Conversão', vendas_individuais:'Vendas individuais'
+  conversao:'Conversão', vendas_individuais:'Vendas individuais', crescimento_yoy:'Crescimento vs ano anterior'
 };
 const RES_LABELS = {funcionou:'✓ Funcionou', indiferente:'➖ Indiferente', nao_funcionou:'✗ Não funcionou'};
 
@@ -1898,25 +1901,116 @@ const DEFAULT_THRESHOLDS = {
   marcas_a:           {tipo:'absoluto_pp',  funcionou:5,  parcial:2},      // +5pp / +2pp
 };
 
-// Da semana ISO da sug (ex '2026-W21'), descobre quais Sx do MES_KEY correspondem:
-// W21 = 18-23/05 = S3. W22 = 25-30 = S4. Retorna {semBaselineId, semAvalId}.
+// ─── ELOGIOS — comparação de crescimento vs mesmo mês do ano anterior ────────
+// Pedido do Athila (04/07/2026): reconhecer vendedora/loja que cresceu muito
+// vs o mesmo mês do ano passado (ex: Rayra). Fonte: HIST_MENSAL_YOY['YYYY-MM']
+// (mês de ANO ANTERIOR, coletado 1x/mês via ERP — mesmo endpoint do cron normal,
+// só com o range de data do ano anterior). Ver [[premiacao_sugestoes_redesign]].
+const ELOGIO_THRESHOLD_PCT = 20; // crescimento mínimo (%) pra virar sugestão de elogio
+
+// Seed real (coletado 04/07/2026 via cron_etapa1_vendas.mjs, di=01/06/2025 df=30/06/2025):
+// caso de origem — Rayra (L1) R$26.460 em jun/2025 → R$42.202 em jun/2026 = +59% (elogio real).
+const HIST_MENSAL_YOY = {
+  '2025-06': {
+    L1: {Outros:78577, Rayra:26460},
+    L3: {Outros:31317, Raimunda:22740},
+    L4: {Outros:74424, Tanaia:41751, Josilene:25391},
+    L5: {Outros:41129, Rosiene:29862, Joyce:24943},
+  },
+};
+
+// Compara o total de um mês (individual ou loja inteira) com o mesmo mês do ano
+// anterior. Retorna null se faltar dado de qualquer um dos dois lados (não dá
+// pra comparar — não gera elogio nem conclusão nenhuma, fica silencioso).
+function calcCrescimentoYoY(mesKeyAtual, lojaKey, vendedora) {
+  const [anoStr, mm] = mesKeyAtual.split('-');
+  const mesKeyAnterior = `${+anoStr - 1}-${mm}`;
+  const atualLd = DADOS[mesKeyAtual]?.[lojaKey];
+  const anteriorObj = HIST_MENSAL_YOY[mesKeyAnterior]?.[lojaKey];
+  if (!atualLd || !anteriorObj) return null;
+
+  const somaMes = (ld, vend) => (ld.semanas || []).reduce((s, sem) => {
+    const v = (ld.vendas?.[sem.id] || {});
+    return s + (vend ? (v[vend] || 0) : Object.values(v).reduce((a,x)=>a+(x||0),0));
+  }, 0);
+
+  const atual = vendedora ? somaMes(atualLd, vendedora) : somaMes(atualLd, null);
+  const anterior = vendedora ? (anteriorObj[vendedora] || 0) : Object.values(anteriorObj).reduce((s,v)=>s+(v||0),0);
+  if (anterior <= 0 || atual <= 0) return null;
+  return {atual, anterior, variacaoPct: (atual - anterior) / anterior * 100, mesKeyAnterior};
+}
+
+// ─── MOTOR DE AVALIAÇÃO AUTOMÁTICA — GENERALIZADO (04/07/2026) ───────────────
+// Antes disso, esta função era hardcoded pra maio/2026 (W19-W22) — sugestões de
+// qualquer semana seguinte (W23 em diante, ~40 sugestões) NUNCA foram avaliadas
+// automaticamente porque a função só sabia mapear 4 semanas específicas e
+// calcAutoMetrics tinha `mesKey = '2026-05'` fixo. Ver [[premiacao_sugestoes_redesign]].
 //
-// ⚠️ Caso especial — W21 (S3, mai/2026): App lançado quinta 21/05, no MEIO da S3.
-// Antes do app vs depois do app é a comparação justa pras sugestões W21. Não compara
-// com S2 (toda pré-app). Usa vendas_split.S3_pre (seg-qua 18-20/05) vs S3_pos
-// (qui-sáb 21-23/05). Ver memória [[premiacao_metrica_antes_depois_app]].
-// Outras semanas seguem regra padrão (S vs S-1).
-function _semIdsDaSugestao(idSug) {
-  const mapa = {
-    'W21': {baseline:'S3_pre', avaliada:'S3_pos', label:'antes app (18-20/05) → depois app (21-23/05)'},
-    'W22': {baseline:'S3',     avaliada:'S4'},
-    'W19': {baseline:'',       avaliada:'S1'},
-    'W20': {baseline:'S1',     avaliada:'S2'},
-  };
-  const m = idSug.match(/-W(\d+)-/);
+// Regra (pedido do Athila, 04/07/2026): o motor automático vale SÓ "daqui pra
+// frente" — sugestões geradas ANTES de AUTO_AVALIACAO_DESDE ficam como "legado"
+// (sem avaliação automática; avaliação manual continua opcional pra elas).
+const AUTO_AVALIACAO_DESDE = {ano: 2026, semana: 28}; // primeira semana gerada pelo sistema novo
+
+// Segunda-feira (Date, UTC) de uma semana ISO (ano, semana).
+function _isoWeekParaData(ano, semana) {
+  const simple = new Date(Date.UTC(ano, 0, 1 + (semana - 1) * 7));
+  const dow = simple.getUTCDay() || 7;
+  simple.setUTCDate(simple.getUTCDate() + 1 - dow);
+  return simple;
+}
+
+// "01/07–04/07" OU "01/06 a 06/06" → {ini:Date, fim:Date} (UTC, ano informado).
+function _parsePeriodo(periodo, ano) {
+  if (!periodo) return null;
+  const m = periodo.match(/(\d{2})\/(\d{2})\D+(\d{2})\/(\d{2})/);
   if (!m) return null;
-  const k = 'W' + m[1].padStart(2,'0');
-  return mapa[k] || null;
+  return {
+    ini: new Date(Date.UTC(ano, +m[2]-1, +m[1])),
+    fim: new Date(Date.UTC(ano, +m[4]-1, +m[3])),
+  };
+}
+
+// Acha em qual {mesKey, semana} do DADOS a segunda-feira de uma semana ISO cai,
+// e qual é a semana anterior (baseline). Lojas compartilham os mesmos períodos
+// no mesmo mês, então L1 serve de referência pra achar o período.
+function _acharSemanaPorIsoWeek(ano, semana) {
+  const segunda = _isoWeekParaData(ano, semana);
+  for (const mesKey of Object.keys(DADOS)) {
+    const ld = DADOS[mesKey]?.L1;
+    if (!ld || !ld.semanas) continue;
+    const idx = ld.semanas.findIndex(s => {
+      const per = _parsePeriodo(s.periodo, ano);
+      return per && segunda >= per.ini && segunda <= per.fim;
+    });
+    if (idx >= 0) {
+      return {mesKey, avaliada: ld.semanas[idx].id, baseline: idx > 0 ? ld.semanas[idx-1].id : null};
+    }
+  }
+  return null;
+}
+
+// Da semana ISO da sug (ex '2026-W21'), descobre {mesKey, baseline, avaliada}.
+//
+// ⚠️ Casos especiais preservados (mai/2026) — App lançado quinta 21/05, no MEIO
+// da S3. Antes do app vs depois do app é a comparação justa pras sugestões W21.
+// Usa vendas_split.S3_pre (seg-qua 18-20/05) vs S3_pos (qui-sáb 21-23/05).
+// Ver memória [[premiacao_metrica_antes_depois_app]]. W19/W20/W22 também fixas
+// (mesma época, mesmo raciocínio S vs S-1 mas com IDs já conhecidos).
+function _semIdsDaSugestao(idSug) {
+  const especiais = {
+    'W21': {mesKey:'2026-05', baseline:'S3_pre', avaliada:'S3_pos', label:'antes app (18-20/05) → depois app (21-23/05)'},
+    'W22': {mesKey:'2026-05', baseline:'S3',     avaliada:'S4'},
+    'W19': {mesKey:'2026-05', baseline:'',       avaliada:'S1'},
+    'W20': {mesKey:'2026-05', baseline:'S1',     avaliada:'S2'},
+  };
+  const m = idSug.match(/^(\d{4})-W(\d+)-/);
+  if (!m) return null;
+  const ano = +m[1], semana = +m[2];
+  const wKey = 'W' + String(semana).padStart(2,'0');
+  if (especiais[wKey]) return especiais[wKey];
+
+  if (ano < AUTO_AVALIACAO_DESDE.ano || semana < AUTO_AVALIACAO_DESDE.semana) return null; // legado
+  return _acharSemanaPorIsoWeek(ano, semana);
 }
 
 function _getMA(ld, semId, vendOuLoja) {
@@ -1965,7 +2059,7 @@ function calcAutoMetrics(sug) {
   }
   const ids = _semIdsDaSugestao(sug.id);
   if (!ids) return null;
-  const mesKey = '2026-05'; // ⚠️ futuro: derivar de ids
+  const mesKey = ids.mesKey; // derivado de _semIdsDaSugestao (generalizado 04/07/2026)
   const ld = DADOS[mesKey]?.[sug.loja];
   if (!ld) return null;
 
@@ -2259,10 +2353,80 @@ function salvarComentario(idSug, texto) {
   localStorage.setItem('avaliacoes_premiacao', JSON.stringify(local));
 }
 
+// Semana ISO REAL de hoje (não mais "a última chave existente em SUGESTOES").
+// Antes, se a geração semanal falhasse, o painel mostrava a última semana
+// disponível como se fosse a atual — sem avisar que estava desatualizada
+// (foi assim que W26/W27 ficaram invisíveis 2 semanas seguidas em jun/jul).
+// Ver [[premiacao_sugestoes_redesign]].
+function _isoSemanaDeHoje() {
+  const hoje = new Date();
+  const d = new Date(Date.UTC(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const semana = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return {ano: d.getUTCFullYear(), semana, key: `${d.getUTCFullYear()}-W${String(semana).padStart(2,'0')}`};
+}
+
 function getSemanaCorrente() {
-  // Retorna a chave 'YYYY-Www' mais recente disponível em SUGESTOES
-  const keys = Object.keys(SUGESTOES).sort();
-  return keys[keys.length - 1];
+  return _isoSemanaDeHoje().key;
+}
+
+// ─── FILA "AGUARDANDO AVALIAÇÃO" ──────────────────────────────────────────────
+// Varre TODAS as semanas fechadas (anteriores à atual) e lista sugestões sem
+// veredito nenhum — nem manual (AVALIACOES) nem automático (calcAutoMetrics).
+// Resolve a invisibilidade do backlog: antes, sugestão de semana passada só
+// aparecia em Análise SE já avaliada; sem isso, 40 sugestões (W22-W27) ficaram
+// invisíveis e ninguém percebeu que não estavam sendo avaliadas.
+function getFilaAvaliacaoPendente() {
+  const atual = _isoSemanaDeHoje();
+  const avalMap = loadAvaliacoes();
+  const ovs = loadSugestoesOverrides();
+  const pendentes = [];
+  for (const [semKey, sem] of Object.entries(SUGESTOES)) {
+    const m = semKey.match(/^(\d{4})-W(\d+)$/);
+    if (!m) continue;
+    const ano = +m[1], semana = +m[2];
+    if (ano > atual.ano || (ano === atual.ano && semana >= atual.semana)) continue; // só semanas fechadas
+    (sem.itens || []).forEach(s => {
+      // Só faz sentido avaliar o que foi de fato APROVADO (chegou pra equipe).
+      // Rejeitada ou nunca revisada (ainda pendente de aprovação) não entra aqui.
+      const statusEfetivo = ovs[s.id]?.status || s.status || 'pendente';
+      if (statusEfetivo !== 'aprovada') return;
+      if (avalMap[s.id]) return; // já avaliada manualmente
+      const auto = calcAutoMetrics(s);
+      if (auto && auto.tipo === 'calculado' && auto.status !== null) return; // já avaliada automaticamente
+      pendentes.push({s, semKey, ano, semana, temAuto: !!(auto && auto.tipo === 'calculado')});
+    });
+  }
+  pendentes.sort((a,b) => a.ano - b.ano || a.semana - b.semana);
+  return pendentes;
+}
+
+function renderFilaAvaliacaoPendente() {
+  const pendentes = getFilaAvaliacaoPendente();
+  if (pendentes.length === 0) {
+    return `<div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--green)">
+      ✅ Nenhuma sugestão pendente de avaliação — tudo em dia.
+    </div>`;
+  }
+  const rows = pendentes.slice(0, 30).map(({s, semKey}) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px">
+      <div>
+        <span style="color:var(--muted)">${semKey}</span> ·
+        <span style="color:${s.loja?LOJAS_BASE[s.loja]?.cor:'var(--muted)'};font-weight:600">${s.loja||'GERAL'}</span>
+        ${s.vendedora?` · <b>${s.vendedora}</b>`:''} — ${s.titulo}
+      </div>
+    </div>`).join('');
+  return `<div style="background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.35);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <h3 style="color:var(--yellow);font-size:13px">📋 Aguardando avaliação</h3>
+      <span style="background:rgba(234,179,8,.25);color:var(--yellow);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">${pendentes.length}</span>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Sugestões de semanas fechadas sem veredito (nem automático, nem manual). Ordenadas da mais antiga pra mais nova.</div>
+    ${rows}
+    ${pendentes.length > 30 ? `<div style="font-size:11px;color:var(--muted);margin-top:6px">+ ${pendentes.length-30} mais antigas...</div>` : ''}
+  </div>`;
 }
 
 // ─── APROVAÇÃO DE SUGESTÕES ──────────────────────────────────────────────────
@@ -2448,10 +2612,11 @@ function aprovarTodasDaSemana() {
 function renderSugestoes() {
   const semKey = getSemanaCorrente();
   const sem = SUGESTOES[semKey];
+  const filaPendente = renderFilaAvaliacaoPendente();
   if (!sem || !sem.itens || sem.itens.length === 0) {
-    return `<div class="sug-empty">
-      <h2 style="color:var(--text);margin-bottom:8px">Sem sugestões para essa semana</h2>
-      <p>O agente gera novas sugestões toda segunda às 9h.</p>
+    return filaPendente + `<div class="sug-empty">
+      <h2 style="color:var(--text);margin-bottom:8px">Sem sugestões para essa semana (${semKey})</h2>
+      <p>O agente gera novas sugestões todo sábado às 18h, pra semana seguinte.</p>
     </div>`;
   }
   const avalMap = loadAvaliacoes();
@@ -2594,7 +2759,7 @@ function renderSugestoes() {
         <button class="sug-btn" style="background:transparent;color:var(--muted);border-color:var(--border);margin-top:6px;width:auto;padding:4px 10px;font-size:11px" onclick="voltarSugestaoPendente('${s.id}')">↩️ Voltar pra pendente</button>`;
     }
 
-    return `<div class="sug-card" data-id="${s.id}" data-aval="${aval}" data-status="${s._status}" style="border-left:4px solid ${isPendente?'var(--yellow)':isAprovada?'var(--green)':'var(--red)'}">
+    return `<div class="sug-card" data-id="${s.id}" data-aval="${aval}" data-status="${s._status}" data-tipo="${s.tipo}" style="border-left:4px solid ${isPendente?'var(--yellow)':isAprovada?'var(--green)':'var(--red)'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <div class="sug-meta">${chips}</div>
         ${statusBadge}
@@ -2611,7 +2776,7 @@ function renderSugestoes() {
   const rejeitadas = itens.filter(i => i._status === 'rejeitada').length;
   const aprovadasAval = itens.filter(i => i._status === 'aprovada' && avalMap[i.id]).length;
 
-  return `
+  return filaPendente + `
     <div class="sug-hdr">
       <div>
         <h2>💡 Sugestões da ${sem.semana_label}</h2>

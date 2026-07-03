@@ -2918,7 +2918,18 @@ function renderProgresso() {
   const sugs = getMinhasSugestoesAprovadas();
   const temAlgo = sugs.individuais.length + sugs.loja.length + sugs.gerais.length > 0;
 
+  // Elogio/reconhecimento (tipo='elogio') — sem botões de ação (não é tarefa,
+  // é reconhecimento de crescimento). Visual celebratório distinto.
+  function renderElogioCard(s) {
+    return `<div style="background:linear-gradient(135deg,rgba(234,179,8,.14),rgba(234,179,8,.03));border:1px solid rgba(234,179,8,.4);border-radius:8px;padding:12px 14px;margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;color:var(--yellow);letter-spacing:.4px;margin-bottom:6px">🏆 RECONHECIMENTO</div>
+      <p><b>${s.titulo}</b></p>
+      <p style="margin-top:4px">${s.descricao}</p>
+    </div>`;
+  }
+
   function renderSugCard(s) {
+    if (s.tipo === 'elogio') return renderElogioCard(s);
     const meuFb = getMeuFeedback(s.id);
     const acao = meuFb?.acao || '';
     // Retorno do dono (carregado em window.__RETORNOS_DONO)
