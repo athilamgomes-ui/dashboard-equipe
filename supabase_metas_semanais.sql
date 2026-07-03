@@ -58,3 +58,32 @@ insert into public.metas_semanais (mes, loja, semana, meta) values
   ('2026-06','L5','S4',25000)
 on conflict (mes, loja, semana)
   do update set meta = excluded.meta, atualizado_em = now();
+
+-- Seed com a META REAL (=Ideal, sem reajuste ainda) de julho/2026 — extraída da
+-- Tabela de Premiação (PDF do Athila) em 04/07/2026. ⚠️ Julho tem 5 semanas
+-- (01-04/07, 06-11/07, 13-18/07, 20-25/07, 27-31/07) — o nº de semanas por mês É
+-- VARIÁVEL, decidido pelo Athila no início de cada mês (não fixar em 4 nem 5).
+-- L3 meta MENSAL subiu de R$80.000 (jun) pra R$85.000 (jul, confirmado pelo Athila).
+insert into public.metas_semanais (mes, loja, semana, meta) values
+  ('2026-07','L1','S1',20000),
+  ('2026-07','L1','S2',35000),
+  ('2026-07','L1','S3',30000),
+  ('2026-07','L1','S4',25000),
+  ('2026-07','L1','S5',30000),
+  ('2026-07','L3','S1',10000),
+  ('2026-07','L3','S2',25000),
+  ('2026-07','L3','S3',20000),
+  ('2026-07','L3','S4',10000),
+  ('2026-07','L3','S5',20000),
+  ('2026-07','L4','S1',20000),
+  ('2026-07','L4','S2',35000),
+  ('2026-07','L4','S3',30000),
+  ('2026-07','L4','S4',25000),
+  ('2026-07','L4','S5',30000),
+  ('2026-07','L5','S1',10000),
+  ('2026-07','L5','S2',25000),
+  ('2026-07','L5','S3',20000),
+  ('2026-07','L5','S4',15000),
+  ('2026-07','L5','S5',20000)
+on conflict (mes, loja, semana)
+  do update set meta = excluded.meta, atualizado_em = now();
