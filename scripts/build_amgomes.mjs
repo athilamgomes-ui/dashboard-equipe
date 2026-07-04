@@ -96,6 +96,27 @@ for (const [k, info] of Object.entries(LOJA)) {
 if (Object.keys(M).length !== 4) die("faltam lojas");
 if (Object.values(M).every(m => m.vliq === 0)) die("todas as lojas com V.Líquida 0 — coleta suspeita, abortando");
 
+// ── Sanity: soma dos vendedores × acumulado da loja (não-fatal; tolerância 5% ou R$ 1.000) ──
+{
+  const SANITY_FILE = "/tmp/amgomes_sanity_warn.txt";
+  const avisos = [];
+  for (const k of Object.keys(LOJA)) {
+    const arr = (vendData[k] || []).filter(x => x && x.n && Number.isFinite(Number(x.v)));
+    if (!arr.length) continue; // coleta de vendedores vazia p/ esta loja — check pulado
+    const soma = Math.round(arr.reduce((s, x) => s + Number(x.v), 0));
+    const ref = M[k].vliq;
+    const tol = Math.max(1000, ref * 0.05);
+    if (Math.abs(soma - ref) > tol) {
+      const pct = ref > 0 ? ((soma - ref) / ref) * 100 : 0;
+      const linha = `⚠️ SANITY: ${k} soma vendedores R$${fmtMil(soma)} vs acumulado loja R$${fmtMil(ref)} (Δ ${fmtPct(pct)})`;
+      avisos.push(linha);
+      log(linha);
+    }
+  }
+  if (avisos.length) fs.writeFileSync(SANITY_FILE, avisos.join("\n") + "\n");
+  else { try { fs.unlinkSync(SANITY_FILE); } catch { /* ausente, ok */ } }
+}
+
 // ── Ranking (por % meta; fração cancela → equivalente a vliq/metaMensal) ──
 const ranking = Object.values(M).sort((a, b) => (b.vliq / b.metaMensal) - (a.vliq / a.metaMensal));
 ranking.forEach((m, i) => { m.rank = i + 1; });
