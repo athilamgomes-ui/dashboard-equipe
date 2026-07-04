@@ -1425,6 +1425,24 @@ function aplicarMetasWorkerNoDADOS(items) {
   const all = loadDecisoesMeta();
   for (const it of items) {
     if (!it || !Array.isArray(it.metas)) continue;
+    const key = `${it.mes}|${it.loja}`;
+    // tipo 'reset' = Athila restaurou as metas originais (em outro device ou
+    // antes do F5). Aplica os valores originais mas NÃO vira "decisão" — assim
+    // o card de sugestão de ajuste volta a aparecer. Decisão local mais nova
+    // que o reset vence (o dreno do boot reenvia ela pros stores).
+    if (it.tipo === 'reset') {
+      const existing = all[key];
+      if (existing && new Date(existing.em||0) > new Date(it.em||0)) continue;
+      const ldR = DADOS[it.mes]?.[it.loja];
+      if (ldR && Array.isArray(ldR.semanas)) {
+        for (const m of it.metas) {
+          const sem = ldR.semanas.find(s => s.id === m.id);
+          if (sem && typeof m.nova === 'number') sem.meta = m.nova;
+        }
+      }
+      delete all[key];
+      continue;
+    }
     const ld = DADOS[it.mes]?.[it.loja];
     if (ld && Array.isArray(ld.semanas)) {
       for (const m of it.metas) {
@@ -1434,7 +1452,6 @@ function aplicarMetasWorkerNoDADOS(items) {
     }
     // Espelha no localStorage — merge por semana (preserva semanas que só
     // existem localmente; Worker sobrescreve as que ele tem).
-    const key = `${it.mes}|${it.loja}`;
     const existing = all[key];
     const merged = (existing && Array.isArray(existing.metas)) ? existing.metas.slice() : [];
     for (const m of it.metas) {
@@ -1557,11 +1574,9 @@ function aplicarAjusteMeta(mesKey, lojaKey, dadosStr) {
     const sem = ld.semanas.find(s => s.id === d.id);
     if (sem) sem.meta = d.nova;
   });
-  // Persiste decisão E pendente (skill sincroniza no próximo run)
+  // setDecisaoMeta já persiste no Worker + Supabase — é de lá que o agente
+  // lê na Etapa 3 (fila local ajustes_meta_pendentes aposentada em 04/07/2026).
   setDecisaoMeta(mesKey, lojaKey, {tipo:'aplicado_sugestao', metas: dados});
-  const pending = JSON.parse(localStorage.getItem('ajustes_meta_pendentes') || '[]');
-  pending.push({mesKey, lojaKey, dados, aplicado_em: new Date().toISOString()});
-  localStorage.setItem('ajustes_meta_pendentes', JSON.stringify(pending));
   rerender();
 }
 
@@ -1589,9 +1604,6 @@ function salvarMetaCustom(mesKey, lojaKey, idsStr) {
     }
   }
   setDecisaoMeta(mesKey, lojaKey, {tipo:'custom', metas: novasMetas});
-  const pending = JSON.parse(localStorage.getItem('ajustes_meta_pendentes') || '[]');
-  pending.push({mesKey, lojaKey, dados: novasMetas, aplicado_em: new Date().toISOString(), origem: 'custom'});
-  localStorage.setItem('ajustes_meta_pendentes', JSON.stringify(pending));
   rerender();
 }
 
@@ -1616,10 +1628,21 @@ function resetarDecisaoMeta(mesKey, lojaKey) {
       if (sem) sem.meta = o.meta;
     }
   }
-  // 3. Limpa também pendentes (skill não vai mais aplicar)
-  const pending = JSON.parse(localStorage.getItem('ajustes_meta_pendentes') || '[]');
-  const filtered = pending.filter(p => !(p.mesKey === mesKey && p.lojaKey === lojaKey));
-  localStorage.setItem('ajustes_meta_pendentes', JSON.stringify(filtered));
+  // 3. Propaga o reset pros stores compartilhados (Worker + Supabase) com as
+  // metas ORIGINAIS. Sem isso, o fetch do boot (e o agente na Etapa 3)
+  // reaplicava a meta ajustada por cima do reset — o reset só valia neste
+  // navegador até o F5.
+  if (original) {
+    const metasOrig = original.map(o => ({id: o.id, nova: o.meta}));
+    salvarMetasSupabase(mesKey, lojaKey, metasOrig);
+    try {
+      fetch(`${WORKER_URL}/metas-loja`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({mes: mesKey, loja: lojaKey, tipo: 'reset', metas: metasOrig})
+      }).catch(e => console.warn('[metas-loja] falha ao propagar reset:', e));
+    } catch(e) { console.warn('[metas-loja] erro no reset:', e); }
+  }
   rerender();
 }
 
@@ -2450,6 +2473,7 @@ function salvarRetornoFeedback(idSug, loja, vendedora) {
   });
 }
 
+let _debounceComent = {};
 function salvarComentario(idSug, texto) {
   const local = JSON.parse(localStorage.getItem('avaliacoes_premiacao') || '[]');
   const reg = local.find(a => a.id_sugestao === idSug);
@@ -2457,6 +2481,18 @@ function salvarComentario(idSug, texto) {
   reg.comentario = texto;
   reg.avaliado_em = new Date().toISOString().slice(0,10);
   localStorage.setItem('avaliacoes_premiacao', JSON.stringify(local));
+  // Escrita-dupla debounced (oninput dispara a cada tecla). Sem isso o
+  // comentário editado depois da avaliação ficava SÓ neste navegador e a
+  // Etapa 3 do agente (que lê do Worker) nunca o via.
+  clearTimeout(_debounceComent[idSug]);
+  _debounceComent[idSug] = setTimeout(() => {
+    supaUpsert('sugestoes_avaliacoes', {id_sugestao: idSug, resultado: reg.resultado, comentario: reg.comentario||'', em: new Date().toISOString()}, 'id_sugestao');
+    fetch(`${WORKER_URL}/avaliacao`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id_sugestao: idSug, resultado: reg.resultado, comentario: reg.comentario||''})
+    }).catch(e => console.warn('[avaliacao] falha ao enviar comentário:', e));
+  }, 900);
 }
 
 // Semana ISO REAL de hoje (não mais "a última chave existente em SUGESTOES").
@@ -2602,6 +2638,45 @@ function mergeItens(workerItems, supaItems, keyFn) {
     if (!cur || new Date(it.em||0) >= new Date(cur.em||0)) map.set(k, it);
   }
   return [...map.values()];
+}
+
+// ── DRENO local → stores (04/07/2026 — fim do Chrome MCP na Etapa 3) ─────────
+// O agente agora lê avaliações/overrides/metas do Worker (+Supabase), não mais
+// do localStorage via browser. O que ficou SÓ neste navegador (envio que falhou
+// offline, registro anterior à escrita-dupla) é reenviado no boot. Só reenvia o
+// que está ausente ou mais novo que o remoto → converge em 1 boot, sem loop.
+function drenarLocalParaStores(overrides, avaliacoes, metasLoja) {
+  try {
+    const localOv = JSON.parse(localStorage.getItem('sugestoes_overrides') || '{}');
+    for (const [id, reg] of Object.entries(localOv)) {
+      const remoto = overrides.find(o => o.id_sugestao === id);
+      if (!remoto || new Date(reg.em||0) > new Date(remoto.em||0)) enviarOverrideWorker(id, reg);
+    }
+    const localAv = JSON.parse(localStorage.getItem('avaliacoes_premiacao') || '[]');
+    for (const a of localAv) {
+      const remoto = avaliacoes.find(x => x.id_sugestao === a.id_sugestao);
+      if (remoto && new Date(remoto.em||0) >= new Date(a.em||a.avaliado_em||0)) continue;
+      supaUpsert('sugestoes_avaliacoes', {id_sugestao: a.id_sugestao, resultado: a.resultado, comentario: a.comentario||'', em: new Date().toISOString()}, 'id_sugestao');
+      fetch(`${WORKER_URL}/avaliacao`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({id_sugestao: a.id_sugestao, resultado: a.resultado, comentario: a.comentario||''})
+      }).catch(()=>{});
+    }
+    const decisoes = loadDecisoesMeta();
+    for (const [key, dec] of Object.entries(decisoes)) {
+      if (!dec || dec.tipo === 'ignorado' || !Array.isArray(dec.metas)) continue;
+      const [mes, loja] = key.split('|');
+      const remoto = metasLoja.find(m => m.mes === mes && m.loja === loja);
+      if (remoto && new Date(remoto.em||0) >= new Date(dec.em||0)) continue;
+      salvarMetasSupabase(mes, loja, dec.metas);
+      fetch(`${WORKER_URL}/metas-loja`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({mes, loja, tipo: dec.tipo || 'custom', metas: dec.metas})
+      }).catch(()=>{});
+    }
+    // Fila legada da Etapa 3 via Chrome MCP — sem consumidor desde 04/07/2026.
+    localStorage.removeItem('ajustes_meta_pendentes');
+  } catch(e) { console.warn('[dreno] falhou:', e); }
 }
 
 // Lê todas as metas do mês. Aplica em DADOS (Supabase é autoritativo).
@@ -3392,6 +3467,10 @@ async function initDashboard() {
       if (idx < 0) localAv.push(a); else if (new Date(a.em||0) > new Date(localAv[idx].em||localAv[idx].avaliado_em||0)) localAv[idx] = {...a, avaliado_em: (a.em||'').slice(0,10)};
     }
     localStorage.setItem('avaliacoes_premiacao', JSON.stringify(localAv));
+
+    // Dreno: o que só existe neste navegador sobe pro Worker/Supabase
+    // (é de lá que o agente lê na Etapa 3 — zero Chrome MCP desde 04/07/2026)
+    drenarLocalParaStores(overrides, avaliacoes, metasLoja);
 
     // Anexa feedbacks por sugestão (em memória, pra render mostrar)
     for (const sem of Object.values(SUGESTOES)) {
