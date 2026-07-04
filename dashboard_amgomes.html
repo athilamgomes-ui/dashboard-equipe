@@ -773,6 +773,19 @@ function renderVendorTables() {
         <td style="text-align:right;color:var(--accent);font-size:11px;padding:5px 4px;">${r.m12 ? fR(r.m12) : '—'}</td>
       </tr>`;
     });
+    // Vendedor Padrão = diferença entre o total da loja (V.Líquida real do ERP)
+    // e a soma dos vendedores nomeados = vendas sem vendedor atribuído.
+    // Só exibe quando o gap é material (evita ruído de arredondamento).
+    const padrao = Math.round(totalV - somaV);
+    if (padrao >= 100) {
+      html += `<tr>
+        <td style="padding:5px 4px;font-weight:400;font-style:italic;color:var(--muted);" title="Vendas sem vendedor nomeado (VENDEDOR PADRÃO). É a diferença entre o total da loja e a soma dos vendedores.">Vendedor Padrão</td>
+        <td style="text-align:right;color:var(--muted);font-weight:600;padding:5px 4px;">${fR(padrao)}</td>
+        <td style="text-align:right;color:var(--muted);padding:5px 4px;">—</td>
+        <td style="text-align:right;color:var(--muted);padding:5px 4px;">—</td>
+        <td style="text-align:right;color:var(--muted);padding:5px 4px;">—</td>
+      </tr>`;
+    }
     html += `<tr style="border-top:1px solid var(--border);background:#f8fafc;">
       <td style="padding:5px 4px;font-weight:800;">Total</td>
       <td style="text-align:right;color:${color};font-weight:800;padding:5px 4px;">${fR(totalV)}</td>
