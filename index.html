@@ -25,7 +25,7 @@
   --bg:#f0f4f8; --card:#ffffff; --card2:#f8fafc;
   --text:#0f172a; --text2:#334155; --muted:#64748b; --border:#e2e8f0;
   --accent:#6366f1;
-  --premiacao:#f59e0b; --vendas:#6366f1; --compras:#0891b2; --planej:#3b82f6; --precos:#059669;
+  --premiacao:#f59e0b; --vendas:#6366f1; --compras:#0891b2; --planej:#3b82f6; --precos:#059669; --instagram:#e1306c;
   --shadow:0 1px 3px rgba(15,23,42,.06), 0 6px 20px rgba(15,23,42,.05);
   --shadow-hover:0 6px 16px rgba(15,23,42,.10), 0 14px 40px rgba(15,23,42,.08);
 }
@@ -66,7 +66,7 @@ body{
 .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);border-color:color-mix(in srgb,var(--c) 35%,var(--border))}
 .card:active{transform:scale(.985)}
 .card.premiacao{--c:var(--premiacao)} .card.vendas{--c:var(--vendas)}
-.card.compras{--c:var(--compras)} .card.planej{--c:var(--planej)} .card.precos{--c:var(--precos)}
+.card.compras{--c:var(--compras)} .card.planej{--c:var(--planej)} .card.precos{--c:var(--precos)} .card.instagram{--c:var(--instagram)}
 .card-icon{
   width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;
   font-size:26px;margin-bottom:14px;
@@ -201,6 +201,18 @@ footer .dot{color:var(--accent)}
       <span class="chip">NF-e</span>
       <span class="chip">Margem</span>
       <span class="chip">Preço sugerido</span>
+    </div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a href="https://athilamgomes-ui.github.io/instagram-amgomes/" class="card instagram">
+    <span class="card-icon">📱</span>
+    <div class="card-title">Instagram</div>
+    <div class="card-desc">Análise de conteúdo e vendas online das lojas: comparação, tendência, plano de postagem e metas.</div>
+    <div class="card-chips">
+      <span class="chip">Visão Geral</span>
+      <span class="chip">Plano de postagem</span>
+      <span class="chip">Metas</span>
     </div>
     <span class="card-arrow">→</span>
   </a>
