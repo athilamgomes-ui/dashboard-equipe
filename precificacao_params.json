@@ -6,7 +6,7 @@
     "comissao": 0.01,
     "outros": 0.02
   },
-  "_tabelas_doc": "No ERP os precos ficam em Estoque > Relatorios > Lista de Preco (Ajustes de preco / Precos de venda / Produtos ativos). Cada loja aplica numa tabela. L1 e L4 compartilham a Tabela padrao (mesmo preco).",
+  "_tabelas_doc": "No ERP os precos ficam em Estoque > Relatorios > Lista de Preco. As tabelas sao ESPECIFICAS POR EMPRESA e o dropdown so lista as da empresa logada (sempre emp1 no headless) — por isso selecionamos pelo ID (tabela_id), nao pelo nome. IDs: padrao=1, Itaituba=3, Altamira=4, Teste Atacado=5, Santarem=? (a confirmar). L1/L4 (Altamira)=4, L3 (Itaituba)=3, L5 (Santarem)=a confirmar.",
   "lojas": {
     "L1": {
       "nome": "Casa da Beleza Altamira",
@@ -19,7 +19,8 @@
       "outros": 0.02,
       "abater_credito_icms": false,
       "aliquota_credito_icms": 0.0,
-      "tabela_preco": "Tabela Altamira"
+      "tabela_preco": "Tabela Altamira",
+      "tabela_id": 4
     },
     "L3": {
       "nome": "Casa da Beleza Itaituba",
@@ -32,7 +33,8 @@
       "outros": 0.02,
       "abater_credito_icms": false,
       "aliquota_credito_icms": 0.0,
-      "tabela_preco": "Tabela padrão"
+      "tabela_preco": "Tabela Itaituba",
+      "tabela_id": 3
     },
     "L4": {
       "nome": "MissBeleza Altamira",
@@ -45,7 +47,8 @@
       "outros": 0.02,
       "abater_credito_icms": false,
       "aliquota_credito_icms": 0.0,
-      "tabela_preco": "Tabela Altamira"
+      "tabela_preco": "Tabela Altamira",
+      "tabela_id": 4
     },
     "L5": {
       "nome": "MissBeleza Santarem",

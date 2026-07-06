@@ -163,7 +163,7 @@ const num = v => { const n = Number(v); return isNaN(n) ? 0 : n; };
 
 // Preço de venda atual no ERP (Estoque > Relatórios > Lista de Preços, produtos ativos somente).
 // Filtra por marca (códigos); devolve [{cod,ean,desc,preco}]. Tenta até 3x (o filtro de marca às vezes falha).
-async function relatorioPrecosErp(page, empresa, tabelaNome, marcaCodes) {
+async function relatorioPrecosErp(page, empresa, tabelaNome, marcaCodes, tabelaId) {
   let melhor = { tabela: null, rows: [] };
   for (let tent = 1; tent <= 3; tent++) {
     await gotoRetry(page, URL_LISTA_PRECOS);
@@ -175,7 +175,7 @@ async function relatorioPrecosErp(page, empresa, tabelaNome, marcaCodes) {
     // onclick que monta a grade editável); marcar .checked à toa cai em modo texto sem os inputs.
     const ajChecked = await page.evaluate(() => !!document.getElementById("ajuste_precos")?.checked);
     if (!ajChecked) { await page.click("#ajuste_precos").catch(() => {}); await page.waitForTimeout(700); }
-    const tabInfo = await page.evaluate(({ empresa, tabelaNome, marcaCodes }) => {
+    const tabInfo = await page.evaluate(({ empresa, tabelaNome, tabelaId, marcaCodes }) => {
       [1, 3, 4, 9, 10, 11].forEach(i => { const e = document.getElementById("empresas_" + i); if (e) e.checked = (i === empresa); });
       document.querySelectorAll("input[name=visao]").forEach(r => r.checked = (r.value === "A"));
       const a = document.getElementById("ativa"); if (a) a.checked = true;
@@ -191,16 +191,26 @@ async function relatorioPrecosErp(page, empresa, tabelaNome, marcaCodes) {
       const tp = document.getElementById("tabela_preco");
       let usada = null, opcoes = null, casou = false;
       if (tp) {
-        const semAcento = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-        const alvo = semAcento(tabelaNome).replace(/tabela/g, "").trim();
         opcoes = [...tp.options].map(o => o.text);
-        let opt = [...tp.options].find(o => alvo && semAcento(o.text).includes(alvo));
-        if (opt) casou = true;
-        if (!opt) opt = [...tp.options].find(o => /padr/i.test(o.text || "")) || tp.options[0];
-        if (opt) { tp.value = opt.value; usada = opt.text; }
+        // ⚠️ As tabelas de preço são específicas por empresa e o dropdown só lista as da empresa LOGADA
+        // (sempre emp 1/Altamira no headless). Por isso Itaituba/Santarém não aparecem por nome. Solução:
+        // selecionar pelo ID da tabela (injetando a option, igual à marca) — o relatório honra o ID submetido.
+        if (tabelaId != null && String(tabelaId) !== "") {
+          const t = String(tabelaId);
+          let opt = [...tp.options].find(o => o.value === t);
+          if (!opt) { opt = document.createElement("option"); opt.value = t; opt.text = "tabela " + t; tp.add(opt); }
+          tp.value = t; usada = opt.text; casou = true;
+        } else {
+          const semAcento = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+          const alvo = semAcento(tabelaNome).replace(/tabela/g, "").trim();
+          let opt = [...tp.options].find(o => alvo && semAcento(o.text).includes(alvo));
+          if (opt) casou = true;
+          if (!opt) opt = [...tp.options].find(o => /padr/i.test(o.text || "")) || tp.options[0];
+          if (opt) { tp.value = opt.value; usada = opt.text; }
+        }
       }
       return { usada, opcoes, casou };
-    }, { empresa, tabelaNome, marcaCodes });
+    }, { empresa, tabelaNome, tabelaId, marcaCodes });
     if (tabInfo && !tabInfo.casou) log(`  ⚠️ tabela "${tabelaNome}" NÃO encontrada (emp ${empresa}) — usando "${tabInfo.usada}". Opções: ${(tabInfo.opcoes || []).join(" | ")}`);
     const tabUsada = (tabInfo && tabInfo.usada) || null;
     await page.waitForTimeout(1200);
@@ -501,6 +511,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       if (!lojas[L].length) continue;
       const empresa = (PARAMS.lojas[L] || {}).empresa;
       const tabelaNome = (PARAMS.lojas[L] || {}).tabela_preco;
+      const tabelaId = (PARAMS.lojas[L] || {}).tabela_id;
       if (!empresa) continue;
       // agrupar itens por marca
       const porMarca = {};
@@ -511,7 +522,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       }
       for (const [mk, g] of Object.entries(porMarca)) {
         try {
-          const { tabela, rows } = await relatorioPrecosErp(page, empresa, tabelaNome, g.codes);
+          const { tabela, rows } = await relatorioPrecosErp(page, empresa, tabelaNome, g.codes, tabelaId);
           const porEan = {}; for (const r of rows) if (r.ean) porEan[r.ean] = r;
           let porEanN = 0;
           for (const it of g.itens) {
