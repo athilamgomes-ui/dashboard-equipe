@@ -1397,16 +1397,17 @@ function renderResumo(mesKey, lojaKey, ld) {
 }
 
 // ─── AJUSTE DINÂMICO DE META ─────────────────────────────────────────────────
-// ── REGRAS (redesenhadas 06/07/2026, pedido do Athila) ──
-// 1. Meta NUNCA diminui por bom desempenho: se a loja está ADIANTADA (vendeu
-//    mais que o planejado até aqui), as metas das semanas restantes são MANTIDAS
-//    — o excedente é gordura, não desconto. (Antes: superar a S1 fazia o motor
-//    REBAIXAR todas as semanas seguintes — punia quem vendia mais. Incidente L1
-//    jul/2026: bateu 125% da S1 e a sugestão mandava reduzir S2-S5.)
-// 2. Se a loja está ATRASADA, a falta é redistribuída conforme o PADRÃO
-//    HISTÓRICO REAL da loja por DIA DO MÊS (derivado dos meses fechados em
-//    DADOS): semanas historicamente fortes (início de mês — recebimento)
-//    carregam mais; semanas fracas (3ª semana, tipicamente) carregam menos.
+// ── REGRAS (refinadas 06/07/2026 em DUAS iterações com o Athila) ──
+// A meta mensal é FIXA. A distribuição entre as semanas restantes segue o
+// PADRÃO HISTÓRICO REAL da loja por DIA DO MÊS (derivado dos meses fechados em
+// DADOS): semanas historicamente fortes (início de mês — recebimento) carregam
+// mais; semanas fracas (3ª semana, tipicamente) carregam menos.
+// - Loja ATRASADA: a falta extra é somada às restantes conforme o perfil.
+// - Loja ADIANTADA: a redução total é EXATAMENTE o valor que a equipe
+//   ultrapassou (ex.: passou R$4k na S1 → as restantes caem R$4k no total,
+//   distribuído pelo perfil — não mais, não menos). 2ª iteração: a 1ª versão
+//   travava qualquer redução ("meta nunca diminui") + card verde; o Athila
+//   pediu pra remover o card e permitir o desconto exato do excedente.
 
 // Fallback legado (Jan-Abr 2026, por quartil) — usado só se ainda não há meses
 // fechados suficientes em DADOS pra derivar o perfil diário.
@@ -1474,12 +1475,9 @@ function calcularAjusteMeta(ld, semAtual, lojaKey, mesKey) {
 
   if (Math.abs(gapTotal) < 100) return null; // em linha — nada a fazer
 
-  // ── ADIANTADA: metas mantidas, sem sugestão de redução (regra 1) ──
-  if (gapTotal < 0) {
-    return {tipo:'adiantado', excedente: -gapTotal, vendidoAcum, faltaMensal, gapPorSemana, restantes};
-  }
-
-  // ── ATRASADA: redistribui a falta pelo perfil histórico diário (regra 2) ──
+  // Redistribui o que FALTA do mês pelo perfil histórico diário. Vale pros dois
+  // sentidos: atrasada (restantes sobem, no total, o gap) e adiantada (restantes
+  // caem, no total, EXATAMENTE o excedente que a equipe ultrapassou).
   const ano = parseInt(mesKey.slice(0, 4), 10);
   const perfil = _perfilDiarioLoja(lojaKey, mesKey);
   let pesos, fonte;
@@ -1523,7 +1521,7 @@ function calcularAjusteMeta(ld, semAtual, lojaKey, mesKey) {
     sugestao[sugestao.length-1].delta += ajusteFinal;
   }
 
-  return {tipo:'atrasado', gapTotal, gapPorSemana, sugestao, faltaMensal, vendidoAcum, fonte, pesos};
+  return {tipo: gapTotal > 0 ? 'atrasado' : 'adiantado', gapTotal, gapPorSemana, sugestao, faltaMensal, vendidoAcum, fonte, pesos};
 }
 
 // Helpers de decisão (persistente)
@@ -1643,62 +1641,7 @@ function renderAjusteMeta(mesKey, lojaKey, ld) {
   const aj = calcularAjusteMeta(ld, semAtual, lojaKey, mesKey);
   if (!aj) return '';
 
-  // ── LOJA ADIANTADA: card informativo, SEM sugestão de redução ──────────────
-  // (Regra 06/07/2026: meta nunca diminui por bom desempenho — o excedente é
-  // vantagem acumulada, não desconto nas próximas semanas.)
-  if (aj.tipo === 'adiantado') {
-    const rowsConclA = aj.gapPorSemana.map(g => {
-      const gapCls = g.gap > 100 ? 'delta-neg' : g.gap < -100 ? 'delta-pos' : 'delta-zero';
-      const gapTxt = g.gap > 0 ? `−${fR(g.gap)}` : g.gap < 0 ? `+${fR(-g.gap)}` : '—';
-      return `<tr><td>${g.sem.label}</td><td>${fR(g.sem.meta)}</td><td>${fR(g.total)}</td><td class="${gapCls}">${gapTxt}</td></tr>`;
-    }).join('');
-    const inputsCustomA = aj.restantes.map(s => `
-      <tr>
-        <td style="padding:6px 8px">${s.label}${s.id===semAtual?' <span style="color:var(--blue);font-size:10px">(atual)</span>':''}</td>
-        <td style="padding:6px 8px;color:var(--muted)">${fR(s.meta)}</td>
-        <td style="padding:6px 8px">
-          <input type="number" id="custom-${lojaKey}-${s.id}" value="${s.meta}" step="100" min="0"
-            style="width:110px;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:4px 8px;font-size:13px;text-align:right">
-        </td>
-      </tr>`).join('');
-    const idsRestantesA = JSON.stringify(aj.restantes.map(s=>s.id)).replace(/"/g,'&quot;');
-    return `<div class="ajuste-meta" id="ajuste-${lojaKey}" style="background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(34,197,94,.02));border-color:rgba(34,197,94,.35)">
-      <h3 style="color:var(--green)">🚀 Loja ADIANTADA — metas mantidas</h3>
-      <div class="ajuste-status">
-        Vendido nas semanas fechadas: <b>${fR(aj.vendidoAcum)}</b> — a loja está
-        <b style="color:var(--green)">${fR(aj.excedente)} à frente</b> do planejado.
-        Pela regra, <b>as metas das próximas semanas NÃO diminuem</b> quando a equipe
-        supera a meta: o excedente vira vantagem acumulada pro mês (falta ${fR(aj.faltaMensal)}
-        pra meta mensal de ${fR(ld.meta_mensal)}).
-      </div>
-      <table class="ajuste-tabela">
-        <thead><tr><th>Semana</th><th>Meta</th><th>Vendido</th><th>Diferença</th></tr></thead>
-        <tbody>${rowsConclA}</tbody>
-      </table>
-      <div class="ajuste-btns" id="ajuste-btns-${lojaKey}">
-        <button class="ajuste-btn aplicar" onclick="ignorarAjusteMeta('${mesKey}','${lojaKey}')">
-          ✓ Ok, manter metas
-        </button>
-        <button class="ajuste-btn cancelar" onclick="abrirCustomMeta('${lojaKey}')">
-          Quero ajustar manualmente (ex.: subir a régua)
-        </button>
-      </div>
-      <div id="custom-form-${lojaKey}" style="display:none;margin-top:10px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px">
-        <div style="font-size:12px;color:var(--text);font-weight:600;margin-bottom:8px">✏️ Digite a meta nova de cada semana restante:</div>
-        <table style="width:100%;font-size:12px;margin-bottom:10px">
-          <thead><tr style="color:var(--muted)"><th style="text-align:left;padding:6px 8px">Semana</th><th style="text-align:left;padding:6px 8px">Meta atual</th><th style="text-align:left;padding:6px 8px">Nova meta (R$)</th></tr></thead>
-          <tbody>${inputsCustomA}</tbody>
-        </table>
-        <div style="display:flex;gap:8px">
-          <button class="ajuste-btn aplicar" onclick="salvarMetaCustom('${mesKey}','${lojaKey}','${idsRestantesA}')">💾 Salvar metas manuais</button>
-          <button class="ajuste-btn cancelar" onclick="document.getElementById('custom-form-${lojaKey}').style.display='none';document.getElementById('ajuste-btns-${lojaKey}').style.display='flex'">Voltar</button>
-        </div>
-      </div>
-    </div>`;
-  }
-
-  // ── LOJA ATRASADA: redistribuição pelo perfil histórico ────────────────────
-  const {gapTotal, gapPorSemana, sugestao, faltaMensal, vendidoAcum, fonte, pesos} = aj;
+  const {tipo, gapTotal, gapPorSemana, sugestao, faltaMensal, vendidoAcum, fonte, pesos} = aj;
   const fonteTxt = fonte === 'perfil'
     ? ` Distribuição pelo <b>padrão histórico REAL da ${lojaKey} por dia do mês</b> (meses fechados no sistema — semanas de início de mês carregam mais, semanas historicamente fracas carregam menos): ${sugestao.map((s,i)=>`${s.sem.label.replace('Semana ','S')} ${(pesos[i]*100).toFixed(0)}%`).join(' · ')}.`
     : fonte === 'quartil'
@@ -1707,7 +1650,9 @@ function renderAjusteMeta(mesKey, lojaKey, ld) {
   const statusText =
     `Vendido nas semanas fechadas: <b>${fR(vendidoAcum)}</b>. ` +
     `Falta <b>${fR(faltaMensal)}</b> pra bater a meta mensal de <b>${fR(ld.meta_mensal)}</b>.` +
-    ` <span style="color:var(--red)">A loja está ${fR(gapTotal)} atrás do planejado — a diferença foi redistribuída nas próximas semanas.</span>` +
+    (tipo === 'atrasado'
+      ? ` <span style="color:var(--red)">A loja está ${fR(gapTotal)} atrás do planejado — a diferença foi somada às próximas semanas.</span>`
+      : ` <span style="color:var(--green)">A equipe ultrapassou o planejado em ${fR(-gapTotal)} — esse valor EXATO foi descontado das próximas semanas (a soma continua fechando a meta mensal de ${fR(ld.meta_mensal)}).</span>`) +
     fonteTxt;
 
   const rowsConcl = gapPorSemana.map(g => {
