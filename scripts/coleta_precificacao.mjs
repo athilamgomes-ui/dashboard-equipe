@@ -59,9 +59,16 @@ const CUTOFF_DIAS = 90;       // janela ampla p/ achar a NF (a NF pode ser dias 
 // GATILHO (29/06/2026): dispara pela ENTRADA da NF no ERP (campo LancadaNoMicrovix da API), não mais pelo status ENTREGUE do Planejamento.
 // Como a API não traz a DATA do lançamento, guardamos em precificacao_lancadas.json quando cada NF foi vista lançada pela 1ª vez e mostramos as dos últimos N dias.
 const DIAS_ENTRADA = Number(process.env.DIAS_ENTRADA || process.env.DIAS_ENTREGA) || 3; // janela (dias) desde que a NF foi detectada lançada no ERP
-const STATE_FILE = REPO + "/precificacao_lancadas.json"; // estado local (gitignored): { "<chave>": "<ISO 1ª vez vista lançada>" }
+const STATE_FILE = REPO + "/precificacao_lancadas.json"; // estado local (gitignored): { "<chave>": {desde:"YYYY-MM-DD" (1ª aparição), aplicadoDesde:"ISO"|null (quando detectou preço já aplicado no ERP)} }
 const NF_FILTER = process.env.NF ? String(process.env.NF).split(",").map(s => s.trim()).filter(Boolean) : null; // teste: NF=9341 ou NF=684024,684025 node ... → puxa só essa(s) NF(s), ignora o gatilho
-const loadState = () => { try { return JSON.parse(readFileSync(STATE_FILE, "utf8")); } catch { return null; } };
+const loadState = () => {
+  try {
+    const raw = JSON.parse(readFileSync(STATE_FILE, "utf8"));
+    const out = {};
+    for (const [k, v] of Object.entries(raw)) out[k] = typeof v === "string" ? { desde: v, aplicadoDesde: null } : v; // migra formato antigo (string) → objeto
+    return out;
+  } catch { return null; }
+};
 const saveState = s => { try { writeFileSync(STATE_FILE, JSON.stringify(s, null, 0)); } catch (e) { log("aviso: não salvou estado lançadas: " + e.message); } };
 const PROC_SKIP_PRECO = process.env.SKIP_PRECO === "1"; // pula a coleta de preço atual do ERP (debug rápido)
 const norm = s => String(s || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
@@ -227,6 +234,40 @@ async function relatorioPrecosErp(page, empresa, tabelaNome, marcaCodes) {
   return melhor;
 }
 
+// ===== Preço sugerido PADRÃO (espelha precificacao.html: margemMarca/custoEfetivo/calc/arredonda90) =====
+// Usado SÓ p/ DETECTAR se a NF já foi precificada no ERP (comparar com preco_atual do relatório de preços).
+// Não conhece overrides manuais de margem/preço feitos no navegador (localStorage) — se a equipe editar
+// a mão, a detecção automática pode não bater; por isso a NF nunca desaparece sozinha antes de bater.
+function margemPadraoMarca(marca) {
+  const m = PARAMS.margem || {};
+  if (marca && m._por_marca && m._por_marca[marca] != null) return m._por_marca[marca];
+  return m._default != null ? m._default : 0.15;
+}
+function custoPctNode(cfg, campo) { const g = PARAMS.globais || {}; return cfg[campo] != null ? cfg[campo] : (g[campo] || 0); }
+function arredonda90Node(p) { let c = Math.floor(p) + 0.90; if (c < p - 1e-9) c += 1; return Math.round(c * 100) / 100; }
+function creditoItemNode(item, uf, cfg) {
+  if (uf === "PA") return 0; // compra dentro do estado: imposto de entrada 0%
+  if (cfg.regime !== "lucro_real") return 0;
+  return Number(item.credito_icms_pct) || 0;
+}
+function stEntradaPctNode(item, uf, cfg) {
+  if (uf === "PA") return 0; // compra dentro do estado: imposto de entrada 0%
+  if (!item.st) return 0;
+  const t = PARAMS.st_entrada_por_uf || {};
+  const r = t[uf];
+  return r != null ? r : (t._default || 0);
+}
+function precoSugeridoPadrao(item, uf, loja) {
+  const cfg = PARAMS.lojas[loja] || {};
+  const base = item.custo_unit_cheio;
+  const custo = item.st ? base * (1 + stEntradaPctNode(item, uf, cfg)) : base * (1 - creditoItemNode(item, uf, cfg));
+  const imposto = item.st ? 0 : (cfg.imposto || 0);
+  const fixos = imposto + custoPctNode(cfg, "cartao") + custoPctNode(cfg, "comissao") + custoPctNode(cfg, "outros") + (cfg.custo_fixo || 0);
+  const div = 1 - fixos - margemPadraoMarca(item.marca);
+  if (div <= 0) return null;
+  return arredonda90Node(custo / div);
+}
+
 async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
   let err;
   for (let i = 0; i < tentativas; i++) {
@@ -271,35 +312,42 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       return res;
     }, EMPRESAS);
 
-    // GATILHO POR ENTRADA NO ERP + JANELA DE 3 DIAS A PARTIR DA 1ª APARIÇÃO NA TELA.
-    // state[chave] = data em que a NF apareceu PELA 1ª VEZ na lista de precificação (ISO). A NF fica visível
-    // por DIAS_ENTRADA dias a partir dessa data; depois é removida (não reaparece — o state lembra a data).
-    // data_lcto do nfes_erp serve só p/ decidir se a ENTRADA é recente o bastante p/ uma NF NOVA começar a
-    // aparecer (evita inundar a tela na 1ª execução com lançadas antigas que já foram precificadas).
+    // GATILHO POR ENTRADA NO ERP + FICA NA TELA ATÉ SER PRECIFICADA (pedido do usuário 06/07/2026).
+    // state[chave] = {desde: 1ª aparição, aplicadoDesde: quando detectou preço já aplicado no ERP, ou null}.
+    // Regra: uma vez que apareceu, NUNCA some sozinha enquanto não for detectada como precificada
+    // (ver precoSugeridoPadrao + bloco de detecção após a coleta de preços do ERP, mais abaixo).
+    // DIAS_ENTRADA só conta DEPOIS de detectada — vira o prazo de permanência pós-precificação, não mais
+    // a janela de exibição desde a entrada. data_lcto do nfes_erp continua servindo só p/ decidir se uma
+    // NF NOVA (ainda sem state) é recente o bastante p/ começar a aparecer (evita reviver NF antiga já paga).
     const lctoMap = NF_FILTER ? {} : await dataLctoErp();
     const state = loadState() || {};
     const janelaMs = DIAS_ENTRADA * 86400000;
     const todayISO = HOJE.toISOString().slice(0, 10);
     let stateDirty = false;
-    // poda entradas antigas do state (> 30d) p/ não crescer sem limite
-    const podaLim = HOJE.getTime() - 30 * 86400000;
-    for (const k of Object.keys(state)) { const t = Date.parse(state[k]); if (isNaN(t) || t < podaLim) { delete state[k]; stateDirty = true; } }
-    // decide visibilidade por NF; carimba a 1ª aparição
-    const visivel = (loja, nfe) => {
+    // poda SÓ entradas já precificadas há muito tempo (>30d pós-aplicação) — nunca poda as ainda não precificadas
+    for (const k of Object.keys(state)) {
+      const e = state[k];
+      if (e && e.aplicadoDesde) { const t = Date.parse(e.aplicadoDesde); if (isNaN(t) || (HOJE.getTime() - t) > 30 * 86400000) { delete state[k]; stateDirty = true; } }
+    }
+    // elegibilidade por NF: começa a aparecer (evidência de entrada recente) e continua até ser precificada
+    const elegivel = (loja, nfe) => {
       if (!nfe.LancadaNoMicrovix) return false;
       const numN = String(nfe.Numero).replace(/^0+/, "");
       const ch = String(nfe.Chave || (loja + "-" + nfe.Numero));
-      let desde = state[ch];
-      if (!desde) {
+      let entry = state[ch];
+      if (!entry) {
         // NF nova: só COMEÇA a aparecer com EVIDÊNCIA de entrada recente = data_lcto do nfes_erp ≤ DIAS_ENTRADA.
         // SEM data_lcto não inicia (pode ser entrada antiga que saiu da janela do nfes_erp; uma entrada de verdade
         // ganha data_lcto na próxima rodada do coletor de NFes, ≤2h, e aí começa a aparecer).
         const entISO = lctoMap[loja + "|" + numN];
         const entMs = entISO ? Date.parse(entISO) : NaN;
         if (isNaN(entMs) || (HOJE.getTime() - entMs) > janelaMs) return false;
-        desde = todayISO; state[ch] = desde; stateDirty = true; // carimba a 1ª aparição = hoje
+        entry = { desde: todayISO, aplicadoDesde: null };
+        state[ch] = entry; stateDirty = true; // carimba a 1ª aparição = hoje
       }
-      return (HOJE.getTime() - Date.parse(desde)) <= janelaMs; // remove DIAS_ENTRADA dias após aparecer
+      // já foi detectada como precificada há mais de DIAS_ENTRADA dias → não mostra mais
+      if (entry.aplicadoDesde && (HOJE.getTime() - Date.parse(entry.aplicadoDesde)) >= janelaMs) return false;
+      return true; // enquanto não detectada como precificada, FICA NA TELA indefinidamente
     };
 
     const cutoff = new Date(HOJE.getTime() - CUTOFF_DIAS * 86400000);
@@ -324,7 +372,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
           // GATILHO: entrada no ERP + visível por DIAS_ENTRADA dias a partir da 1ª aparição (depois some)
           if (!marcaForn) continue; // sem marca mapeada não dá p/ buscar preço ERP nem precificar com referência
           if (marcaNaoRevenda(marcaForn)) continue; // sacolas/uso interno não vão p/ precificação
-          if (!visivel(loja, nfe)) continue;
+          if (!elegivel(loja, nfe)) continue;
         }
         const itens = (nfe.Produtos || []).map(p => {
           const valorBase = num(p.ValorTotalLiquido) || (num(p.ValorBruto) - num(p.ValorDesconto));
@@ -372,7 +420,6 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       lojas[loja].sort((a, b) => (a.data_emissao < b.data_emissao ? 1 : -1));
       log(`${loja}: ${kept} NFes mantidas (de ${nfes.length})`);
     }
-    if (!NF_FILTER && stateDirty) saveState(state); // persiste 1ª-aparição e poda
 
     // ===== Enriquecer lendo o XML da NFe, PRODUTO POR PRODUTO (fonte autoritativa) =====
     // Crédito de ICMS por item: só se NÃO for ST. ST = CST 10/30/60/70, ICMS-ST destacado, OU tem CEST.
@@ -468,6 +515,29 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
           log(`preços ERP ${L}/${mk} (emp ${empresa}, ${tabela || "?"}, ${rows.length} prod): ${porEanN}/${g.itens.length} associados por EAN`);
         } catch (e) { log(`preços ERP ${L}/${mk} FALHOU: ${String(e.message || e).split("\n")[0]}`); }
       }
+    }
+
+    // ===== DETECÇÃO: a NF já foi precificada no ERP? =====
+    // Critério: TODOS os itens com EAN (os que entram no .txt de importação) têm preco_atual no ERP
+    // igual (±R$0,01) ao preço sugerido PADRÃO calculado agora. Ao bater pela 1ª vez, carimba
+    // aplicadoDesde=agora; a NF continua na tela por mais DIAS_ENTRADA dias e só então some
+    // (pedido do usuário: "enquanto não precificou fica; os 3 dias contam só depois de precificar").
+    if (!NF_FILTER) {
+      for (const L of Object.keys(lojas)) for (const nf of lojas[L]) {
+        const comEan = nf.itens.filter(it => it.ean && it.ean !== "SEM GTIN");
+        const bateu = comEan.length > 0 && comEan.every(it => {
+          if (it.preco_atual == null) return false;
+          const sug = precoSugeridoPadrao(it, nf.uf, L);
+          return sug != null && Math.abs(sug - it.preco_atual) <= 0.01;
+        });
+        const ch = String(nf.chave_nfe || (L + "-" + nf.numero));
+        const entry = state[ch] || (state[ch] = { desde: todayISO, aplicadoDesde: null });
+        if (bateu && !entry.aplicadoDesde) {
+          entry.aplicadoDesde = HOJE.toISOString(); stateDirty = true;
+          log(`✅ ${L} NF ${nf.numero}: preço já aplicado no ERP (${comEan.length} item(ns) c/ EAN bateram) — some da tela em ${DIAS_ENTRADA}d`);
+        }
+      }
+      saveState(state); // sempre grava (arquivo pequeno) — garante que a migração de formato antigo também persista
     }
 
     const totNfes = Object.values(lojas).reduce((s, a) => s + a.length, 0);
