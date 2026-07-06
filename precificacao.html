@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Precificação — Grupo A.M. Gomes</title>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg:#f0f4f8; --card:#fff; --ink:#1e293b; --muted:#64748b; --line:#e2e8f0;
@@ -67,7 +68,7 @@
     <div><label>Margem padrão</label><br><input type="number" id="margemPadrao" step="1" min="0" max="80"> <span class="muted">%</span></div>
     <div id="credInfo" class="muted" style="font-size:12px;max-width:280px"></div>
     <div style="flex:1"></div>
-    <button class="btn sec" id="btnAtualizar" title="Recarrega os dados da última coleta para reassociar produtos cujo cadastro/EAN foi corrigido no ERP">🔄 Atualizar associação</button>
+    <button class="btn sec" id="btnAtualizar" title="Dispara AGORA a coleta no ERP (NFes + preços), sem esperar o agendamento — leva ~1-2 min">⚡ Atualizar NFes agora</button>
     <button class="btn sec" id="btnConfig">⚙️ Configurar custos</button>
     <div class="muted" id="geradoEm"></div>
   </div>
@@ -126,6 +127,9 @@
 
 <script>
 const LOJAS = ["L1","L3","L4","L5"];
+const SUPABASE_URL="https://valhewbvjwdkkvuejrxa.supabase.co";
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 let DADOS=null, PARAMS=null, lojaAtual="L1", nfeSel=null, overrides={}, precoOver={}; // overrides[k]=margem(frac); precoOver[k]=preço manual
 
 const brl = v => (v==null||isNaN(v))?"—":v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
@@ -377,20 +381,41 @@ document.getElementById("btnTxtErp").onclick=()=>{
         `\n\nNo ERP: Estoque > Relatórios > Lista de Preços > "Ajuste de Preços" > "Arquivo para atualização de valores" > selecione o arquivo, marque "Código de Barras", Validar e Upload. Empresa ${(PARAMS.lojas[lojaAtual]||{}).empresa} · ${(PARAMS.lojas[lojaAtual]||{}).tabela_preco}.`);
 };
 
-// Recarrega os dados da última coleta (reassocia produtos cujo cadastro foi corrigido no ERP),
-// preservando loja e NF-e selecionadas.
+// Dispara AGORA uma coleta fresca no ERP (NFes + preços) via pedido no Supabase — um processo
+// no Mac fica de olho e roda na hora (~a cada 20s checa; a coleta em si leva ~1-2 min). Depois
+// recarrega precificacao_dados.json publicado, preservando loja e NF-e selecionadas.
+async function recarregarDados(loja,sel){
+  const d=await fetch("precificacao_dados.json?v="+Date.now()).then(r=>r.json());
+  DADOS=d;
+  for(const L of LOJAS) for(const nf of (d.lojas[L]||[])) for(const it of nf.itens) it._uf=nf.uf;
+  const dEnt = d.dias_entrada!=null ? ` · janela de ${d.dias_entrada}d após entrada/precificação` : "";
+  document.getElementById("geradoEm").textContent = "Coletado em "+new Date(d.gerado_em).toLocaleString("pt-BR")+dEnt;
+  lojaAtual=loja; elLoja.value=loja; nfeSel=(DADOS.lojas[loja]&&DADOS.lojas[loja][sel])?sel:null;
+  renderNfes(); renderItens();
+  return d.gerado_em;
+}
 document.getElementById("btnAtualizar").onclick=async()=>{
   const loja=lojaAtual, sel=nfeSel; const b=document.getElementById("btnAtualizar"); const t0=b.textContent;
-  b.textContent="🔄 Atualizando..."; b.disabled=true;
+  b.disabled=true;
   try{
-    const d=await fetch("precificacao_dados.json?v="+Date.now()).then(r=>r.json());
-    DADOS=d;
-    for(const L of LOJAS) for(const nf of (d.lojas[L]||[])) for(const it of nf.itens) it._uf=nf.uf;
-    const dEnt = d.dias_entrega!=null ? ` · entregas (ENTREGUE) dos últimos ${d.dias_entrega} dias` : "";
-    document.getElementById("geradoEm").textContent = "Coletado em "+new Date(d.gerado_em).toLocaleString("pt-BR")+dEnt;
-    lojaAtual=loja; elLoja.value=loja; nfeSel=(DADOS.lojas[loja]&&DADOS.lojas[loja][sel])?sel:null;
-    renderNfes(); renderItens();
-  }catch(e){ alert("Falha ao recarregar dados: "+e); }
+    const geradoAntes = DADOS && DADOS.gerado_em;
+    const agora=new Date().toISOString();
+    const {error:errUp}=await sb.from("precificacao_trigger").update({solicitado_em:agora}).eq("id",1);
+    if(errUp){
+      alert("Não consegui pedir a atualização (tabela precificacao_trigger ainda não configurada no Supabase). Avise o Claude.");
+      b.textContent=t0; b.disabled=false; return;
+    }
+    b.textContent="⏳ Pedido enviado — coletando (~1-2 min)...";
+    // poll: espera o gerado_em mudar (nova coleta publicada) — até 3min
+    const t0ms=Date.now();
+    while(Date.now()-t0ms<180000){
+      await new Promise(r=>setTimeout(r,7000));
+      try{
+        const novoGerado=await recarregarDados(loja,sel);
+        if(novoGerado && novoGerado!==geradoAntes){ b.textContent="✅ Atualizado!"; await new Promise(r=>setTimeout(r,1200)); break; }
+      }catch(e){/* tenta de novo no próximo ciclo */}
+    }
+  }catch(e){ alert("Falha ao pedir atualização: "+e); }
   b.textContent=t0; b.disabled=false;
 };
 
