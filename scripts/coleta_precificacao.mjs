@@ -239,8 +239,9 @@ async function relatorioPrecosErp(page, empresa, tabelaNome, marcaCodes, tabelaI
         let ean = null; const a = [...tr.querySelectorAll("a")].find(x => /codebars/i.test(x.getAttribute("href") || ""));
         if (a) ean = (a.textContent || "").trim();
         const desc = (tr.cells[1] && tr.cells[1].textContent || "").trim();
+        const ref = (tr.cells[2] && tr.cells[2].textContent || "").trim(); // coluna Referência = código do fornecedor (cprod da NF)
         const p = parse(v.value);
-        if (p != null) out.push({ cod, ean, desc, preco: p });
+        if (p != null) out.push({ cod, ean, desc, ref, preco: p });
       }
       return out;
     });
@@ -523,15 +524,30 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       for (const [mk, g] of Object.entries(porMarca)) {
         try {
           const { tabela, rows } = await relatorioPrecosErp(page, empresa, tabelaNome, g.codes, tabelaId);
+          // Índice por EAN (código de barras exibido no relatório).
           const porEan = {}; for (const r of rows) if (r.ean) porEan[r.ean] = r;
-          let porEanN = 0;
+          // Índice por REFERÊNCIA (= código do fornecedor/cprod). SEGURO: só usa referências ÚNICAS —
+          // se duas linhas têm a mesma referência com preços diferentes, marca ambígua e NÃO associa.
+          // Necessário porque o relatório mostra só UM código de barras por produto (às vezes o interno,
+          // não o EAN da NF) — aí o match por EAN falha mesmo o produto existindo. A referência resolve.
+          const refMap = {};
+          for (const r of rows) {
+            const k = String(r.ref || "").toUpperCase().trim(); if (!k) continue;
+            if (refMap[k] === undefined) refMap[k] = r;
+            else if (refMap[k] === null || refMap[k].preco !== r.preco) refMap[k] = null; // ambígua → descarta
+          }
+          let porEanN = 0, porRefN = 0;
           for (const it of g.itens) {
-            // associação SOMENTE por EAN (código de barras) — exata, sem aproximação por descrição
+            if (it.preco_atual != null) continue;
+            // 1º: EAN exato (código de barras). 2º (fallback): referência exata (cprod ↔ Referência).
             if (it.ean && it.ean !== "SEM GTIN" && porEan[it.ean] != null) {
               const r = porEan[it.ean]; it.preco_atual = r.preco; it.cod_erp = r.cod; it.match_tipo = "ean"; porEanN++;
+            } else {
+              const k = String(it.cprod || "").toUpperCase().trim();
+              if (k && refMap[k]) { const r = refMap[k]; it.preco_atual = r.preco; it.cod_erp = r.cod; it.match_tipo = "ref"; porRefN++; }
             }
           }
-          log(`preços ERP ${L}/${mk} (emp ${empresa}, ${tabela || "?"}, ${rows.length} prod): ${porEanN}/${g.itens.length} associados por EAN`);
+          log(`preços ERP ${L}/${mk} (emp ${empresa}, ${tabela || "?"}, ${rows.length} prod): ${porEanN} por EAN + ${porRefN} por referência = ${porEanN + porRefN}/${g.itens.length}`);
         } catch (e) { log(`preços ERP ${L}/${mk} FALHOU: ${String(e.message || e).split("\n")[0]}`); }
       }
     }
