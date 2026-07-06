@@ -1397,14 +1397,19 @@ function renderResumo(mesKey, lojaKey, ld) {
 }
 
 // ─── AJUSTE DINÂMICO DE META ─────────────────────────────────────────────────
-// Regra: meta mensal fixa. Se uma semana terminou abaixo da meta, o gap é
-// redistribuído nas semanas seguintes (proporcional ao peso original). Se passou
-// da meta, o excedente reduz as seguintes.
+// ── REGRAS (redesenhadas 06/07/2026, pedido do Athila) ──
+// 1. Meta NUNCA diminui por bom desempenho: se a loja está ADIANTADA (vendeu
+//    mais que o planejado até aqui), as metas das semanas restantes são MANTIDAS
+//    — o excedente é gordura, não desconto. (Antes: superar a S1 fazia o motor
+//    REBAIXAR todas as semanas seguintes — punia quem vendia mais. Incidente L1
+//    jul/2026: bateu 125% da S1 e a sugestão mandava reduzir S2-S5.)
+// 2. Se a loja está ATRASADA, a falta é redistribuída conforme o PADRÃO
+//    HISTÓRICO REAL da loja por DIA DO MÊS (derivado dos meses fechados em
+//    DADOS): semanas historicamente fortes (início de mês — recebimento)
+//    carregam mais; semanas fracas (3ª semana, tipicamente) carregam menos.
 
-// Padrão histórico de vendas por loja (Jan-Abr 2026, ERP Microvix)
-// Cada loja tem 4 quartis (Q1..Q4) representando % do faturamento do mês.
-// Usado para distribuir o "faltante" entre semanas restantes de forma realista,
-// em vez de usar as metas semanais originais (que podem somar mais que a meta mensal).
+// Fallback legado (Jan-Abr 2026, por quartil) — usado só se ainda não há meses
+// fechados suficientes em DADOS pra derivar o perfil diário.
 const PADRAO_SEMANAL = {
   L1: {Q1:0.2613, Q2:0.2696, Q3:0.2131, Q4:0.256},
   L3: {Q1:0.2843, Q2:0.2771, Q3:0.1955, Q4:0.2432},
@@ -1413,7 +1418,38 @@ const PADRAO_SEMANAL = {
 };
 const SEM_TO_Q = {S1:'Q1', S2:'Q2', S3:'Q3', S4:'Q4'};
 
-function calcularAjusteMeta(ld, semAtual, lojaKey) {
+// Perfil de venda por DIA DO MÊS (1..31) da loja, derivado dos meses FECHADOS
+// em DADOS (venda da semana ÷ dias da janela, agregada por dia-do-mês e
+// normalizada). Captura o padrão real da loja — início de mês forte
+// (recebimento), meio do mês fraco — e funciona pra mês de 4 OU 5 semanas.
+function _perfilDiarioLoja(lojaKey, mesAtualKey) {
+  const soma = new Array(32).fill(0);
+  const cnt = new Array(32).fill(0);
+  for (const [mk, d] of Object.entries(DADOS)) {
+    if (!d || mk >= mesAtualKey || !d[lojaKey]) continue; // só meses FECHADOS
+    const ld = d[lojaKey];
+    const ano = parseInt(mk.slice(0, 4), 10);
+    for (const sem of (ld.semanas || [])) {
+      const per = _parsePeriodo(sem.periodo, ano);
+      if (!per) continue;
+      const vendido = Object.values(ld.vendas?.[sem.id] || {}).reduce((a, v) => a + (v || 0), 0);
+      if (vendido <= 0) continue;
+      const d1 = per.ini.getUTCDate(), d2 = per.fim.getUTCDate();
+      const porDia = vendido / (d2 - d1 + 1);
+      for (let dia = d1; dia <= d2; dia++) { soma[dia] += porDia; cnt[dia]++; }
+    }
+  }
+  const perfil = new Array(32).fill(0);
+  let tot = 0;
+  for (let dia = 1; dia <= 31; dia++) {
+    if (cnt[dia] > 0) { perfil[dia] = soma[dia] / cnt[dia]; tot += perfil[dia]; }
+  }
+  if (tot <= 0) return null;
+  for (let dia = 1; dia <= 31; dia++) perfil[dia] /= tot; // share do mês por dia
+  return perfil;
+}
+
+function calcularAjusteMeta(ld, semAtual, lojaKey, mesKey) {
   const sems = ld.semanas;
   const idxAtual = sems.findIndex(s => s.id === semAtual);
   if (idxAtual < 1) return null; // S1 ainda em curso, nada a redistribuir
@@ -1432,34 +1468,54 @@ function calcularAjusteMeta(ld, semAtual, lojaKey) {
     return {sem:s, total, gap: s.meta - total};
   });
 
-  // Falta pra meta MENSAL = meta_mensal − vendido_acumulado.
-  // Esse valor é redistribuído entre as semanas restantes.
   const faltaMensal = ld.meta_mensal - vendidoAcum;
   const somaRestantesOrig = restantes.reduce((a,s)=>a+s.meta, 0);
-  const gapTotal = faltaMensal - somaRestantesOrig; // delta vs metas originais
+  const gapTotal = faltaMensal - somaRestantesOrig; // >0 = atrasada · <0 = adiantada
 
-  if (Math.abs(gapTotal) < 100 && restantes.length > 1) return null;
+  if (Math.abs(gapTotal) < 100) return null; // em linha — nada a fazer
 
-  // Pesos: padrão histórico da loja (renormalizado pras semanas restantes)
-  // Fallback: distribuição uniforme se loja não tem padrão.
-  const padrao = PADRAO_SEMANAL[lojaKey];
-  const usaHist = !!padrao;
-  let pesos;
-  if (usaHist) {
-    const pesosBruto = restantes.map(s => padrao[SEM_TO_Q[s.id]] || 0.25);
-    const somaPesos = pesosBruto.reduce((a,p)=>a+p, 0);
-    pesos = pesosBruto.map(p => somaPesos > 0 ? p / somaPesos : 1/restantes.length);
-  } else {
-    pesos = restantes.map(() => 1/restantes.length);
+  // ── ADIANTADA: metas mantidas, sem sugestão de redução (regra 1) ──
+  if (gapTotal < 0) {
+    return {tipo:'adiantado', excedente: -gapTotal, vendidoAcum, faltaMensal, gapPorSemana, restantes};
   }
 
-  // Sugestão = peso × faltaMensal (arredondado em R$100)
+  // ── ATRASADA: redistribui a falta pelo perfil histórico diário (regra 2) ──
+  const ano = parseInt(mesKey.slice(0, 4), 10);
+  const perfil = _perfilDiarioLoja(lojaKey, mesKey);
+  let pesos, fonte;
+  if (perfil) {
+    const brutos = restantes.map(s => {
+      const per = _parsePeriodo(s.periodo, ano);
+      if (!per) return null;
+      let w = 0;
+      for (let dia = per.ini.getUTCDate(); dia <= per.fim.getUTCDate(); dia++) w += perfil[dia] || 0;
+      return w;
+    });
+    if (!brutos.includes(null)) {
+      const somaW = brutos.reduce((a,w)=>a+w, 0);
+      pesos = somaW > 0 ? brutos.map(w => w/somaW) : null;
+      fonte = 'perfil';
+    }
+  }
+  if (!pesos) {
+    // Fallback: quartis legados (só mapeia S1-S4) ou uniforme
+    const padrao = PADRAO_SEMANAL[lojaKey];
+    const brutos = restantes.map(s => padrao?.[SEM_TO_Q[s.id]] ?? null);
+    if (padrao && !brutos.includes(null)) {
+      const somaW = brutos.reduce((a,w)=>a+w, 0);
+      pesos = brutos.map(w => w/somaW);
+      fonte = 'quartil';
+    } else {
+      pesos = restantes.map(() => 1/restantes.length);
+      fonte = 'uniforme';
+    }
+  }
+
   const sugestao = restantes.map((s, i) => {
     const nova = Math.round(faltaMensal * pesos[i] / 100) * 100;
     return {sem:s, atual:s.meta, nova, delta: nova - s.meta};
   });
-
-  // Ajuste final pra fechar a meta mensal exata na última semana
+  // Fecha a meta mensal exata na última semana
   const totalNovo = sugestao.reduce((s,x)=>s+x.nova, 0);
   const ajusteFinal = faltaMensal - totalNovo;
   if (ajusteFinal !== 0) {
@@ -1467,7 +1523,7 @@ function calcularAjusteMeta(ld, semAtual, lojaKey) {
     sugestao[sugestao.length-1].delta += ajusteFinal;
   }
 
-  return {gapTotal, gapPorSemana, sugestao, faltaMensal, vendidoAcum, usaHist, pesos};
+  return {tipo:'atrasado', gapTotal, gapPorSemana, sugestao, faltaMensal, vendidoAcum, fonte, pesos};
 }
 
 // Helpers de decisão (persistente)
@@ -1584,21 +1640,75 @@ function renderAjusteMeta(mesKey, lojaKey, ld) {
   if (getDecisaoMeta(mesKey, lojaKey)) return '';
 
   const semAtual = DADOS[mesKey].semana_atual;
-  const aj = calcularAjusteMeta(ld, semAtual, lojaKey);
+  const aj = calcularAjusteMeta(ld, semAtual, lojaKey, mesKey);
   if (!aj) return '';
 
-  const {gapTotal, gapPorSemana, sugestao, faltaMensal, vendidoAcum, usaHist, pesos} = aj;
-  const isFalta = gapTotal > 0;
-  const padraoTxt = usaHist
-    ? ` Distribuição baseada no <b>padrão histórico da ${lojaKey}</b> (Jan–Abr/2026): ${sugestao.map((s,i)=>`${s.sem.label.replace('Semana ','S')} ${(pesos[i]*100).toFixed(0)}%`).join(' · ')}.`
-    : '';
+  // ── LOJA ADIANTADA: card informativo, SEM sugestão de redução ──────────────
+  // (Regra 06/07/2026: meta nunca diminui por bom desempenho — o excedente é
+  // vantagem acumulada, não desconto nas próximas semanas.)
+  if (aj.tipo === 'adiantado') {
+    const rowsConclA = aj.gapPorSemana.map(g => {
+      const gapCls = g.gap > 100 ? 'delta-neg' : g.gap < -100 ? 'delta-pos' : 'delta-zero';
+      const gapTxt = g.gap > 0 ? `−${fR(g.gap)}` : g.gap < 0 ? `+${fR(-g.gap)}` : '—';
+      return `<tr><td>${g.sem.label}</td><td>${fR(g.sem.meta)}</td><td>${fR(g.total)}</td><td class="${gapCls}">${gapTxt}</td></tr>`;
+    }).join('');
+    const inputsCustomA = aj.restantes.map(s => `
+      <tr>
+        <td style="padding:6px 8px">${s.label}${s.id===semAtual?' <span style="color:var(--blue);font-size:10px">(atual)</span>':''}</td>
+        <td style="padding:6px 8px;color:var(--muted)">${fR(s.meta)}</td>
+        <td style="padding:6px 8px">
+          <input type="number" id="custom-${lojaKey}-${s.id}" value="${s.meta}" step="100" min="0"
+            style="width:110px;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:4px 8px;font-size:13px;text-align:right">
+        </td>
+      </tr>`).join('');
+    const idsRestantesA = JSON.stringify(aj.restantes.map(s=>s.id)).replace(/"/g,'&quot;');
+    return `<div class="ajuste-meta" id="ajuste-${lojaKey}" style="background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(34,197,94,.02));border-color:rgba(34,197,94,.35)">
+      <h3 style="color:var(--green)">🚀 Loja ADIANTADA — metas mantidas</h3>
+      <div class="ajuste-status">
+        Vendido nas semanas fechadas: <b>${fR(aj.vendidoAcum)}</b> — a loja está
+        <b style="color:var(--green)">${fR(aj.excedente)} à frente</b> do planejado.
+        Pela regra, <b>as metas das próximas semanas NÃO diminuem</b> quando a equipe
+        supera a meta: o excedente vira vantagem acumulada pro mês (falta ${fR(aj.faltaMensal)}
+        pra meta mensal de ${fR(ld.meta_mensal)}).
+      </div>
+      <table class="ajuste-tabela">
+        <thead><tr><th>Semana</th><th>Meta</th><th>Vendido</th><th>Diferença</th></tr></thead>
+        <tbody>${rowsConclA}</tbody>
+      </table>
+      <div class="ajuste-btns" id="ajuste-btns-${lojaKey}">
+        <button class="ajuste-btn aplicar" onclick="ignorarAjusteMeta('${mesKey}','${lojaKey}')">
+          ✓ Ok, manter metas
+        </button>
+        <button class="ajuste-btn cancelar" onclick="abrirCustomMeta('${lojaKey}')">
+          Quero ajustar manualmente (ex.: subir a régua)
+        </button>
+      </div>
+      <div id="custom-form-${lojaKey}" style="display:none;margin-top:10px;padding:12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px">
+        <div style="font-size:12px;color:var(--text);font-weight:600;margin-bottom:8px">✏️ Digite a meta nova de cada semana restante:</div>
+        <table style="width:100%;font-size:12px;margin-bottom:10px">
+          <thead><tr style="color:var(--muted)"><th style="text-align:left;padding:6px 8px">Semana</th><th style="text-align:left;padding:6px 8px">Meta atual</th><th style="text-align:left;padding:6px 8px">Nova meta (R$)</th></tr></thead>
+          <tbody>${inputsCustomA}</tbody>
+        </table>
+        <div style="display:flex;gap:8px">
+          <button class="ajuste-btn aplicar" onclick="salvarMetaCustom('${mesKey}','${lojaKey}','${idsRestantesA}')">💾 Salvar metas manuais</button>
+          <button class="ajuste-btn cancelar" onclick="document.getElementById('custom-form-${lojaKey}').style.display='none';document.getElementById('ajuste-btns-${lojaKey}').style.display='flex'">Voltar</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── LOJA ATRASADA: redistribuição pelo perfil histórico ────────────────────
+  const {gapTotal, gapPorSemana, sugestao, faltaMensal, vendidoAcum, fonte, pesos} = aj;
+  const fonteTxt = fonte === 'perfil'
+    ? ` Distribuição pelo <b>padrão histórico REAL da ${lojaKey} por dia do mês</b> (meses fechados no sistema — semanas de início de mês carregam mais, semanas historicamente fracas carregam menos): ${sugestao.map((s,i)=>`${s.sem.label.replace('Semana ','S')} ${(pesos[i]*100).toFixed(0)}%`).join(' · ')}.`
+    : fonte === 'quartil'
+    ? ` Distribuição pelo padrão histórico legado (Jan–Abr/2026, por quartil): ${sugestao.map((s,i)=>`${s.sem.label.replace('Semana ','S')} ${(pesos[i]*100).toFixed(0)}%`).join(' · ')}.`
+    : ' Distribuição uniforme (sem histórico suficiente ainda).';
   const statusText =
     `Vendido nas semanas fechadas: <b>${fR(vendidoAcum)}</b>. ` +
     `Falta <b>${fR(faltaMensal)}</b> pra bater a meta mensal de <b>${fR(ld.meta_mensal)}</b>.` +
-    padraoTxt +
-    (isFalta
-      ? ` <span style="color:var(--red)">Acima das metas restantes originais em ${fR(gapTotal)} — precisa correr nas próximas.</span>`
-      : ` <span style="color:var(--green)">Abaixo das metas restantes originais em ${fR(-gapTotal)} — dá pra aliviar as próximas.</span>`);
+    ` <span style="color:var(--red)">A loja está ${fR(gapTotal)} atrás do planejado — a diferença foi redistribuída nas próximas semanas.</span>` +
+    fonteTxt;
 
   const rowsConcl = gapPorSemana.map(g => {
     const gapCls = g.gap > 100 ? 'delta-neg' : g.gap < -100 ? 'delta-pos' : 'delta-zero';
