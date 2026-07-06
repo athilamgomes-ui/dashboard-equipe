@@ -517,24 +517,39 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       }
     }
 
-    // ===== DETECÇÃO: a NF já foi precificada no ERP? =====
-    // Critério: TODOS os itens com EAN (os que entram no .txt de importação) têm preco_atual no ERP
-    // igual (±R$0,01) ao preço sugerido PADRÃO calculado agora. Ao bater pela 1ª vez, carimba
-    // aplicadoDesde=agora; a NF continua na tela por mais DIAS_ENTRADA dias e só então some
-    // (pedido do usuário: "enquanto não precificou fica; os 3 dias contam só depois de precificar").
+    // ===== DETECÇÃO: a NF já foi precificada no ERP? (2 sinais, OR) =====
+    // A ÚNICA forma de mudar preço em lote é importando o .txt no ERP (Ajuste de Preço por Lote) —
+    // não existe um log/auditoria dedicado dessa importação (investigado 06/07/2026: a tela de
+    // upload não guarda histórico). Então detectamos o EFEITO da importação no relatório de preços,
+    // por 2 sinais complementares (um item resolve se qualquer um bater):
+    //   (a) preco_atual no ERP == preço sugerido PADRÃO calculado agora (±R$0,01) — caso comum.
+    //   (b) preco_atual MUDOU desde a 1ª vez que vimos essa NF (guardado em entry.baseline por EAN)
+    //       — cobre quando a equipe edita a margem/preço na mão antes de importar (não bateria com
+    //       o padrão calculado, mas o preço no ERP mudou = foi importado algo).
+    // TODOS os itens com EAN (os que entram no .txt) precisam resolver p/ considerar a NF precificada.
+    // Ao bater pela 1ª vez, carimba aplicadoDesde=agora; a NF continua na tela por mais DIAS_ENTRADA
+    // dias e só então some (pedido do usuário: "enquanto não precificou fica; os 3 dias contam só
+    // depois de precificar").
     if (!NF_FILTER) {
       for (const L of Object.keys(lojas)) for (const nf of lojas[L]) {
         const comEan = nf.itens.filter(it => it.ean && it.ean !== "SEM GTIN");
-        const bateu = comEan.length > 0 && comEan.every(it => {
-          if (it.preco_atual == null) return false;
-          const sug = precoSugeridoPadrao(it, nf.uf, L);
-          return sug != null && Math.abs(sug - it.preco_atual) <= 0.01;
-        });
         const ch = String(nf.chave_nfe || (L + "-" + nf.numero));
         const entry = state[ch] || (state[ch] = { desde: todayISO, aplicadoDesde: null });
+        if (!entry.baseline) entry.baseline = {};
+        let algumDadoValido = false;
+        const resolvidos = comEan.map(it => {
+          if (it.preco_atual == null) return null; // ainda sem dado de preço nesta rodada — não decide nada
+          algumDadoValido = true;
+          if (entry.baseline[it.ean] == null) { entry.baseline[it.ean] = it.preco_atual; stateDirty = true; } // carimba o preço "antes de precificar" na 1ª vez que vemos dado
+          const sug = precoSugeridoPadrao(it, nf.uf, L);
+          const bateuSugerido = sug != null && Math.abs(sug - it.preco_atual) <= 0.01;
+          const mudouDoBaseline = Math.abs(it.preco_atual - entry.baseline[it.ean]) > 0.01;
+          return bateuSugerido || mudouDoBaseline;
+        });
+        const bateu = comEan.length > 0 && algumDadoValido && resolvidos.every(r => r === true);
         if (bateu && !entry.aplicadoDesde) {
           entry.aplicadoDesde = HOJE.toISOString(); stateDirty = true;
-          log(`✅ ${L} NF ${nf.numero}: preço já aplicado no ERP (${comEan.length} item(ns) c/ EAN bateram) — some da tela em ${DIAS_ENTRADA}d`);
+          log(`✅ ${L} NF ${nf.numero}: preço aplicado no ERP (${comEan.length} item(ns) c/ EAN resolvidos) — some da tela em ${DIAS_ENTRADA}d`);
         }
       }
       saveState(state); // sempre grava (arquivo pequeno) — garante que a migração de formato antigo também persista
