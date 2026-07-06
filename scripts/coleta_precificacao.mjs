@@ -169,12 +169,19 @@ async function relatorioPrecosErp(page, empresa, tabelaNome, marcaCodes) {
     await gotoRetry(page, URL_LISTA_PRECOS);
     await page.waitForSelector("#empresas_" + empresa, { timeout: 20000 });
     await page.waitForTimeout(1000);
+    // ⚠️ ESSENCIAL (fix 06/07/2026): "Ajuste de Preços" precisa estar LIGADO — é o que renderiza os inputs
+    // valor_* que o parser lê. A opção é sticky por usuário no ERP; se alguém usar o relatório em modo
+    // leitura, ela desliga e a coleta passa a achar 0 produtos. E precisa ser via CLIQUE REAL (dispara o
+    // onclick que monta a grade editável); marcar .checked à toa cai em modo texto sem os inputs.
+    const ajChecked = await page.evaluate(() => !!document.getElementById("ajuste_precos")?.checked);
+    if (!ajChecked) { await page.click("#ajuste_precos").catch(() => {}); await page.waitForTimeout(700); }
     const tabInfo = await page.evaluate(({ empresa, tabelaNome, marcaCodes }) => {
       [1, 3, 4, 9, 10, 11].forEach(i => { const e = document.getElementById("empresas_" + i); if (e) e.checked = (i === empresa); });
       document.querySelectorAll("input[name=visao]").forEach(r => r.checked = (r.value === "A"));
       const a = document.getElementById("ativa"); if (a) a.checked = true;
       const d = document.getElementById("desativa"); if (d) d.checked = false;
       const bar = document.getElementById("barras"); if (bar) bar.checked = true;
+      const pv = document.getElementById("preco_venda"); if (pv) pv.checked = true; // ajustar Preço de Venda (não custo)
       const ms = document.getElementById("marcas");
       if (ms && marcaCodes && marcaCodes.length) {
         const c = String(marcaCodes[0]);
@@ -284,6 +291,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
   }
   const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true, viewport: { width: 1400, height: 900 } });
   const page = ctx.pages()[0] || (await ctx.newPage());
+  page.on("dialog", d => d.accept().catch(() => {})); // "Sessão expirada" no relatório de preços é espúrio/não-fatal — aceitar e seguir (o relatório renderiza mesmo assim)
   try {
     await garantirSessao(page, { log });
     await gotoRetry(page, URL_NFE);
