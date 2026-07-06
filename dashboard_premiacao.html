@@ -478,24 +478,29 @@ const DADOS = {
     },
   },
   '2026-07': {
-    // Atualizado 04/07/2026 13:15 (sábado 04/07 — S1 FECHANDO, 4 dias úteis 01–04/07). Coleta Playwright headless. Cliente 8 (R Maura)=R$0 em jul (sem exclusão).
-    // METAS SEMANAIS OFICIAIS (04/07/2026, extraídas da Tabela de Premiação/PDF do Athila): julho tem 5 semanas
-    // (01-04/07, 06-11/07, 13-18/07, 20-25/07, 27-31/07) — mês variável, NÃO fixo em 4. Meta Real = Meta Ideal
-    // (nenhum reajuste ainda). L3 meta mensal SUBIU de R$80.000 (jun) pra R$85.000 (jul, confirmado pelo Athila).
-    semana_atual: 'S1',
+    // Atualizado 06/07/2026 10:20 (segunda — S1 FECHADA/congelada com sábado completo; S2 iniciando).
+    // Coleta Playwright headless (run manual: cron de sáb 18h e domingo não rodaram — Mac dormindo).
+    // Cliente 8 (R Maura)=R$0 em jul S1/S2 (verificado 06/07). S1 HISTÓRICA: todas as lojas ≥120%.
+    // METAS SEMANAIS OFICIAIS (04/07/2026, Tabela de Premiação/PDF): julho tem 5 semanas
+    // (01-04/07, 06-11/07, 13-18/07, 20-25/07, 27-31/07). Meta Real = Meta Ideal (sem reajuste).
+    semana_atual: 'S2',
     L1: {
       meta_mensal: 140000,
       semanas: [
         {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:20000},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:35000},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:30000},{id:'S4', label:'Semana 4', periodo:'20/07–25/07', meta:25000},{id:'S5', label:'Semana 5', periodo:'27/07–31/07', meta:30000},
       ],
       vendas: {
-        S1:{Outros:2162,Rayra:7823,Sofia:5270,Bárbara:8766},
+        S1:{Outros:2162,Rayra:8533,Sofia:5489,Bárbara:8774},
+        S2:{Rayra:21,Sofia:80,Bárbara:974},
       },
-      marcasA_loja: {S1:21.9},
-      marcasA_indiv: {Rayra:28.9,Sofia:12.8,Bárbara:26.5},
-      tickets: { S1:{Outros:1,Rayra:96,Sofia:68,Bárbara:107} },
-      pecas:   { S1:{Outros:9,Rayra:228,Sofia:168,Bárbara:383} },
-      cmv:     { S1:{Rayra:38.3,Sofia:51.2,Bárbara:58} },
+      marcasA_loja: {S1:21.9,S2:63.7},
+      marcasA_indiv: {Rayra:28,Sofia:13.5,Bárbara:30.9},
+      tickets: { S1:{Outros:1,Rayra:107,Sofia:72,Bárbara:108},S2:{Rayra:1,Sofia:1,Bárbara:3} },
+      pecas:   { S1:{Outros:9,Rayra:251,Sofia:175,Bárbara:383},S2:{Rayra:1,Sofia:3,Bárbara:13} },
+      cmv:     { S1:{Rayra:38.3,Sofia:52.8,Bárbara:58},S2:{Rayra:31.3,Sofia:35.3,Bárbara:31.5} },
+      // Unidades vendidas por marca (coleta_vendas_marca_semana.mjs) — baseline pras
+      // sugestões venda_marca. S2 é coletada no fechamento da semana.
+      vendas_marca: { S1:{'ITALLIAN HAIR':58,'APSE':21,'HAIR EXTRATTUS':20,'PROBELLE PROFISSIONAL':19,'NATUM PROFISSIONAL':14} },
     },
     L3: {
       meta_mensal: 85000,
@@ -503,13 +508,15 @@ const DADOS = {
         {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:10000},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:25000},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:20000},{id:'S4', label:'Semana 4', periodo:'20/07–25/07', meta:10000},{id:'S5', label:'Semana 5', periodo:'27/07–31/07', meta:20000},
       ],
       vendas: {
-        S1:{Outros:-26,Raimunda:4279,'Ana Mira':2685,Naila:2416,Brunna:2027},
+        S1:{Outros:-26,Raimunda:4311,'Ana Mira':2685,Naila:3018,Brunna:2644},
+        S2:{Raimunda:5,'Ana Mira':602,Naila:303,Brunna:121},
       },
-      marcasA_loja: {S1:16.4},
-      marcasA_indiv: {'Ana Mira':23.9,Naila:23.2,Raimunda:15.5,Brunna:0},
-      tickets: { S1:{Outros:0,Raimunda:40,'Ana Mira':41,Naila:36,Brunna:27} },
-      pecas:   { S1:{Outros:-1,Raimunda:100,'Ana Mira':164,Naila:101,Brunna:87} },
-      cmv:     { S1:{Raimunda:58.9,'Ana Mira':75.1,Naila:64.7} },
+      marcasA_loja: {S1:14.8,S2:53},
+      marcasA_indiv: {'Ana Mira':36.2,Naila:16.9,Raimunda:15.4,Brunna:0},
+      tickets: { S1:{Outros:0,Raimunda:40,'Ana Mira':41,Naila:44,Brunna:32},S2:{Raimunda:1,'Ana Mira':5,Naila:3,Brunna:3} },
+      pecas:   { S1:{Outros:-1,Raimunda:101,'Ana Mira':164,Naila:131,Brunna:105},S2:{Raimunda:5,'Ana Mira':8,Naila:9,Brunna:8} },
+      cmv:     { S1:{Raimunda:59,'Ana Mira':75.1,Naila:62.1,Brunna:98.1},S2:{'Ana Mira':31.7,Naila:59.8,Brunna:38.6} },
+      vendas_marca: { S1:{'NATUM PROFISSIONAL':14,'HAIR EXTRATTUS':9,'APSE':9,'ITALLIAN HAIR':6} },
     },
     L4: {
       meta_mensal: 140000,
@@ -517,13 +524,15 @@ const DADOS = {
         {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:20000},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:35000},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:30000},{id:'S4', label:'Semana 4', periodo:'20/07–25/07', meta:25000},{id:'S5', label:'Semana 5', periodo:'27/07–31/07', meta:30000},
       ],
       vendas: {
-        S1:{Tanaia:1456,Josilene:6558,'Bruna F.':8238,Débora:8505},
+        S1:{Tanaia:1456,Josilene:6805,'Bruna F.':9177,Débora:8505},
+        S2:{Josilene:87,'Bruna F.':212,Débora:24},
       },
-      marcasA_loja: {S1:33.9},
-      marcasA_indiv: {Tanaia:49.1,Josilene:30,'Bruna F.':41.5,Débora:27},
-      tickets: { S1:{Tanaia:15,Josilene:77,'Bruna F.':103,Débora:85} },
-      pecas:   { S1:{Tanaia:31,Josilene:178,'Bruna F.':227,Débora:245} },
-      cmv:     { S1:{Tanaia:40.4,Josilene:34.6,'Bruna F.':34.7,Débora:35} },
+      marcasA_loja: {S1:33.7,S2:100},
+      marcasA_indiv: {Tanaia:49.1,Josilene:28.5,'Bruna F.':43.9,Débora:27},
+      tickets: { S1:{Tanaia:15,Josilene:80,'Bruna F.':115,Débora:85},S2:{Josilene:2,'Bruna F.':4,Débora:1} },
+      pecas:   { S1:{Tanaia:31,Josilene:184,'Bruna F.':250,Débora:245},S2:{Josilene:3,'Bruna F.':11,Débora:2} },
+      cmv:     { S1:{Tanaia:40.4,Josilene:35.1,'Bruna F.':34,Débora:35},S2:{Josilene:38.7,'Bruna F.':39.1,Débora:43} },
+      vendas_marca: { S1:{'ITALLIAN HAIR':71,'WIDI CARE':34,'APSE':31,'CADIVEU':30,'NATUM PROFISSIONAL':26} },
     },
     L5: {
       meta_mensal: 90000,
@@ -531,13 +540,15 @@ const DADOS = {
         {id:'S1', label:'Semana 1', periodo:'01/07–04/07', meta:10000},{id:'S2', label:'Semana 2', periodo:'06/07–11/07', meta:25000},{id:'S3', label:'Semana 3', periodo:'13/07–18/07', meta:20000},{id:'S4', label:'Semana 4', periodo:'20/07–25/07', meta:15000},{id:'S5', label:'Semana 5', periodo:'27/07–31/07', meta:20000},
       ],
       vendas: {
-        S1:{Rosiene:4323,Joyce:2939,Rayssa:3467,Karina:3771},
+        S1:{Rosiene:4323,Joyce:3158,Rayssa:4135,Karina:3777},
+        S2:{Rosiene:120,Karina:31},
       },
-      marcasA_loja: {S1:27.4},
-      marcasA_indiv: {Rosiene:34.2,Joyce:26.9,Rayssa:35.3,Karina:12.8},
-      tickets: { S1:{Rosiene:31,Joyce:31,Rayssa:30,Karina:43} },
-      pecas:   { S1:{Rosiene:138,Joyce:90,Rayssa:132,Karina:130} },
-      cmv:     { S1:{Rosiene:38.7,Joyce:45.3,Rayssa:71.3,Karina:46.4} },
+      marcasA_loja: {S1:26.9,S2:0},
+      marcasA_indiv: {Rosiene:33.3,Joyce:26.2,Rayssa:32.6,Karina:12.6},
+      tickets: { S1:{Rosiene:31,Joyce:36,Rayssa:35,Karina:44},S2:{Rosiene:1,Karina:1} },
+      pecas:   { S1:{Rosiene:138,Joyce:96,Rayssa:143,Karina:131},S2:{Rosiene:1,Karina:2} },
+      cmv:     { S1:{Rosiene:38.7,Joyce:45.1,Rayssa:67.4,Karina:51.8},S2:{Rosiene:49.9,Karina:45} },
+      vendas_marca: { S1:{'ITALLIAN HAIR':24,'NATUM PROFISSIONAL':19,'APSE':18,'HAIR EXTRATTUS':11} },
     },
   },
   '2026-08': null,
@@ -853,6 +864,75 @@ const SUGESTOES = {
        descricao:'Só uma das 4 lojas está perto dos 30% de Marcas A. A regra simples da semana pra todas: a PRIMEIRA oferta a todo cliente novo é uma marca A da loja. Marca A sobe a margem e libera o bônus de R$50 no prêmio da equipe. Cada gerente confere o número da própria loja no caixa às 12h e às 17h e corrige no mesmo dia, sem deixar pro fim da semana.',
        prazo:'curto', status:'pendente'},
     ]
+  },
+
+  // ══ W28 (06-11/07) — gerada 06/07/2026 via CATCH-UP (cron de sáb 18h não rodou).
+  // 1ª semana do sistema novo: alvos rastreáveis com dado real (venda_marca com
+  // baseline S1 já coletada, vendas_individuais, ticket_medio, atingir_meta) +
+  // primeiros ELOGIOS YoY (junho fechado vs junho/2025). Contexto: S1 recorde,
+  // TODAS as lojas ≥120% da meta. Tatiane de férias (sem sugestão individual).
+  '2026-W28': {
+    semana_label: 'Semana 06/07 – 11/07',
+    geradas_em: '06/07/2026',
+    itens: [
+      // ── 🏆 ELOGIOS (crescimento vs junho/2025 — dado real do ERP) ──
+      {id:'2026-W28-L1-01', escopo:'vendedora', loja:'L1', vendedora:'Rayra', tipo:'elogio', meta_alvo:'crescimento_yoy',
+       titulo:'🏆 Rayra — +59,5% vs junho do ano passado',
+       descricao:'Rayra, olha esse número: em junho de 2025 você vendeu R$26.460. Em junho de 2026, R$42.202 — um crescimento de 59,5% em um ano. Isso é consistência e evolução de verdade. A gestão vê e reconhece: você é referência da Casa da Beleza. Parabéns!',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W28-L1-02', escopo:'loja', loja:'L1', tipo:'elogio', meta_alvo:'crescimento_yoy',
+       titulo:'🏆 Casa da Beleza — +29,2% vs junho do ano passado',
+       descricao:'Equipe da Casa da Beleza: junho de 2026 fechou em R$135.721 contra R$105.037 em junho de 2025 — a loja cresceu 29,2% em um ano. E vocês ainda abriram julho batendo 124,8% da meta na primeira semana. Time em outro nível. Parabéns a todas!',
+       prazo:'curto', status:'pendente'},
+
+      // ── Casa da Beleza Altamira (S1 124,8% · MA 21,9%) ──
+      {id:'2026-W28-L1-03', escopo:'loja', loja:'L1', tipo:'marca', meta_alvo:'venda_marca', marca:'ITALLIAN HAIR',
+       titulo:'L1 — crescer Itallian Hair 15% essa semana (58un → 67un)',
+       descricao:'Desafio com número: semana passada a loja vendeu 58 unidades de Itallian Hair. Meta dessa semana: 67 ou mais (+15%). Como: pra todo cliente de tratamento capilar, a PRIMEIRA oferta é Itallian — e sempre em combo de 2-3 produtos da linha. No sábado puxamos o relatório e contamos pra vocês o resultado exato.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W28-L1-04', escopo:'vendedora', loja:'L1', vendedora:'Sofia', tipo:'meta', meta_alvo:'vendas_individuais',
+       titulo:'Sofia — repetir a semana forte: R$6.300 na S2',
+       descricao:'Você fez R$5.489 na semana passada — sua melhor semana até aqui. O desafio agora é provar que não foi sorte: R$6.300 essa semana (+15%). A semana é maior (meta da loja R$35k), então tem cliente pra isso. Continue com as frases de fechamento que funcionaram: "esse está saindo muito, quer levar?".',
+       prazo:'curto', status:'pendente'},
+
+      // ── Miss Beleza Itaituba (S1 126,3% · MA 14,8% — a mais baixa do grupo) ──
+      {id:'2026-W28-L3-01', escopo:'loja', loja:'L3', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'L3 — a maior meta semanal do mês: R$25.000 (R$4.200/dia)',
+       descricao:'Semana passada vocês bateram 126% da meta — agora vem a semana mais pesada do mês: R$25.000. Quebrando por dia dá R$4.200/dia (seg a sáb). Ana Mira: acompanhe o acumulado no caixa todo fim de tarde e avise a equipe quanto falta pro dia seguinte. Ritmo diário é o que segura meta grande.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W28-L3-02', escopo:'loja', loja:'L3', tipo:'marca', meta_alvo:'venda_marca', marca:'NATUM PROFISSIONAL',
+       titulo:'L3 — dobrar a atenção na Natum: 14un → 17un+ essa semana',
+       descricao:'As Marcas A da loja estão em 14,8% — a mais baixa do grupo, e isso custa o bônus de R$50 no prêmio de vocês. A marca A que mais vende aí é a Natum (14 unidades na semana passada). Desafio com número: 17+ unidades essa semana (+15%). Natum é a primeira oferta pra cliente de tratamento. Sábado contamos o resultado.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W28-L3-03', escopo:'vendedora', loja:'L3', vendedora:'Brunna', tipo:'ticket_medio', meta_alvo:'ticket_medio',
+       titulo:'Brunna — subir seu ticket médio 10% com combo de 3',
+       descricao:'Seu ticket médio na semana passada foi R$83 por cliente. Desafio: R$91+ essa semana (+10%). O caminho é o combo: quando o cliente pegar um shampoo, ofereça o condicionador e a máscara da MESMA marca — 3 peças em vez de 1. Você converte bem quem atende; agora é vender mais pra cada um.',
+       prazo:'curto', status:'pendente'},
+
+      // ── MissBeleza Altamira (S1 129,7% · MA 33,7% ✦ ÚNICA COM BÔNUS) ──
+      {id:'2026-W28-L4-01', escopo:'vendedora', loja:'L4', vendedora:'Josilene', tipo:'meta', meta_alvo:'vendas_individuais',
+       titulo:'Josilene — voltou voando: agora R$7.800 na S2',
+       descricao:'Que volta! R$6.805 na sua primeira semana de retorno — segunda maior da loja. O desafio dessa semana: R$7.800 (+15%). A semana é maior (meta R$35k) e você conhece a casa. Suas Marcas A estão em 28,5%, quase nos 30% — oferecendo Itallian e Cadiveu primeiro, você cresce o volume E o bônus da equipe junto.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W28-L4-02', escopo:'loja', loja:'L4', tipo:'marca', meta_alvo:'venda_marca', marca:'CADIVEU',
+       titulo:'L4 — Cadiveu como carro-chefe: 30un → 35un+ essa semana',
+       descricao:'Vocês são a única loja com bônus de Marcas A (33,7%) — parabéns, isso é R$50 a mais no pool. Pra manter: desafio com número na Cadiveu, que vendeu 30 unidades na semana passada. Meta: 35+ (+15%). Cadiveu tem margem alta e cliente fiel — primeira oferta em tratamento premium. Sábado sai o resultado.',
+       prazo:'curto', status:'pendente'},
+
+      // ── MissBeleza Santarém (S1 153,9% — RECORDE DO GRUPO · MA 26,9%) ──
+      {id:'2026-W28-L5-01', escopo:'loja', loja:'L5', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'L5 — do recorde (154%!) pra semana grande: R$25.000',
+       descricao:'Vocês fizeram a MELHOR semana do grupo: 153,9% da meta! Prêmio de R$630 no pool — o maior desde o início. Agora a régua sobe: meta de R$25.000 essa semana (R$4.200/dia). O ritmo de semana passada (R$2.500+/dia) precisa quase dobrar — mas a semana é cheia e o embalo tá com vocês. Rosiene: acumulado no caixa todo fim de tarde.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W28-L5-02', escopo:'loja', loja:'L5', tipo:'marca', meta_alvo:'venda_marca', marca:'ITALLIAN HAIR',
+       titulo:'L5 — Itallian pra destravar o bônus: 24un → 28un+ (faltam 3pp)',
+       descricao:'As Marcas A de vocês fecharam em 26,9% — faltam só 3 pontos pros 30% que valem +R$50 no prêmio. A alavanca é a Itallian: 24 unidades semana passada, desafio de 28+ essa semana (+15%). Primeira oferta pra todo cliente de tratamento. Tão perto que seria pena deixar na mesa.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W28-L5-03', escopo:'vendedora', loja:'L5', vendedora:'Karina', tipo:'meta', meta_alvo:'vendas_individuais',
+       titulo:'Karina — a nova que não para de crescer: R$4.300 na S2',
+       descricao:'R$3.777 na semana passada — você foi a 3ª da loja e segue crescendo todo mês. Desafio: R$4.300 essa semana (+15%). Um ponto pra trabalhar junto: suas Marcas A estão em 12,6% (as da loja em 27%) — pega com a Rosiene as frases de oferta da Itallian e da Natum. Subindo isso, seu ticket cresce e o bônus da equipe também.',
+       prazo:'curto', status:'pendente'},
+    ]
   }
 };
 
@@ -974,6 +1054,42 @@ const HISTORICO_PREMIOS = {
       'Karina': {S1:23, S2:21, S3:79, S4:24},
       _em_pct: {S1:86, S2:70, S3:102, S4:85},
       _pool:   {S1:100, S2:80, S3:280, S4:100},
+    },
+  },
+  '2026-07': {
+    // S1 CONGELADA 06/07/2026 10:20 (fechou sáb 04/07; coleta final com sábado completo).
+    // Meta Real = Ideal (sem reajuste): L1=20000 L3=10000 L4=20000 L5=10000. Cliente 8 = R$0.
+    // SEMANA HISTÓRICA: todas as lojas ≥120% — L4 com bônus Marcas A (33,7% ≥30). IMUTÁVEL.
+    L1: {
+      'Rayra': {S1:157},
+      'Sofia': {S1:101},
+      'Bárbara': {S1:162},
+      _em_pct: {S1:125},
+      _pool:   {S1:420},
+    },
+    L3: {
+      'Ana Mira': {S1:89},
+      'Raimunda': {S1:143},
+      'Brunna': {S1:88},
+      'Naila': {S1:100},
+      _em_pct: {S1:126},
+      _pool:   {S1:420},
+    },
+    L4: {
+      'Tanaia': {S1:27},
+      'Josilene': {S1:123},
+      'Bruna F.': {S1:166},
+      'Débora': {S1:154},
+      _em_pct: {S1:130},
+      _pool:   {S1:470},  // 420 + 50 bônus Marcas A (33,7%)
+    },
+    L5: {
+      'Rosiene': {S1:177},
+      'Joyce': {S1:129},
+      'Rayssa': {S1:169},
+      'Karina': {S1:155},
+      _em_pct: {S1:154},
+      _pool:   {S1:630},  // faixa 120%+ com extra: 420 + 3×70 (153,9%)
     },
   },
 };
