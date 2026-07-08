@@ -59,7 +59,7 @@ const CUTOFF_DIAS = 90;       // janela ampla p/ achar a NF (a NF pode ser dias 
 // GATILHO (29/06/2026): dispara pela ENTRADA da NF no ERP (campo LancadaNoMicrovix da API), não mais pelo status ENTREGUE do Planejamento.
 // Como a API não traz a DATA do lançamento, guardamos em precificacao_lancadas.json quando cada NF foi vista lançada pela 1ª vez e mostramos as dos últimos N dias.
 const DIAS_ENTRADA = Number(process.env.DIAS_ENTRADA || process.env.DIAS_ENTREGA) || 3; // dias que a NF fica visível DEPOIS de detectada como precificada (regra "some 3 dias após precificar")
-const DIAS_INICIO = Number(process.env.DIAS_INICIO) || 15;   // janela p/ uma NF NOVA COMEÇAR a aparecer (entrada no ERP ≤ N dias). Ampla: captura tudo que entrou; a remoção é pela precificação, não pelo tempo.
+const DIAS_INICIO = Number(process.env.DIAS_INICIO) || 3;   // janela p/ uma NF aparecer: entrada no ERP ≤ N dias (regra do usuário 08/07: "só busque as dos últimos 3 dias").
 const STATE_FILE = REPO + "/precificacao_lancadas.json"; // estado local (gitignored): { "<chave>": {desde:"YYYY-MM-DD" (1ª aparição), aplicadoDesde:"ISO"|null (quando detectou preço já aplicado no ERP)} }
 const NF_FILTER = process.env.NF ? String(process.env.NF).split(",").map(s => s.trim()).filter(Boolean) : null; // teste: NF=9341 ou NF=684024,684025 node ... → puxa só essa(s) NF(s), ignora o gatilho
 const loadState = () => {
