@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-26'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-27'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -339,10 +339,18 @@ function detectarFaturamentos(dd){
     var dl=items.filter(function(c){return c.it.origem==='lancada'&&c.it.data_lcto;}).map(function(c){return String(c.it.data_lcto).slice(0,10);}).sort().slice(-1)[0]||''; // data de LANÇAMENTO no ERP (campo Lçto = entrada feita pela equipe), distinta da emissão/faturamento
     return {nfs:nfs,nf:nfs.join('+'),valor:valor,data:data,lancadas:lancadas,dataLanc:dl,mm:mm};
   }
+  function temIrmaoAtivo(p){ // outro pedido da MESMA marca+loja ainda ENVIADO/FATURADO (não ENTREGUE):
+    // sinal de que são pedidos DISTINTOS que vão chegar como NFs SEPARADAS (1 por loja física), não 1 pedido faturado em N notas.
+    var pm=norm(p.marca);
+    return DB.pedidos.some(function(x){ return x.id!==p.id && norm(x.marca)===pm && x.loja===p.loja && (x.status==='ENVIADO'||x.status==='FATURADO'); });
+  }
   function escolher(p){
     var pv=Number(p.valor_total)||0, cand=candidatas(p); if(!cand.length)return null;
     var mcands=cand.filter(function(c){return c.mm;});
-    var combo=bestSubsetSum(mcands,pv);                       // 1) marca: combinação (1 ou N NFs) que SOMA o pedido
+    // combinação (somar N NFs num pedido só) SÓ faz sentido quando há UM pedido pendente dessa marca+loja
+    // (1 pedido faturado em várias notas, ex. Brasitech/Gama). Se há outro pedido irmão pendente, as NFs
+    // vêm SEPARADAS (uma por loja/pedido) e somar aqui rouba a nota do irmão — ver incidente Itallian 08/07/2026.
+    var combo=temIrmaoAtivo(p)?null:bestSubsetSum(mcands,pv);  // 1) marca: combinação (1 ou N NFs) que SOMA o pedido
     if(combo)return mkMatch(combo.items,true);
     if(mcands.length){ mcands.sort(function(a,b){return Math.abs((Number(a.it.valor)||0)-pv)-Math.abs((Number(b.it.valor)||0)-pv);}); return mkMatch([mcands[0]],true); } // 2) marca: NF única mais próxima (vira sugestão se valor distante)
     var sem=cand.filter(function(c){return !c.mm;}); if(sem.length){ sem.sort(function(a,b){return Math.abs((Number(a.it.valor)||0)-pv)-Math.abs((Number(b.it.valor)||0)-pv);}); return mkMatch([sem[0]],false); } // 3) sem-marca: valor próximo
