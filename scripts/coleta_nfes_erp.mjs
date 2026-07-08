@@ -201,6 +201,14 @@ async function coletaLancadas(page) {
   return out;
 }
 
+async function lerNfesErpAnterior() {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/nfes_erp?id=eq.1&select=dados`, {
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+  });
+  if (!r.ok) throw new Error("supabase read " + r.status);
+  const rows = await r.json();
+  return (rows[0] && rows[0].dados) || [];
+}
 async function gravarSupabase(lista) {
   const body = JSON.stringify({ id: 1, dados: lista, atualizado_em: new Date().toISOString() });
   const r = await fetch(`${SUPABASE_URL}/rest/v1/nfes_erp`, {
@@ -220,6 +228,15 @@ async function runOnce() {
     const pend = await coletaPendentes(page);
     let lanc = [];
     try { lanc = await coletaLancadas(page); } catch (e) { log(`lançadas FALHOU (segue só com pendentes): ${e.message}`); }
+    // ⚠️ GUARD (08/07/2026): se a coleta de lançadas vier VAZIA (falha na tela relatorio_notas), NÃO
+    // sobrescrever com 0 — preserva as lançadas da coleta anterior. Sem isso, um 0 espúrio zera a
+    // fila de precificação (que depende do data_lcto daqui). Só preserva no modo Supabase.
+    if (lanc.length === 0 && !FILE_MODE) {
+      try {
+        const prevLanc = (await lerNfesErpAnterior()).filter(x => x.origem === "lancada" && x.data_lcto);
+        if (prevLanc.length) { lanc = prevLanc; log(`⚠️ lançadas vieram 0 — PRESERVANDO ${prevLanc.length} lançadas da coleta anterior (não sobrescreve com vazio)`); }
+      } catch (e) { log("aviso: não preservou lançadas anteriores: " + String(e.message).split("\n")[0]); }
+    }
     const lancKeys = new Set(lanc.map(x => x.loja + "|" + x.nf));
     const lista = lanc.concat(pend.filter(p => !lancKeys.has(p.loja + "|" + p.nf)));
     log(`total: ${lista.length} (pendentes ${pend.length}, lançadas ${lanc.length})`);
