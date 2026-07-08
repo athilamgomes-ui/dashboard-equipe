@@ -176,11 +176,12 @@ async function relatorioPrecosErp(page, empresa, tabelaNome, marcaCodes, tabelaI
     // onclick que monta a grade editável); marcar .checked à toa cai em modo texto sem os inputs.
     const ajChecked = await page.evaluate(() => !!document.getElementById("ajuste_precos")?.checked);
     if (!ajChecked) { await page.click("#ajuste_precos").catch(() => {}); await page.waitForTimeout(700); }
-    const tabInfo = await page.evaluate(({ empresa, tabelaNome, tabelaId, marcaCodes }) => {
+    const incluirInativos = tent >= 4; // fallback: se as 1ªs tentativas (só ativos) não acharam nada, inclui inativos (marca nova com produtos ainda desativados, ex. Depimiel)
+    const tabInfo = await page.evaluate(({ empresa, tabelaNome, tabelaId, marcaCodes, incluirInativos }) => {
       [1, 3, 4, 9, 10, 11].forEach(i => { const e = document.getElementById("empresas_" + i); if (e) e.checked = (i === empresa); });
       document.querySelectorAll("input[name=visao]").forEach(r => r.checked = (r.value === "A"));
       const a = document.getElementById("ativa"); if (a) a.checked = true;
-      const d = document.getElementById("desativa"); if (d) d.checked = false;
+      const d = document.getElementById("desativa"); if (d) d.checked = !!incluirInativos;
       const bar = document.getElementById("barras"); if (bar) bar.checked = true;
       const pv = document.getElementById("preco_venda"); if (pv) pv.checked = true; // ajustar Preço de Venda (não custo)
       const ms = document.getElementById("marcas");
@@ -211,7 +212,7 @@ async function relatorioPrecosErp(page, empresa, tabelaNome, marcaCodes, tabelaI
         }
       }
       return { usada, opcoes, casou };
-    }, { empresa, tabelaNome, tabelaId, marcaCodes });
+    }, { empresa, tabelaNome, tabelaId, marcaCodes, incluirInativos });
     if (tabInfo && !tabInfo.casou) log(`  ⚠️ tabela "${tabelaNome}" NÃO encontrada (emp ${empresa}) — usando "${tabInfo.usada}". Opções: ${(tabInfo.opcoes || []).join(" | ")}`);
     const tabUsada = (tabInfo && tabInfo.usada) || null;
     await page.waitForTimeout(1200);
