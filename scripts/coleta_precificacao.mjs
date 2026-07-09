@@ -242,8 +242,9 @@ async function relatorioPrecosErp(page, empresa, tabelaNome, marcaCodes, tabelaI
         if (a) ean = (a.textContent || "").trim();
         const desc = (tr.cells[1] && tr.cells[1].textContent || "").trim();
         const ref = (tr.cells[2] && tr.cells[2].textContent || "").trim(); // coluna Referência = código do fornecedor (cprod da NF)
+        const custo = parse(tr.cells[7] && tr.cells[7].textContent); // coluna Custo/Líq = custo REAL no cadastro do ERP (não o da nota fiscal, que p/ alguns forn. vem reduzida)
         const p = parse(v.value);
-        if (p != null) out.push({ cod, ean, desc, ref, preco: p });
+        if (p != null) out.push({ cod, ean, desc, ref, custo, preco: p });
       }
       return out;
     });
@@ -544,10 +545,10 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
             if (it.preco_atual != null) continue;
             // 1º: EAN exato (código de barras). 2º (fallback): referência exata (cprod ↔ Referência).
             if (it.ean && it.ean !== "SEM GTIN" && porEan[it.ean] != null) {
-              const r = porEan[it.ean]; it.preco_atual = r.preco; it.cod_erp = r.cod; it.match_tipo = "ean"; porEanN++;
+              const r = porEan[it.ean]; it.preco_atual = r.preco; it.cod_erp = r.cod; it.custo_erp = r.custo; it.match_tipo = "ean"; porEanN++;
             } else {
               const k = String(it.cprod || "").toUpperCase().trim();
-              if (k && refMap[k]) { const r = refMap[k]; it.preco_atual = r.preco; it.cod_erp = r.cod; it.match_tipo = "ref"; porRefN++; }
+              if (k && refMap[k]) { const r = refMap[k]; it.preco_atual = r.preco; it.cod_erp = r.cod; it.custo_erp = r.custo; it.match_tipo = "ref"; porRefN++; }
             }
           }
           log(`preços ERP ${L}/${mk} (emp ${empresa}, ${tabela || "?"}, ${rows.length} prod): ${porEanN} por EAN + ${porRefN} por referência = ${porEanN + porRefN}/${g.itens.length}`);
