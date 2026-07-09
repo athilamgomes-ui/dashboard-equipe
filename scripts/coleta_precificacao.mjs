@@ -352,21 +352,36 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       const e = state[k];
       if (e && e.aplicadoDesde) { const t = Date.parse(e.aplicadoDesde); if (isNaN(t) || (HOJE.getTime() - t) > 30 * 86400000) { delete state[k]; stateDirty = true; } }
     }
+    // poda rastreadores de transição (T|) antigos (>60d)
+    for (const k of Object.keys(state)) {
+      if (!k.startsWith("T|")) continue;
+      const t = Date.parse(state[k]?.ts || ""); if (isNaN(t) || (HOJE.getTime() - t) > 60 * 86400000) { delete state[k]; stateDirty = true; }
+    }
     // elegibilidade por NF: começa a aparecer (evidência de entrada recente) e continua até ser precificada
     const elegivel = (loja, nfe) => {
-      if (!nfe.LancadaNoMicrovix) return false;
       const numN = String(nfe.Numero).replace(/^0+/, "");
       const ch = String(nfe.Chave || (loja + "-" + nfe.Numero));
+      const lancNow = !!nfe.LancadaNoMicrovix;
+      // DETECÇÃO POR TRANSIÇÃO (09/07/2026 — "tem que ser instantâneo"): rastreia o status lançada de
+      // TODA NF vista (chave "T|<chave>"). Quando uma NF que era PENDENTE aparece LANÇADA, é a entrada
+      // acontecendo AGORA → libera na hora, SEM depender do data_lcto do nfes_erp (que atualiza a cada 2h).
+      const tk = "T|" + ch;
+      const prev = state[tk];
+      const transicaoAgora = lancNow && prev && prev.l === false;
+      if (!prev || prev.l !== lancNow) { state[tk] = { l: lancNow, ts: todayISO }; stateDirty = true; }
+      if (!lancNow) return false;
       let entry = state[ch];
       if (!entry) {
-        // NF nova: só COMEÇA a aparecer com EVIDÊNCIA de entrada recente = data_lcto do nfes_erp ≤ DIAS_INICIO.
-        // SEM data_lcto não inicia (pode ser entrada antiga que saiu da janela do nfes_erp; uma entrada de verdade
-        // ganha data_lcto na próxima rodada do coletor de NFes, ≤2h, e aí começa a aparecer).
+        // NF nova COMEÇA a aparecer se: (a) TRANSIÇÃO pendente→lançada detectada agora (instantâneo), OU
+        // (b) data_lcto do nfes_erp ≤ DIAS_INICIO (fallback p/ NF que nunca foi vista pendente).
+        // SEM nenhuma das duas evidências não inicia (pode ser lançada antiga já precificada).
         const entISO = lctoMap[loja + "|" + numN];
         const entMs = entISO ? Date.parse(entISO) : NaN;
-        if (isNaN(entMs) || (HOJE.getTime() - entMs) > janelaInicioMs) return false;
+        const lctoRecente = !isNaN(entMs) && (HOJE.getTime() - entMs) <= janelaInicioMs;
+        if (!transicaoAgora && !lctoRecente) return false;
         entry = { desde: todayISO, aplicadoDesde: null };
         state[ch] = entry; stateDirty = true; // carimba a 1ª aparição = hoje
+        if (transicaoAgora) log(`⚡ entrada AGORA detectada por transição: ${loja} NF ${nfe.Numero}`);
       }
       // já foi detectada como precificada há mais de DIAS_ENTRADA dias → não mostra mais
       if (entry.aplicadoDesde && (HOJE.getTime() - Date.parse(entry.aplicadoDesde)) >= janelaMs) return false;

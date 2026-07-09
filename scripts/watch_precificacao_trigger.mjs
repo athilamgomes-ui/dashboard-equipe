@@ -53,10 +53,18 @@ for (;;) {
       if (jaEmExecucao()) { log("pedido pendente, mas já há uma coleta rodando (lock) — tenta na próxima checagem"); }
       else {
         log("pedido de atualização recebido — rodando coleta AGORA");
+        // 1) coleta EXPRESSA (sem relatório de preços): pega transição pendente→lançada e publica a NF
+        //    na tela em ~60-90s (preço sugerido já sai; preços atuais das demais preservados)
+        try {
+          execSync("PUSH=1 SKIP_PRECO=1 /opt/homebrew/bin/node coleta_precificacao.mjs", { cwd: REPO_SCRIPTS, stdio: "pipe" });
+          log("coleta expressa OK — NF nova (se houver) já na tela");
+        } catch (e) { log("coleta expressa falhou: " + String(e.message || e).split("\n")[0]); }
+        // 2) nfes_erp (data_lcto fresco, fallback p/ NF nunca vista pendente)
         try {
           execSync("/opt/homebrew/bin/node coleta_nfes_erp.mjs", { cwd: REPO_SCRIPTS, stdio: "pipe" });
           log("coleta_nfes_erp OK");
         } catch (e) { log("coleta_nfes_erp falhou: " + String(e.message || e).split("\n")[0]); }
+        // 3) coleta COMPLETA (preenche preço atual do ERP)
         try {
           execSync("PUSH=1 /opt/homebrew/bin/node coleta_precificacao.mjs", { cwd: REPO_SCRIPTS, stdio: "pipe" });
           log("coleta_precificacao OK — publicado");
