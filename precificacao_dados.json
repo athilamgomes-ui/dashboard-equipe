@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-07-09T17:17:27.119Z",
+  "gerado_em": "2026-07-09T17:31:38.928Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
@@ -828,11 +828,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 33.9,
             "cod_erp": "204336",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "ncm": "12119090",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 16.35
           },
           {
             "cprod": "PA00073",
@@ -856,11 +857,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 33.9,
             "cod_erp": "204337",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "ncm": "12119090",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 16.35
           },
           {
             "cprod": "PA00077",
@@ -884,11 +886,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 49.9,
             "cod_erp": "204338",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "ncm": "12119090",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 23.7
           },
           {
             "cprod": "PA00080",
@@ -912,11 +915,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 49.9,
             "cod_erp": "204339",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "ncm": "12119090",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 23.7
           },
           {
             "cprod": "PA00006",
@@ -940,11 +944,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 25.9,
             "cod_erp": "204340",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "ncm": "33049990",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 12.7
           }
         ],
         "uf": "ES"
