@@ -478,8 +478,8 @@ const DADOS = {
     },
   },
   '2026-07': {
-    // Atualizado 08/07/2026 08:44 (quarta — S1 FECHADA/congelada; S2 aberta/parcial, 3 de 6 dias). Cliente 8 = R$0.
-    // Coleta Playwright headless (run manual). Cliente 8 (R Maura)=R$0 em jul S2/MES (verificado 08/07).
+    // Atualizado 09/07/2026 18:11 (quinta — S1 FECHADA/congelada; S2 aberta/parcial, 4 de 6 dias). Cliente 8 = R$0.
+    // Coleta Playwright headless (cron 18h). Cliente 8 (R Maura)=R$0 em jul S2/MES (verificado 09/07).
     // S1 HISTÓRICA: todas as lojas ≥120%.
     // METAS SEMANAIS OFICIAIS (04/07/2026, Tabela de Premiação/PDF): julho tem 5 semanas
     // (01-04/07, 06-11/07, 13-18/07, 20-25/07, 27-31/07). Meta Real = Meta Ideal (sem reajuste).
@@ -491,13 +491,13 @@ const DADOS = {
       ],
       vendas: {
         S1:{Outros:2162,Rayra:8533,Sofia:5489,Bárbara:8774},
-        S2:{Outros:1001,Tatiane:89,Rayra:5413,Sofia:4977,Bárbara:4990},
+        S2:{Outros:883,Tatiane:89,Rayra:7447,Sofia:5381,Bárbara:6671},
       },
-      marcasA_loja: {S1:21.9,S2:26.6},
-      marcasA_indiv: {Rayra:27.4,Bárbara:25.4,Sofia:21.1,Tatiane:65.8},
-      tickets: { S1:{Outros:1,Rayra:107,Sofia:72,Bárbara:108},S2:{Outros:10,Tatiane:2,Rayra:52,Sofia:62,Bárbara:59} },
-      pecas:   { S1:{Outros:9,Rayra:251,Sofia:175,Bárbara:383},S2:{Outros:27,Tatiane:3,Rayra:153,Sofia:153,Bárbara:172} },
-      cmv:     { S1:{Rayra:38.3,Sofia:52.8,Bárbara:58},S2:{Tatiane:95.2,Rayra:43.2,Sofia:56.6,Bárbara:43.4} },
+      marcasA_loja: {S1:21.9,S2:27.6},
+      marcasA_indiv: {Rayra:26.3,Bárbara:28.0,Sofia:20.9,Tatiane:65.8},
+      tickets: { S1:{Outros:1,Rayra:107,Sofia:72,Bárbara:108},S2:{Outros:10,Tatiane:2,Rayra:66,Sofia:67,Bárbara:75} },
+      pecas:   { S1:{Outros:9,Rayra:251,Sofia:175,Bárbara:383},S2:{Outros:18,Tatiane:3,Rayra:204,Sofia:165,Bárbara:219} },
+      cmv:     { S1:{Rayra:38.3,Sofia:52.8,Bárbara:58},S2:{Tatiane:95.2,Rayra:44.6,Sofia:54.7,Bárbara:48.8} },
       // Unidades vendidas por marca (coleta_vendas_marca_semana.mjs) — baseline pras
       // sugestões venda_marca. S2 é coletada no fechamento da semana.
       vendas_marca: { S1:{'ITALLIAN HAIR':58,'APSE':21,'HAIR EXTRATTUS':20,'PROBELLE PROFISSIONAL':19,'NATUM PROFISSIONAL':14} },
@@ -509,13 +509,13 @@ const DADOS = {
       ],
       vendas: {
         S1:{Outros:-26,Raimunda:4311,'Ana Mira':2685,Naila:3018,Brunna:2644},
-        S2:{Raimunda:1888,'Ana Mira':5383,Naila:4158,Brunna:2690},
+        S2:{Raimunda:2239,'Ana Mira':6164,Naila:5411,Brunna:2773},
       },
-      marcasA_loja: {S1:14.8,S2:10.8},
-      marcasA_indiv: {'Ana Mira':17.2,Raimunda:14.1,Brunna:1.9,Naila:14.4},
-      tickets: { S1:{Outros:0,Raimunda:40,'Ana Mira':41,Naila:44,Brunna:32},S2:{Raimunda:30,'Ana Mira':41,Naila:48,Brunna:42} },
-      pecas:   { S1:{Outros:-1,Raimunda:101,'Ana Mira':164,Naila:131,Brunna:105},S2:{Raimunda:97,'Ana Mira':144,Naila:163,Brunna:188} },
-      cmv:     { S1:{Raimunda:59,'Ana Mira':75.1,Naila:62.1,Brunna:98.1},S2:{Raimunda:55.7,'Ana Mira':49,Naila:67.3,Brunna:62.1} },
+      marcasA_loja: {S1:14.8,S2:9.6},
+      marcasA_indiv: {'Ana Mira':15.7,Raimunda:14.2,Brunna:1.9,Naila:12.3},
+      tickets: { S1:{Outros:0,Raimunda:40,'Ana Mira':41,Naila:44,Brunna:32},S2:{Raimunda:37,'Ana Mira':48,Naila:51,Brunna:46} },
+      pecas:   { S1:{Outros:-1,Raimunda:101,'Ana Mira':164,Naila:131,Brunna:105},S2:{Raimunda:118,'Ana Mira':202,Naila:183,Brunna:192} },
+      cmv:     { S1:{Raimunda:59,'Ana Mira':75.1,Naila:62.1,Brunna:98.1},S2:{Raimunda:53.8,'Ana Mira':50.3,Naila:64.5,Brunna:61.7} },
       vendas_marca: { S1:{'NATUM PROFISSIONAL':14,'HAIR EXTRATTUS':9,'APSE':9,'ITALLIAN HAIR':6} },
     },
     L4: {
@@ -525,13 +525,13 @@ const DADOS = {
       ],
       vendas: {
         S1:{Tanaia:1456,Josilene:6805,'Bruna F.':9177,Débora:8505},
-        S2:{Tanaia:1149,Josilene:5768,'Bruna F.':9024,Débora:3418},
+        S2:{Tanaia:1149,Josilene:6317,'Bruna F.':10365,Débora:4436},
       },
-      marcasA_loja: {S1:33.7,S2:22},
-      marcasA_indiv: {Tanaia:29.2,Josilene:27.3,'Bruna F.':32.6,Débora:24.2},
-      tickets: { S1:{Tanaia:15,Josilene:80,'Bruna F.':115,Débora:85},S2:{Tanaia:9,Josilene:51,'Bruna F.':106,Débora:56} },
-      pecas:   { S1:{Tanaia:31,Josilene:184,'Bruna F.':250,Débora:245},S2:{Tanaia:24,Josilene:163,'Bruna F.':401,Débora:131} },
-      cmv:     { S1:{Tanaia:40.4,Josilene:35.1,'Bruna F.':34,Débora:35},S2:{Tanaia:47.3,Josilene:47.8,'Bruna F.':38.2,Débora:45.3} },
+      marcasA_loja: {S1:33.7,S2:24.5},
+      marcasA_indiv: {Tanaia:29.2,Josilene:27.1,'Bruna F.':34.2,Débora:24.7},
+      tickets: { S1:{Tanaia:15,Josilene:80,'Bruna F.':115,Débora:85},S2:{Tanaia:9,Josilene:58,'Bruna F.':124,Débora:72} },
+      pecas:   { S1:{Tanaia:31,Josilene:184,'Bruna F.':250,Débora:245},S2:{Tanaia:24,Josilene:181,'Bruna F.':453,Débora:174} },
+      cmv:     { S1:{Tanaia:40.4,Josilene:35.1,'Bruna F.':34,Débora:35},S2:{Tanaia:47.3,Josilene:46.8,'Bruna F.':40.6,Débora:44.2} },
       vendas_marca: { S1:{'ITALLIAN HAIR':71,'WIDI CARE':34,'APSE':31,'CADIVEU':30,'NATUM PROFISSIONAL':26} },
     },
     L5: {
@@ -541,13 +541,13 @@ const DADOS = {
       ],
       vendas: {
         S1:{Rosiene:4323,Joyce:3158,Rayssa:4135,Karina:3777},
-        S2:{Rosiene:2562,Joyce:638,Rayssa:2411,Karina:2851},
+        S2:{Rosiene:3133,Joyce:638,Rayssa:2716,Karina:3441},
       },
-      marcasA_loja: {S1:26.9,S2:21.9},
-      marcasA_indiv: {Rosiene:28.9,Joyce:24.4,Rayssa:30.2,Karina:16.6},
-      tickets: { S1:{Rosiene:31,Joyce:36,Rayssa:35,Karina:44},S2:{Rosiene:25,Joyce:10,Rayssa:29,Karina:32} },
-      pecas:   { S1:{Rosiene:138,Joyce:96,Rayssa:143,Karina:131},S2:{Rosiene:86,Joyce:19,Rayssa:108,Karina:108} },
-      cmv:     { S1:{Rosiene:38.7,Joyce:45.1,Rayssa:67.4,Karina:51.8},S2:{Rosiene:48.8,Joyce:39.6,Rayssa:50,Karina:40.6} },
+      marcasA_loja: {S1:26.9,S2:20.4},
+      marcasA_indiv: {Rosiene:27.5,Joyce:24.4,Rayssa:28.9,Karina:16.7},
+      tickets: { S1:{Rosiene:31,Joyce:36,Rayssa:35,Karina:44},S2:{Rosiene:29,Joyce:10,Rayssa:38,Karina:35} },
+      pecas:   { S1:{Rosiene:138,Joyce:96,Rayssa:143,Karina:131},S2:{Rosiene:103,Joyce:19,Rayssa:216,Karina:124} },
+      cmv:     { S1:{Rosiene:38.7,Joyce:45.1,Rayssa:67.4,Karina:51.8},S2:{Rosiene:54.1,Joyce:39.6,Rayssa:64.3,Karina:40.6} },
       vendas_marca: { S1:{'ITALLIAN HAIR':24,'NATUM PROFISSIONAL':19,'APSE':18,'HAIR EXTRATTUS':11} },
     },
   },
