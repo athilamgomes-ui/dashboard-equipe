@@ -394,6 +394,20 @@ async function recarregarDados(loja,sel){
   renderNfes(); renderItens();
   return d.gerado_em;
 }
+// AUTO-ATUALIZAÇÃO (10/07/2026): a cada 60s confere se saiu coleta nova e recarrega sozinho,
+// preservando loja/NF selecionadas — acaba com o problema de aba aberta mostrando dado velho.
+setInterval(async()=>{
+  try{
+    const d=await fetch("precificacao_dados.json?v="+Date.now(),{cache:"no-store"}).then(r=>r.json());
+    if(DADOS && d.gerado_em && d.gerado_em!==DADOS.gerado_em) await recarregarDados(lojaAtual,nfeSel);
+  }catch(e){/* offline/transiente — tenta no próximo ciclo */}
+},60000);
+window.addEventListener("focus",async()=>{ // ao voltar pra aba, confere na hora
+  try{
+    const d=await fetch("precificacao_dados.json?v="+Date.now(),{cache:"no-store"}).then(r=>r.json());
+    if(DADOS && d.gerado_em && d.gerado_em!==DADOS.gerado_em) await recarregarDados(lojaAtual,nfeSel);
+  }catch(e){}
+});
 document.getElementById("btnAtualizar").onclick=async()=>{
   const loja=lojaAtual, sel=nfeSel; const b=document.getElementById("btnAtualizar"); const t0=b.textContent;
   b.disabled=true;
