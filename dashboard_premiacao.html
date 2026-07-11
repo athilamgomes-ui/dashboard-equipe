@@ -478,8 +478,9 @@ const DADOS = {
     },
   },
   '2026-07': {
-    // Atualizado 11/07/2026 12:16 (sábado — S1 FECHADA/congelada; S2 aberta, 6 de 6 dias, fecha hoje). Cliente 8 = R$0.
-    // Coleta Playwright headless (cron 12h). Cliente 8 (R Maura)=R$0 em jul S2/MES (verificado 11/07).
+    // Atualizado 11/07/2026 18:12 (cron sábado 18h — coleta FINAL de S2 com sábado completo). Cliente 8 = R$0.
+    // S2 ainda é a semana_atual até domingo; será CONGELADA na virada pra S3 (run de seg 13/07). NÃO congelar aqui.
+    // Coleta Playwright headless. Cliente 8 (R Maura)=R$0 em jul S2/MES (verificado 11/07 18h).
     // S1 HISTÓRICA: todas as lojas ≥120%.
     // METAS SEMANAIS OFICIAIS (04/07/2026, Tabela de Premiação/PDF): julho tem 5 semanas
     // (01-04/07, 06-11/07, 13-18/07, 20-25/07, 27-31/07). Meta Real = Meta Ideal (sem reajuste).
@@ -491,16 +492,16 @@ const DADOS = {
       ],
       vendas: {
         S1:{Outros:2162,Rayra:8533,Sofia:5489,Bárbara:8774},
-        S2:{Outros:936,Tatiane:89,Rayra:11654,Sofia:8330,Bárbara:10508},
+        S2:{Outros:936,Tatiane:89,Rayra:12029,Sofia:8440,Bárbara:12020},
       },
-      marcasA_loja: {S1:21.9,S2:26.4},
-      marcasA_indiv: {Rayra:28.5,Bárbara:26.3,Sofia:18.9,Tatiane:65.8},
-      tickets: { S1:{Outros:1,Rayra:107,Sofia:72,Bárbara:108},S2:{Outros:13,Tatiane:2,Rayra:105,Sofia:92,Bárbara:105} },
-      pecas:   { S1:{Outros:9,Rayra:251,Sofia:175,Bárbara:383},S2:{Outros:23,Tatiane:3,Rayra:333,Sofia:237,Bárbara:307} },
-      cmv:     { S1:{Rayra:38.3,Sofia:52.8,Bárbara:58},S2:{Tatiane:95.2,Rayra:43.6,Sofia:52.2,Bárbara:45.6} },
+      marcasA_loja: {S1:21.9,S2:27.7},
+      marcasA_indiv: {Rayra:29.0,Bárbara:28.2,Sofia:18.8,Tatiane:65.8},
+      tickets: { S1:{Outros:1,Rayra:107,Sofia:72,Bárbara:108},S2:{Outros:13,Tatiane:2,Rayra:113,Sofia:96,Bárbara:116} },
+      pecas:   { S1:{Outros:9,Rayra:251,Sofia:175,Bárbara:383},S2:{Outros:23,Tatiane:3,Rayra:349,Sofia:243,Bárbara:331} },
+      cmv:     { S1:{Rayra:38.3,Sofia:52.8,Bárbara:58},S2:{Tatiane:95.2,Rayra:43.6,Sofia:54.9,Bárbara:43.2} },
       // Unidades vendidas por marca (coleta_vendas_marca_semana.mjs) — baseline pras
       // sugestões venda_marca. S2 é coletada no fechamento da semana.
-      vendas_marca: { S1:{'ITALLIAN HAIR':58,'APSE':21,'HAIR EXTRATTUS':20,'PROBELLE PROFISSIONAL':19,'NATUM PROFISSIONAL':14} },
+      vendas_marca: { S1:{'ITALLIAN HAIR':58,'APSE':21,'HAIR EXTRATTUS':20,'PROBELLE PROFISSIONAL':19,'NATUM PROFISSIONAL':14}, S2:{'ITALLIAN HAIR':90,'APSE':42,'HAIR EXTRATTUS':14,'PROBELLE PROFISSIONAL':22,'NATUM PROFISSIONAL':21} },
     },
     L3: {
       meta_mensal: 85000,
@@ -509,14 +510,14 @@ const DADOS = {
       ],
       vendas: {
         S1:{Outros:-26,Raimunda:4311,'Ana Mira':2685,Naila:3018,Brunna:2644},
-        S2:{Raimunda:3050,'Ana Mira':6775,Naila:6935,Brunna:4149},
+        S2:{Raimunda:3996,'Ana Mira':7420,Naila:6935,Brunna:4149},
       },
-      marcasA_loja: {S1:14.8,S2:11.1},
-      marcasA_indiv: {'Ana Mira':14.7,Raimunda:16.3,Brunna:6,Naila:11.9},
-      tickets: { S1:{Outros:0,Raimunda:40,'Ana Mira':41,Naila:44,Brunna:32},S2:{Raimunda:51,'Ana Mira':53,Naila:76,Brunna:69} },
-      pecas:   { S1:{Outros:-1,Raimunda:101,'Ana Mira':164,Naila:131,Brunna:105},S2:{Raimunda:147,'Ana Mira':212,Naila:283,Brunna:257} },
-      cmv:     { S1:{Raimunda:59,'Ana Mira':75.1,Naila:62.1,Brunna:98.1},S2:{Raimunda:52.2,'Ana Mira':52.2,Naila:63.4,Brunna:55.7} },
-      vendas_marca: { S1:{'NATUM PROFISSIONAL':14,'HAIR EXTRATTUS':9,'APSE':9,'ITALLIAN HAIR':6} },
+      marcasA_loja: {S1:14.8,S2:10.5},
+      marcasA_indiv: {'Ana Mira':14.1,Raimunda:14.4,Brunna:6,Naila:11.9},
+      tickets: { S1:{Outros:0,Raimunda:40,'Ana Mira':41,Naila:44,Brunna:32},S2:{Raimunda:59,'Ana Mira':61,Naila:76,Brunna:69} },
+      pecas:   { S1:{Outros:-1,Raimunda:101,'Ana Mira':164,Naila:131,Brunna:105},S2:{Raimunda:175,'Ana Mira':254,Naila:283,Brunna:257} },
+      cmv:     { S1:{Raimunda:59,'Ana Mira':75.1,Naila:62.1,Brunna:98.1},S2:{Raimunda:51.7,'Ana Mira':51.7,Naila:63.4,Brunna:55.7} },
+      vendas_marca: { S1:{'NATUM PROFISSIONAL':14,'HAIR EXTRATTUS':9,'APSE':9,'ITALLIAN HAIR':6}, S2:{'NATUM PROFISSIONAL':6,'HAIR EXTRATTUS':11,'APSE':15,'ITALLIAN HAIR':31} },
     },
     L4: {
       meta_mensal: 140000,
@@ -525,14 +526,14 @@ const DADOS = {
       ],
       vendas: {
         S1:{Tanaia:1456,Josilene:6805,'Bruna F.':9177,Débora:8505},
-        S2:{Outros:7,Tanaia:1149,Josilene:8521,'Bruna F.':15214,Débora:6452},
+        S2:{Outros:7,Tanaia:1149,Josilene:9017,'Bruna F.':15257,Débora:7085},
       },
-      marcasA_loja: {S1:33.7,S2:25.8},
-      marcasA_indiv: {Tanaia:29.2,Josilene:27.5,'Bruna F.':33.3,Débora:25},
-      tickets: { S1:{Tanaia:15,Josilene:80,'Bruna F.':115,Débora:85},S2:{Outros:1,Tanaia:9,Josilene:84,'Bruna F.':181,Débora:100} },
-      pecas:   { S1:{Tanaia:31,Josilene:184,'Bruna F.':250,Débora:245},S2:{Outros:1,Tanaia:24,Josilene:237,'Bruna F.':587,Débora:238} },
-      cmv:     { S1:{Tanaia:40.4,Josilene:35.1,'Bruna F.':34,Débora:35},S2:{Tanaia:47.3,Josilene:43.9,'Bruna F.':48.3,Débora:39.9} },
-      vendas_marca: { S1:{'ITALLIAN HAIR':71,'WIDI CARE':34,'APSE':31,'CADIVEU':30,'NATUM PROFISSIONAL':26} },
+      marcasA_loja: {S1:33.7,S2:25.2},
+      marcasA_indiv: {Tanaia:29.2,Josilene:26.6,'Bruna F.':33.4,Débora:24.4},
+      tickets: { S1:{Tanaia:15,Josilene:80,'Bruna F.':115,Débora:85},S2:{Outros:1,Tanaia:9,Josilene:93,'Bruna F.':182,Débora:107} },
+      pecas:   { S1:{Tanaia:31,Josilene:184,'Bruna F.':250,Débora:245},S2:{Outros:1,Tanaia:24,Josilene:267,'Bruna F.':589,Débora:255} },
+      cmv:     { S1:{Tanaia:40.4,Josilene:35.1,'Bruna F.':34,Débora:35},S2:{Tanaia:47.3,Josilene:43.8,'Bruna F.':48.2,Débora:39.9} },
+      vendas_marca: { S1:{'ITALLIAN HAIR':71,'WIDI CARE':34,'APSE':31,'CADIVEU':30,'NATUM PROFISSIONAL':26}, S2:{'ITALLIAN HAIR':98,'WIDI CARE':21,'APSE':42,'CADIVEU':28,'NATUM PROFISSIONAL':9} },
     },
     L5: {
       meta_mensal: 90000,
@@ -541,14 +542,14 @@ const DADOS = {
       ],
       vendas: {
         S1:{Rosiene:4323,Joyce:3158,Rayssa:4135,Karina:3777},
-        S2:{Rosiene:4768,Joyce:638,Rayssa:4545,Karina:4783},
+        S2:{Rosiene:5148,Joyce:1041,Rayssa:4870,Karina:5159},
       },
-      marcasA_loja: {S1:26.9,S2:18.8},
-      marcasA_indiv: {Rosiene:25.6,Joyce:24.4,Rayssa:23.9,Karina:18.4},
-      tickets: { S1:{Rosiene:31,Joyce:36,Rayssa:35,Karina:44},S2:{Rosiene:44,Joyce:10,Rayssa:60,Karina:49} },
-      pecas:   { S1:{Rosiene:138,Joyce:96,Rayssa:143,Karina:131},S2:{Rosiene:157,Joyce:19,Rayssa:267,Karina:173} },
-      cmv:     { S1:{Rosiene:38.7,Joyce:45.1,Rayssa:67.4,Karina:51.8},S2:{Rosiene:51.5,Joyce:39.6,Rayssa:59.6,Karina:39.5} },
-      vendas_marca: { S1:{'ITALLIAN HAIR':24,'NATUM PROFISSIONAL':19,'APSE':18,'HAIR EXTRATTUS':11} },
+      marcasA_loja: {S1:26.9,S2:18.4},
+      marcasA_indiv: {Rosiene:26.3,Joyce:22.0,Rayssa:23.0,Karina:18.1},
+      tickets: { S1:{Rosiene:31,Joyce:36,Rayssa:35,Karina:44},S2:{Rosiene:48,Joyce:17,Rayssa:60,Karina:56} },
+      pecas:   { S1:{Rosiene:138,Joyce:96,Rayssa:143,Karina:131},S2:{Rosiene:165,Joyce:36,Rayssa:269,Karina:200} },
+      cmv:     { S1:{Rosiene:38.7,Joyce:45.1,Rayssa:67.4,Karina:51.8},S2:{Rosiene:51.2,Joyce:39.8,Rayssa:59.8,Karina:39.8} },
+      vendas_marca: { S1:{'ITALLIAN HAIR':24,'NATUM PROFISSIONAL':19,'APSE':18,'HAIR EXTRATTUS':11}, S2:{'ITALLIAN HAIR':33,'NATUM PROFISSIONAL':15,'APSE':15,'HAIR EXTRATTUS':14} },
     },
   },
   '2026-08': null,
@@ -605,6 +606,73 @@ function isCaixa(nome) { return (VENDEDORAS_META[nome]?.badges||[]).includes('ca
 // Metas: atingir_meta, marcas_a, ticket_medio, conversao, vendas_individuais
 
 const SUGESTOES = {
+  '2026-W29': {
+    semana_label: 'Semana 13/07 – 18/07',
+    geradas_em: '11/07/2026',
+    itens: [
+      // ── Casa da Beleza Altamira (S2 98,6% da meta · MA 27,7%) ──
+      {id:'2026-W29-L1-01', escopo:'loja', loja:'L1', tipo:'marca', meta_alvo:'venda_marca', marca:'ITALLIAN HAIR',
+       titulo:'L1 — manter Itallian Hair no topo (90un → 100un)',
+       descricao:'Semana passada vocês venderam 90 unidades de Itallian Hair — recorde da loja, +55% sobre a semana anterior. Desafio dessa semana: passar de 100 unidades. Como: Itallian continua sendo a PRIMEIRA oferta pra cliente de tratamento, sempre em combo de 2-3 produtos da linha. No sábado contamos o número exato pra vocês.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W29-L1-02', escopo:'loja', loja:'L1', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'L1 — bater a meta da semana (faltaram só R$486)',
+       descricao:'Vocês fecharam a semana passada em R$33.514 — 98,6% da meta, a R$486 de bater. Essa semana a meta é R$28.021. Cada uma mantendo o ritmo normal, a loja passa a meta com folga. Foco em não deixar cliente sair sem oferta.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W29-L1-03', escopo:'vendedora', loja:'L1', vendedora:'Sofia', tipo:'treinamento', meta_alvo:'vendas_individuais',
+       titulo:'Sofia — seguir crescendo (R$8.440 na semana passada)',
+       descricao:'Você fez R$8.440 na semana passada, seu melhor resultado. Continua subindo: meta pessoal essa semana R$9.000. Segue firme oferecendo Itallian e Truss pra cada cliente novo — quanto mais você domina as marcas A, mais natural fica fechar a venda.',
+       prazo:'curto', status:'pendente'},
+
+      // ── Miss Beleza Itaituba (S2 109,8% da meta · MA 10,5% — a mais baixa do grupo) ──
+      {id:'2026-W29-L3-01', escopo:'loja', loja:'L3', tipo:'marca', meta_alvo:'marcas_a',
+       titulo:'L3 — subir Marcas A de 10,5% (a mais baixa do grupo)',
+       descricao:'A loja bateu 110% da meta semana passada — parabéns! O ponto pra melhorar é Marcas A: 10,5%, a mais baixa das quatro lojas. Meta dessa semana: chegar em 15%. Como: pra cada cliente novo, a PRIMEIRA sugestão é uma marca A (Itallian, Truss ou Natum). A Itallian já saltou de 6 pra 31 unidades — mostra que dá certo.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W29-L3-02', escopo:'loja', loja:'L3', tipo:'marca', meta_alvo:'venda_marca', marca:'ITALLIAN HAIR',
+       titulo:'L3 — crescer Itallian Hair (31un → 36un)',
+       descricao:'Semana passada a Itallian Hair saltou de 6 pra 31 unidades na loja — o maior crescimento do grupo. Desafio: passar de 36 essa semana. Mantenham a Itallian como primeira oferta pra tratamento capilar. Sábado puxamos o número.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W29-L3-03', escopo:'vendedora', loja:'L3', vendedora:'Ana Mira', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'Ana Mira — liderar a virada de Marcas A da loja',
+       descricao:'Como gerente, você puxou a loja pra bater a meta — agora o foco é Marcas A (loja em 10,5%). Combine com a equipe: no início do dia, defina qual marca A cada uma vai priorizar. Monte uma vitrine de destaque com Itallian e Truss na entrada. Quando a equipe inteira oferece marca A primeiro, a porcentagem da loja sobe rápido.',
+       prazo:'curto', status:'pendente'},
+
+      // ── MissBeleza Altamira (S2 98,5% da meta · MA 25,2%) ──
+      {id:'2026-W29-L4-01', escopo:'loja', loja:'L4', tipo:'marca', meta_alvo:'marcas_a',
+       titulo:'L4 — chegar aos 30% de Marcas A (bônus de R$50)',
+       descricao:'A loja está em 25,2% de Marcas A. Faltam menos de 5 pontos pra 30%, onde a equipe ganha R$50 a mais no prêmio. A Bruna F. já é referência (33%) — peçam as frases dela e copiem. Meta: 30% essa semana.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W29-L4-02', escopo:'loja', loja:'L4', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'L4 — fechar a meta (faltaram R$485 na semana passada)',
+       descricao:'Vocês fecharam em R$32.515 — 98,5% da meta, quase lá. Meta dessa semana R$28.030. Com o ritmo de Bruna F., Josilene e Débora, a loja passa a meta se ninguém deixar cliente sem oferta. Atenção aos dias de menor movimento.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W29-L4-03', escopo:'vendedora', loja:'L4', vendedora:'Débora', tipo:'treinamento', meta_alvo:'vendas_individuais',
+       titulo:'Débora — seguir no ritmo forte (R$7.085 na semana)',
+       descricao:'Pra quem entrou há pouco, R$7.085 numa semana é excelente. Próximo passo: subir suas Marcas A (você está em 24%). Continue pareando com a Bruna F. e anotando as frases que ela usa pra oferecer Itallian e Truss. Meta pessoal: R$7.500 essa semana.',
+       prazo:'curto', status:'pendente'},
+
+      // ── MissBeleza Santarém (S2 71,7% da meta · MA 18,4%) ──
+      {id:'2026-W29-L5-01', escopo:'loja', loja:'L5', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'L5 — retomar o ritmo (fechou em 72% da meta)',
+       descricao:'A semana passada fechou em R$16.218 — 72% da meta. Essa semana a meta é R$19.000 (mais baixa), então dá pra bater com esforço coordenado. Reforcem a escala de sexta e sábado (dias de maior movimento) com todas presentes. Cada uma buscando cliente ativo, não esperando na porta.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W29-L5-02', escopo:'vendedora', loja:'L5', vendedora:'Joyce', tipo:'meta', meta_alvo:'vendas_individuais',
+       titulo:'Joyce — recuperar o ritmo (caiu pra R$1.041)',
+       descricao:'Sua média é cerca de R$4.000 por semana, mas essa semana ficou em R$1.041. O que mudou — horário, folga, cliente difícil? Faça uma conversa rápida com a Rosiene (gerente) pra entender e ajustar. Meta pra recuperar: R$3.500 essa semana. Você já mostrou que consegue.',
+       prazo:'curto', status:'pendente'},
+      {id:'2026-W29-L5-03', escopo:'loja', loja:'L5', tipo:'marca', meta_alvo:'marcas_a',
+       titulo:'L5 — subir Marcas A de 18,4% pra 23%',
+       descricao:'A loja está em 18,4% de Marcas A. A Itallian já cresceu de 24 pra 33 unidades — bom sinal. Meta: chegar em 23% essa semana. Pra cada cliente novo, a primeira oferta é Itallian ou Santa Clara. Karina, foco especial nisso pra aprender as marcas A.',
+       prazo:'curto', status:'pendente'},
+
+      // ── Geral (todas as lojas) ──
+      {id:'2026-W29-GE-01', escopo:'geral', tipo:'marca', meta_alvo:'marcas_a',
+       titulo:'Todas as lojas — Itallian Hair foi a marca da semana',
+       descricao:'A Itallian Hair cresceu nas QUATRO lojas na semana passada (L1 90un, L4 98un, L5 33un, e a L3 saltou de 6 pra 31). Isso prova que quando a equipe oferece primeiro, a marca A vende. Vamos manter a Itallian como carro-chefe essa semana em todas as lojas, sempre em combo de 2-3 produtos.',
+       prazo:'curto', status:'pendente'},
+    ],
+  },
   '2026-W21': {
     semana_label: 'Semana 18/05 – 23/05',
     geradas_em: '2026-05-18',
