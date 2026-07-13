@@ -537,7 +537,11 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
 
       const CST_ST_X = new Set(["10", "30", "60", "70"]);
       const MARCAS_POR_CAIXA = new Set((PARAMS.marcas_por_caixa || []).map(norm)); // preço deve ser por UNIDADE, não por caixa (fator do XML qTrib/qCom)
-      const MARCAS_CAIXA_DESC = new Set((PARAMS.marcas_caixa_por_descricao || []).map(norm)); // idem, mas fator vem da DESCRIÇÃO (XML não traz)
+      // Santa Clara: "dividir ou não" é decisão POR PRODUTO (o XML não traz fator; a qtd está na descrição).
+      const SC = norm("Santa Clara");
+      const SC_UNID = PARAMS.santa_clara_por_unidade || {};              // cProd → 'auto' | número (vende UNIDADE: divide)
+      const SC_AMBOS = (PARAMS.santa_clara_ambos_categorias || []).map(norm); // substrings (ex.: LIXA) que vendem pacote E unidade
+      const scDivisorConfig = cfg => (cfg === "auto" || cfg === true) ? null : Number(cfg); // null = ler da descrição
       let comCredito = 0, comST = 0, semInfo = 0, convCaixa = 0;
       for (const L of Object.keys(lojas)) for (const nf of lojas[L]) {
         const d = det[nf.id] || { uf: null, prod: {} };
@@ -553,15 +557,25 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
             it.custo_unit_cheio = Math.round((it.custo_unit_cheio / fator) * 10000) / 10000; // custo por UNIDADE
             it.qtd = Math.round((it.qtd * fator) * 100) / 100; // qtd em UNIDADES
             convCaixa++;
-          } else if (MARCAS_CAIXA_DESC.has(norm(it.marca))) {
-            // Santa Clara: fator lido da DESCRIÇÃO (XML não traz qTrib≠qCom). Só converte se divisor>1.
-            const fator = divisorDescricao(it.descricao);
-            if (fator > 1) {
-              it.unidades_por_caixa = fator;
-              it.custo_unit_cheio = Math.round((it.custo_unit_cheio / fator) * 10000) / 10000; // custo por UNIDADE
-              it.qtd = Math.round((it.qtd * fator) * 100) / 100; // qtd em UNIDADES
-              convCaixa++;
+          } else if (norm(it.marca) === SC) {
+            // Santa Clara: controle por produto. Divisor da descrição, exceto override numérico na config.
+            const cfgUnid = SC_UNID[String(it.cprod)];
+            const ehLixa = SC_AMBOS.some(c => norm(it.descricao).includes(c));
+            if (cfgUnid != null) {
+              // vende UNIDADE → divide (preço da tela é por unidade)
+              const fator = scDivisorConfig(cfgUnid) ?? divisorDescricao(it.descricao);
+              if (fator > 1) {
+                it.unidades_por_caixa = fator;
+                it.custo_unit_cheio = Math.round((it.custo_unit_cheio / fator) * 10000) / 10000; // custo por UNIDADE
+                it.qtd = Math.round((it.qtd * fator) * 100) / 100; // qtd em UNIDADES
+                convCaixa++;
+              }
+            } else if (ehLixa) {
+              // vende PACOTE E UNIDADE → NÃO divide; só anota o divisor p/ a tela derivar o preço unitário
+              const fator = divisorDescricao(it.descricao);
+              if (fator > 1) it.unidades_no_pacote = fator;
             }
+            // demais produtos Santa Clara: vende o PACOTE → não mexe (preço da tela é o do pacote)
           }
           const cstN = String(tx.cst || "").padStart(2, "0").slice(-2);
           const ncm = String(tx.ncm || "").replace(/\D/g, "");

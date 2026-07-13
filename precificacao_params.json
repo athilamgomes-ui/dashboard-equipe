@@ -73,10 +73,14 @@
   "marcas_por_caixa": [
     "Talge"
   ],
-  "_marcas_caixa_por_descricao_doc": "Marcas vendidas por UNIDADE cujo fator de embalagem NÃO vem no XML (qCom==qTrib) — a quantidade está só na DESCRIÇÃO ('C/12', 'PCT C/50', 'C/100 UN'). O coletor extrai o divisor do texto (função divisorDescricao). ROLO = unidade inteira (não divide). Ex.: Santa Clara (toucas, lixas, papéis, máscaras).",
-  "marcas_caixa_por_descricao": [
-    "Santa Clara"
-  ],
+  "_santa_clara_doc": "Santa Clara NÃO tem fator no XML (qCom==qTrib); a quantidade da embalagem está só na descrição (C/12, PCT C/50...). E o 'dividir ou não' é decisão POR PRODUTO (regra usuário 13/07): toucas/papéis/máscaras vendem o PACOTE (não divide, padrão); escovas/pentes/lâminas vendem a UNIDADE (divide). LIXAS vendem os dois → mostra os dois preços (não divide o custo; deriva a unidade na tela).",
+  "santa_clara_por_unidade": {
+    "_doc": "Produtos da Santa Clara vendidos por UNIDADE (dividem). Chave = cProd do ERP; valor = unidades por pacote ('auto' = ler da descrição C/n; número = fixo quando a descrição não diz).",
+    "272": "auto", "274": "auto", "354": "auto", "406": "auto", "775": "auto", "896": "auto",
+    "2236": 12, "2238": 12, "2243": 12
+  },
+  "santa_clara_ambos_categorias": ["LIXA"],
+  "_santa_clara_ambos_doc": "Categorias (substring na descrição) da Santa Clara vendidas COMO PACOTE E COMO UNIDADE. Preço principal = pacote (não divide); a tela mostra também o preço derivado por unidade (pacote ÷ divisor da descrição).",
   "_st_entrada_doc": "ICMS-ST antecipado na ENTRADA, somado ao custo do produto SEMPRE que o item for ST (determinado por NCM x CST do XML). % por UF de origem da nota (regra do usuário 23/06).",
   "st_entrada_por_uf": {
     "SP": 0.21,
