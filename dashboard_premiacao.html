@@ -492,14 +492,14 @@ const DADOS = {
       ],
       vendas: {
         S1:{Outros:2162,Rayra:8533,Sofia:5489,Bárbara:8774},
-        S2:{Outros:936,Tatiane:89,Rayra:12029,Sofia:8440,Bárbara:12020},
+        S2:{Outros:1025,Rayra:12029,Sofia:8440,Bárbara:12020},
         S3:{Rayra:197,Sofia:13},
       },
       marcasA_loja: {S1:21.9,S2:27.7,S3:0},
-      marcasA_indiv: {Rayra:29.0,Bárbara:28.2,Sofia:18.8,Tatiane:65.8},
-      tickets: { S1:{Outros:1,Rayra:107,Sofia:72,Bárbara:108},S2:{Outros:13,Tatiane:2,Rayra:113,Sofia:96,Bárbara:116},S3:{Rayra:3,Sofia:1} },
-      pecas:   { S1:{Outros:9,Rayra:251,Sofia:175,Bárbara:383},S2:{Outros:23,Tatiane:3,Rayra:349,Sofia:243,Bárbara:331},S3:{Rayra:8,Sofia:1} },
-      cmv:     { S1:{Rayra:38.3,Sofia:52.8,Bárbara:58},S2:{Tatiane:95.2,Rayra:43.6,Sofia:54.9,Bárbara:43.2},S3:{Rayra:33.6,Sofia:41} },
+      marcasA_indiv: {Rayra:29.0,Bárbara:28.2,Sofia:18.8},
+      tickets: { S1:{Outros:1,Rayra:107,Sofia:72,Bárbara:108},S2:{Outros:15,Rayra:113,Sofia:96,Bárbara:116},S3:{Rayra:3,Sofia:1} },
+      pecas:   { S1:{Outros:9,Rayra:251,Sofia:175,Bárbara:383},S2:{Outros:26,Rayra:349,Sofia:243,Bárbara:331},S3:{Rayra:8,Sofia:1} },
+      cmv:     { S1:{Rayra:38.3,Sofia:52.8,Bárbara:58},S2:{Rayra:43.6,Sofia:54.9,Bárbara:43.2},S3:{Rayra:33.6,Sofia:41} },
       // Unidades vendidas por marca (coleta_vendas_marca_semana.mjs) — baseline pras
       // sugestões venda_marca. S2 é coletada no fechamento da semana.
       vendas_marca: { S1:{'ITALLIAN HAIR':58,'APSE':21,'HAIR EXTRATTUS':20,'PROBELLE PROFISSIONAL':19,'NATUM PROFISSIONAL':14}, S2:{'ITALLIAN HAIR':90,'APSE':42,'HAIR EXTRATTUS':14,'PROBELLE PROFISSIONAL':22,'NATUM PROFISSIONAL':21} },
@@ -1133,10 +1133,11 @@ const HISTORICO_PREMIOS = {
     // Meta Real = Ideal (sem reajuste): L1=20000 L3=10000 L4=20000 L5=10000. Cliente 8 = R$0.
     // SEMANA HISTÓRICA: todas as lojas ≥120% — L4 com bônus Marcas A (33,7% ≥30). IMUTÁVEL.
     L1: {
-      'Rayra': {S1:157, S2:66},
+      // Tatiane de FÉRIAS até agosto — R$89 lançados no código dela na S2 foram
+      // movidos pra Outros (correção manual do admin 13/07) e o pool redistribuído.
+      'Rayra': {S1:157, S2:67},
       'Sofia': {S1:101, S2:47},
       'Bárbara': {S1:162, S2:66},
-      'Tatiane': {S2:1},  // voltou de férias no fim da S2
       _em_pct: {S1:125, S2:99},
       _pool:   {S1:420, S2:180},
     },

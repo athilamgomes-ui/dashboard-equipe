@@ -1085,7 +1085,7 @@ const DADOS_LOJA = {
     semana_atual: 'S3',
     semana_label: 'Semana 13 a 18/07',
     vendedoras: {
-      'Tatiane':  {sem:0, mes:89, ma_sem:0, ma_mes:65.8, melhorias:[
+      'Tatiane':  {sem:0, mes:0, ma_sem:0, ma_mes:0, melhorias:[
         'Suas Marcas A estão em 22%. Pra chegar em 30%, faça assim: pra cada 10 clientes que você atender, ofereça primeiro uma marca A (Truss, Marco Boni ou Itallian) pra 7 deles. Os outros 3 podem ser outras marcas.',
         'Você foi a vendedora que mais vendeu na loja essa semana. Mantenha o ritmo - quanto mais você fechar venda, mais cresce o prêmio de toda a equipe.'
       ]},
@@ -1291,10 +1291,11 @@ const HISTORICO_PREMIOS = {
     // Meta Real = Ideal: L1=20000 L3=10000 L4=20000 L5=10000. Cliente 8 = R$0.
     // SEMANA HISTÓRICA: todas as lojas ≥120% — L4 com bônus Marcas A (33,7%). IMUTÁVEL.
     L1: {
-      'Rayra': {S1:157, S2:66},
+      // Tatiane de FÉRIAS até agosto — R$89 lançados no código dela na S2 foram
+      // movidos pra Outros (correção manual do admin 13/07) e o pool redistribuído.
+      'Rayra': {S1:157, S2:67},
       'Sofia': {S1:101, S2:47},
       'Bárbara': {S1:162, S2:66},
-      'Tatiane': {S2:1},  // voltou de férias no fim da S2
       _em_pct: {S1:125, S2:99},
       _pool:   {S1:420, S2:180},
     },
@@ -1355,7 +1356,7 @@ const VENDAS_HIST = {
     semanas: [{id:'S1', meta:20000},{id:'S2', meta:34000},{id:'S3', meta:28021},{id:'S4', meta:25000},{id:'S5', meta:28021}],
     vendas: {
       S1:{Outros:2162,Rayra:8533,Sofia:5489,Bárbara:8774},
-      S2:{Outros:936,Tatiane:89,Rayra:12029,Sofia:8440,Bárbara:12020},
+      S2:{Outros:1025,Rayra:12029,Sofia:8440,Bárbara:12020},
       S3:{Rayra:197,Sofia:13},
     },
     marcasA_loja: {S1:21.9,S2:27.7,S3:0},
