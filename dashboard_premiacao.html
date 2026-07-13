@@ -484,7 +484,7 @@ const DADOS = {
     // S1 HISTÓRICA: todas as lojas ≥120%.
     // METAS SEMANAIS OFICIAIS (04/07/2026, Tabela de Premiação/PDF): julho tem 5 semanas
     // (01-04/07, 06-11/07, 13-18/07, 20-25/07, 27-31/07). Meta Real = Meta Ideal (sem reajuste).
-    semana_atual: 'S2',
+    semana_atual: 'S3',
     L1: {
       meta_mensal: 140000,
       semanas: [
@@ -493,12 +493,13 @@ const DADOS = {
       vendas: {
         S1:{Outros:2162,Rayra:8533,Sofia:5489,Bárbara:8774},
         S2:{Outros:936,Tatiane:89,Rayra:12029,Sofia:8440,Bárbara:12020},
+        S3:{Rayra:197,Sofia:13},
       },
-      marcasA_loja: {S1:21.9,S2:27.7},
+      marcasA_loja: {S1:21.9,S2:27.7,S3:0},
       marcasA_indiv: {Rayra:29.0,Bárbara:28.2,Sofia:18.8,Tatiane:65.8},
-      tickets: { S1:{Outros:1,Rayra:107,Sofia:72,Bárbara:108},S2:{Outros:13,Tatiane:2,Rayra:113,Sofia:96,Bárbara:116} },
-      pecas:   { S1:{Outros:9,Rayra:251,Sofia:175,Bárbara:383},S2:{Outros:23,Tatiane:3,Rayra:349,Sofia:243,Bárbara:331} },
-      cmv:     { S1:{Rayra:38.3,Sofia:52.8,Bárbara:58},S2:{Tatiane:95.2,Rayra:43.6,Sofia:54.9,Bárbara:43.2} },
+      tickets: { S1:{Outros:1,Rayra:107,Sofia:72,Bárbara:108},S2:{Outros:13,Tatiane:2,Rayra:113,Sofia:96,Bárbara:116},S3:{Rayra:3,Sofia:1} },
+      pecas:   { S1:{Outros:9,Rayra:251,Sofia:175,Bárbara:383},S2:{Outros:23,Tatiane:3,Rayra:349,Sofia:243,Bárbara:331},S3:{Rayra:8,Sofia:1} },
+      cmv:     { S1:{Rayra:38.3,Sofia:52.8,Bárbara:58},S2:{Tatiane:95.2,Rayra:43.6,Sofia:54.9,Bárbara:43.2},S3:{Rayra:33.6,Sofia:41} },
       // Unidades vendidas por marca (coleta_vendas_marca_semana.mjs) — baseline pras
       // sugestões venda_marca. S2 é coletada no fechamento da semana.
       vendas_marca: { S1:{'ITALLIAN HAIR':58,'APSE':21,'HAIR EXTRATTUS':20,'PROBELLE PROFISSIONAL':19,'NATUM PROFISSIONAL':14}, S2:{'ITALLIAN HAIR':90,'APSE':42,'HAIR EXTRATTUS':14,'PROBELLE PROFISSIONAL':22,'NATUM PROFISSIONAL':21} },
@@ -511,12 +512,13 @@ const DADOS = {
       vendas: {
         S1:{Outros:-26,Raimunda:4311,'Ana Mira':2685,Naila:3018,Brunna:2644},
         S2:{Raimunda:3996,'Ana Mira':7420,Naila:6935,Brunna:4149},
+        S3:{'Ana Mira':451},
       },
-      marcasA_loja: {S1:14.8,S2:10.5},
+      marcasA_loja: {S1:14.8,S2:10.5,S3:0},
       marcasA_indiv: {'Ana Mira':14.1,Raimunda:14.4,Brunna:6,Naila:11.9},
-      tickets: { S1:{Outros:0,Raimunda:40,'Ana Mira':41,Naila:44,Brunna:32},S2:{Raimunda:59,'Ana Mira':61,Naila:76,Brunna:69} },
-      pecas:   { S1:{Outros:-1,Raimunda:101,'Ana Mira':164,Naila:131,Brunna:105},S2:{Raimunda:175,'Ana Mira':254,Naila:283,Brunna:257} },
-      cmv:     { S1:{Raimunda:59,'Ana Mira':75.1,Naila:62.1,Brunna:98.1},S2:{Raimunda:51.7,'Ana Mira':51.7,Naila:63.4,Brunna:55.7} },
+      tickets: { S1:{Outros:0,Raimunda:40,'Ana Mira':41,Naila:44,Brunna:32},S2:{Raimunda:59,'Ana Mira':61,Naila:76,Brunna:69},S3:{'Ana Mira':2} },
+      pecas:   { S1:{Outros:-1,Raimunda:101,'Ana Mira':164,Naila:131,Brunna:105},S2:{Raimunda:175,'Ana Mira':254,Naila:283,Brunna:257},S3:{'Ana Mira':13} },
+      cmv:     { S1:{Raimunda:59,'Ana Mira':75.1,Naila:62.1,Brunna:98.1},S2:{Raimunda:51.7,'Ana Mira':51.7,Naila:63.4,Brunna:55.7},S3:{'Ana Mira':36.6} },
       vendas_marca: { S1:{'NATUM PROFISSIONAL':14,'HAIR EXTRATTUS':9,'APSE':9,'ITALLIAN HAIR':6}, S2:{'NATUM PROFISSIONAL':6,'HAIR EXTRATTUS':11,'APSE':15,'ITALLIAN HAIR':31} },
     },
     L4: {
@@ -527,12 +529,13 @@ const DADOS = {
       vendas: {
         S1:{Tanaia:1456,Josilene:6805,'Bruna F.':9177,Débora:8505},
         S2:{Outros:7,Tanaia:1149,Josilene:9017,'Bruna F.':15257,Débora:7085},
+        S3:{Josilene:36,'Bruna F.':283},
       },
-      marcasA_loja: {S1:33.7,S2:25.2},
+      marcasA_loja: {S1:33.7,S2:25.2,S3:0},
       marcasA_indiv: {Tanaia:29.2,Josilene:26.6,'Bruna F.':33.4,Débora:24.4},
-      tickets: { S1:{Tanaia:15,Josilene:80,'Bruna F.':115,Débora:85},S2:{Outros:1,Tanaia:9,Josilene:93,'Bruna F.':182,Débora:107} },
-      pecas:   { S1:{Tanaia:31,Josilene:184,'Bruna F.':250,Débora:245},S2:{Outros:1,Tanaia:24,Josilene:267,'Bruna F.':589,Débora:255} },
-      cmv:     { S1:{Tanaia:40.4,Josilene:35.1,'Bruna F.':34,Débora:35},S2:{Tanaia:47.3,Josilene:43.8,'Bruna F.':48.2,Débora:39.9} },
+      tickets: { S1:{Tanaia:15,Josilene:80,'Bruna F.':115,Débora:85},S2:{Outros:1,Tanaia:9,Josilene:93,'Bruna F.':182,Débora:107},S3:{Josilene:1,'Bruna F.':4} },
+      pecas:   { S1:{Tanaia:31,Josilene:184,'Bruna F.':250,Débora:245},S2:{Outros:1,Tanaia:24,Josilene:267,'Bruna F.':589,Débora:255},S3:{Josilene:2,'Bruna F.':7} },
+      cmv:     { S1:{Tanaia:40.4,Josilene:35.1,'Bruna F.':34,Débora:35},S2:{Tanaia:47.3,Josilene:43.8,'Bruna F.':48.2,Débora:39.9},S3:{Josilene:35.1,'Bruna F.':27.5} },
       vendas_marca: { S1:{'ITALLIAN HAIR':71,'WIDI CARE':34,'APSE':31,'CADIVEU':30,'NATUM PROFISSIONAL':26}, S2:{'ITALLIAN HAIR':98,'WIDI CARE':21,'APSE':42,'CADIVEU':28,'NATUM PROFISSIONAL':9} },
     },
     L5: {
@@ -543,12 +546,13 @@ const DADOS = {
       vendas: {
         S1:{Rosiene:4323,Joyce:3158,Rayssa:4135,Karina:3777},
         S2:{Rosiene:5148,Joyce:1041,Rayssa:4870,Karina:5159},
+        S3:{Rosiene:70},
       },
-      marcasA_loja: {S1:26.9,S2:18.4},
+      marcasA_loja: {S1:26.9,S2:18.4,S3:0},
       marcasA_indiv: {Rosiene:26.3,Joyce:22.0,Rayssa:23.0,Karina:18.1},
-      tickets: { S1:{Rosiene:31,Joyce:36,Rayssa:35,Karina:44},S2:{Rosiene:48,Joyce:17,Rayssa:60,Karina:56} },
-      pecas:   { S1:{Rosiene:138,Joyce:96,Rayssa:143,Karina:131},S2:{Rosiene:165,Joyce:36,Rayssa:269,Karina:200} },
-      cmv:     { S1:{Rosiene:38.7,Joyce:45.1,Rayssa:67.4,Karina:51.8},S2:{Rosiene:51.2,Joyce:39.8,Rayssa:59.8,Karina:39.8} },
+      tickets: { S1:{Rosiene:31,Joyce:36,Rayssa:35,Karina:44},S2:{Rosiene:48,Joyce:17,Rayssa:60,Karina:56},S3:{Rosiene:1} },
+      pecas:   { S1:{Rosiene:138,Joyce:96,Rayssa:143,Karina:131},S2:{Rosiene:165,Joyce:36,Rayssa:269,Karina:200},S3:{Rosiene:1} },
+      cmv:     { S1:{Rosiene:38.7,Joyce:45.1,Rayssa:67.4,Karina:51.8},S2:{Rosiene:51.2,Joyce:39.8,Rayssa:59.8,Karina:39.8},S3:{Rosiene:51.9} },
       vendas_marca: { S1:{'ITALLIAN HAIR':24,'NATUM PROFISSIONAL':19,'APSE':18,'HAIR EXTRATTUS':11}, S2:{'ITALLIAN HAIR':33,'NATUM PROFISSIONAL':15,'APSE':15,'HAIR EXTRATTUS':14} },
     },
   },
@@ -1129,35 +1133,36 @@ const HISTORICO_PREMIOS = {
     // Meta Real = Ideal (sem reajuste): L1=20000 L3=10000 L4=20000 L5=10000. Cliente 8 = R$0.
     // SEMANA HISTÓRICA: todas as lojas ≥120% — L4 com bônus Marcas A (33,7% ≥30). IMUTÁVEL.
     L1: {
-      'Rayra': {S1:157},
-      'Sofia': {S1:101},
-      'Bárbara': {S1:162},
-      _em_pct: {S1:125},
-      _pool:   {S1:420},
+      'Rayra': {S1:157, S2:66},
+      'Sofia': {S1:101, S2:47},
+      'Bárbara': {S1:162, S2:66},
+      'Tatiane': {S2:1},  // voltou de férias no fim da S2
+      _em_pct: {S1:125, S2:99},
+      _pool:   {S1:420, S2:180},
     },
     L3: {
-      'Ana Mira': {S1:89},
-      'Raimunda': {S1:143},
-      'Brunna': {S1:88},
-      'Naila': {S1:100},
-      _em_pct: {S1:126},
-      _pool:   {S1:420},
+      'Ana Mira': {S1:89, S2:92},
+      'Raimunda': {S1:143, S2:50},
+      'Brunna': {S1:88, S2:52},
+      'Naila': {S1:100, S2:86},
+      _em_pct: {S1:126, S2:110},
+      _pool:   {S1:420, S2:280},
     },
     L4: {
-      'Tanaia': {S1:27},
-      'Josilene': {S1:123},
-      'Bruna F.': {S1:166},
-      'Débora': {S1:154},
-      _em_pct: {S1:130},
-      _pool:   {S1:470},  // 420 + 50 bônus Marcas A (33,7%)
+      'Tanaia': {S1:27, S2:6},
+      'Josilene': {S1:123, S2:50},
+      'Bruna F.': {S1:166, S2:85},
+      'Débora': {S1:154, S2:39},
+      _em_pct: {S1:130, S2:99},
+      _pool:   {S1:470, S2:180},  // S1: 420 + 50 bônus Marcas A (33,7%)
     },
     L5: {
-      'Rosiene': {S1:177},
-      'Joyce': {S1:129},
-      'Rayssa': {S1:169},
-      'Karina': {S1:155},
-      _em_pct: {S1:154},
-      _pool:   {S1:630},  // faixa 120%+ com extra: 420 + 3×70 (153,9%)
+      'Rosiene': {S1:177, S2:25},
+      'Joyce': {S1:129, S2:5},
+      'Rayssa': {S1:169, S2:24},
+      'Karina': {S1:155, S2:26},
+      _em_pct: {S1:154, S2:72},
+      _pool:   {S1:630, S2:80},  // S1: faixa 120%+ com extra (153,9%)
     },
   },
 };
