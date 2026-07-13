@@ -73,6 +73,26 @@ const loadState = () => {
 const saveState = s => { try { writeFileSync(STATE_FILE, JSON.stringify(s, null, 0)); } catch (e) { log("aviso: não salvou estado lançadas: " + e.message); } };
 const PROC_SKIP_PRECO = process.env.SKIP_PRECO === "1"; // pula a coleta de preço atual do ERP (debug rápido)
 const norm = s => String(s || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+// CONVERS\u00c3O CAIXA\u2192UNIDADE POR DESCRI\u00c7\u00c3O (13/07/2026 \u2014 marca Santa Clara).
+// Diferente da Talge: o XML N\u00c3O traz o fator (qCom == qTrib em todos os itens); a quantidade da
+// embalagem vive s\u00f3 no TEXTO ("C/12", "PCT C/50", "C/100 UN"...). Extrai o divisor da descri\u00e7\u00e3o.
+// ROLO = unidade inteira (vendido inteiro; regra confirmada usu\u00e1rio 13/07). Armadilhas tratadas:
+// C/12COMP (dentes do pente), 80G (gramatura), 127V, 150ML, REF.222 \u2192 N\u00c3O s\u00e3o divisor.
+const divisorDescricao = desc => {
+  const s = norm(desc);
+  if (/\bROLO\b/.test(s) || /\bR\.C\//.test(s)) return 1;              // rolo = 1 unidade
+  let m = s.match(/C\/\s*(\d+)\s*CXS?\s*C\/\s*(\d+)/);                 // "C/10 CXS C/5" \u2192 50
+  if (m) return Number(m[1]) * Number(m[2]);
+  m = s.match(/C\/\s*(\d+)\s*(?:UNID|UNDS?|UN|PE[C\u00c7]AS?|PC)\b/);       // "C/100 UN"
+  if (m) return Number(m[1]);
+  m = s.match(/\bPCT\.?\s*(\d+)\s*(?:UNID|UNDS?|UN|PE[C\u00c7]AS?|PC)\b/);  // "PCT 100 PECAS"
+  if (m) return Number(m[1]);
+  for (const mm of s.matchAll(/C\/\s*(\d+)([A-Z]?)/g)) {              // "C/12" puro (exclui C/12COMP)
+    if (mm[2]) continue;                                              // d\u00edgito seguido de letra \u2192 especifica\u00e7\u00e3o
+    const n = Number(mm[1]); if (n >= 2) return n;
+  }
+  return 1;
+};
 // marca (normalizada) \u2192 c\u00f3digos no ERP (ex.: PROBELLE \u2192 ["858","366"])
 const MARCA_TO_CODES = {};
 for (const [nome, v] of Object.entries(MARCA_IDS)) {
@@ -516,7 +536,8 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       }, nfList);
 
       const CST_ST_X = new Set(["10", "30", "60", "70"]);
-      const MARCAS_POR_CAIXA = new Set((PARAMS.marcas_por_caixa || []).map(norm)); // preço deve ser por UNIDADE, não por caixa
+      const MARCAS_POR_CAIXA = new Set((PARAMS.marcas_por_caixa || []).map(norm)); // preço deve ser por UNIDADE, não por caixa (fator do XML qTrib/qCom)
+      const MARCAS_CAIXA_DESC = new Set((PARAMS.marcas_caixa_por_descricao || []).map(norm)); // idem, mas fator vem da DESCRIÇÃO (XML não traz)
       let comCredito = 0, comST = 0, semInfo = 0, convCaixa = 0;
       for (const L of Object.keys(lojas)) for (const nf of lojas[L]) {
         const d = det[nf.id] || { uf: null, prod: {} };
@@ -532,6 +553,15 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
             it.custo_unit_cheio = Math.round((it.custo_unit_cheio / fator) * 10000) / 10000; // custo por UNIDADE
             it.qtd = Math.round((it.qtd * fator) * 100) / 100; // qtd em UNIDADES
             convCaixa++;
+          } else if (MARCAS_CAIXA_DESC.has(norm(it.marca))) {
+            // Santa Clara: fator lido da DESCRIÇÃO (XML não traz qTrib≠qCom). Só converte se divisor>1.
+            const fator = divisorDescricao(it.descricao);
+            if (fator > 1) {
+              it.unidades_por_caixa = fator;
+              it.custo_unit_cheio = Math.round((it.custo_unit_cheio / fator) * 10000) / 10000; // custo por UNIDADE
+              it.qtd = Math.round((it.qtd * fator) * 100) / 100; // qtd em UNIDADES
+              convCaixa++;
+            }
           }
           const cstN = String(tx.cst || "").padStart(2, "0").slice(-2);
           const ncm = String(tx.ncm || "").replace(/\D/g, "");

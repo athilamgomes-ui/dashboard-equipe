@@ -73,6 +73,10 @@
   "marcas_por_caixa": [
     "Talge"
   ],
+  "_marcas_caixa_por_descricao_doc": "Marcas vendidas por UNIDADE cujo fator de embalagem NÃO vem no XML (qCom==qTrib) — a quantidade está só na DESCRIÇÃO ('C/12', 'PCT C/50', 'C/100 UN'). O coletor extrai o divisor do texto (função divisorDescricao). ROLO = unidade inteira (não divide). Ex.: Santa Clara (toucas, lixas, papéis, máscaras).",
+  "marcas_caixa_por_descricao": [
+    "Santa Clara"
+  ],
   "_st_entrada_doc": "ICMS-ST antecipado na ENTRADA, somado ao custo do produto SEMPRE que o item for ST (determinado por NCM x CST do XML). % por UF de origem da nota (regra do usuário 23/06).",
   "st_entrada_por_uf": {
     "SP": 0.21,
