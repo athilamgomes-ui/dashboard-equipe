@@ -343,6 +343,22 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
     // NF NOVA (ainda sem state) é recente o bastante p/ começar a aparecer (evita reviver NF antiga já paga).
     const lctoMap = NF_FILTER ? {} : await dataLctoErp();
     const state = loadState() || {};
+    // BOTÃO "✅ Concluída" (13/07/2026): a equipe marca a NF como precificada na tela → linha na tabela
+    // Supabase precificacao_concluidas. Aqui aplicamos: aplicadoDesde retroativo (concluida_em − janela)
+    // → a NF sai imediatamente e NÃO volta (o state lembra). Falha na consulta não trava a coleta.
+    try {
+      const rc = await fetch(`${SUPABASE_URL}/rest/v1/precificacao_concluidas?select=chave,concluida_em`, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+      if (rc.ok) {
+        let aplicadas = 0;
+        for (const c of await rc.json()) {
+          const retro = new Date(Date.parse(c.concluida_em || Date.now()) - DIAS_ENTRADA * 86400000).toISOString();
+          const e = state[c.chave];
+          if (e && !e.aplicadoDesde) { e.aplicadoDesde = retro; aplicadas++; }
+          else if (!e) { state[c.chave] = { desde: new Date().toISOString().slice(0, 10), aplicadoDesde: retro }; aplicadas++; }
+        }
+        if (aplicadas) log(`✅ concluídas pelo botão aplicadas: ${aplicadas}`);
+      }
+    } catch {}
     const janelaMs = DIAS_ENTRADA * 86400000;      // remoção: dias visível DEPOIS de precificada
     const janelaInicioMs = DIAS_INICIO * 86400000; // início: entrada no ERP ≤ N dias p/ COMEÇAR a aparecer
     const todayISO = HOJE.toISOString().slice(0, 10);
@@ -622,9 +638,17 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
           const mudouDoBaseline = Math.abs(it.preco_atual - entry.baseline[it.ean]) > 0.01;
           return bateuSugerido || mudouDoBaseline;
         });
-        const bateu = comEan.length > 0 && algumDadoValido && resolvidos.every(r => r === true);
+        // ≥60% dos itens COM DADO resolvidos = NF precificada (13/07/2026 — exigir 100% nunca fechava:
+        // a equipe mantém o preço antigo de propósito em parte dos itens, então "todos" era inalcançável)
+        const validos = resolvidos.filter(r => r !== null);
+        const okCount = validos.filter(r => r === true).length;
+        const bateu = comEan.length > 0 && algumDadoValido && validos.length > 0 && okCount >= 2 && (okCount / validos.length) >= 0.6;
         if (bateu && !entry.aplicadoDesde) {
-          entry.aplicadoDesde = HOJE.toISOString(); stateDirty = true;
+          // NF antiga (na tela há >3d) detectada agora → sai imediatamente (já teve seus 3 dias de exposição);
+          // NF fresca → fica os 3 dias normais após a precificação
+          const naTelaMs = HOJE.getTime() - Date.parse(entry.desde || todayISO);
+          entry.aplicadoDesde = naTelaMs > janelaMs ? new Date(HOJE.getTime() - janelaMs).toISOString() : HOJE.toISOString();
+          stateDirty = true;
           log(`✅ ${L} NF ${nf.numero}: preço aplicado no ERP (${comEan.length} item(ns) c/ EAN resolvidos) — some da tela em ${DIAS_ENTRADA}d`);
         }
       }

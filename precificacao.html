@@ -109,6 +109,7 @@
           <button class="btn sec" id="btnCsv">⬇️ CSV</button>
           <button class="btn sec" id="btnXlsx">📥 XLSX</button>
           <button class="btn" id="btnTxtErp" title="Gera o .txt p/ importar em Estoque > Lista de Preços > Arquivo para atualização de valores">📤 Arquivo p/ ERP (.txt)</button>
+          <button class="btn sec" id="btnConcluir" style="border-color:var(--ok);color:var(--ok)" title="Marca esta NF-e como precificada — ela sai da tela agora e não volta">✅ Concluída</button>
         </div>
       </div>
       <div class="tbl-wrap">
@@ -136,11 +137,18 @@ const brl = v => (v==null||isNaN(v))?"—":v.toLocaleString("pt-BR",{style:"curr
 const pct = v => (v==null||isNaN(v))?"—":(v*100).toFixed(1)+"%";
 const elLoja=document.getElementById("loja"), elMargem=document.getElementById("margemPadrao");
 
+// concluídas locais: evita a NF recém-concluída reaparecer no auto-refresh antes do coletor republicar
+const CONC_KEY="precificacao_concluidas_local";
+function concluidasLocal(){try{const o=JSON.parse(localStorage.getItem(CONC_KEY)||"{}");const now=Date.now();let mudou=false;for(const k in o){if(now-o[k]>7*86400000){delete o[k];mudou=true;}}if(mudou)localStorage.setItem(CONC_KEY,JSON.stringify(o));return o;}catch(e){return{}}}
+function salvaConcluidaLocal(ch){const o=concluidasLocal();o[ch]=Date.now();localStorage.setItem(CONC_KEY,JSON.stringify(o));}
+function filtraConcluidas(d){const o=concluidasLocal();for(const L of LOJAS){if(d.lojas&&d.lojas[L])d.lojas[L]=d.lojas[L].filter(nf=>!o[nf.chave_nfe||""]);}}
+
 async function carregar(){
   const [d,p] = await Promise.all([
     fetch("precificacao_dados.json?v="+Date.now()).then(r=>r.json()),
     fetch("precificacao_params.json?v="+Date.now()).then(r=>r.json()),
   ]);
+  filtraConcluidas(d);
   DADOS=d; PARAMS=p;
   for(const L of LOJAS) for(const nf of (d.lojas[L]||[])) for(const it of nf.itens) it._uf=nf.uf; // UF da NF em cada item (p/ ST entrada)
   mergeConfigLocal();
@@ -386,6 +394,7 @@ document.getElementById("btnTxtErp").onclick=()=>{
 // recarrega precificacao_dados.json publicado, preservando loja e NF-e selecionadas.
 async function recarregarDados(loja,sel){
   const d=await fetch("precificacao_dados.json?v="+Date.now()).then(r=>r.json());
+  filtraConcluidas(d);
   DADOS=d;
   for(const L of LOJAS) for(const nf of (d.lojas[L]||[])) for(const it of nf.itens) it._uf=nf.uf;
   const dEnt = d.dias_entrada!=null ? ` · janela de ${d.dias_entrada}d após entrada/precificação` : "";
@@ -408,6 +417,23 @@ window.addEventListener("focus",async()=>{ // ao voltar pra aba, confere na hora
     if(DADOS && d.gerado_em && d.gerado_em!==DADOS.gerado_em) await recarregarDados(lojaAtual,nfeSel);
   }catch(e){}
 });
+// ✅ Concluída: marca a NF como precificada (grava no Supabase), remove da tela NA HORA e não volta
+// (o coletor lê precificacao_concluidas a cada rodada e trava a NF no estado permanentemente).
+document.getElementById("btnConcluir").onclick=async()=>{
+  const arr=DADOS.lojas[lojaAtual]||[]; const nf=arr[nfeSel];
+  if(!nf){alert("Selecione uma NF-e primeiro.");return;}
+  if(!confirm(`Marcar como CONCLUÍDA a NF ${nf.numero} (${nf.itens[0]?.marca||""} · ${lojaAtual})?\nEla sai da tela agora e não volta.`))return;
+  const b=document.getElementById("btnConcluir"); b.disabled=true;
+  try{
+    const chave=nf.chave_nfe||`${lojaAtual}-${nf.numero}`;
+    const {error}=await sb.from("precificacao_concluidas").upsert({chave, concluida_em:new Date().toISOString()});
+    if(error){alert("Não consegui gravar a conclusão (tabela precificacao_concluidas ainda não existe no Supabase?). Avise o Claude.\n\n"+error.message);b.disabled=false;return;}
+    salvaConcluidaLocal(chave);                      // não deixa o auto-refresh trazer de volta
+    arr.splice(nfeSel,1); nfeSel=null;               // remove da tela NA HORA
+    renderNfes(); renderItens();
+  }catch(e){alert("Falha ao concluir: "+e);}
+  b.disabled=false;
+};
 document.getElementById("btnAtualizar").onclick=async()=>{
   const loja=lojaAtual, sel=nfeSel; const b=document.getElementById("btnAtualizar"); const t0=b.textContent;
   b.disabled=true;
