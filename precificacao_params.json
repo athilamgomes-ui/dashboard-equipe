@@ -69,6 +69,10 @@
     "_default": 0.15,
     "_por_marca": {}
   },
+  "_marcas_por_caixa_doc": "Marcas cujos produtos entram na NFe em CAIXA (CX) mas devem ser precificados por UNIDADE. O coletor divide o custo pelo fator qTrib/qCom do XML (unidades por caixa) e mostra o preço da unidade. Ex.: Talge (luvas, toucas) — caixa de 10+ unidades.",
+  "marcas_por_caixa": [
+    "Talge"
+  ],
   "_st_entrada_doc": "ICMS-ST antecipado na ENTRADA, somado ao custo do produto SEMPRE que o item for ST (determinado por NCM x CST do XML). % por UF de origem da nota (regra do usuário 23/06).",
   "st_entrada_por_uf": {
     "SP": 0.21,

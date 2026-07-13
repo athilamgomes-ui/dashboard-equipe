@@ -505,7 +505,9 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
               const pICMS = parseFloat(tag(icmsBlk, "pICMS") || "0");
               const vICMSST = parseFloat(tag(icmsBlk, "vICMSST") || "0");
               const ncm = tag(d, "NCM");
-              prod[cProd] = { cst, csosn, grpTag, orig: tag(icmsBlk, "orig"), vICMS, pICMS, vICMSST, vProd, cest, ncm };
+              const qCom = parseFloat(tag(d, "qCom") || "0");   // qtd comercial (ex.: 1 CX)
+              const qTrib = parseFloat(tag(d, "qTrib") || "0"); // qtd tributável (ex.: 10 UN) → fator CX→unidade
+              prod[cProd] = { cst, csosn, grpTag, orig: tag(icmsBlk, "orig"), vICMS, pICMS, vICMSST, vProd, cest, ncm, qCom, qTrib };
             }
             out[nf.id] = { uf, prod };
           } catch (e) { out[nf.id] = { uf: null, prod: {}, erro: String(e).slice(0, 80) }; }
@@ -514,13 +516,23 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       }, nfList);
 
       const CST_ST_X = new Set(["10", "30", "60", "70"]);
-      let comCredito = 0, comST = 0, semInfo = 0;
+      const MARCAS_POR_CAIXA = new Set((PARAMS.marcas_por_caixa || []).map(norm)); // preço deve ser por UNIDADE, não por caixa
+      let comCredito = 0, comST = 0, semInfo = 0, convCaixa = 0;
       for (const L of Object.keys(lojas)) for (const nf of lojas[L]) {
         const d = det[nf.id] || { uf: null, prod: {} };
         nf.uf = d.uf;
         for (const it of nf.itens) {
           const tx = (d.prod || {})[it.cprod];
           if (!tx) { semInfo++; it.cst = null; it.icms_pct = null; it.ncm = null; it.st = false; it.st_motivo = null; it.credito_icms_pct = 0; continue; }
+          // CONVERSÃO CAIXA→UNIDADE (13/07/2026 — marca Talge entra em CX; preço tem que ser da unidade).
+          // fator = qTrib/qCom (unidades por caixa, lido do XML). Divide o custo unitário e multiplica a qtd.
+          if (MARCAS_POR_CAIXA.has(norm(it.marca)) && tx.qCom > 0 && tx.qTrib > tx.qCom) {
+            const fator = tx.qTrib / tx.qCom;
+            it.unidades_por_caixa = Math.round(fator * 100) / 100;
+            it.custo_unit_cheio = Math.round((it.custo_unit_cheio / fator) * 10000) / 10000; // custo por UNIDADE
+            it.qtd = Math.round((it.qtd * fator) * 100) / 100; // qtd em UNIDADES
+            convCaixa++;
+          }
           const cstN = String(tx.cst || "").padStart(2, "0").slice(-2);
           const ncm = String(tx.ncm || "").replace(/\D/g, "");
           const stPorNcm = ncmEhST(ncm);                                    // PRIMÁRIO: NCM na lista SEFA-PA
@@ -537,7 +549,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       }
       const revisar = [];
       for (const L of Object.keys(lojas)) for (const nf of lojas[L]) for (const it of nf.itens) if (it.st_motivo === "nf") revisar.push(it.ncm);
-      log(`XML por item: ${nfList.length} NFes; c/ crédito=${comCredito}, ST sem crédito=${comST}, sem info=${semInfo}; ST só por sinal-NF (revisar NCM)=${revisar.length}`);
+      log(`XML por item: ${nfList.length} NFes; c/ crédito=${comCredito}, ST sem crédito=${comST}, sem info=${semInfo}; ST só por sinal-NF (revisar NCM)=${revisar.length}; itens convertidos CX→unidade=${convCaixa}`);
     }
 
     // ===== Preço de venda atual no ERP (Lista de Preços), por LOJA × MARCA =====
