@@ -351,7 +351,7 @@ function renderItens(){
       <td>${r.erro?'<span style="color:var(--crit)">soma % ≥ 100</span>':`<input type="text" class="mono preco-in" data-k="${k}" value="${f.preco!=null?f.preco.toFixed(2):''}" title="editar preço fixa este valor (margem recalculada)" style="width:84px;text-align:right;font-weight:700;color:${manual?'#b45309':'var(--indigo-d)'};${manual?'background:#fffbeb;':''}">`}</td>
       <td class="mono">${f.markup?f.markup.toFixed(2)+'×':'—'}</td>
       <td class="mono" style="color:var(--ok)">${pct(f.margemReal)}</td>
-      <td class="mono" title="${pa!=null?'Preço atual no ERP':'sem preço no ERP'}">${pa!=null?brl(pa):'<span class="muted">—</span>'}${delta!=null?` <span class="muted" style="font-size:11px">(${delta>=0?'+':''}${brl(delta)})</span>`:''}</td>
+      <td class="mono" title="${pa!=null?'Preço atual no ERP':'sem preço no ERP'}">${pa!=null?brl(pa):'<span class="muted">—</span>'}${delta!=null?` <span class="muted" style="font-size:11px">(${delta>=0?'+':''}${brl(delta)})</span>`:''}${(()=>{const cu=it.custo_unit_cheio||0;const fat=it.unidades_por_caixa;if(!fat||pa==null||cu<=0)return '';return pa>cu*Math.sqrt(fat)*1.3?` <span class="pill" style="background:#fee2e2;color:#b91c1c;font-size:10px" title="O preço sugerido agora é por UNIDADE, mas este preço atual do ERP parece ser da CAIXA (${fat} un). Confira antes de comparar/aplicar.">⚠️ atual parece ser da caixa</span>`:'';})()}</td>
     </tr>`;
   }).join("");
   document.getElementById("tbody").innerHTML=rows;
