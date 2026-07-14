@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-07-14T17:02:17.224Z",
+  "gerado_em": "2026-07-14T17:18:27.829Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
@@ -518,13 +518,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 33.9,
             "cod_erp": "204405",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "12119090",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 16.35
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PA00027",
@@ -548,13 +547,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 24.9,
             "cod_erp": "204406",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 11.9
+            "st_motivo": "ncm"
           }
         ],
         "uf": "ES"
