@@ -34,6 +34,8 @@ const FORN_MARCAS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/comp
 const ICMS_UF = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_icms_estados.json", "utf8"));
 const PARAMS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_params.json", "utf8"));
 const MARCA_IDS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/compras/marca_ids.json", "utf8"));
+// Preços de venda FIXOS por EAN (definidos manualmente pelo usuário) — injetados em item.preco_manual.
+const PRECOS_MANUAIS = (() => { try { return JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_precos_manuais.json", "utf8")).precos || {}; } catch { return {}; } })();
 const ST_PA = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/st_pa_ncm.json", "utf8"));
 const ST_NCM = (ST_PA.ncm_st || []).map(String).sort((a, b) => b.length - a.length); // prefixos mais longos primeiro
 const URL_LISTA_PRECOS = "https://linx.microvix.com.br/gestor_web/produtos/relatorio_lista_precos.asp";
@@ -471,6 +473,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
             custo_unit_cheio: Math.round((custoTotal / qtd) * 10000) / 10000,
             cst: null, icms_pct: null, credito_icms_pct: 0, // preenchidos depois via BuscarDetalhesNFe
             preco_atual: null, cod_erp: null, match_tipo: null, // preço/código internos do ERP (preenchidos via Lista de Preços)
+            preco_manual: PRECOS_MANUAIS[String(p.CEAN || "")] ?? null, // preço de venda FIXO por EAN (sobrepõe o sugerido na tela)
           };
         });
         if (!itens.length) continue;

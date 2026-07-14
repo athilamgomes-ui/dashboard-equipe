@@ -78,7 +78,7 @@
     "_doc": "Produtos da Santa Clara vendidos por UNIDADE (dividem). Chave = cProd do ERP; valor = unidades por pacote ('auto' = ler da descrição C/n; número = fixo quando a descrição não diz). Classificação validada 14/07/2026 via Histórico de Movimento (preço real de venda), 98% de acerto no gabarito do usuário. Lixas ficam fora (categoria 'ambos').",
     "272": "auto", "274": "auto", "354": "auto", "406": "auto", "775": "auto", "896": "auto",
     "2236": 12, "2238": 12, "2243": 12,
-    "2565": "auto", "3697": "auto", "4279": "auto"
+    "2565": "auto", "3697": "auto", "4279": "auto", "4281": "auto"
   },
   "santa_clara_ambos_categorias": ["LIXA"],
   "_santa_clara_ambos_doc": "Categorias (substring na descrição) da Santa Clara vendidas COMO PACOTE E COMO UNIDADE. Preço principal = pacote (não divide); a tela mostra também o preço derivado por unidade (pacote ÷ divisor da descrição).",
