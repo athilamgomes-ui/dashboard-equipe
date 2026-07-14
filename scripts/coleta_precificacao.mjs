@@ -474,6 +474,21 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
           };
         });
         if (!itens.length) continue;
+        // DEDUP: a NFe pode trazer o MESMO produto em várias linhas (<det>) — para precificar
+        // queremos 1 linha por produto. Agrupa por cprod (fallback ean/descrição), somando qtd e
+        // custos; recalcula o custo unitário. (14/07/2026 — NF 538 trazia 1003329 duplicado.)
+        const SOMAR = ["qtd", "valor_bruto", "desconto", "frete", "seguro", "outras", "ipi", "icms_st", "fcp_st", "custo_cheio_total"];
+        const dedup = new Map();
+        for (const it of itens) {
+          const chave = String(it.cprod || it.ean || it.descricao || "").toUpperCase().trim();
+          const prev = dedup.get(chave);
+          if (!prev) { dedup.set(chave, it); continue; }
+          for (const c of SOMAR) prev[c] = Math.round(((prev[c] || 0) + (it[c] || 0)) * 10000) / 10000;
+          prev.custo_unit_cheio = prev.qtd ? Math.round((prev.custo_cheio_total / prev.qtd) * 10000) / 10000 : prev.custo_unit_cheio;
+        }
+        const itensU = [...dedup.values()];
+        if (itensU.length < itens.length) log(`  NF ${nfe.Numero}/${loja}: ${itens.length - itensU.length} linha(s) duplicada(s) mescladas`);
+        itens.length = 0; itens.push(...itensU);
         totItens += itens.length;
         lojas[loja].push({
           id: nfe.Id,
