@@ -73,6 +73,8 @@
     <div class="muted" id="geradoEm"></div>
   </div>
 
+  <div id="avisoCfg" style="display:none;background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:13px"></div>
+
   <div class="card" id="configPanel" style="display:none">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
       <strong>⚙️ Configurar custos por loja</strong>
@@ -137,7 +139,7 @@ const LOJAS = ["L1","L3","L4","L5"];
 const SUPABASE_URL="https://valhewbvjwdkkvuejrxa.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-let DADOS=null, PARAMS=null, lojaAtual="L1", nfeSel=null, overrides={}, precoOver={}; // overrides[k]=margem(frac); precoOver[k]=preço manual
+let DADOS=null, PARAMS=null, PARAMS_FILE=null, lojaAtual="L1", nfeSel=null, overrides={}, precoOver={}; // overrides[k]=margem(frac); precoOver[k]=preço manual
 
 const brl = v => (v==null||isNaN(v))?"—":v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const pct = v => (v==null||isNaN(v))?"—":(v*100).toFixed(1)+"%";
@@ -156,9 +158,11 @@ async function carregar(){
   ]);
   filtraConcluidas(d);
   DADOS=d; PARAMS=p;
+  PARAMS_FILE=JSON.parse(JSON.stringify(p)); // padrão oficial do arquivo, ANTES do override do navegador
   loadMargensLocal(); await loadMargensSupabase(); // últimas margens por marca
   for(const L of LOJAS) for(const nf of (d.lojas[L]||[])) for(const it of nf.itens) it._uf=nf.uf; // UF da NF em cada item (p/ ST entrada)
   mergeConfigLocal();
+  renderAvisoConfig();
   elMargem.value = Math.round((p.margem._default||0.15)*100);
   const dEnt = d.dias_entrega!=null ? ` · entregas (ENTREGUE) dos últimos ${d.dias_entrega} dias` : "";
   document.getElementById("geradoEm").textContent = "Coletado em "+new Date(d.gerado_em).toLocaleString("pt-BR")+dEnt;
@@ -190,15 +194,40 @@ function renderConfig(){
       cell("imposto")+cell("custo_fixo")+cell("cartao")+cell("comissao")+cell("outros")+`</tr>`;
   }).join("");
 }
+// Salva SÓ o que realmente diverge do arquivo oficial. Antes gravava os 5 campos das 4 lojas
+// em qualquer Salvar, congelando um retrato dos percentuais neste navegador — o dashboard passava
+// a ignorar o precificacao_params.json para sempre, sem avisar. (15/07/2026: um custo fixo de 22%
+// esquecido na L4 mostrou margem 9,5% onde a real era 12,4%.)
 function salvarConfig(){
   const ov={};
   document.querySelectorAll(".cfg-in").forEach(inp=>{
     const L=inp.dataset.l, c=inp.dataset.c, v=parseFloat(inp.value);
-    if(!isNaN(v)){ (ov[L]=ov[L]||{})[c]=v/100; }
+    if(isNaN(v)) return;
+    const padrao=custoPct((PARAMS_FILE.lojas||{})[L]||{}, c);
+    if(Math.abs(v/100-padrao)<1e-9) return;   // igual ao padrão → não persiste
+    (ov[L]=ov[L]||{})[c]=v/100;
   });
-  localStorage.setItem(CFG_KEY, JSON.stringify(ov));
-  mergeConfigLocal(); syncCreditoToggle(); renderItens();
+  if(Object.keys(ov).length) localStorage.setItem(CFG_KEY, JSON.stringify(ov));
+  else localStorage.removeItem(CFG_KEY);
+  PARAMS.lojas=JSON.parse(JSON.stringify(PARAMS_FILE.lojas)); // volta ao padrão e reaplica só os diffs
+  mergeConfigLocal(); syncCreditoToggle(); renderAvisoConfig(); renderItens();
   document.getElementById("configPanel").style.display="none";
+}
+// Aviso VISÍVEL de que esta tela não está usando os percentuais oficiais.
+const CAMPO_NOME={imposto:"imposto venda",custo_fixo:"custo fixo",cartao:"cartão",comissao:"comissão",outros:"outros"};
+function renderAvisoConfig(){
+  const el=document.getElementById("avisoCfg"); if(!el) return;
+  let ov={}; try{ ov=JSON.parse(localStorage.getItem(CFG_KEY)||"{}"); }catch(e){}
+  const itens=[];
+  for(const L of LOJAS) for(const c in (ov[L]||{})){
+    const padrao=custoPct((PARAMS_FILE.lojas||{})[L]||{}, c);
+    itens.push(`${L} ${CAMPO_NOME[c]||c} ${(ov[L][c]*100).toFixed(1)}% (padrão ${(padrao*100).toFixed(1)}%)`);
+  }
+  if(!itens.length){ el.style.display="none"; return; }
+  el.style.display="";
+  el.innerHTML=`⚠️ <b>Este navegador está usando percentuais próprios</b>, não os oficiais — as margens abaixo não conferem com as de outra pessoa: ${itens.join(" · ")}. `+
+    `<a href="#" id="lnkResetCfg" style="color:inherit;font-weight:700">usar os padrões</a>`;
+  document.getElementById("lnkResetCfg").onclick=e=>{ e.preventDefault(); localStorage.removeItem(CFG_KEY); location.reload(); };
 }
 document.getElementById("btnConfig").onclick=()=>{ const p=document.getElementById("configPanel"); const show=p.style.display==="none"; if(show) renderConfig(); p.style.display=show?"":"none"; };
 document.getElementById("btnSalvarConfig").onclick=salvarConfig;

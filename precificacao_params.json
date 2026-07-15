@@ -80,7 +80,15 @@
     "2236": 12, "2238": 12, "2243": 12,
     "2565": "auto", "3697": "auto", "4279": "auto", "4281": "auto",
     "_doc_lixas": "Regra do usuário 15/07/2026: lixa CUBO, lixa EVA e lixa de PLÁSTICO vendem a UNIDADE (entram aqui). Refil de lixa vende o PACOTE (fica no default, via santa_clara_ambos_excecoes). Só as lixas de PAPEL p/ unhas são 'ambos'.",
+    "_doc_1075_3205": "Confirmado pelo usuário 15/07/2026: 1075 (LIXA PES EVA SOFT) e 3205 (LIXA ANAT.PLAST.VRD) são vendidos individuais e a NF já traz unidade avulsa — 'auto' resolve divisor 1, ou seja NÃO divide. Correto assim.",
     "752": "auto", "1075": "auto", "3205": "auto", "3694": "auto"
+  },
+  "_santa_clara_pacote_confirmados": {
+    "_doc": "Produtos Santa Clara SEM venda registrada no histórico (classificação foi por preço de cadastro, base fraca) que o usuário confirmou como PACOTE em 15/07/2026. Ficam no default (não dividem) — esta chave é só registro, para não reabrir a dúvida.",
+    "2558": "LUVA DESC.LEITOSA PCT C/20 UND",
+    "5755": "PROTETOR BACIA PEDICURE C/25",
+    "6522": "ESPATULA/PALITO LG.ESP.C/50",
+    "6523": "ESPATULA/PALITO LG.ESP.C/6"
   },
   "santa_clara_ambos_categorias": ["LIXA"],
   "santa_clara_ambos_excecoes": ["REFIL", "REF.LIXA"],
