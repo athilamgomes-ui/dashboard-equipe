@@ -478,7 +478,7 @@ const DADOS = {
     },
   },
   '2026-07': {
-    // Atualizado 15/07/2026 12:35 (S3 em andamento, 3º dia parcial 13–15/07). S2 FECHADA+CONGELADA em HISTORICO_PREMIOS (imutável). Cliente 8=R$0.
+    // Atualizado 15/07/2026 18:11 (S3 em andamento, 3º dia parcial 13–15/07). S2 FECHADA+CONGELADA em HISTORICO_PREMIOS (imutável). Cliente 8=R$0.
     // S1+S2 são snapshots IMUTÁVEIS — só S3 é dinâmica. Coleta Playwright headless.
     // Cliente 8 (R Maura)=R$0 em jul S1/S2/S3/MES (verificado 15/07 12:20).
     // S1 HISTÓRICA: todas as lojas ≥120%.
@@ -493,13 +493,13 @@ const DADOS = {
       vendas: {
         S1:{Outros:2162,Rayra:8533,Sofia:5489,Bárbara:8774},
         S2:{Outros:1025,Rayra:12029,Sofia:8440,Bárbara:12020},
-        S3:{Outros:3384,Rayra:4420,Sofia:4583,Bárbara:4035},
+        S3:{Outros:3384,Rayra:5729,Sofia:4839,Bárbara:4604},
       },
-      marcasA_loja: {S1:21.9,S2:27.7,S3:27.1},
-      marcasA_indiv: {Rayra:50.6,Sofia:24.7,Bárbara:19.3},
-      tickets: { S1:{Outros:1,Rayra:107,Sofia:72,Bárbara:108},S2:{Outros:15,Rayra:113,Sofia:96,Bárbara:116},S3:{Outros:9,Rayra:38,Sofia:49,Bárbara:40} },
-      pecas:   { S1:{Outros:9,Rayra:251,Sofia:175,Bárbara:383},S2:{Outros:26,Rayra:349,Sofia:243,Bárbara:331},S3:{Outros:25,Rayra:134,Sofia:124,Bárbara:106} },
-      cmv:     { S1:{Rayra:38.3,Sofia:52.8,Bárbara:58},S2:{Rayra:43.6,Sofia:54.9,Bárbara:43.2},S3:{Rayra:40.8,Sofia:45.4,Bárbara:38.6} },
+      marcasA_loja: {S1:21.9,S2:27.7,S3:25.4},
+      marcasA_indiv: {Rayra:31.5,Sofia:20,Bárbara:26.8},
+      tickets: { S1:{Outros:1,Rayra:107,Sofia:72,Bárbara:108},S2:{Outros:15,Rayra:113,Sofia:96,Bárbara:116},S3:{Outros:14,Rayra:55,Sofia:55,Bárbara:57} },
+      pecas:   { S1:{Outros:9,Rayra:251,Sofia:175,Bárbara:383},S2:{Outros:26,Rayra:349,Sofia:243,Bárbara:331},S3:{Outros:48,Rayra:181,Sofia:145,Bárbara:159} },
+      cmv:     { S1:{Rayra:38.3,Sofia:52.8,Bárbara:58},S2:{Rayra:43.6,Sofia:54.9,Bárbara:43.2},S3:{Rayra:44.5,Sofia:50.8,Bárbara:42.2} },
       // Unidades vendidas por marca (coleta_vendas_marca_semana.mjs) — baseline pras
       // sugestões venda_marca. S2 é coletada no fechamento da semana.
       vendas_marca: { S1:{'ITALLIAN HAIR':58,'APSE':21,'HAIR EXTRATTUS':20,'PROBELLE PROFISSIONAL':19,'NATUM PROFISSIONAL':14}, S2:{'ITALLIAN HAIR':90,'APSE':42,'HAIR EXTRATTUS':14,'PROBELLE PROFISSIONAL':22,'NATUM PROFISSIONAL':21} },
@@ -512,13 +512,13 @@ const DADOS = {
       vendas: {
         S1:{Outros:-26,Raimunda:4311,'Ana Mira':2685,Naila:3018,Brunna:2644},
         S2:{Raimunda:3996,'Ana Mira':7420,Naila:6935,Brunna:4149},
-        S3:{Raimunda:2339,'Ana Mira':1652,Naila:2971,Brunna:1238},
+        S3:{Raimunda:2399,'Ana Mira':1652,Naila:3221,Brunna:1294},
       },
-      marcasA_loja: {S1:14.8,S2:10.5,S3:24},
-      marcasA_indiv: {Raimunda:18.3,'Ana Mira':29.4,Naila:23.5,Brunna:28.7},
-      tickets: { S1:{Outros:0,Raimunda:40,'Ana Mira':41,Naila:44,Brunna:32},S2:{Raimunda:59,'Ana Mira':61,Naila:76,Brunna:69},S3:{Raimunda:26,'Ana Mira':16,Naila:23,Brunna:19} },
-      pecas:   { S1:{Outros:-1,Raimunda:101,'Ana Mira':164,Naila:131,Brunna:105},S2:{Raimunda:175,'Ana Mira':254,Naila:283,Brunna:257},S3:{Raimunda:89,'Ana Mira':54,Naila:76,Brunna:45} },
-      cmv:     { S1:{Raimunda:59,'Ana Mira':75.1,Naila:62.1,Brunna:98.1},S2:{Raimunda:51.7,'Ana Mira':51.7,Naila:63.4,Brunna:55.7},S3:{Raimunda:55.9,'Ana Mira':41.2,Naila:54.2,Brunna:72.7} },
+      marcasA_loja: {S1:14.8,S2:10.5,S3:23},
+      marcasA_indiv: {Raimunda:15.2,'Ana Mira':16.3,Naila:14.3,Brunna:9.4},
+      tickets: { S1:{Outros:0,Raimunda:40,'Ana Mira':41,Naila:44,Brunna:32},S2:{Raimunda:59,'Ana Mira':61,Naila:76,Brunna:69},S3:{Raimunda:30,'Ana Mira':18,Naila:25,Brunna:23} },
+      pecas:   { S1:{Outros:-1,Raimunda:101,'Ana Mira':164,Naila:131,Brunna:105},S2:{Raimunda:175,'Ana Mira':254,Naila:283,Brunna:257},S3:{Raimunda:107,'Ana Mira':57,Naila:83,Brunna:56} },
+      cmv:     { S1:{Raimunda:59,'Ana Mira':75.1,Naila:62.1,Brunna:98.1},S2:{Raimunda:51.7,'Ana Mira':51.7,Naila:63.4,Brunna:55.7},S3:{Raimunda:54.1,'Ana Mira':40.6,Naila:53.7,Brunna:71.4} },
       vendas_marca: { S1:{'NATUM PROFISSIONAL':14,'HAIR EXTRATTUS':9,'APSE':9,'ITALLIAN HAIR':6}, S2:{'NATUM PROFISSIONAL':6,'HAIR EXTRATTUS':11,'APSE':15,'ITALLIAN HAIR':31} },
     },
     L4: {
@@ -529,13 +529,13 @@ const DADOS = {
       vendas: {
         S1:{Tanaia:1456,Josilene:6805,'Bruna F.':9177,Débora:8505},
         S2:{Outros:7,Tanaia:1149,Josilene:9017,'Bruna F.':15257,Débora:7085},
-        S3:{Outros:53,Josilene:2936,'Bruna F.':6621,Débora:4913},
+        S3:{Outros:53,Josilene:3777,'Bruna F.':7770,Débora:5428},
       },
-      marcasA_loja: {S1:33.7,S2:25.2,S3:31.1},
-      marcasA_indiv: {Josilene:28.1,'Bruna F.':33.8,Débora:29.6},
-      tickets: { S1:{Tanaia:15,Josilene:80,'Bruna F.':115,Débora:85},S2:{Outros:1,Tanaia:9,Josilene:93,'Bruna F.':182,Débora:107},S3:{Outros:2,Josilene:41,'Bruna F.':62,Débora:47} },
-      pecas:   { S1:{Tanaia:31,Josilene:184,'Bruna F.':250,Débora:245},S2:{Outros:1,Tanaia:24,Josilene:267,'Bruna F.':589,Débora:255},S3:{Outros:2,Josilene:126,'Bruna F.':173,Débora:132} },
-      cmv:     { S1:{Tanaia:40.4,Josilene:35.1,'Bruna F.':34,Débora:35},S2:{Tanaia:47.3,Josilene:43.8,'Bruna F.':48.2,Débora:39.9},S3:{Josilene:48.9,'Bruna F.':56.4,Débora:35.5} },
+      marcasA_loja: {S1:33.7,S2:25.2,S3:34.8},
+      marcasA_indiv: {Josilene:27.9,'Bruna F.':34.8,Débora:25.9},
+      tickets: { S1:{Tanaia:15,Josilene:80,'Bruna F.':115,Débora:85},S2:{Outros:1,Tanaia:9,Josilene:93,'Bruna F.':182,Débora:107},S3:{Outros:2,Josilene:47,'Bruna F.':75,Débora:62} },
+      pecas:   { S1:{Tanaia:31,Josilene:184,'Bruna F.':250,Débora:245},S2:{Outros:1,Tanaia:24,Josilene:267,'Bruna F.':589,Débora:255},S3:{Outros:2,Josilene:142,'Bruna F.':217,Débora:173} },
+      cmv:     { S1:{Tanaia:40.4,Josilene:35.1,'Bruna F.':34,Débora:35},S2:{Tanaia:47.3,Josilene:43.8,'Bruna F.':48.2,Débora:39.9},S3:{Josilene:45.9,'Bruna F.':50.3,Débora:36.5} },
       vendas_marca: { S1:{'ITALLIAN HAIR':71,'WIDI CARE':34,'APSE':31,'CADIVEU':30,'NATUM PROFISSIONAL':26}, S2:{'ITALLIAN HAIR':98,'WIDI CARE':21,'APSE':42,'CADIVEU':28,'NATUM PROFISSIONAL':9} },
     },
     L5: {
@@ -546,13 +546,13 @@ const DADOS = {
       vendas: {
         S1:{Rosiene:4323,Joyce:3158,Rayssa:4135,Karina:3777},
         S2:{Rosiene:5148,Joyce:1041,Rayssa:4870,Karina:5159},
-        S3:{Rosiene:2000,Joyce:1296,Rayssa:2108,Karina:1802},
+        S3:{Rosiene:2239,Joyce:1296,Rayssa:2622,Karina:1956},
       },
-      marcasA_loja: {S1:26.9,S2:18.4,S3:30.7},
-      marcasA_indiv: {Rosiene:36.4,Joyce:22.6,Rayssa:22.1,Karina:40.4},
-      tickets: { S1:{Rosiene:31,Joyce:36,Rayssa:35,Karina:44},S2:{Rosiene:48,Joyce:17,Rayssa:60,Karina:56},S3:{Rosiene:17,Joyce:11,Rayssa:14,Karina:13} },
-      pecas:   { S1:{Rosiene:138,Joyce:96,Rayssa:143,Karina:131},S2:{Rosiene:165,Joyce:36,Rayssa:269,Karina:200},S3:{Rosiene:75,Joyce:32,Rayssa:44,Karina:51} },
-      cmv:     { S1:{Rosiene:38.7,Joyce:45.1,Rayssa:67.4,Karina:51.8},S2:{Rosiene:51.2,Joyce:39.8,Rayssa:59.8,Karina:39.8},S3:{Rosiene:53.8,Joyce:47.3,Rayssa:54,Karina:43.6} },
+      marcasA_loja: {S1:26.9,S2:18.4,S3:29.8},
+      marcasA_indiv: {Rosiene:29.5,Joyce:22.2,Rayssa:21,Karina:22.1},
+      tickets: { S1:{Rosiene:31,Joyce:36,Rayssa:35,Karina:44},S2:{Rosiene:48,Joyce:17,Rayssa:60,Karina:56},S3:{Rosiene:22,Joyce:14,Rayssa:22,Karina:19} },
+      pecas:   { S1:{Rosiene:138,Joyce:96,Rayssa:143,Karina:131},S2:{Rosiene:165,Joyce:36,Rayssa:269,Karina:200},S3:{Rosiene:91,Joyce:53,Rayssa:63,Karina:64} },
+      cmv:     { S1:{Rosiene:38.7,Joyce:45.1,Rayssa:67.4,Karina:51.8},S2:{Rosiene:51.2,Joyce:39.8,Rayssa:59.8,Karina:39.8},S3:{Rosiene:51.5,Joyce:48.6,Rayssa:54,Karina:41.3} },
       vendas_marca: { S1:{'ITALLIAN HAIR':24,'NATUM PROFISSIONAL':19,'APSE':18,'HAIR EXTRATTUS':11}, S2:{'ITALLIAN HAIR':33,'NATUM PROFISSIONAL':15,'APSE':15,'HAIR EXTRATTUS':14} },
     },
   },
@@ -2378,6 +2378,7 @@ function calcAutoMetrics(sug) {
 
   const th = sug.threshold || DEFAULT_THRESHOLDS[sug.meta_alvo];
   let baseline = null, resultado = null, status = null, deltaStr = '', unidade = '';
+  let ctxTM = null; // contexto extra do ticket médio (clientes/vendas) — ver branch abaixo
 
   if (sug.meta_alvo === 'vendas_individuais') {
     if (!sug.vendedora) return null;
@@ -2461,6 +2462,17 @@ function calcAutoMetrics(sug) {
     baseline = _getTicketMedio(ld, ids.baseline, alvo);
     resultado = _getTicketMedio(ld, ids.avaliada, alvo);
     unidade = 'R$';
+    // Ticket médio é uma DIVISÃO — ele cai tanto quando se vende pior quanto
+    // quando se atende muito mais gente. Sem o numerador e o denominador
+    // separados, um "-27%" pode ser lido como fracasso quando na verdade a
+    // pessoa cresceu em vendas (caso Brunna S1→S2 jul/2026). Guardamos os dois
+    // pra mensagem de retorno poder contar a história inteira.
+    ctxTM = {
+      clientes_base: alvo ? _getTicketsIndiv(ld, ids.baseline, alvo) : _getTicketsLoja(ld, ids.baseline),
+      clientes_aval: alvo ? _getTicketsIndiv(ld, ids.avaliada, alvo) : _getTicketsLoja(ld, ids.avaliada),
+      vendas_base:   alvo ? _getVendasIndiv(ld, ids.baseline, alvo) : _getVendasLoja(ld, ids.baseline),
+      vendas_aval:   alvo ? _getVendasIndiv(ld, ids.avaliada, alvo) : _getVendasLoja(ld, ids.avaliada),
+    };
     if (baseline !== null && resultado !== null && baseline > 0) {
       const variacao = (resultado - baseline) / baseline * 100;
       deltaStr = (variacao >= 0 ? '+' : '') + variacao.toFixed(0) + '%';
@@ -2499,6 +2511,7 @@ function calcAutoMetrics(sug) {
     threshold: th,
     sem_baseline: ids.baseline,
     sem_avaliada: ids.avaliada,
+    ctxTM,
   };
 }
 
@@ -2558,6 +2571,54 @@ function gerarMensagemFeedback(sug, m) {
     }
     return `Equipe da ${lojaLabel}: % Marcas A em ${m.resultado?.toFixed(1)}% (era ${m.baseline?.toFixed(1)}%). ` +
       `Precisamos rever a abordagem — sugestão: monte mesa de destaque com Marcas A na entrada e oriente a equipe.`;
+  }
+
+  // Ticket médio. NÃO existia mensagem pra este alvo (o motor calculava o -27% e
+  // devolvia null), então o card saía com o carimbo vermelho e a caixa VAZIA —
+  // "não funcionou" sem uma linha de explicação. Athila, 15/07/2026: "apenas dizer
+  // que não funcionou não é um feedback efetivo".
+  // A regra aqui: ticket médio é vendas ÷ clientes. Antes de cobrar, olhar se o
+  // denominador explodiu — quem atendeu o dobro de gente e caiu de ticket não
+  // vendeu mal, vendeu MAIS. Nesse caso o reconhecimento vem primeiro e o combo
+  // vira oportunidade quantificada em R$, não repreensão.
+  if (sug.meta_alvo === 'ticket_medio') {
+    const c = m.ctxTM || {};
+    const alvoLabel = nome || `Equipe da ${LOJAS_BASE[sug.loja]?.nome || sug.loja}`;
+    const temCtx = c.clientes_base > 0 && c.clientes_aval > 0;
+    const dCli = temCtx ? (c.clientes_aval / c.clientes_base - 1) * 100 : null;
+    const dVen = temCtx && c.vendas_base > 0 ? (c.vendas_aval / c.vendas_base - 1) * 100 : null;
+    const pct = (v) => (v >= 0 ? '+' : '') + Math.round(v) + '%';
+
+    if (m.status === 'funcionou') {
+      return `${alvoLabel}, seu ticket médio subiu ${m.deltaStr} ` +
+        `(${fmtR(m.baseline)} → ${fmtR(m.resultado)} por cliente)${temCtx ? `, atendendo ${c.clientes_aval} clientes` : ''}. ` +
+        `Era exatamente isso: o combo funcionou. Cada cliente que entra está saindo com mais. Segue assim!`;
+    }
+    if (m.status === 'parcial') {
+      return `${alvoLabel}, seu ticket médio subiu ${m.deltaStr} (${fmtR(m.baseline)} → ${fmtR(m.resultado)} por cliente). ` +
+        `Subiu, mas menos que o alvo. Na próxima, tenta oferecer a máscara da mesma marca junto do shampoo — ` +
+        `é a peça que mais sobe o valor sem o cliente sentir.`;
+    }
+    // Não bateu o alvo. Antes de cobrar: cresceu em vendas atendendo mais gente?
+    if (temCtx && dVen !== null && dVen > 10 && dCli > dVen) {
+      const potencial = Math.round(c.clientes_aval * m.baseline);
+      return `${alvoLabel}, o número cru diz que seu ticket caiu ${m.deltaStr} ` +
+        `(${fmtR(m.baseline)} → ${fmtR(m.resultado)} por cliente) — mas ele não conta a história toda, ` +
+        `e a sua é boa: suas vendas cresceram ${pct(dVen)} (${fmtR(c.vendas_base)} → ${fmtR(c.vendas_aval)}) ` +
+        `e você atendeu ${pct(dCli)} mais clientes (${c.clientes_base} → ${c.clientes_aval}). ` +
+        `Você não vendeu pior, você vendeu pra MUITO mais gente — e isso tem valor. ` +
+        `O ticket caiu porque o atendimento ficou mais rápido, não porque piorou. ` +
+        `Onde está a oportunidade: se esses mesmos ${c.clientes_aval} clientes tivessem saído com ${fmtR(m.baseline)} ` +
+        `(o seu próprio ticket de antes), a semana teria sido ${fmtR(potencial)} em vez de ${fmtR(c.vendas_aval)}. ` +
+        `Mesma gente, mesmo esforço. O combo é isso: no cliente que já está na sua frente, ` +
+        `oferecer o condicionador e a máscara da mesma marca do shampoo. Não precisa atender mais ninguém.`;
+    }
+    return `${alvoLabel}, seu ticket médio ficou em ${m.deltaStr} ` +
+      `(${fmtR(m.baseline)} → ${fmtR(m.resultado)} por cliente)` +
+      `${temCtx ? `, com ${c.clientes_aval} clientes atendidos` : ''}. ` +
+      `Vamos olhar isso juntas: pode ser o tipo de cliente da semana ou a hora de oferecer o combo. ` +
+      `O caminho é o mesmo — no cliente que já está na sua frente, oferecer o condicionador e a máscara ` +
+      `da mesma marca do shampoo. Semana nova, começa do zero.`;
   }
 
   if (sug.meta_alvo === 'venda_marca' && sug.marca) {
@@ -3777,7 +3838,8 @@ async function initDashboard() {
     // Supabase é AUTORITATIVO — aplicado por último, vence Worker e localStorage.
     await lerEAplicarMetasSupabase(curMes);
     // Retornos aprovados vêm SÓ do Worker — sem mistura com sugestões.
-    window.__FEEDBACK_RETORNOS = retornos;
+    // status 'removido' = lápide (admin apagou). Some do painel e do app das vendedoras.
+    window.__FEEDBACK_RETORNOS = (retornos || []).filter(r => r.status !== 'removido');
 
     // Mescla overrides no localStorage (mantém também o que ele fez localmente)
     const localOv = JSON.parse(localStorage.getItem('sugestoes_overrides') || '{}');

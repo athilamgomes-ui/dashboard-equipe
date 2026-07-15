@@ -204,7 +204,26 @@ export default {
 
       if (method === 'GET' && url.pathname === '/feedback-retornos') {
         const items = await listAll(KV, 'feedback_retorno:');
-        return jsonResponse(request, { items });
+        // Filtra as lápides (status 'removido') na origem, para que nenhum cliente
+        // desatualizado volte a exibir um retorno que o admin apagou.
+        return jsonResponse(request, { items: items.filter(x => x && x.status !== 'removido') });
+      }
+
+      // Exclusão definitiva de um retorno. Enquanto esta rota não estava no ar, a
+      // remoção era feita por lápide (POST com status 'removido'), que os clientes
+      // filtram na leitura. Aqui o registro sai do KV de vez.
+      if (method === 'DELETE' && url.pathname === '/feedback-retorno') {
+        const id_sugestao = url.searchParams.get('id_sugestao');
+        const loja = url.searchParams.get('loja');
+        const vendedora = url.searchParams.get('vendedora');
+        if (!id_sugestao || !loja || !vendedora) {
+          return jsonResponse(request, { error: 'Query obrigatoria: id_sugestao, loja, vendedora' }, 400);
+        }
+        const key = `feedback_retorno:${id_sugestao}:${loja}:${vendedora}`;
+        const antes = await KV.get(key);
+        if (antes === null) return jsonResponse(request, { ok: true, removidos: 0 });
+        await KV.delete(key);
+        return jsonResponse(request, { ok: true, removidos: 1, removido: JSON.parse(antes) });
       }
 
       // === LEITURA DO QUIZ (vendedora respondeu) ===
