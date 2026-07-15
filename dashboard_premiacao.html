@@ -2680,7 +2680,10 @@ function salvarAvaliacao(idSug, resultado, comentario) {
   if (curTab === 'analise') rerender();
 }
 
-function salvarRetornoFeedback(idSug, loja, vendedora) {
+// `btn` vem do onclick via `this` — capturado AGORA, de forma síncrona. Nunca ler
+// `event.target` dentro do .then: quando a resposta chega o event global já morreu
+// e o TypeError cai no .catch, virando um falso "Sem conexão" (bug de 15/07).
+function salvarRetornoFeedback(idSug, loja, vendedora, btn) {
   const statusSel = document.getElementById(`ret-status-${idSug}-${vendedora}`);
   const txtSel = document.getElementById(`ret-txt-${idSug}-${vendedora}`);
   if (!statusSel || !txtSel) return;
@@ -2703,20 +2706,22 @@ function salvarRetornoFeedback(idSug, loja, vendedora) {
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(reg)
   }).then(r => {
-    if (r.ok) {
-      const btn = event.target;
-      btn.textContent = '✓ Salvo';
-      setTimeout(() => { btn.textContent = '💾 Salvar retorno'; rerender(); }, 1500);
+    if (!r.ok) { alert('Falha ao salvar (servidor respondeu ' + r.status + '). Tente de novo.'); return; }
+    // Daqui pra baixo é só tela/push: um erro aqui NÃO significa que o salvamento falhou,
+    // então isola em try/catch pra não cair no .catch de rede.
+    try {
+      if (btn) {
+        btn.textContent = '✓ Salvo';
+        setTimeout(() => { btn.textContent = '💾 Salvar retorno'; rerender(); }, 1500);
+      } else { rerender(); }
       // Avisa a vendedora no celular que a gestão respondeu o feedback dela.
       const emojiRet = status === 'excelente' ? '⭐' : status === 'reconhecida' ? '👏' : '📨';
       enviarPush({ loja, vendedora, titulo: `${emojiRet} Retorno da gestão pra você`,
         corpo: 'O Athila respondeu seu feedback — abre o app pra ler.' });
-    } else {
-      alert('Falha ao salvar. Tente de novo.');
-    }
+    } catch (e) { console.warn('[retorno] salvo, mas falhou a tela/push:', e); }
   }).catch(e => {
-    console.warn('[retorno] falha:', e);
-    alert('Sem conexão. Será reenviado quando voltar.');
+    console.warn('[retorno] falha de rede:', e);
+    alert('Sem conexão com o servidor. O retorno NÃO foi salvo — tente de novo.');
   });
 }
 
@@ -3153,7 +3158,7 @@ function renderResultadoSemanaPassada() {
       </select>
       <textarea id="ret-txt-${s.id}-${alvoVend}" class="sug-comment" style="min-height:54px;font-size:11px;margin-top:6px" placeholder="Mensagem pra ${quem}...">${textoInicial}</textarea>
       <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
-        <button class="sug-btn" style="background:rgba(124,92,252,.2);color:#9d8aff;border-color:rgba(124,92,252,.5);font-size:11px;padding:5px 10px" onclick="salvarRetornoFeedback('${s.id}','${s.loja}','${alvoVend}')">
+        <button class="sug-btn" style="background:rgba(124,92,252,.2);color:#9d8aff;border-color:rgba(124,92,252,.5);font-size:11px;padding:5px 10px" onclick="salvarRetornoFeedback('${s.id}','${s.loja}','${alvoVend}',this)">
           ${ret ? '💾 Atualizar' : '📨 Enviar pra ' + quem}
         </button>
         ${ret ? `<span style="font-size:10px;color:var(--green)">✓ enviado ${(ret.em||'').slice(0,10)}</span>` : ''}
@@ -3272,7 +3277,7 @@ function renderSugestoes() {
                 </select>
                 <textarea id="ret-txt-${fb.id_sugestao}-${fb.vendedora}" class="sug-comment" placeholder="Mensagem pra ela: o que você viu, o que espera..." style="min-height:50px;font-size:11px">${textoInicial}</textarea>
                 <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
-                  <button class="sug-btn" style="background:rgba(124,92,252,.2);color:#9d8aff;border-color:rgba(124,92,252,.5);font-size:11px;padding:5px 10px" onclick="salvarRetornoFeedback('${fb.id_sugestao}','${fb.loja}','${fb.vendedora}')">
+                  <button class="sug-btn" style="background:rgba(124,92,252,.2);color:#9d8aff;border-color:rgba(124,92,252,.5);font-size:11px;padding:5px 10px" onclick="salvarRetornoFeedback('${fb.id_sugestao}','${fb.loja}','${fb.vendedora}',this)">
                     ${ret ? '💾 Atualizar retorno' : ehSugestao ? '✓ Aprovar e enviar' : '💾 Salvar e enviar'}
                   </button>
                   ${ret ? `<span style="font-size:10px;color:var(--green)">enviado em ${(ret.em||'').slice(0,16).replace('T',' ')}</span>` : ''}
