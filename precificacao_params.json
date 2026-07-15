@@ -78,10 +78,13 @@
     "_doc": "Produtos da Santa Clara vendidos por UNIDADE (dividem). Chave = cProd do ERP; valor = unidades por pacote ('auto' = ler da descrição C/n; número = fixo quando a descrição não diz). Classificação validada 14/07/2026 via Histórico de Movimento (preço real de venda), 98% de acerto no gabarito do usuário. Lixas ficam fora (categoria 'ambos').",
     "272": "auto", "274": "auto", "354": "auto", "406": "auto", "775": "auto", "896": "auto",
     "2236": 12, "2238": 12, "2243": 12,
-    "2565": "auto", "3697": "auto", "4279": "auto", "4281": "auto"
+    "2565": "auto", "3697": "auto", "4279": "auto", "4281": "auto",
+    "_doc_lixas": "Regra do usuário 15/07/2026: lixa CUBO, lixa EVA e lixa de PLÁSTICO vendem a UNIDADE (entram aqui). Refil de lixa vende o PACOTE (fica no default, via santa_clara_ambos_excecoes). Só as lixas de PAPEL p/ unhas são 'ambos'.",
+    "752": "auto", "1075": "auto", "3205": "auto", "3694": "auto"
   },
   "santa_clara_ambos_categorias": ["LIXA"],
-  "_santa_clara_ambos_doc": "Categorias (substring na descrição) da Santa Clara vendidas COMO PACOTE E COMO UNIDADE. Preço principal = pacote (não divide); a tela mostra também o preço derivado por unidade (pacote ÷ divisor da descrição).",
+  "santa_clara_ambos_excecoes": ["REFIL", "REF.LIXA"],
+  "_santa_clara_ambos_doc": "Categorias (substring na descrição) da Santa Clara vendidas COMO PACOTE E COMO UNIDADE — na prática só as lixas de PAPEL p/ unhas. Preço principal = pacote (não divide); a tela mostra também o preço derivado por unidade (pacote ÷ divisor da descrição). 'santa_clara_ambos_excecoes' tira dessa categoria o que casa com 'LIXA' mas vende só o pacote (refil).",
   "_st_entrada_doc": "ICMS-ST antecipado na ENTRADA, somado ao custo do produto SEMPRE que o item for ST (determinado por NCM x CST do XML). % por UF de origem da nota (regra do usuário 23/06).",
   "st_entrada_por_uf": {
     "SP": 0.21,

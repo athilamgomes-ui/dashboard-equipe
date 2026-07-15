@@ -559,6 +559,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       const SC = norm("Santa Clara");
       const SC_UNID = PARAMS.santa_clara_por_unidade || {};              // cProd → 'auto' | número (vende UNIDADE: divide)
       const SC_AMBOS = (PARAMS.santa_clara_ambos_categorias || []).map(norm); // substrings (ex.: LIXA) que vendem pacote E unidade
+      const SC_AMBOS_EXC = (PARAMS.santa_clara_ambos_excecoes || []).map(norm); // batem em SC_AMBOS mas vendem só o PACOTE (ex.: REFIL de lixa)
       const scDivisorConfig = cfg => (cfg === "auto" || cfg === true) ? null : Number(cfg); // null = ler da descrição
       let comCredito = 0, comST = 0, semInfo = 0, convCaixa = 0;
       for (const L of Object.keys(lojas)) for (const nf of lojas[L]) {
@@ -578,7 +579,8 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
           } else if (norm(it.marca) === SC) {
             // Santa Clara: controle por produto. Divisor da descrição, exceto override numérico na config.
             const cfgUnid = SC_UNID[String(it.cprod)];
-            const ehLixa = SC_AMBOS.some(c => norm(it.descricao).includes(c));
+            const dsc = norm(it.descricao);
+            const ehLixa = SC_AMBOS.some(c => dsc.includes(c)) && !SC_AMBOS_EXC.some(c => dsc.includes(c));
             if (cfgUnid != null) {
               // vende UNIDADE → divide (preço da tela é por unidade)
               const fator = scDivisorConfig(cfgUnid) ?? divisorDescricao(it.descricao);
