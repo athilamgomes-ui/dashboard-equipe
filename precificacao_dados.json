@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-07-15T21:32:23.300Z",
+  "gerado_em": "2026-07-15T22:48:04.293Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
@@ -12086,13 +12086,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 689.9,
             "cod_erp": "80155",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "85163200",
             "cest": "2110300",
             "st": true,
-            "st_motivo": "nf",
-            "custo_erp": 263.99
+            "st_motivo": "nf"
           }
         ],
         "uf": "PR"
