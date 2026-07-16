@@ -492,14 +492,25 @@ document.getElementById("btnCsv").onclick=()=>{
 document.getElementById("btnTxtErp").onclick=()=>{
   const arr=DADOS.lojas[lojaAtual]||[]; const nf=arr[nfeSel];
   if(!nf){alert("Selecione uma NF-e.");return;}
-  const linhas=[]; let assoc=0, naoassoc=0, erro=0;
+  // A MESMA NF pode trazer o mesmo EAN em mais de uma linha (o fornecedor separa por lote/cProd:
+  // ex. NF 214716 Beauty Color, LPA02169 e LPA02369 = mesmo produto). Uma linha por item geraria
+  // EAN repetido e o ERP rejeita o arquivo inteiro ("produto X encontra-se repetido"). Agrupa por
+  // EAN: preço igual → 1 linha; preços diferentes → fica o MAIOR (nunca vender abaixo da margem)
+  // e avisa quais divergiram, p/ o usuário conferir. (16/07/2026)
+  const porEan=new Map(); let naoassoc=0, erro=0;
   for(const it of nf.itens){
     const k=itemKey(nf,it); const margem=margemItem(nf,it);
     const r=calc(it,margem); const f=finais(it,k,margem,r);
     if(!temEan(it)){naoassoc++; continue;}            // só os sem EAN ficam de fora
     if(f.erro||f.preco==null){erro++; continue;}
-    linhas.push(`${it.ean};${f.preco.toFixed(2).replace('.',',')}`); assoc++;
+    const p=+f.preco.toFixed(2), ant=porEan.get(it.ean);
+    if(!ant){ porEan.set(it.ean,{preco:p, n:1, divergiu:false, desc:it.descricao}); }
+    else { ant.n++; if(Math.abs(ant.preco-p)>=0.005) ant.divergiu=true; ant.preco=Math.max(ant.preco,p); }
   }
+  const dups=[...porEan.entries()].filter(([,v])=>v.n>1);
+  const diverg=dups.filter(([,v])=>v.divergiu);
+  const linhas=[...porEan.entries()].map(([ean,v])=>`${ean};${v.preco.toFixed(2).replace('.',',')}`);
+  const assoc=linhas.length;
   if(!linhas.length){alert("Nenhum item com EAN para gerar o arquivo.");return;}
   const blob=new Blob([linhas.join("\n")+"\n"],{type:"text/plain"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
@@ -507,6 +518,8 @@ document.getElementById("btnTxtErp").onclick=()=>{
   alert(`Arquivo gerado: ${assoc} produtos (por EAN/código de barras).`+
         (naoassoc?`\n⚠ ${naoassoc} sem EAN na NF (vermelhos) — cadastrar no ERP à mão.`:` 🎉 Todos com EAN!`)+
         (erro?`\n${erro} sem preço.`:``)+
+        (dups.length?`\nℹ ${dups.length} produto(s) vinham repetidos na NF (lotes diferentes) — juntados em 1 linha cada.`:``)+
+        (diverg.length?`\n⚠ Preço diferente entre as linhas repetidas — ficou o MAIOR, confira: ${diverg.map(([e,v])=>`${e} (${v.desc})`).join(" · ")}`:``)+
         `\n\nNo ERP: Estoque > Relatórios > Lista de Preços > "Ajuste de Preços" > "Arquivo para atualização de valores" > selecione o arquivo, marque "Código de Barras", Validar e Upload. Empresa ${(PARAMS.lojas[lojaAtual]||{}).empresa} · ${(PARAMS.lojas[lojaAtual]||{}).tabela_preco}.`);
 };
 
