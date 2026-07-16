@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-07-15T22:48:04.293Z",
+  "gerado_em": "2026-07-16T11:26:57.686Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
@@ -588,17 +588,16 @@
             "fcp_st": 0,
             "custo_cheio_total": 218.96,
             "custo_unit_cheio": 27.37,
-            "cst": "500",
-            "icms_pct": 7,
+            "cst": null,
+            "icms_pct": null,
             "credito_icms_pct": 0,
             "preco_atual": 55.9,
             "cod_erp": "17883",
             "match_tipo": "ref",
             "preco_manual": 52.9,
-            "ncm": "33072090",
-            "cest": null,
-            "st": true,
-            "st_motivo": "ncm",
+            "ncm": null,
+            "st": false,
+            "st_motivo": null,
             "custo_erp": 27.37
           },
           {
@@ -618,17 +617,16 @@
             "fcp_st": 0,
             "custo_cheio_total": 492.96,
             "custo_unit_cheio": 41.08,
-            "cst": "500",
-            "icms_pct": 7,
+            "cst": null,
+            "icms_pct": null,
             "credito_icms_pct": 0,
             "preco_atual": 98.9,
             "cod_erp": "202926",
             "match_tipo": "ean",
             "preco_manual": 85.9,
-            "ncm": "33072090",
-            "cest": null,
-            "st": true,
-            "st_motivo": "ncm",
+            "ncm": null,
+            "st": false,
+            "st_motivo": null,
             "custo_erp": 41.08
           },
           {
@@ -648,21 +646,20 @@
             "fcp_st": 0,
             "custo_cheio_total": 562.5,
             "custo_unit_cheio": 56.25,
-            "cst": "500",
-            "icms_pct": 7,
+            "cst": null,
+            "icms_pct": null,
             "credito_icms_pct": 0,
             "preco_atual": 103.9,
             "cod_erp": "5667",
             "match_tipo": "ean",
             "preco_manual": 109.9,
-            "ncm": "33072090",
-            "cest": null,
-            "st": true,
-            "st_motivo": "ncm",
+            "ncm": null,
+            "st": false,
+            "st_motivo": null,
             "custo_erp": 56.25
           }
         ],
-        "uf": "SC"
+        "uf": null
       },
       {
         "id": 4768,
@@ -12086,12 +12083,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 689.9,
             "cod_erp": "80155",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85163200",
             "cest": "2110300",
             "st": true,
-            "st_motivo": "nf"
+            "st_motivo": "nf",
+            "custo_erp": 263.99
           }
         ],
         "uf": "PR"
