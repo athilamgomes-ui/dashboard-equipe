@@ -401,7 +401,7 @@ function renderItens(){
     const margem = margemItem(nf,it);
     const r=calc(it,margem);
     const f=finais(it,k,margem,r);              // preço/markup/margem finais (considera edição manual)
-    const manual = precoOver[k]!=null || it.preco_manual!=null;
+    const manual = f.precoFixado; // preço travado por valor (digitado ou fixo do EAN) — não pela margem
     const pa = it.preco_atual;
     const delta = (pa!=null && f.preco!=null) ? (f.preco-pa) : null;
     return `<tr>
@@ -445,11 +445,14 @@ function margemDoPreco(item, preco){
 }
 // valores finais considerando preço manual (precoOver) se houver
 function finais(item,k,margem,r){
-  if(r.erro) return {preco:null,markup:null,margemReal:margem};
-  // prioridade: edição na tela (precoOver) > preço fixo do EAN (preco_manual) > calculado
-  const pFix = precoOver[k]!=null ? precoOver[k] : (item.preco_manual!=null ? item.preco_manual : null);
-  if(pFix!=null){ return {preco:pFix, markup:pFix/r.custo, margemReal:margemDoPreco(item,pFix), fixoEan:precoOver[k]==null}; }
-  return {preco:r.preco, markup:r.markup, margemReal:r.margemReal};
+  if(r.erro) return {preco:null,markup:null,margemReal:margem,precoFixado:false};
+  // Prioridade: preço digitado na tela (precoOver) > MARGEM PRÓPRIA do produto > preço fixo do EAN
+  // (preco_manual) > margem da marca. A margem própria tem que vencer o preço fixo, senão o usuário
+  // digita 20% e o preço não sai do lugar — o campo de margem viraria só um mostrador (16/07/2026).
+  const temMargemPropria = overrides[k]!=null || (item.ean && item.ean!=="SEM GTIN" && margensProduto[item.ean]!=null);
+  const pFix = precoOver[k]!=null ? precoOver[k] : ((item.preco_manual!=null && !temMargemPropria) ? item.preco_manual : null);
+  if(pFix!=null){ return {preco:pFix, markup:pFix/r.custo, margemReal:margemDoPreco(item,pFix), fixoEan:precoOver[k]==null, precoFixado:true}; }
+  return {preco:r.preco, markup:r.markup, margemReal:r.margemReal, precoFixado:false};
 }
 
 function linhasExport(){
