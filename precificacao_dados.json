@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-07-16T20:34:51.148Z",
+  "gerado_em": "2026-07-16T20:48:27.543Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
@@ -503,12 +503,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 55.9,
             "cod_erp": "17883",
-            "match_tipo": "ref*",
+            "match_tipo": "ref",
             "preco_manual": 52.9,
             "ncm": "33072090",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 27.37
           },
           {
             "cprod": "2100442",
@@ -532,12 +533,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 89.9,
             "cod_erp": "202926",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "preco_manual": 85.9,
             "ncm": "33072090",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 41.08
           },
           {
             "cprod": "1001342",
@@ -561,12 +563,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 103.9,
             "cod_erp": "5667",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "preco_manual": 109.9,
             "ncm": "33072090",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 56.25
           }
         ],
         "uf": "SC"
