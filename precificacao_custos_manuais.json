@@ -1,0 +1,4 @@
+{
+  "_leiame": "Custo cheio unitario REAL por EAN, para NFs subfaturadas (o XML/cadastro traz custo abaixo do real, ex. Itallian). A tela usa este valor no lugar do custo_unit_cheio do XML e recalcula o preco sugerido pela formula normal. NAO toca no ERP. Chave = EAN (string), valor = custo em reais (numero, ponto decimal). Chaves comecando com _ sao ignoradas.",
+  "_exemplo": 12.34
+}
