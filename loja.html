@@ -2315,6 +2315,10 @@ async function init() {
   // (via UI que POSTa pro Worker). Sem aprovação no painel → retorno NÃO aparece no app.
   // Não há mais PRESET pré-aprovado — isso permitia que textos do sistema aparecessem
   // pra vendedoras como se fosse o Athila.
+  function _retornosDoCache() {
+    try { return JSON.parse(localStorage.getItem('retornos_cache_' + LOJA_KEY) || '[]'); }
+    catch(_) { return []; }
+  }
   try {
     const [wr, sup] = await Promise.all([
       fetch(`${WORKER_URL}/feedback-retornos`, {cache: 'no-store'}).then(r=>r.json()).catch(()=>({items:[]})),
@@ -2322,11 +2326,22 @@ async function init() {
     ]);
     // status 'removido' = lápide: o admin apagou o retorno. Enquanto o Worker não
     // tiver rota DELETE, é assim que um retorno sai do ar (ver RETORNO_REMOVIDO).
-    window.__RETORNOS_DONO = mergeItens(wr.items, sup, x => `${x.id_sugestao}|${x.loja}|${x.vendedora}`)
+    const lista = mergeItens(wr.items, sup, x => `${x.id_sugestao}|${x.loja}|${x.vendedora}`)
       .filter(x => x.loja === LOJA_KEY && x.status !== 'removido');
+    // Só sobrescreve o cache quando veio conteúdo. Uma resposta vazia por falha
+    // silenciosa (o .catch acima devolve {items:[]}) não pode apagar a mensagem
+    // que a vendedora já recebeu — ver bug de 21/07/2026.
+    if (lista.length) {
+      window.__RETORNOS_DONO = lista;
+      try { localStorage.setItem('retornos_cache_' + LOJA_KEY, JSON.stringify(lista)); } catch(_) {}
+    } else {
+      window.__RETORNOS_DONO = _retornosDoCache();
+    }
   } catch (e) {
-    window.__RETORNOS_DONO = [];
-    console.warn('[init] /feedback-retornos falhou — sem retornos disponíveis:', e);
+    // Rede caiu: mostrar o último retorno conhecido é MUITO melhor que sumir com
+    // a mensagem do dono — o sintoma que a gerente da L3 relatou.
+    window.__RETORNOS_DONO = _retornosDoCache();
+    console.warn('[init] /feedback-retornos falhou — usando cache local:', e);
   }
 
   // Sincroniza quizzes respondidos do Worker. Sem isso, vendedora que respondeu
@@ -4139,8 +4154,14 @@ if ('serviceWorker' in navigator) {
         if (!nw) return;
         nw.addEventListener('statechange', () => {
           if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('[SW] versao nova detectada, atualizando...');
-            setTimeout(() => location.reload(), 1500);
+            // Mesmo motivo do auto-update acima (bug 21/07/2026): recarregar por
+            // cima da tela derruba a vendedora do que ela está lendo. Só recarrega
+            // sozinho se o app estiver em segundo plano; à vista, espera ela sair.
+            console.log('[SW] versao nova detectada');
+            if (document.hidden) setTimeout(() => location.reload(), 1500);
+            else document.addEventListener('visibilitychange', function once() {
+              if (document.hidden) { document.removeEventListener('visibilitychange', once); location.reload(); }
+            });
           }
         });
       });
@@ -4150,19 +4171,58 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
-// Auto-update check: detecta mudanca via Last-Modified header (mais confiavel que SW)
+// Auto-update check via Last-Modified.
+//
+// ⚠️ BUG CORRIGIDO 21/07/2026 (gerente da L3: "toda vez que entro no app a
+// mensagem some, o app fica saindo"). A versão anterior comparava só
+// `lm !== lastModified` e dava location.reload() na hora. O GitHub Pages serve
+// de vários nós de CDN que, durante a propagação, devolvem Last-Modified
+// DIFERENTES pro mesmo arquivo — então o valor ficava alternando A→B→A e o app
+// entrava em LOOP DE RELOAD a cada ~35s, jogando a vendedora fora da tela que
+// ela estava lendo.
+//
+// Três travas agora:
+//   1. só reage a versão ESTRITAMENTE MAIS NOVA (compara como data, não string)
+//   2. exige 2 leituras seguidas do mesmo valor novo (mata o flap da CDN)
+//   3. NUNCA recarrega com a tela à vista — mostra um aviso discreto e deixa
+//      ela decidir. Recarga automática só com o app em segundo plano.
 (function(){
-  let lastModified = null;
+  let atual = null;       // Last-Modified da versão que está rodando
+  let candidato = null;   // valor novo aguardando confirmação
+  let avisando = false;
+
+  function mostrarAviso() {
+    if (avisando || document.getElementById('upd-banner')) return;
+    avisando = true;
+    const b = document.createElement('div');
+    b.id = 'upd-banner';
+    b.style.cssText = 'position:fixed;left:12px;right:12px;bottom:16px;z-index:9999;' +
+      'background:#111;color:#fff;border-radius:12px;padding:12px 14px;display:flex;' +
+      'align-items:center;gap:10px;box-shadow:0 6px 24px rgba(0,0,0,.35);font-size:14px';
+    b.innerHTML = '<span style="flex:1">Tem uma versão nova do app.</span>' +
+      '<button id="upd-go" style="background:#fff;color:#111;border:0;border-radius:8px;' +
+      'padding:8px 12px;font-weight:600">Atualizar</button>' +
+      '<button id="upd-no" style="background:transparent;color:#aaa;border:0;font-size:20px;' +
+      'line-height:1;padding:4px 6px">×</button>';
+    document.body.appendChild(b);
+    b.querySelector('#upd-go').onclick = () => location.reload();
+    b.querySelector('#upd-no').onclick = () => { b.remove(); avisando = false; };
+  }
+
   async function checkUpdate() {
     try {
       const r = await fetch(location.pathname + '?_=' + Date.now(), {method:'HEAD', cache:'no-store'});
       const lm = r.headers.get('last-modified');
       if (!lm) return;
-      if (lastModified === null) { lastModified = lm; return; }
-      if (lm !== lastModified) {
-        console.log('[auto-update] nova versao detectada');
-        location.reload();
-      }
+      if (atual === null) { atual = lm; return; }
+      // trava 1: só versão mais nova. Voltar pra uma anterior (nó atrasado da
+      // CDN) é ruído, não atualização.
+      if (!(new Date(lm) > new Date(atual))) { candidato = null; return; }
+      // trava 2: confirmar na leitura seguinte antes de agir
+      if (candidato !== lm) { candidato = lm; return; }
+      // trava 3: com a tela à vista, avisar em vez de recarregar por cima dela
+      if (document.hidden) { atual = lm; location.reload(); }
+      else mostrarAviso();
     } catch(e) {}
   }
   window.addEventListener('load', () => {

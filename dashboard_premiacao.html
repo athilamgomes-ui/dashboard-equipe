@@ -2818,6 +2818,7 @@ function gerarMensagemFeedback(sug, m) {
     // O acumulado usado na conta de ritmo é o do FECHAMENTO da semana avaliada.
     // Mas quando ela lê a mensagem a semana seguinte já correu, então mostrar
     // esse número como "no mês" faz ele divergir do app. Dizemos os dois.
+    const s0 = c.serie;   // série de semanas fechadas dela (mediana/máximo)
     const linhaHoje = (c.total_hoje && c.total_hoje > c.acumulado)
       ? ` Hoje você já está em ${fmtR(c.total_hoje)}.` : '';
     // Quando a projeção passa da primeira faixa, mostrar as DUAS distâncias:
@@ -2846,26 +2847,33 @@ function gerarMensagemFeedback(sug, m) {
         `Parabéns de verdade.`;
     }
     if (m.status === 'funcionou') {
-      return `${nome}, você está no ritmo: ${fmtR(c.acumulado)} no mês até o fechamento da ` +
-        `semana, quando o esperado a esta altura era ${fmtR(c.esperado)} (${m.deltaStr}).` +
-        `${linhaHoje}${linhaSemana} Nesse passo você projeta fechar em ${fmtR(c.projecao)}.` +
-        `${escada} São ${fmtR(porSem)} por semana nas ${c.semanas_restantes} que restam. ` +
-        `Segue exatamente assim.`;
+      // ⚠️ NUNCA dizer "o esperado a esta altura era R$X". Athila, 21/07/2026:
+      // "como eu posso esperar pouco da minha vendedora? a intenção do app é
+      // puxar as vendedoras para que elas se superem". A régua do texto é sempre
+      // a FAIXA DO PRÊMIO e o recorde dela — nunca uma expectativa média que,
+      // sendo superada, comunica que se pedia pouco.
+      const recorde = s0 && s0.maximo ? ` Seu recorde numa semana é ${fmtR(s0.maximo)}.` : '';
+      return `${nome}, ${fmtR(c.acumulado)} no mês até o fechamento da semana.` +
+        `${linhaHoje}${linhaSemana} Mantendo esse passo você fecha o mês em ${fmtR(c.projecao)}.` +
+        `${escada} São ${fmtR(porSem)} por semana nas ${c.semanas_restantes} que restam.${recorde} ` +
+        `Você está entre as que mais vendem — agora a pergunta não é se você chega, ` +
+        `é até onde você consegue ir.`;
     }
     // ⚠️ TESTE DE REALIDADE antes de pedir qualquer coisa. Se o "faltam R$X por
     // semana" for maior do que a melhor semana que ela já fez, prometer que "é
     // alcançável" é criar fracasso no papel — a lição do caso Brunna (15/07) e do
     // scripts/baseline_justa.mjs. Nesse caso a mensagem troca o alvo do mês por
     // um alvo semanal que ela de fato consegue perseguir.
-    const s = c.serie;
+    const s = s0;
     const viavel = !s || !s.maximo ? true : porSem <= s.maximo;
 
     if (m.status === 'parcial' && viavel) {
-      return `${nome}, você está perto do ritmo: ${fmtR(c.acumulado)} no mês contra ` +
-        `${fmtR(c.esperado)} esperados (${m.deltaStr}).${linhaHoje}${linhaSemana} ` +
-        `Pra fechar nos ${fmtR(c.alvo_mes)} faltam ${fmtR(c.falta)} em ${c.semanas_restantes} ` +
-        `semana(s) — ${fmtR(porSem)} por semana, e você já fez ${fmtR(s ? s.maximo : porSem)} numa ` +
-        `semana. Dá pra buscar: oferecer Marca A já na primeira sugestão e fechar o combo de 3 produtos.`;
+      return `${nome}, ${fmtR(c.acumulado)} no mês até o fechamento da semana.` +
+        `${linhaHoje}${linhaSemana} Os ${fmtR(c.alvo_mes)} estão ao seu alcance: faltam ` +
+        `${fmtR(c.falta)} em ${c.semanas_restantes} semana(s), ou seja ${fmtR(porSem)} por semana — ` +
+        `e você já fez ${fmtR(s ? s.maximo : porSem)} numa semana, então é território conhecido. ` +
+        `O caminho mais curto é oferecer Marca A já na primeira sugestão e fechar o combo de ` +
+        `3 produtos. Vai depender de repetir o seu melhor, não de fazer algo novo.`;
     }
     if (!viavel) {
       // Alvo do mês fora de alcance: ser honesto e trocar por um alvo que valha a pena.
@@ -2881,13 +2889,13 @@ function gerarMensagemFeedback(sug, m) {
         `É esse o alvo. Me diz o que precisa da minha parte pra chegar lá.`;
     }
     // fora do ritmo, mas ainda matematicamente ao alcance dela
-    return `${nome}, vamos falar com clareza: você está em ${fmtR(c.acumulado)} no mês e ` +
-      `o ritmo pros ${fmtR(c.alvo_mes)} pedia ${fmtR(c.esperado)} a esta altura (${m.deltaStr}).` +
-      `${linhaHoje}${linhaSemana} Mantendo esse passo o mês fecharia em ${fmtR(c.projecao)}. ` +
-      `Pra virar o jogo faltam ${fmtR(c.falta)} em ${c.semanas_restantes} semana(s), ` +
-      `o que dá ${fmtR(porSem)} por semana — você já chegou a ${fmtR(s ? s.maximo : porSem)} numa ` +
-      `semana, então está dentro do que você consegue. Quero entender com você o que está travando — ` +
-      `se é fluxo de cliente, escala ou abordagem — e montar o plano junto. Ainda dá tempo.`;
+    return `${nome}, vamos falar com clareza: ${fmtR(c.acumulado)} no mês até o fechamento ` +
+      `da semana.${linhaHoje}${linhaSemana} Mantendo esse passo o mês fecharia em ${fmtR(c.projecao)}, ` +
+      `abaixo dos ${fmtR(c.alvo_mes)}. Pra virar o jogo faltam ${fmtR(c.falta)} em ` +
+      `${c.semanas_restantes} semana(s), o que dá ${fmtR(porSem)} por semana — e você já chegou a ` +
+      `${fmtR(s ? s.maximo : porSem)} numa semana, então isso está dentro do que VOCÊ já provou que ` +
+      `consegue. Não é um número novo, é o seu melhor repetido. Quero entender com você o que está ` +
+      `travando — se é fluxo de cliente, escala ou abordagem — e montar o plano junto.`;
   }
 
   if (sug.meta_alvo === 'vendas_individuais' && nome) {
