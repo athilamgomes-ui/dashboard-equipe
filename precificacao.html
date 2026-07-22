@@ -144,6 +144,12 @@ let DADOS=null, PARAMS=null, PARAMS_FILE=null, lojaAtual="L1", nfeSel=null, over
 // traz o custo abaixo do real (ex. Itallian) → aqui entra o custo cheio unitário REAL do pedido, e o
 // preço sugerido recalcula pela fórmula normal. NÃO toca no ERP; é só a sugestão da tela. (17/07/2026)
 let CUSTOS_MANUAIS={};
+// EAN manual por código do fornecedor (arquivo precificacao_eans_manuais.json): alguns itens vêm
+// "SEM GTIN" na NFe (o fornecedor não informou o código de barras) — sem EAN o produto não entra no
+// .txt do ERP nem aceita custo/margem por EAN. Aqui o usuário informa o EAN de cadastro do produto.
+// Chave: "CNPJ:CPROD" (preferida) ou só "CPROD". Só preenche item que está SEM GTIN — nunca
+// sobrescreve EAN que veio na nota. (18/07/2026)
+let EANS_MANUAIS={};
 
 const brl = v => (v==null||isNaN(v))?"—":v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const pct = v => (v==null||isNaN(v))?"—":(v*100).toFixed(1)+"%";
@@ -161,11 +167,18 @@ async function carregar(){
     fetch("precificacao_params.json?v="+Date.now()).then(r=>r.json()),
   ]);
   CUSTOS_MANUAIS=await fetch("precificacao_custos_manuais.json?v="+Date.now()).then(r=>r.ok?r.json():{}).catch(()=>({}));
+  EANS_MANUAIS=await fetch("precificacao_eans_manuais.json?v="+Date.now()).then(r=>r.ok?r.json():{}).catch(()=>({}));
   filtraConcluidas(d);
   DADOS=d; PARAMS=p;
   PARAMS_FILE=JSON.parse(JSON.stringify(p)); // padrão oficial do arquivo, ANTES do override do navegador
   loadMargensLocal(); await loadMargensSupabase(); // últimas margens por marca
-  for(const L of LOJAS) for(const nf of (d.lojas[L]||[])) for(const it of nf.itens) it._uf=nf.uf; // UF da NF em cada item (p/ ST entrada)
+  for(const L of LOJAS) for(const nf of (d.lojas[L]||[])) for(const it of nf.itens){
+    it._uf=nf.uf; // UF da NF em cada item (p/ ST entrada)
+    if(!it.ean || it.ean==="SEM GTIN"){ // item veio sem código de barras → tenta EAN manual (CNPJ:cprod > cprod)
+      const e=EANS_MANUAIS[(nf.cnpj||"")+":"+it.cprod] ?? EANS_MANUAIS[String(it.cprod)];
+      if(e){ it.ean=String(e); it._eanManual=true; }
+    }
+  }
   mergeConfigLocal();
   renderAvisoConfig();
   elMargem.value = Math.round((p.margem._default||0.15)*100);
@@ -412,7 +425,7 @@ function renderItens(){
     const pa = it.preco_atual;
     const delta = (pa!=null && f.preco!=null) ? (f.preco-pa) : null;
     return `<tr>
-      <td class="l desc" title="${it.descricao}">${it.descricao}${it.unidades_por_caixa?` <span class="pill" style="background:#fef3c7;color:#92400e;font-size:10px">📦 emb. c/ ${it.unidades_por_caixa} un — preço por UNIDADE</span>`:''}${it.unidades_no_pacote?` <span class="pill" style="background:#e0e7ff;color:#3730a3;font-size:10px">📦 pacote c/ ${it.unidades_no_pacote} un — mostra pacote e unidade</span>`:''}<div class="muted" style="font-size:11px">cód ${it.cprod}${it.ean&&it.ean!=='SEM GTIN'?' · '+it.ean:''} · ${statusErp(it)}</div></td>
+      <td class="l desc" title="${it.descricao}">${it.descricao}${it.unidades_por_caixa?` <span class="pill" style="background:#fef3c7;color:#92400e;font-size:10px">📦 emb. c/ ${it.unidades_por_caixa} un — preço por UNIDADE</span>`:''}${it.unidades_no_pacote?` <span class="pill" style="background:#e0e7ff;color:#3730a3;font-size:10px">📦 pacote c/ ${it.unidades_no_pacote} un — mostra pacote e unidade</span>`:''}<div class="muted" style="font-size:11px">cód ${it.cprod}${it.ean&&it.ean!=='SEM GTIN'?' · '+it.ean+(it._eanManual?' <span class="pill" style="background:#fce7f3;color:#9d174d;font-size:10px" title="a NF veio SEM código de barras; EAN informado manualmente (precificacao_eans_manuais.json)">✍ EAN manual</span>':''):''} · ${statusErp(it)}</div></td>
       <td class="l">${it.marca||'<span class="muted">—</span>'}</td>
       <td class="mono">${it.qtd}</td>
       <td class="mono" title="NCM ${it.ncm||'—'} · CST ${it.cst||'—'} · ICMS ${it.icms_pct!=null?it.icms_pct+'%':'—'}${it.st?' · ST'+(it.st_motivo==='ncm'?' (NCM na lista SEFA-PA)':' (sinal da NF — revisar NCM)')+(stEntradaPct(it)>0?` · +${(stEntradaPct(it)*100).toFixed(0)}% ST entrada (UF ${it._uf||'?'}) somado ao custo`:'')+' · imposto 0% na venda':(it.credito_icms_pct>0?' · crédito de ICMS aplicado':' · sem crédito')}">${brl(r.custo)}${custoManual(it)!=null?` <span class="pill" style="background:#dbeafe;color:#1e40af;font-size:10px" title="Custo real informado manualmente (PDF do pedido) porque a NF veio subfaturada. XML dizia ${brl(it.custo_unit_cheio)}.">✍ custo real ${brl(custoManual(it))}</span>`:''}${(()=>{const cr=creditoItem(it);if(cr>0)return ` <span class="pill l" style="font-size:10px">crédito −${(cr*100).toFixed(0)}% ICMS</span>`;if(it.st){const se=stEntradaPct(it);return ` <span class="pill t" style="font-size:10px">ST${it.st_motivo==='nf'?'?':''}${se>0?' +'+(se*100).toFixed(0)+'%':''}</span>`;}return '';})()}</td>
