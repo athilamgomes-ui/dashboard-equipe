@@ -2778,28 +2778,20 @@ function gerarMensagemFeedback(sug, m) {
     const quaseLa = (c.lista || []).filter(x => x.acum < c.alvo_mes && x.projecao >= c.alvo_mes)
       .slice(0, 3).map(x => x.vend.split(' ')[0]).join(', ');
     const abertura = c.bateram > 0
-      ? `${c.bateram === 1 ? 'Uma de vocês já garantiu' : c.bateram + ' de vocês já garantiram'} ` +
-        `o prêmio individual de ${fmtR(c.alvo_mes)} — ${garantidas}. ` +
-        (quaseLa ? `${quaseLa} estão logo atrás e devem fechar também. ` : '')
+      ? `${c.bateram === 1 ? 'Uma já garantiu' : c.bateram + ' já garantiram'} os ${fmtR(c.alvo_mes)}: ${garantidas}. ` +
+        (quaseLa ? `${quaseLa} logo atrás. ` : '')
       : `Ninguém fechou os ${fmtR(c.alvo_mes)} ainda. `;
-    const meio = `No total, ${c.no_ritmo} de ${c.total} estão no ritmo pra chegar lá, ` +
-      `e ${c.projetam} projetam fechar acima dos ${fmtR(c.alvo_mes)} mantendo o passo atual. ` +
-      `Por loja: ${porLoja}.`;
+    const meio = `${c.no_ritmo}/${c.total} no ritmo. Por loja: ${porLoja}.`;
     if (m.status === 'funcionou') {
-      return `Time, a corrida está pegando: ${abertura}${meio} ` +
-        `A maioria está no jogo — quem ainda não entrou, dá tempo. Continuem oferecendo ` +
-        `Marca A pra todo cliente: é o que mais move o número individual.`;
+      return `Time! ${abertura}${meio} A maioria no jogo — quem falta, dá tempo. ` +
+        `Marca A pra todo cliente é o que mais move o número. 💪`;
     }
     if (m.status === 'parcial') {
-      return `Time, a corrida está dividida: ${abertura}${meio} ` +
-        `Metade do grupo ainda está fora do ritmo — e a diferença não é esforço, é método. ` +
-        `Quem está na frente está oferecendo Marca A logo na primeira sugestão e fechando ` +
-        `combo de 3 produtos. Vamos trocar isso entre as lojas nessa semana.`;
+      return `Time! ${abertura}${meio} Quem está na frente oferece Marca A logo de cara e fecha combo de 3. ` +
+        `Vamos espalhar isso essa semana. 👊`;
     }
-    return `Time, precisamos falar da corrida com franqueza: ${abertura}${meio} ` +
-      `A maior parte do grupo não está no ritmo, e isso não se resolve pedindo mais esforço — ` +
-      `vou sentar loja por loja pra entender o que está travando (fluxo de cliente, escala, ` +
-      `estoque ou abordagem) e ajustar o que for da minha parte.`;
+    return `Time, com franqueza: ${abertura}${meio} A maioria fora do ritmo não é esforço, é método — ` +
+      `vou sentar loja por loja pra destravar (fluxo, escala, estoque ou abordagem).`;
   }
 
   // Sugestão de objetivo MENSAL ("chegar nos R$31.000"). O feedback tem que
@@ -2808,94 +2800,48 @@ function gerarMensagemFeedback(sug, m) {
   if (sug.meta_alvo === 'meta_mensal_individual' && nome) {
     const c = m.ctxMes || {};
     const porSem = c.semanas_restantes > 0 ? c.falta / c.semanas_restantes : c.falta;
-    const cumpriuSemana = c.pct_semana !== null && c.pct_semana >= 100;
-    const linhaSemana = c.pedido_semana
-      ? (cumpriuSemana
-          ? ` Essa semana você entregou os ${fmtR(c.pedido_semana)} que combinamos (${fmtR(c.semana_rs)}) — obrigado.`
-          : ` Essa semana o combinado era ${fmtR(c.pedido_semana)} e fechou em ${fmtR(c.semana_rs)}.`)
-      : '';
+    const s0 = c.serie;              // série de semanas fechadas dela (mediana/máximo)
+    const agora = c.total_hoje && c.total_hoje > c.acumulado ? c.total_hoje : c.acumulado;
+    // As DUAS distâncias — pros R$31.000 (prêmio base) e pra faixa mais alta que
+    // ela mira (pedido do Athila, 21/07). Uma linha só.
+    const duasFaltas = (!c.faixa_conquistada && c.alvo_mes > c.base_31k)
+      ? `Faltam ${fmtR(c.falta_31k)} pros ${fmtR(c.base_31k)} e ${fmtR(c.falta)} pros ${fmtR(c.alvo_mes)}${c.faixa_alvo ? ` (${fmtR(c.faixa_alvo.premio)})` : ''}.`
+      : `Faltam ${fmtR(c.falta)}.`;
+    const recTxt = s0 && s0.maximo ? ` (já fez ${fmtR(s0.maximo)} numa)` : '';
 
-    // O acumulado usado na conta de ritmo é o do FECHAMENTO da semana avaliada.
-    // Mas quando ela lê a mensagem a semana seguinte já correu, então mostrar
-    // esse número como "no mês" faz ele divergir do app. Dizemos os dois.
-    const s0 = c.serie;   // série de semanas fechadas dela (mediana/máximo)
-    const linhaHoje = (c.total_hoje && c.total_hoje > c.acumulado)
-      ? ` Hoje você já está em ${fmtR(c.total_hoje)}.` : '';
-    // Quando a projeção passa da primeira faixa, mostrar as DUAS distâncias:
-    // o que garante o prêmio base e o que sobe de faixa (pedido do Athila).
-    const escada = (() => {
-      if (c.faixa_conquistada && c.alvo_mes > c.faixa_conquistada.valor) {
-        return ` Você já garantiu os ${fmtR(c.faixa_conquistada.valor)} ` +
-          `(prêmio de ${fmtR(c.faixa_conquistada.premio)}); pros ${fmtR(c.alvo_mes)} ` +
-          `${c.faixa_alvo ? `(${fmtR(c.faixa_alvo.premio)}) ` : ''}faltam ${fmtR(c.falta)}.`;
-      }
-      if (!c.faixa_conquistada && c.alvo_mes > c.base_31k) {
-        return ` Pros ${fmtR(c.base_31k)} do prêmio base faltam ${fmtR(c.falta_31k)}; ` +
-          `pros ${fmtR(c.alvo_mes)}${c.faixa_alvo ? ` (${fmtR(c.faixa_alvo.premio)})` : ''}, ${fmtR(c.falta)}.`;
-      }
-      return ` Faltam ${fmtR(c.falta)}.`;
-    })();
+    // Mensagens CURTAS e diretas (Athila, 22/07/2026). Régua = faixa do prêmio e
+    // recorde dela, nunca "o esperado era X" (isso comunica que se pedia pouco).
 
     if (c.acumulado >= c.alvo_mes) {
       const proxima = c.prox_faixa
-        ? ` A próxima faixa são ${fmtR(c.prox_faixa.valor)} (${fmtR(c.prox_faixa.premio)}) — ` +
-          `faltam ${fmtR(c.prox_faixa.valor - c.acumulado)}.`
-        : ` Você passou de todas as faixas do prêmio individual.`;
-      return `${nome}, conseguiu: ${fmtR(c.acumulado)} no mês até o fechamento da semana — ` +
-        `você passou dos ${fmtR(c.alvo_mes)} e o prêmio individual é seu, faltando ` +
-        `${c.semanas_restantes} semana(s) pro mês fechar.${linhaHoje}${linhaSemana}${proxima} ` +
-        `Parabéns de verdade.`;
+        ? ` Próxima faixa: ${fmtR(c.prox_faixa.valor)} (${fmtR(c.prox_faixa.premio)}), faltam ${fmtR(c.prox_faixa.valor - c.acumulado)}.`
+        : '';
+      return `${nome}, conseguiu! ${fmtR(agora)} no mês, prêmio garantido 🎉${proxima} Parabéns!`;
     }
     if (m.status === 'funcionou') {
-      // ⚠️ NUNCA dizer "o esperado a esta altura era R$X". Athila, 21/07/2026:
-      // "como eu posso esperar pouco da minha vendedora? a intenção do app é
-      // puxar as vendedoras para que elas se superem". A régua do texto é sempre
-      // a FAIXA DO PRÊMIO e o recorde dela — nunca uma expectativa média que,
-      // sendo superada, comunica que se pedia pouco.
-      const recorde = s0 && s0.maximo ? ` Seu recorde numa semana é ${fmtR(s0.maximo)}.` : '';
-      return `${nome}, ${fmtR(c.acumulado)} no mês até o fechamento da semana.` +
-        `${linhaHoje}${linhaSemana} Mantendo esse passo você fecha o mês em ${fmtR(c.projecao)}.` +
-        `${escada} São ${fmtR(porSem)} por semana nas ${c.semanas_restantes} que restam.${recorde} ` +
-        `Você está entre as que mais vendem — agora a pergunta não é se você chega, ` +
-        `é até onde você consegue ir.`;
+      return `${nome}, ${fmtR(agora)} no mês, indo muito bem 💪 No seu ritmo fecha em ${fmtR(c.projecao)}. ${duasFaltas} ` +
+        `São ${fmtR(porSem)}/semana — você é uma das que mais vende, bora ver até onde dá.`;
     }
-    // ⚠️ TESTE DE REALIDADE antes de pedir qualquer coisa. Se o "faltam R$X por
-    // semana" for maior do que a melhor semana que ela já fez, prometer que "é
-    // alcançável" é criar fracasso no papel — a lição do caso Brunna (15/07) e do
-    // scripts/baseline_justa.mjs. Nesse caso a mensagem troca o alvo do mês por
-    // um alvo semanal que ela de fato consegue perseguir.
+    // Teste de realidade: se o "por semana" for maior que o recorde dela, não
+    // prometer o alvo do mês — trocar por um alvo semanal que ela alcança (lição
+    // do caso Brunna, 15/07 + baseline_justa.mjs).
     const s = s0;
     const viavel = !s || !s.maximo ? true : porSem <= s.maximo;
 
     if (m.status === 'parcial' && viavel) {
-      return `${nome}, ${fmtR(c.acumulado)} no mês até o fechamento da semana.` +
-        `${linhaHoje}${linhaSemana} Os ${fmtR(c.alvo_mes)} estão ao seu alcance: faltam ` +
-        `${fmtR(c.falta)} em ${c.semanas_restantes} semana(s), ou seja ${fmtR(porSem)} por semana — ` +
-        `e você já fez ${fmtR(s ? s.maximo : porSem)} numa semana, então é território conhecido. ` +
-        `O caminho mais curto é oferecer Marca A já na primeira sugestão e fechar o combo de ` +
-        `3 produtos. Vai depender de repetir o seu melhor, não de fazer algo novo.`;
+      return `${nome}, ${fmtR(agora)} no mês. ${duasFaltas} São ${fmtR(porSem)}/semana${recTxt} — dá pra buscar. ` +
+        `Oferece Marca A logo de cara e fecha combo de 3. 👊`;
     }
     if (!viavel) {
-      // Alvo do mês fora de alcance: ser honesto e trocar por um alvo que valha a pena.
-      const alvoReal = Math.round((s.maximo * 1.1) / 50) * 50;   // +10% sobre a melhor semana dela
+      const alvoReal = Math.round((s.maximo * 1.1) / 50) * 50;   // +10% sobre o recorde dela
       const fecharia = c.acumulado + alvoReal * c.semanas_restantes;
-      return `${nome}, vou ser transparente com você porque acho que é o mais justo: ` +
-        `você está em ${fmtR(c.acumulado)} no mês e fechar os ${fmtR(c.alvo_mes)} exigiria ` +
-        `${fmtR(porSem)} por semana nas ${c.semanas_restantes} semanas que restam — sendo que sua ` +
-        `melhor semana até agora foi ${fmtR(s.maximo)}.${linhaHoje}${linhaSemana} Ou seja: esse número ` +
-        `provavelmente não fecha desta vez, e eu não vou cobrar de você uma conta que não fecha. ` +
-        `O que eu quero de verdade é o seu melhor mês: se você fizer ${fmtR(alvoReal)} por semana — ` +
-        `um pouco acima do seu recorde — o mês fecha em ${fmtR(fecharia)}, o seu melhor resultado. ` +
-        `É esse o alvo. Me diz o que precisa da minha parte pra chegar lá.`;
+      return `${nome}, vou ser sincero: os ${fmtR(c.alvo_mes)} pedem ${fmtR(porSem)}/semana e seu recorde é ${fmtR(s.maximo)}. ` +
+        `Não quero te cobrar conta que não fecha. Teu alvo é ${fmtR(alvoReal)}/semana → mês em ${fmtR(fecharia)}, teu melhor. ` +
+        `Me diz como te ajudo.`;
     }
-    // fora do ritmo, mas ainda matematicamente ao alcance dela
-    return `${nome}, vamos falar com clareza: ${fmtR(c.acumulado)} no mês até o fechamento ` +
-      `da semana.${linhaHoje}${linhaSemana} Mantendo esse passo o mês fecharia em ${fmtR(c.projecao)}, ` +
-      `abaixo dos ${fmtR(c.alvo_mes)}. Pra virar o jogo faltam ${fmtR(c.falta)} em ` +
-      `${c.semanas_restantes} semana(s), o que dá ${fmtR(porSem)} por semana — e você já chegou a ` +
-      `${fmtR(s ? s.maximo : porSem)} numa semana, então isso está dentro do que VOCÊ já provou que ` +
-      `consegue. Não é um número novo, é o seu melhor repetido. Quero entender com você o que está ` +
-      `travando — se é fluxo de cliente, escala ou abordagem — e montar o plano junto.`;
+    // fora do ritmo, mas ainda ao alcance dela
+    return `${nome}, vamos com franqueza: ${fmtR(agora)} no mês, nesse passo fecha em ${fmtR(c.projecao)} (abaixo dos ${fmtR(c.alvo_mes)}). ` +
+      `São ${fmtR(porSem)}/semana${recTxt} — dá. Vamos sentar pra ver o que travou.`;
   }
 
   if (sug.meta_alvo === 'vendas_individuais' && nome) {
@@ -2911,17 +2857,15 @@ function gerarMensagemFeedback(sug, m) {
       : ` (${fmtR(m.baseline)} → ${fmtR(m.resultado)})`;
 
     if (m.status === 'funcionou') {
-      return `${nome}, suas vendas cresceram ${m.deltaStr}${notaSem}. Excelente trabalho! ` +
-        `Continua nessa pegada — as técnicas que você usou essa semana estão funcionando.`;
+      return `${nome}, suas vendas cresceram ${m.deltaStr}${notaSem} 👏 Continua nessa pegada!`;
     }
     if (m.status === 'parcial') {
       return `${nome}, suas vendas subiram ${m.deltaStr} essa semana${notaSem}. Tá no caminho — ` +
-        `pra subir mais, foca em oferecer Marcas A já na primeira sugestão ao cliente.`;
+        `pra subir mais, oferece Marca A logo na primeira sugestão. 👊`;
     }
     // não funcionou
-    return `${nome}, essa semana suas vendas ficaram em ${m.deltaStr}${notaSem}. ` +
-      `Vamos sentar e olhar o que aconteceu — pode ser escala, cliente, ou ajuste ` +
-      `de abordagem. A próxima semana é nova.`;
+    return `${nome}, essa semana as vendas ficaram em ${m.deltaStr}${notaSem}. ` +
+      `Vamos sentar pra ver o que travou — semana nova, jogo novo.`;
   }
 
   if (sug.meta_alvo === 'atingir_meta' && isWeekendComparison) {
@@ -2945,15 +2889,14 @@ function gerarMensagemFeedback(sug, m) {
   if (sug.meta_alvo === 'marcas_a' && sug.escopo === 'loja') {
     const lojaLabel = LOJAS_BASE[sug.loja]?.nome || sug.loja;
     if (m.status === 'funcionou') {
-      return `Equipe da ${lojaLabel}: % de Marcas A subiu ${m.deltaStr} (${m.baseline?.toFixed(1)}% → ${m.resultado?.toFixed(1)}%). ` +
-        `Vocês entenderam a estratégia — continua oferecendo marca A primeiro!`;
+      return `Equipe ${lojaLabel}: Marcas A subiu ${m.deltaStr} (${m.baseline?.toFixed(1)}% → ${m.resultado?.toFixed(1)}%) 👏 Continua oferecendo Marca A primeiro!`;
     }
     if (m.status === 'parcial') {
-      return `Equipe da ${lojaLabel}: % Marcas A subiu ${m.deltaStr} (${m.baseline?.toFixed(1)}% → ${m.resultado?.toFixed(1)}%). ` +
-        `Tá subindo — pra atingir os 30% e destravar +R$50 no prêmio, intensificar combo de 3 produtos.`;
+      return `Equipe ${lojaLabel}: Marcas A subiu ${m.deltaStr} (${m.baseline?.toFixed(1)}% → ${m.resultado?.toFixed(1)}%). ` +
+        `Pros 30% e +R$50 no prêmio, caprichem no combo de 3. 👊`;
     }
-    return `Equipe da ${lojaLabel}: % Marcas A em ${m.resultado?.toFixed(1)}% (era ${m.baseline?.toFixed(1)}%). ` +
-      `Precisamos rever a abordagem — sugestão: monte mesa de destaque com Marcas A na entrada e oriente a equipe.`;
+    return `Equipe ${lojaLabel}: Marcas A em ${m.resultado?.toFixed(1)}% (era ${m.baseline?.toFixed(1)}%). ` +
+      `Vamos virar isso: mesa de Marcas A na entrada e oferecer pra todo cliente.`;
   }
 
   // Ticket médio. NÃO existia mensagem pra este alvo (o motor calculava o -27% e
@@ -3011,18 +2954,14 @@ function gerarMensagemFeedback(sug, m) {
     const alvoLabel = sug.escopo === 'vendedora' && nome ? nome : `Equipe da ${LOJAS_BASE[sug.loja]?.nome || sug.loja}`;
     const un = (v) => Math.round(v||0) + ' un';
     if (m.status === 'funcionou') {
-      return `${alvoLabel}: vocês acataram a sugestão da semana — resultado: as vendas de ${sug.marca} ` +
-        `cresceram ${m.deltaStr} essa semana comparada com a anterior (${un(m.baseline)} → ${un(m.resultado)}). ` +
-        `Continuem oferecendo ${sug.marca} primeiro — está funcionando!`;
+      return `${alvoLabel}: ${sug.marca} cresceu ${m.deltaStr} (${un(m.baseline)} → ${un(m.resultado)}) 👏 Continuem oferecendo primeiro!`;
     }
     if (m.status === 'parcial') {
-      return `${alvoLabel}: as vendas de ${sug.marca} subiram ${m.deltaStr} essa semana ` +
-        `(${un(m.baseline)} → ${un(m.resultado)}). Teve efeito, mas dá pra crescer mais — ` +
-        `reforcem oferecer ${sug.marca} pra todo cliente novo.`;
+      return `${alvoLabel}: ${sug.marca} subiu ${m.deltaStr} (${un(m.baseline)} → ${un(m.resultado)}). ` +
+        `Dá pra mais — oferecer pra todo cliente novo. 👊`;
     }
-    return `${alvoLabel}: as vendas de ${sug.marca} ficaram em ${m.deltaStr} essa semana ` +
-      `(${un(m.baseline)} → ${un(m.resultado)}). Vamos rever a abordagem — talvez precise de mais destaque ` +
-      `no ponto de venda ou reforço na hora de oferecer.`;
+    return `${alvoLabel}: ${sug.marca} ficou em ${m.deltaStr} (${un(m.baseline)} → ${un(m.resultado)}). ` +
+      `Vamos dar mais destaque no balcão e oferecer logo de cara.`;
   }
 
   return null;
