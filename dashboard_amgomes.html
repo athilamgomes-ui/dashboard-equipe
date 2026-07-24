@@ -329,6 +329,16 @@
     </div>
   </div>
 
+  <!-- Faturamento médio por dia — render por JS estático (renderFatDia), FORA dos marcadores do build → persiste no pipeline -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">
+      <span>📆</span> <span>Faturamento médio por dia — mês corrente</span>
+      <span id="fatDiaBadge" style="margin-left:auto;font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;font-weight:600;"></span>
+    </div>
+    <div id="fatDiaGrid" class="grid4"></div>
+    <div id="fatDiaNota" style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;"></div>
+  </div>
+
 <!-- VENDGRID_INICIO --> <!-- ordem = ranking dos KPIs (gerado por build_amgomes.mjs) -->
   <div class="grid4" style="margin-bottom:16px;">
 
@@ -800,6 +810,59 @@ function renderVendorTables() {
   });
 }
 renderVendorTables();
+
+// ─── FATURAMENTO MÉDIO POR DIA (mês corrente) ────────────
+// Média/dia = acumulado ÷ dias abertos (seg–sáb) decorridos · Meta/dia = meta mensal ÷ dias abertos do mês
+// Projeção = média/dia × dias abertos do mês. Ancorado na DATA DA COLETA (#lastUpdate, estática) —
+// NUNCA new Date() de page-load (senão abrir num domingo/feriado daria dias errados).
+function renderFatDia() {
+  const grid = document.getElementById('fatDiaGrid');
+  if (!grid) return;
+  const lu = document.getElementById('lastUpdate');
+  const md = lu && lu.textContent.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if (!md) { grid.innerHTML = '<div style="color:var(--muted);font-size:12px;">sem data de coleta</div>'; return; }
+  const dia = +md[1], mes = +md[2], ano = +md[3];          // mes 1-12
+  const diasAbertos = ate => { let n = 0; for (let d = 1; d <= ate; d++) if (new Date(ano, mes-1, d).getDay() !== 0) n++; return n; }; // domingo(0) = loja fechada
+  const ultimoDia = new Date(ano, mes, 0).getDate();
+  const decorridos = diasAbertos(dia);                     // dias abertos até a data da coleta (dia corrente entra parcial)
+  const totais     = diasAbertos(ultimoDia);               // dias abertos no mês inteiro
+  const restantes  = Math.max(0, totais - decorridos);
+  const fR = v => 'R$' + Math.round(v).toLocaleString('pt-BR');
+  const nomes = ['MissBeleza Santarém','MissBeleza Altamira','Casa Altamira','Casa Itaituba']; // ordem [L5,L4,L1,L3]
+  const cods  = ['L5','L4','L1','L3'];
+  const itens = maiAcum.map((acum, i) => {
+    const meta = metas[i];
+    const mediaDia = decorridos > 0 ? acum / decorridos : 0;
+    const metaDia  = totais > 0 ? meta / totais : 0;
+    const projecao = mediaDia * totais;
+    return { i, nome: nomes[i], cod: cods[i], cor: colors[i], acum, meta, mediaDia, metaDia, projecao,
+             ritmo: metaDia > 0 ? mediaDia/metaDia : 0, projPct: meta > 0 ? projecao/meta : 0 };
+  }).sort((a, b) => b.mediaDia - a.mediaDia);              // maior faturamento/dia primeiro
+  grid.innerHTML = itens.map(t => {
+    let badge, bcls;
+    if (t.ritmo >= 1)        { badge = '✔ No ritmo'; bcls = 'badge-green'; }
+    else if (t.ritmo >= 0.9) { badge = '⚠ No limite'; bcls = 'badge-yellow'; }
+    else                     { badge = '✘ Abaixo';   bcls = 'badge-red'; }
+    return `<div class="card" style="padding:14px;border-top:3px solid ${t.cor};">
+      <div style="font-weight:700;font-size:13px;">${t.nome}</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">${t.cod} · ${decorridos} dias abertos até ${String(dia).padStart(2,'0')}/${String(mes).padStart(2,'0')}</div>
+      <div style="font-size:24px;font-weight:800;color:${t.cor};line-height:1;">${fR(t.mediaDia)}<span style="font-size:12px;font-weight:600;color:var(--muted);">/dia</span></div>
+      <span class="badge ${bcls}" style="margin:8px 0;display:inline-block;">${badge}</span>
+      <div style="font-size:12px;line-height:1.9;border-top:1px solid var(--border);padding-top:8px;">
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted);">Meta/dia p/ bater</span><strong>${fR(t.metaDia)}</strong></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted);">Projeção fim do mês</span><strong style="color:${t.cor};">${fR(t.projecao)}</strong></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted);">Projeção vs meta</span><strong style="color:${t.projPct>=1?'#059669':'#dc2626'};">${(t.projPct*100).toFixed(0)}%</strong></div>
+      </div>
+    </div>`;
+  }).join('');
+  const badge = document.getElementById('fatDiaBadge');
+  if (badge) badge.textContent = `${decorridos} de ${totais} dias abertos · ${restantes} restantes`;
+  const nota = document.getElementById('fatDiaNota');
+  if (nota) nota.innerHTML = '📌 Média = faturamento acumulado ÷ dias em que a loja abriu (seg–sáb; domingo fora). '
+    + 'Projeção = média/dia × dias abertos do mês. O dia corrente entra parcial e feriados não são descontados — '
+    + 'trate a projeção como estimativa de ritmo, não previsão exata.';
+}
+renderFatDia();
 
 // ─── COMPARATIVO MÊS A MÊS (YoY) — gráfico + tabela com filtro de escopo ───
 const yoyEscopos = [
