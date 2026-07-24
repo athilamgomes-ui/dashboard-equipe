@@ -828,7 +828,12 @@ function renderFatDia() {
   const totais        = diasAbertos(ano, mes, ultimoDia);  // dias abertos no mês inteiro
   const decorridosAnt = diasAbertos(ano-1, mes, dia);      // mesmos dias no ano anterior (calendário desloca → recalcula)
   const restantes  = Math.max(0, totais - decorridos);
-  const mesLabel = (fatMensal.mesesLabel && fatMensal.mesesLabel[mes-1]) || ('mês ' + mes);
+  const mesLabel  = (fatMensal.mesesLabel && fatMensal.mesesLabel[mes-1]) || ('mês ' + mes);
+  const mesLabel1 = (fatMensal.mesesLabel && fatMensal.mesesLabel[0]) || 'Jan';
+  // Capacidade = média/dia no ANO (acumulado Jan→mês corrente ÷ dias abertos do período), simétrico nos dois anos.
+  const diasAbertosAno = (y, mLast, dLast) => { let n = 0; for (let m = 1; m <= mLast; m++) { const last = (m === mLast) ? dLast : new Date(y, m, 0).getDate(); for (let d = 1; d <= last; d++) if (new Date(y, m-1, d).getDay() !== 0) n++; } return n; };
+  const diasAno    = diasAbertosAno(ano,   mes, dia);
+  const diasAnoAnt = diasAbertosAno(ano-1, mes, dia);
   const fR = v => 'R$' + Math.round(v).toLocaleString('pt-BR');
   const nomes = ['MissBeleza Santarém','MissBeleza Altamira','Casa Altamira','Casa Itaituba']; // ordem [L5,L4,L1,L3]
   const cods  = ['L5','L4','L1','L3'];
@@ -844,7 +849,12 @@ function renderFatDia() {
     const acumAnt  = serieAnt.length ? serieAnt[serieAnt.length - 1] : null;
     const mediaDiaAnt = (acumAnt != null && decorridosAnt > 0) ? acumAnt / decorridosAnt : null;
     const yoy = (mediaDiaAnt && mediaDiaAnt > 0) ? (mediaDia - mediaDiaAnt) / mediaDiaAnt : null;
-    return { i, nome: nomes[i], cod, cor: colors[i], acum, meta, mediaDia, metaDia, projecao, mediaDiaAnt, yoy,
+    // Capacidade: média/dia no ano (YTD) dos dois anos, sobre o MESMO intervalo Jan→dia-limite.
+    const serieAtual = ((fatMensal.atual || {})[cod]) || [];
+    const capAtual = (serieAtual.length && diasAno > 0)    ? serieAtual.reduce((a, b) => a + b, 0) / diasAno    : null;
+    const capAnt   = (serieAnt.length   && diasAnoAnt > 0) ? serieAnt.reduce((a, b) => a + b, 0)   / diasAnoAnt : null;
+    const yoyCap   = (capAnt && capAnt > 0 && capAtual != null) ? (capAtual - capAnt) / capAnt : null;
+    return { i, nome: nomes[i], cod, cor: colors[i], acum, meta, mediaDia, metaDia, projecao, mediaDiaAnt, yoy, capAtual, capAnt, yoyCap,
              ritmo: metaDia > 0 ? mediaDia/metaDia : 0, projPct: meta > 0 ? projecao/meta : 0 };
   }).sort((a, b) => b.mediaDia - a.mediaDia);              // maior faturamento/dia primeiro
   grid.innerHTML = itens.map(t => {
@@ -865,16 +875,23 @@ function renderFatDia() {
           <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted);">Média/dia ${mesLabel}/${fatMensal.anoAnterior}</span><strong>${t.mediaDiaAnt != null ? fR(t.mediaDiaAnt) : '—'}</strong></div>
           <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted);">vs ${fatMensal.anoAnterior} (mesmo período)</span><strong style="color:${t.yoy == null ? 'var(--muted)' : t.yoy >= 0 ? '#059669' : '#dc2626'};">${t.yoy == null ? '—' : (t.yoy >= 0 ? '▲ ' : '▼ ') + Math.abs(t.yoy*100).toFixed(0) + '%'}</strong></div>
         </div>
+        <div style="border-top:1px dashed var(--border);margin-top:6px;padding-top:6px;">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);font-weight:700;margin-bottom:2px;">Capacidade · média/dia no ano (${mesLabel1}–${mesLabel})</div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted);">Este ano (${fatMensal.anoAtual})</span><strong style="color:${t.cor};">${t.capAtual != null ? fR(t.capAtual) : '—'}</strong></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted);">Ano anterior (${fatMensal.anoAnterior})</span><strong>${t.capAnt != null ? fR(t.capAnt) : '—'}</strong></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--muted);">Variação de capacidade</span><strong style="color:${t.yoyCap == null ? 'var(--muted)' : t.yoyCap >= 0 ? '#059669' : '#dc2626'};">${t.yoyCap == null ? '—' : (t.yoyCap >= 0 ? '▲ ' : '▼ ') + Math.abs(t.yoyCap*100).toFixed(0) + '%'}</strong></div>
+        </div>
       </div>
     </div>`;
   }).join('');
   const badge = document.getElementById('fatDiaBadge');
   if (badge) badge.textContent = `${decorridos} de ${totais} dias abertos · ${restantes} restantes`;
   const nota = document.getElementById('fatDiaNota');
-  if (nota) nota.innerHTML = '📌 Média = faturamento acumulado ÷ dias em que a loja abriu (seg–sáb; domingo fora). '
-    + 'Projeção = média/dia × dias abertos do mês. A comparação com o ano anterior usa o MESMO mês e o MESMO dia-limite '
-    + '(' + mesLabel + '/' + fatMensal.anoAnterior + ' até o dia ' + String(dia).padStart(2,'0') + '), pra ficar simétrica. '
-    + 'O dia corrente entra parcial e feriados não são descontados — trate a projeção como estimativa de ritmo, não previsão exata.';
+  if (nota) nota.innerHTML = '📌 Média/dia (destaque) = faturamento do MÊS ÷ dias em que a loja abriu (seg–sáb; domingo fora). '
+    + 'Projeção = média/dia × dias abertos do mês. A comparação de mês usa o MESMO mês e dia-limite ('
+    + mesLabel + '/' + fatMensal.anoAnterior + ' até o dia ' + String(dia).padStart(2,'0') + '). '
+    + '<b>Capacidade · média/dia no ano</b> = faturamento acumulado ' + mesLabel1 + '–' + mesLabel + ' ÷ dias abertos do período (Jan até a data), comparável entre os dois anos — mede o ritmo médio do ano, não só do mês. '
+    + 'O dia corrente entra parcial e feriados não são descontados.';
 }
 renderFatDia();
 
