@@ -2564,6 +2564,19 @@ function _getTicketMedio(ld, semId, vend) {
 
 function calcAutoMetrics(sug) {
   if (!sug || !sug.meta_alvo) return null;
+  // ⚠️ O ALVO QUE VOCÊ APROVOU MANDA — não o rascunho do HTML. Se o override
+  // (o que o Athila editou/aprovou no painel) traz alvo_semana/meta_valor/meta_alvo,
+  // eles têm prioridade sobre os campos crus da sugestão. Sem isso, a avaliação
+  // media contra o meu rascunho e ignorava a edição (Athila, 27/07/2026).
+  try {
+    const o = (typeof loadSugestoesOverrides === 'function') ? loadSugestoesOverrides()[sug.id] : null;
+    if (o && (o.alvo_semana != null || o.meta_valor != null || o.meta_alvo)) {
+      sug = { ...sug };
+      if (o.alvo_semana != null && o.alvo_semana !== '') sug.alvo_semana = +o.alvo_semana;
+      if (o.meta_valor != null && o.meta_valor !== '') sug.meta_valor = +o.meta_valor;
+      if (o.meta_alvo) sug.meta_alvo = o.meta_alvo;
+    }
+  } catch (_) {}
   if (!['vendas_individuais','atingir_meta','marcas_a','ticket_medio','venda_marca','meta_mensal_individual','corrida_mensal'].includes(sug.meta_alvo)) {
     return {tipo:'nao_rastreavel', meta_alvo:sug.meta_alvo};
   }
@@ -3555,7 +3568,30 @@ function _pushDeAprovacao(s) {
   }
 }
 
-function aprovarSugestao(idSug, textoEditado, prazo) {
+// Campo editável do ALVO que a avaliação vai usar. Só aparece pros tipos que têm
+// alvo. Prefill: o que você já aprovou (override) > o rascunho da sugestão.
+function _alvoEditavelFrag(s) {
+  const tipos = ['vendas_individuais','venda_marca','marcas_a','meta_mensal_individual'];
+  if (!tipos.includes(s.meta_alvo)) return '';
+  if (s.meta_alvo === 'marcas_a' && s.escopo !== 'loja') return '';
+  const ov = loadSugestoesOverrides()[s.id] || {};
+  const ehMensal = s.meta_alvo === 'meta_mensal_individual';
+  const campo = ehMensal ? 'meta_valor' : 'alvo_semana';
+  const unidade = s.meta_alvo === 'venda_marca' ? 'unidades'
+    : s.meta_alvo === 'marcas_a' ? '% (piso p/ manter)'
+    : ehMensal ? 'R$ no mês' : 'R$ na semana';
+  const valAtual = ov[campo] ?? s[campo] ?? '';
+  return `
+    <div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;flex-wrap:wrap">
+      <span style="color:var(--muted)">🎯 Alvo da avaliação (${unidade}):</span>
+      <input type="number" class="sug-alvo" data-campo="${campo}" value="${valAtual}"
+        style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:3px 6px;font-size:11px;width:120px"
+        placeholder="${ehMensal?'ex: 31000':'ex: 11000'}">
+      <span style="color:var(--muted);font-size:10px">é este número que o painel vai medir</span>
+    </div>`;
+}
+
+function aprovarSugestao(idSug, textoEditado, prazo, alvo) {
   const ov = loadSugestoesOverrides();
   const reg = {
     status: 'aprovada',
@@ -3563,6 +3599,13 @@ function aprovarSugestao(idSug, textoEditado, prazo) {
     prazo: prazo || null,
     em: new Date().toISOString()
   };
+  // 🎯 O ALVO que você aprovou vira a fonte da avaliação (ver calcAutoMetrics).
+  // Preserva o alvo anterior se você não mexeu neste approve.
+  const antes = ov[idSug] || {};
+  if (alvo && alvo.campo && alvo.valor !== '' && alvo.valor != null) {
+    reg[alvo.campo] = +alvo.valor;
+  } else if (antes.alvo_semana != null) { reg.alvo_semana = antes.alvo_semana; }
+  if (antes.meta_valor != null && reg.meta_valor == null) reg.meta_valor = antes.meta_valor;
   ov[idSug] = reg;
   localStorage.setItem('sugestoes_overrides', JSON.stringify(ov));
   enviarOverrideWorker(idSug, reg);
@@ -3581,7 +3624,11 @@ function aprovarComPrazo(idSug) {
     texto = editor.querySelector('textarea').value.trim();
     if (!texto) return alert('Texto não pode ficar vazio');
   }
-  aprovarSugestao(idSug, texto, prazo);
+  // Alvo editável (só aparece pros tipos com alvo). Vale mesmo sem abrir o editor.
+  let alvo = null;
+  const inp = card.querySelector('.sug-alvo');
+  if (inp && inp.value !== '') alvo = { campo: inp.dataset.campo, valor: inp.value };
+  aprovarSugestao(idSug, texto, prazo, alvo);
 }
 
 function toggleFeedbacks(idSug) {
@@ -3857,6 +3904,7 @@ function renderSugestoes() {
         </div>
         <div class="sug-editor" style="display:none;margin-top:8px">
           <textarea class="sug-comment" style="min-height:80px;width:100%">${s.descricao.replace(/</g,'&lt;')}</textarea>
+          ${_alvoEditavelFrag(s)}
           <button class="sug-btn" style="background:var(--blue);color:#fff;border:none;margin-top:6px;width:100%" onclick="aprovarComPrazo('${s.id}')">💾 Salvar texto + aprovar</button>
         </div>`;
     } else if (isAprovada) {

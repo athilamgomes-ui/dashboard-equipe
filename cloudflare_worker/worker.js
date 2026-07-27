@@ -141,7 +141,7 @@ export default {
       // === OVERRIDE DO ATHILA (aprovar/editar/rejeitar) ===
       if (method === 'POST' && url.pathname === '/override') {
         const body = await request.json();
-        const { id_sugestao, status, texto_editado, prazo } = body;
+        const { id_sugestao, status, texto_editado, prazo, alvo_semana, meta_valor, meta_alvo } = body;
         if (!id_sugestao || !status) {
           return jsonResponse(request, { error: 'Campos obrigatorios: id_sugestao, status' }, 400);
         }
@@ -150,6 +150,11 @@ export default {
           id_sugestao, status,
           texto_editado: texto_editado || null,
           prazo: prazo || null,
+          // 🎯 Alvo que o Athila aprovou — a avaliação (calcAutoMetrics) usa ISTO,
+          // não o rascunho do HTML. Ver premiacao-avaliar-ritmo-mensal (27/07/2026).
+          alvo_semana: (alvo_semana != null && alvo_semana !== '') ? Number(alvo_semana) : null,
+          meta_valor: (meta_valor != null && meta_valor !== '') ? Number(meta_valor) : null,
+          meta_alvo: meta_alvo || null,
           em: new Date().toISOString()
         };
         await KV.put(key, JSON.stringify(reg));
