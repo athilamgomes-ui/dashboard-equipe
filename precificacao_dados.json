@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-07-27T12:55:43.166Z",
+  "gerado_em": "2026-07-27T13:16:08.712Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
@@ -35,19 +35,20 @@
             "fcp_st": 0,
             "custo_cheio_total": 216,
             "custo_unit_cheio": 18,
-            "cst": null,
-            "icms_pct": null,
+            "cst": "000",
+            "icms_pct": 7,
             "credito_icms_pct": 0,
             "preco_atual": null,
             "cod_erp": null,
             "match_tipo": null,
             "preco_manual": null,
-            "ncm": null,
-            "st": false,
-            "st_motivo": null
+            "ncm": "33059000",
+            "cest": null,
+            "st": true,
+            "st_motivo": "ncm"
           }
         ],
-        "uf": null
+        "uf": "SP"
       },
       {
         "id": 4803,
