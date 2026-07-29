@@ -86,6 +86,47 @@ continuam funcionando, então o bug fica invisível). Por isso `coletarDiaRapido
 Aconteceu em 29/07: o painel publicou Cartão R$ 0 enquanto o relatório de planos mostrava
 R$ 201 mil no mesmo período. Navegação normal não sofre disso (o browser lê o `<meta charset>`).
 
+## 🔑 A regra mais importante: "informado" em dinheiro é SALDO, não movimento
+
+O ERP mostra três colunas por forma de pagamento, mas elas **não significam a mesma coisa** para
+dinheiro e para as outras formas:
+
+- **Valor Calculado** = o que o ERP registrou nas vendas do dia (fluxo).
+- **Valor Informado** — para cartão/PIX é o mesmo fluxo (o próprio ERP preenche, por isso bate
+  sempre exato). Para **dinheiro** é o **saldo físico da gaveta no fim do dia**.
+
+Comparar os dois direto no dinheiro não quer dizer nada. O teste correto (dado pelo Athila em
+29/07/2026 e validado nos dados):
+
+```
+caixa_esperado = caixa_de_ontem + dinheiro_do_dia + suprimentos − sangria
+diferença      = caixa_informado − caixa_esperado
+```
+
+Exemplo que fecha (L4, 28/07): 891,30 (caixa de 27/07) + 906,05 (dinheiro) − 750 (sangria)
+= 1.047,35 contra 1.047,40 informado → diferença de R$ 0,05.
+
+Tolerância: **R$ 1,00/dia** (troco arredondado). No acumulado, o limite escala junto
+(nº de dias × R$ 1,00) — R$ 17 de deriva em 43 dias não é rombo.
+
+A corrente **quebra** em dia `não fechado` (não há saldo confiável para o dia seguinte partir) e
+**atravessa** dias `sem movimento` (domingo: a gaveta não é tocada, o saldo continua o mesmo).
+
+⚠️ Antes de 29/07 o painel fazia `informado − calculado` e acusava divergência em quase todo dia.
+Era erro de premissa, não do dado.
+
+## 🚩 "Não conferido": L3 e L5 não contam o caixa
+
+Em julho/2026, Itaituba (L3) e Santarém (L5) informaram valor **idêntico ao calculado, centavo a
+centavo, em 100% dos dias** — inclusive em dias com sangria, quando bater exato seria impossível.
+O operador está repetindo o número da tela em vez de contar a gaveta.
+
+O painel marca esses dias como **`não conferido`** (roxo) e os tira do cálculo de deriva — senão
+geraria falta fantasma de milhares de reais (L3 dava −R$ 5.818, L5 −R$ 2.418, puro artefato).
+Regra: `informado == calculado` e (houve sangria **ou** existia saldo anterior).
+
+Altamira (L1 e L4) confere de verdade: deriva de julho R$ 15,37 e R$ 1,95 respectivamente.
+
 ## ⚠️ Regras de negócio que já custaram caro
 
 - **Consolidar por LOJA, nunca por operador.** Em Itaituba (L3) as vendas saem no usuário
@@ -95,10 +136,13 @@ R$ 201 mil no mesmo período. Navegação normal não sofre disso (o browser lê
   "Listar conferência consolidada" do ERP **não faz isso** (testado em 29/07: continua um bloco
   por usuário).
 - **"Não fechado" ≠ falta de dinheiro.** Se ninguém lançou o fechamento, o Valor Informado vem
-  zerado e a diferença fica igual ao total do dia. O painel marca esses dias como
-  `não fechado` (âmbar) e os exclui do cálculo de falta/sobra. Nunca tratar como desvio.
-- **Status possíveis:** `sem_movimento` (domingo/feriado) · `nao_fechado` · `ok` · `divergente`.
-- Diferença = **informado − calculado**. Negativo = faltou dinheiro no caixa.
+  zerado. O painel marca esses dias como `não fechado` (âmbar), exclui do cálculo e reinicia a
+  corrente de saldo. Nunca tratar como desvio.
+- **Status possíveis:** `sem_movimento` (domingo/feriado) · `nao_fechado` · `nao_conferido` ·
+  `sem_base` (dia seguinte a um não fechado) · `ok` · `divergente`.
+- **Janela publicada:** a constante `DATA_MINIMA` no build corta em 01/07/2026. Junho está no
+  cache mas foi coletado antes da correção de encoding (cartão/crediário faltando). Para liberar
+  o histórico: recoletar com `DIAS=` maior + `FORCE_FULL=1` e apagar a constante.
 - **Recebível de cartão:** o `RUNBOOK_FINANCEIRO` diz que "não existe contas a receber" porque o
   grupo vende tudo à vista — isso vale para o *cliente*, não para a *adquirente*. Cada parcela de
   cartão vira um recebível da administradora (STONE etc.) com data de vencimento; em 29/07 havia

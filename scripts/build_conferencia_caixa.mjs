@@ -43,6 +43,11 @@ const RAIZ = path.join(DIR, "..");
 const RAW = path.join(RAIZ, "conferencia_caixa_raw.json");
 const OUT = path.join(RAIZ, "conferencia_caixa.html");
 
+// Só publica de julho/2026 em diante: junho foi coletado antes da correção de encoding
+// (cartão/crediário/convênio faltando) e o Athila pediu para tratar o passado depois.
+// Quando junho for recoletado, é só apagar esta constante.
+const DATA_MINIMA = "2026-07-01";
+
 const raw = JSON.parse(fs.readFileSync(RAW, "utf8"));
 if (!raw.dias || !Object.keys(raw.dias).length) {
   console.error("conferencia_caixa_raw.json sem dias coletados");
@@ -58,7 +63,7 @@ const LOJAS = [
 
 // ── Monta a série por loja/dia, já limpa para o front ──
 const dias = Object.values(raw.dias)
-  .filter(d => d && d.data)
+  .filter(d => d && d.data && d.data >= DATA_MINIMA)
   .sort((a, b) => (a.data < b.data ? -1 : a.data > b.data ? 1 : a.loja.localeCompare(b.loja)));
 
 const F = (o, k) => ({
@@ -67,15 +72,84 @@ const F = (o, k) => ({
   dif: o?.formas?.[k]?.dif ?? 0,
 });
 
+// ── CONFERÊNCIA DE CAIXA: o "informado" em dinheiro é SALDO, não movimento ──────
+// O "Valor Calculado" do ERP é o dinheiro finalizado nas vendas do dia (um fluxo).
+// O "Valor Informado" é o que estava FISICAMENTE no caixa no fim do dia (um saldo).
+// Comparar um com o outro direto não significa nada — o teste correto é:
+//
+//     caixa_esperado = caixa_de_ontem + dinheiro_do_dia + suprimentos − sangria
+//     diferença      = caixa_informado − caixa_esperado
+//
+// Conferido com o Athila em 29/07 e validado nos dados: L4 fecha com deriva de
+// R$ 1,95 no mês inteiro. É por isso que cartão e PIX sempre "batiam" (são fluxo
+// contra fluxo, preenchidos pelo próprio ERP) e o dinheiro nunca batia.
+const TOL = 1.00;   // R$ — abaixo disso é arredondamento de troco, não divergência
+
+function reconciliar(lista) {
+  const porLoja = {};
+  for (const d of lista) (porLoja[d.loja] = porLoja[d.loja] || []).push(d);
+
+  for (const loja of Object.keys(porLoja)) {
+    const dias = porLoja[loja].sort((a, b) => (a.data < b.data ? -1 : 1));
+    let caixaAnterior = null, dataAnterior = null;
+
+    for (const d of dias) {
+      const f = k => d.formas?.[k] || { calc: 0, inf: 0 };
+      const calc = f("dinheiro").calc || 0;
+      const inf = f("dinheiro").inf || 0;
+      const sangria = f("sangria").calc || 0;
+      const suprimento = f("suprimentos").calc || 0;
+
+      d.caixa = { calc, inf, sangria, suprimento, anterior: caixaAnterior, dataAnterior, esperado: null, residuo: null };
+
+      if (d.status === "sem_movimento") { d.conf = "sem_movimento"; continue; }   // caixa não se mexe
+
+      // Ninguém lançou o fechamento: não há o que conferir e a corrente quebra.
+      if (d.total.inf === 0 && d.total.calc > 0) {
+        d.conf = "nao_fechado";
+        caixaAnterior = null; dataAnterior = null;
+        continue;
+      }
+
+      // Informado idêntico ao calculado, centavo a centavo, num dia em que o caixa
+      // tinha saldo anterior ou houve sangria: para bater exato seria preciso que a
+      // gaveta zerasse sozinha. Na prática é o operador repetindo o número da tela
+      // em vez de contar o dinheiro. Não é falta de caixa, é ausência de conferência
+      // — L3 e L5 fazem isso em 100% dos dias de julho.
+      if (Math.abs(inf - calc) < 0.005 && (sangria > 0 || (caixaAnterior || 0) > 0.005)) {
+        d.conf = "nao_conferido";
+        caixaAnterior = inf; dataAnterior = d.data;
+        continue;
+      }
+
+      if (caixaAnterior === null) {
+        d.conf = "sem_base";                       // primeiro dia da série ou pós-buraco
+      } else {
+        const esperado = +(caixaAnterior + calc + suprimento - sangria).toFixed(2);
+        const residuo = +(inf - esperado).toFixed(2);
+        d.caixa.esperado = esperado;
+        d.caixa.residuo = residuo;
+        d.conf = Math.abs(residuo) <= TOL ? "ok" : "divergente";
+      }
+      caixaAnterior = inf; dataAnterior = d.data;
+    }
+  }
+  return lista;
+}
+reconciliar(dias);
+
 const DADOS = {
   geradoEm: raw.geradoEm || null,
   geradoEmBR: raw.geradoEmBR || "—",
   janela: raw.janela || {},
   lojas: LOJAS,
+  tolerancia: TOL,
   dias: dias.map(d => ({
     data: d.data,
     loja: d.loja,
     status: d.status,
+    conf: d.conf,
+    caixa: d.caixa,
     total: d.total,
     saldoIni: d.saldo_inicial,
     saldoFim: d.saldo_final,
@@ -212,6 +286,7 @@ tbody tr:hover{background:var(--card2)}
 .p-div{background:rgba(220,38,38,.11);color:var(--falta)}
 .p-nf{background:rgba(245,158,11,.13);color:#b45309}
 .p-sm{background:rgba(148,163,184,.15);color:var(--muted)}
+.p-nc{background:rgba(124,58,237,.12);color:#6d28d9}
 
 .loja-tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10.5px;font-weight:800;color:#fff}
 
@@ -295,14 +370,21 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
 <div class="pane on" id="p-conf">
   <div class="kpis" id="kpi-conf"></div>
   <div class="box">
-    <div class="box-h"><h3>Dia a dia</h3><span class="hint">diferença = informado − calculado · negativo = faltou dinheiro no caixa</span></div>
+    <div class="box-h"><h3>Dia a dia</h3><span class="hint">caixa esperado = caixa anterior + dinheiro do dia − sangria</span></div>
     <div class="scroll"><table id="t-conf"></table></div>
     <div class="nota">
-      <b>Calculado</b> = soma que o ERP registrou nas vendas do dia. <b>Informado</b> = o que a loja
-      declarou ao fechar o caixa. Dias marcados como <b>não fechado</b> não têm conferência: ninguém
-      lançou o fechamento no ERP, então a diferença não significa falta de dinheiro — significa
-      falta do fechamento. Itaituba lança venda e fechamento em usuários diferentes; os valores aqui
-      já vêm somados por loja para não gerar falso alarme.
+      O <b>caixa informado</b> é um <b>saldo</b>: o dinheiro que estava fisicamente na gaveta no fim
+      do dia — não o movimento do dia. Por isso ele não é comparado direto com o dinheiro vendido, e
+      sim com o que <i>deveria</i> ter sobrado:
+      <b>caixa de ontem + dinheiro do dia + suprimento − sangria</b>. A coluna
+      <b>diferença</b> é o que sobrou ou faltou de verdade; negativo = faltou dinheiro na gaveta.
+      Diferenças abaixo de R$ 1,00 contam como acerto (arredondamento de troco).
+      <br><br>
+      <b>Não fechado</b> = ninguém lançou o fechamento no ERP; não há o que conferir, e a corrente
+      recomeça no dia seguinte. <b>Não conferido</b> = o valor informado é idêntico ao que o sistema
+      calculou mesmo tendo havido sangria — sinal de que o operador repetiu o número da tela em vez
+      de contar a gaveta. Itaituba lança venda e fechamento em usuários diferentes; os valores já
+      vêm somados por loja para não gerar falso alarme.
     </div>
   </div>
 </div>
@@ -404,7 +486,11 @@ const diaSem = s => { const [y,m,d]=s.split("-").map(Number); return ["dom","seg
 const corLoja = k => (D.lojas.find(l=>l.key===k)||{}).cor || "#64748b";
 const nomeLoja = k => { const l=D.lojas.find(x=>x.key===k); return l ? l.nome+" "+l.cidade : k; };
 const cls = v => Math.abs(v)<0.01 ? "zero" : (v<0 ? "falta" : "sobra");
-const PILL = {ok:['p-ok','bateu'], divergente:['p-div','diferença'], nao_fechado:['p-nf','não fechado'], sem_movimento:['p-sm','sem movimento']};
+const PILL = {
+  ok:['p-ok','bateu'], divergente:['p-div','diferença'],
+  nao_fechado:['p-nf','não fechado'], sem_movimento:['p-sm','sem movimento'],
+  nao_conferido:['p-nc','não conferido'], sem_base:['p-sm','sem base']
+};
 
 const selLoja = document.getElementById("f-loja");
 
@@ -425,41 +511,58 @@ const kpi = (lbl,val,sub,cor,corVal) =>
 // ══ 1. CONFERÊNCIA ══
 function rConf(){
   const ds = filtrados();
-  const comFech = ds.filter(d => d.status==="ok" || d.status==="divergente");
-  const naoFech = ds.filter(d => d.status==="nao_fechado");
-  const div = ds.filter(d => d.status==="divergente");
-  const somaDif = comFech.reduce((a,d)=>a+(d.dinheiro.dif||0),0);
-  const faltas = comFech.filter(d=>d.dinheiro.dif < -0.01);
-  const sobras = comFech.filter(d=>d.dinheiro.dif > 0.01);
-  const taxa = ds.filter(d=>d.status!=="sem_movimento").length;
+  const conferidos = ds.filter(d => d.conf==="ok" || d.conf==="divergente");
+  const naoFech    = ds.filter(d => d.conf==="nao_fechado");
+  const naoConf    = ds.filter(d => d.conf==="nao_conferido");
+  const div        = ds.filter(d => d.conf==="divergente");
+  const comMov     = ds.filter(d => d.conf!=="sem_movimento");
+
+  const deriva = conferidos.reduce((a,d)=>a+(d.caixa.residuo||0),0);
+  const piores = div.slice().sort((a,b)=>Math.abs(b.caixa.residuo)-Math.abs(a.caixa.residuo));
+  const pior = piores[0];
+  const lojasSemConf = [...new Set(naoConf.map(d=>d.loja))];
+
+  // A mesma tolerância de R$ 1,00/dia, aplicada ao acumulado: R$ 17 em 43 dias é
+  // arredondamento de troco, não rombo — pintar de vermelho seria alarme falso.
+  const limiteDeriva = Math.max(1, conferidos.length * D.tolerancia);
+  const corDeriva = Math.abs(deriva) <= limiteDeriva ? "var(--ok)" : "var(--falta)";
 
   document.getElementById("kpi-conf").innerHTML =
-    kpi("Diferença acumulada", nf2(somaDif), (faltas.length+" dia(s) com falta · "+sobras.length+" com sobra"),
-        somaDif < -0.01 ? "var(--falta)" : "var(--ok)", somaDif < -0.01 ? "var(--falta)" : "var(--ok)") +
-    kpi("Maior falta num dia", faltas.length ? nf2(Math.min(...faltas.map(d=>d.dinheiro.dif))) : "—",
-        faltas.length ? (()=>{const w=faltas.reduce((a,b)=>a.dinheiro.dif<b.dinheiro.dif?a:b); return w.loja+" · "+dBR(w.data);})() : "nenhuma falta",
-        "var(--falta)", faltas.length?"var(--falta)":"") +
-    kpi("Caixas não fechados", naoFech.length, "de "+taxa+" dia(s) com movimento", "var(--alerta)", naoFech.length?"#b45309":"") +
-    kpi("Dias conferidos OK", comFech.length-div.length, "de "+comFech.length+" fechamento(s)", "var(--ok)");
+    kpi("Deriva acumulada", nf2(deriva), conferidos.length+" dia(s) conferido(s)", corDeriva, corDeriva) +
+    kpi("Maior diferença num dia", pior ? nf2(pior.caixa.residuo) : "—",
+        pior ? pior.loja+" · "+dBR(pior.data) : "tudo dentro de "+nf2(D.tolerancia),
+        "var(--falta)", pior?"var(--falta)":"var(--ok)") +
+    kpi("Caixas não fechados", naoFech.length, "de "+comMov.length+" dia(s) com movimento",
+        "var(--alerta)", naoFech.length?"#b45309":"") +
+    kpi("Sem conferência real", naoConf.length,
+        lojasSemConf.length ? lojasSemConf.join(", ")+" repetem o valor do sistema" : "todas conferem",
+        "#7c3aed", naoConf.length?"#6d28d9":"var(--ok)");
 
   const linhas = ds.map(d => {
-    const p = PILL[d.status] || PILL.sem_movimento;
+    const p = PILL[d.conf] || PILL.sem_movimento;
+    const c = d.caixa || {};
+    const temCalculo = c.esperado != null;
+    const mostra = v => v==null ? '<span class="zero">—</span>' : nf(v);
     return '<tr>'+
       '<td><b>'+dBR(d.data)+'</b> <span style="color:var(--muted);font-size:11px">'+diaSem(d.data)+'</span></td>'+
       '<td style="text-align:left"><span class="loja-tag" style="background:'+corLoja(d.loja)+'">'+d.loja+'</span></td>'+
-      '<td class="num">'+nf(d.dinheiro.calc)+'</td>'+
-      '<td class="num">'+(d.status==="nao_fechado"?'<span class="zero">—</span>':nf(d.dinheiro.inf))+'</td>'+
-      '<td class="'+(d.status==="nao_fechado"?"zero":cls(d.dinheiro.dif))+'">'+(d.status==="nao_fechado"?"—":nf2(d.dinheiro.dif))+'</td>'+
-      '<td class="num">'+nf(d.total.calc)+'</td>'+
-      '<td class="'+(d.status==="nao_fechado"?"zero":cls(d.total.dif))+'">'+(d.status==="nao_fechado"?"—":nf2(d.total.dif))+'</td>'+
+      '<td class="num zero">'+mostra(c.anterior)+'</td>'+
+      '<td class="num">'+mostra(c.calc)+'</td>'+
+      '<td class="num">'+(c.sangria?nf(c.sangria):'<span class="zero">—</span>')+'</td>'+
+      '<td class="num">'+(temCalculo?nf(c.esperado):'<span class="zero">—</span>')+'</td>'+
+      // Em dia sem movimento o ERP devolve 0, mas o dinheiro continua na gaveta:
+      // mostrar "R$ 0" ali daria a entender que o caixa foi zerado.
+      '<td class="num"><b>'+((d.conf==="nao_fechado"||d.conf==="sem_movimento")?'<span class="zero">—</span>':nf(c.inf))+'</b></td>'+
+      '<td class="'+(temCalculo?cls(c.residuo):"zero")+'">'+(temCalculo?nf2(c.residuo):"—")+'</td>'+
       '<td><span class="pill '+p[0]+'">'+p[1]+'</span></td>'+
     '</tr>';
   }).join("");
 
   document.getElementById("t-conf").innerHTML =
-    '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>Dinheiro calculado</th><th>Dinheiro informado</th>'+
-    '<th>Diferença</th><th>Total do dia</th><th>Dif. total</th><th style="text-align:left">Status</th></tr></thead>'+
-    '<tbody>'+(linhas || '<tr><td colspan="8" class="vazio">Sem dados no período.</td></tr>')+'</tbody>';
+    '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>Caixa anterior</th>'+
+    '<th>Dinheiro do dia</th><th>Sangria</th><th>Caixa esperado</th><th>Caixa informado</th>'+
+    '<th>Diferença</th><th style="text-align:left">Status</th></tr></thead>'+
+    '<tbody>'+(linhas || '<tr><td colspan="9" class="vazio">Sem dados no período.</td></tr>')+'</tbody>';
 }
 
 // ══ 2. FORMAS ══
