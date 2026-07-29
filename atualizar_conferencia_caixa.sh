@@ -47,7 +47,8 @@ if [ ! -s "$RAW" ] || ! grep -q '"dias"' "$RAW"; then
   [ -f /tmp/conf_caixa_raw_bak.json ] && cp -f /tmp/conf_caixa_raw_bak.json "$RAW"
   exit 10
 fi
-log "coleta OK ($($NODE -e 'console.log(Object.keys(require("'"$RAW"'").dias).length)') dias-loja)"
+QTD=$(RAWPATH="$RAW" $NODE -e 'console.log(Object.keys(require(process.env.RAWPATH).dias).length)' 2>/dev/null || echo "?")
+log "coleta OK ($QTD dias-loja)"
 
 # ── 2) Build (único escritor do HTML; cifra com a senha do Keychain) ──
 cd "$REPO" || exit 20

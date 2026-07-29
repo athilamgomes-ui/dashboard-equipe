@@ -206,7 +206,119 @@ export function parseConferencia(txt) {
   return { operadores, consolidado: cons };
 }
 
-// ── Coleta de 1 (loja, dia) ─────────────────────────────────────────────────
+// ── Coleta rápida: POST direto no listagem_conferencia_caixa.asp ────────────
+// Recarregar a tela de filtros a cada consulta custava ~108s por item (45 dias × 4
+// lojas = mais de 2h). O form posta em listagem_conferencia_caixa.asp; serializando
+// o form UMA vez e mandando fetch por item, cai para poucos segundos.
+// O HTML da resposta é injetado num container fora da tela (NÃO display:none — aí o
+// innerText degrada para textContent e perde os \t que separam as colunas da tabela).
+const URL_LISTAGEM = "https://linx.microvix.com.br/gestor_web/faturamento/listagem_conferencia_caixa.asp";
+
+export async function prepararFormBase(page) {
+  await page.goto(URL_CONF, { waitUntil: "domcontentloaded", timeout: 45000 });
+  await page.waitForSelector('select[name="empresa"]', { timeout: 25000 });
+  await page.waitForTimeout(800);
+  return page.evaluate(() => {
+    const form = document.querySelector('form[name="Form1"][action*="listagem_conferencia_caixa"]')
+      || [...document.forms].find(f => /listagem_conferencia_caixa/.test(f.getAttribute("action") || ""));
+    if (!form) throw new Error("form da conferência não encontrado");
+    // Liga as opções que queremos em todas as consultas
+    for (const n of ["listar_saldo_inicio_fim", "somar_recebimentos_faturas_por_forma_pagamento"]) {
+      const e = form.querySelector(`[name="${n}"]`); if (e) e.checked = true;
+    }
+    const pares = [];
+    for (const el of form.elements) {
+      if (!el.name) continue;
+      if (el.type === "checkbox" || el.type === "radio") { if (el.checked) pares.push([el.name, el.value]); continue; }
+      if (el.tagName === "SELECT" && el.multiple) {
+        [...el.selectedOptions].forEach(o => pares.push([el.name, o.value])); continue;
+      }
+      if (el.type === "button") continue;
+      pares.push([el.name, el.value]);
+    }
+    // container off-screen (visível para o layout → innerText mantém os \t)
+    if (!document.getElementById("__conf_box")) {
+      const d = document.createElement("div");
+      d.id = "__conf_box";
+      d.style.cssText = "position:absolute;left:-99999px;top:0;width:1400px;";
+      document.body.appendChild(d);
+    }
+    return pares;
+  });
+}
+
+export async function coletarDiaRapido(page, base, empId, dataBr) {
+  const txt = await page.evaluate(async ({ base, empId, dataBr, url }) => {
+    const p = new URLSearchParams();
+    for (const [k, v] of base) {
+      if (k === "empresa") { p.append(k, String(empId)); continue; }
+      if (k === "data") { p.append(k, dataBr); continue; }
+      p.append(k, v);
+    }
+    p.set("empresa", String(empId));
+    p.set("data", dataBr);
+    const r = await fetch(url, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: p.toString(),
+    });
+    // ⚠️ O Microvix serve as telas ASP em windows-1252, e `r.text()` assume UTF-8 quando o
+    // header não traz charset. Sem isso "Cartão" vira "Cart�o" e os regexes de Cartão,
+    // Crediário, Convênio, Depósito e Devoluções não casam — as formas COM ACENTO somem
+    // silenciosamente do relatório (dinheiro e PIX passam, e o erro fica invisível).
+    const buf = await r.arrayBuffer();
+    const ct = r.headers.get("content-type") || "";
+    let charset = (/charset=([\w-]+)/i.exec(ct) || [])[1];
+    if (!charset) {
+      const inicio = new TextDecoder("windows-1252").decode(buf.slice(0, 4096));
+      charset = (/charset=([\w-]+)/i.exec(inicio) || [])[1] || "windows-1252";
+    }
+    let html;
+    try { html = new TextDecoder(charset).decode(buf); }
+    catch { html = new TextDecoder("windows-1252").decode(buf); }
+    const box = document.getElementById("__conf_box");
+    box.innerHTML = html;
+    const t = box.innerText || "";
+    box.innerHTML = "";
+    return t;
+  }, { base, empId, dataBr, url: URL_LISTAGEM });
+
+  return interpretarResposta(txt, dataBr);
+}
+
+/**
+ * Domingo/feriado: a loja não abre, o relatório volta sem nenhum bloco de operador
+ * (e às vezes sem sequer o cabeçalho "Valor Calculado"). Isso é um dia SEM MOVIMENTO,
+ * não um erro — tratar como erro faria todo domingo sumir do painel.
+ * Só é erro de verdade quando a resposta não é o relatório (sessão caiu, página de erro).
+ */
+function interpretarResposta(txt, dataBr) {
+  // Guarda de encoding: se o texto veio com caracteres de substituição, os rótulos
+  // acentuados (Cartão, Crediário, Convênio, Depósito, Devoluções) não vão casar e as
+  // formas somem sem erro nenhum. Falhar alto é melhor que publicar cartão zerado.
+  if (/�/.test(txt)) {
+    throw new Error(`resposta com encoding quebrado (${dataBr}) — charset do ERP não foi respeitado`);
+  }
+  if (/Valor Calculado/i.test(txt)) return parseConferencia(txt);
+
+  const ehTelaDoRelatorio = /conferência dos caixas|conferencia dos caixas|conferência diária|Detalhar Vendas|Vendas Abortadas/i.test(txt);
+  const pareceLoginOuErro = /Sess.o expirada|sessao_expirada|f_senha|lmxta-login|Erro interno|Runtime Error/i.test(txt);
+
+  if (ehTelaDoRelatorio && !pareceLoginOuErro) {
+    return {
+      operadores: [],
+      consolidado: {
+        formas: {}, total: { calc: 0, inf: 0, dif: 0 },
+        cartao_administradoras: {}, saldo_inicial: null, saldo_final: null,
+        status: "sem_movimento",
+      },
+    };
+  }
+  throw new Error(`resposta do POST não parece o relatório de conferência (${dataBr}, ${txt.length} chars)`);
+}
+
+// ── Coleta de 1 (loja, dia) — caminho lento, via navegação (fallback) ────────
 async function coletarDia(page, empId, dataBr) {
   await page.goto(URL_CONF, { waitUntil: "domcontentloaded", timeout: 45000 });
   await page.waitForSelector('select[name="empresa"]', { timeout: 20000 });
@@ -227,10 +339,7 @@ async function coletarDia(page, empId, dataBr) {
   ]);
   await page.waitForTimeout(1600);
   const txt = await page.evaluate(() => (document.body.innerText || ""));
-  if (!/Valor Calculado|conferência dos caixas|conferencia dos caixas/i.test(txt)) {
-    throw new Error("resposta não parece o relatório de conferência");
-  }
-  return parseConferencia(txt);
+  return interpretarResposta(txt, dataBr);
 }
 
 // ── Mix de formas de pagamento por plano/bandeira (período, 1 request p/ 4 lojas) ──
@@ -283,7 +392,11 @@ async function coletarRecebivelCartao(page, di, df) {
     s("data_inicial", di); s("data_final", df);
     document.querySelectorAll('input[id^="empresas_"]').forEach(cb => { cb.checked = false; });
     for (const id of ids) { const e = document.getElementById("empresas_" + id); if (e) e.checked = true; }
-    const r = document.getElementById("cod_clientex");           // agrupa por cliente/fornecedor
+    // Agrupa por VENCIMENTO. Tentei por cliente/fornecedor (cod_clientex) para separar por
+    // administradora, mas o relatório não emitiu os subtotais por grupo. Por vencimento o
+    // formato "Subtotal do grupo DD/MM/AAAA em reais" é estável — e responde a pergunta que
+    // interessa: quanto cai no banco em cada dia.
+    const r = document.getElementById("data_venc");
     if (r) { r.checked = true; r.dispatchEvent(new Event("change", { bubbles: true })); }
   }, { di, df, ids: ALVO.map(l => l.id) });
   await Promise.all([
@@ -293,18 +406,24 @@ async function coletarRecebivelCartao(page, di, df) {
   await page.waitForTimeout(2500);
   const txt = await page.evaluate(() => (document.body.innerText || ""));
 
-  // Subtotais por grupo: "Grupo: STONE PAGAMENTOS (967)" ... "Total do grupo ... R$ X"
-  const adms = [];
-  const linhas = txt.split("\n");
-  let grupo = null;
-  for (const l of linhas) {
-    const mG = /^Grupo:\s*(.+?)\s*$/.exec(l.trim());
-    if (mG) { grupo = mG[1]; continue; }
-    const mT = /Total (?:do grupo|Grupo)[^R]*R\$\s*([\d.,]+)/i.exec(l);
-    if (mT && grupo) { adms.push({ nome: grupo, valor: num(mT[1]) }); grupo = null; }
+  // Cada bloco de vencimento fecha com:
+  //   "Subtotal do grupo 01/07/2026 em reais\tR$ 6.560,19\tR$ 6.560,19"
+  const porVencimento = [];
+  for (const l of txt.split("\n")) {
+    const m = /Subtotal do grupo\s+(\d{2}\/\d{2}\/\d{4})\s+em reais\s*\t*\s*R\$\s*([\d.,]+)/i.exec(l);
+    if (m) {
+      const [dd, mm, yyyy] = m[1].split("/");
+      porVencimento.push({ data: `${yyyy}-${mm}-${dd}`, valor: num(m[2]) });
+    }
   }
+  porVencimento.sort((a, b) => (a.data < b.data ? -1 : 1));
   const mGeral = /Total Geral a Receber:\s*R\$\s*([\d.,]+)/i.exec(txt);
-  return { administradoras: adms, totalGeral: mGeral ? num(mGeral[1]) : null };
+  const somaGrupos = +porVencimento.reduce((a, b) => a + (b.valor || 0), 0).toFixed(2);
+  return {
+    porVencimento,
+    totalGeral: mGeral ? num(mGeral[1]) : somaGrupos,
+    somaGrupos,   // se divergir do totalGeral, o parse perdeu algum bloco
+  };
 }
 
 // ── Main ────────────────────────────────────────────────────────────────────
@@ -351,10 +470,34 @@ let erros = 0;
 try {
   await garantirSessao(page, { log });
 
+  // Serializa o form uma vez; se falhar, cai no caminho lento (navegação por item).
+  let formBase = null;
+  if (pendentes.length) {
+    try {
+      formBase = await prepararFormBase(page);
+      log(`form serializado (${formBase.length} campos) — usando POST direto`);
+    } catch (e) {
+      log("não consegui serializar o form (" + String(e).slice(0, 80) + ") — caminho lento");
+    }
+  }
+
   let feitos = 0, seguidas = 0;
   for (const p of pendentes) {
     try {
-      const r = await coletarDia(page, p.loja.id, isoParaBr(p.dia));
+      let r;
+      try {
+        r = formBase
+          ? await coletarDiaRapido(page, formBase, p.loja.id, isoParaBr(p.dia))
+          : await coletarDia(page, p.loja.id, isoParaBr(p.dia));
+      } catch (e1) {
+        // "Execution context was destroyed" = a página navegou no meio do evaluate (o ERP
+        // às vezes redireciona sozinho). É transitório: reancora o form e tenta mais uma vez.
+        if (!/Execution context was destroyed|context was destroyed/i.test(String(e1))) throw e1;
+        log(`  retry ${p.k} (contexto destruído)`);
+        await page.waitForTimeout(1500);
+        formBase = await prepararFormBase(page);
+        r = await coletarDiaRapido(page, formBase, p.loja.id, isoParaBr(p.dia));
+      }
       seguidas = 0;
       cache.dias[p.k] = {
         data: p.dia,
@@ -399,9 +542,11 @@ try {
     }
   }
 
-  // Extras do período visível (últimos 30 dias)
-  const dIni = isoParaBr(dias[Math.max(0, dias.length - 30)]);
-  const dFim = isoParaBr(dias[dias.length - 1]);
+  // Extras do período visível (últimos 30 dias).
+  // ⚠️ `dias` está do MAIS RECENTE para o mais antigo: dias[0] é hoje e dias[len-1] o mais
+  // velho. Inverter isso manda data_inicial > data_final e o relatório volta vazio.
+  const dFim = isoParaBr(dias[0]);
+  const dIni = isoParaBr(dias[Math.min(dias.length - 1, 29)]);
   try {
     log("mix de planos de pagamento...");
     cache.planos = { periodo: { ini: dIni, fim: dFim }, formas: await coletarPlanos(page, dIni, dFim) };

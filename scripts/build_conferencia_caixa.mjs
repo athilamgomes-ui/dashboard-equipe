@@ -342,13 +342,17 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
 <div class="pane" id="p-banco">
   <div class="kpis" id="kpi-banco"></div>
   <div class="box">
-    <div class="box-h"><h3>Vendido no cartão × a receber das administradoras</h3></div>
+    <div class="box-h"><h3>Calendário de entrada no banco</h3><span class="hint">recebível de cartão em aberto, por data de vencimento</span></div>
     <div class="scroll"><table id="t-banco"></table></div>
     <div class="nota">
-      Cartão não entra no banco na hora: cada parcela vira um recebível da administradora com data de
-      vencimento. A coluna <b>a receber</b> é o que ainda está para cair na conta, por administradora,
-      nos próximos 3 meses. Inclui parcelas de vendas de meses anteriores.
+      Cartão não entra no banco na hora: cada parcela vira um recebível da administradora com data
+      de vencimento. Esta é a agenda do que ainda vai cair na conta — inclui parcelas de vendas de
+      meses anteriores, por isso o total não bate com o cartão vendido no período.
     </div>
+  </div>
+  <div class="box">
+    <div class="box-h"><h3>Administradoras usadas nas vendas</h3><span class="hint">no período filtrado</span></div>
+    <div class="scroll"><table id="t-banco-adm"></table></div>
   </div>
 </div>
 
@@ -552,29 +556,41 @@ function rBanco(){
   const ds = filtrados();
   const vendCartao = ds.reduce((a,d)=>a+(d.cartao?.calc||0),0);
   const rec = D.recebivel || {};
-  const adms = (rec.administradoras||[]).filter(a=>a.valor>0).sort((a,b)=>b.valor-a.valor);
-  const totalRec = rec.totalGeral || adms.reduce((a,b)=>a+b.valor,0);
+  const venc = (rec.porVencimento||[]).filter(v=>v.valor>0);
+  const totalRec = rec.totalGeral || venc.reduce((a,b)=>a+b.valor,0);
 
-  // administradoras vistas nas vendas do período
+  // administradoras que apareceram nas vendas do período (lado "vendeu")
   const admVenda = {};
   ds.forEach(d => Object.entries(d.adms||{}).forEach(([n,v]) => { admVenda[n] = (admVenda[n]||0)+v; }));
   const listaVenda = Object.entries(admVenda).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
 
+  const hoje = new Date().toISOString().slice(0,10);
+  const em30 = new Date(Date.now()+30*864e5).toISOString().slice(0,10);
+  const prox30 = venc.filter(v=>v.data>=hoje && v.data<=em30).reduce((a,b)=>a+b.valor,0);
+
   document.getElementById("kpi-banco").innerHTML =
     kpi("Cartão vendido", nf(vendCartao), "no período filtrado", "#6366f1") +
-    kpi("A receber das adm.", nf(totalRec), rec.periodo ? "venc. até "+rec.periodo.fim : "próximos 3 meses", "#0891b2") +
-    kpi("Administradoras", adms.length || listaVenda.length, "com recebível em aberto", "#7c3aed");
+    kpi("A receber (total)", nf(totalRec), rec.periodo ? "venc. até "+rec.periodo.fim : "próximos 3 meses", "#0891b2") +
+    kpi("Cai nos próximos 30 dias", nf(prox30), venc.filter(v=>v.data>=hoje&&v.data<=em30).length+" data(s) de vencimento", "#7c3aed") +
+    kpi("Administradoras", listaVenda.length, "usadas nas vendas do período", "#059669");
 
-  const linhas = listaVenda.map(([n,v])=>{
-    const r = adms.find(a => a.nome.toUpperCase().includes(n.toUpperCase().split(" ")[0]));
-    return '<tr><td>'+n+'</td><td class="num">'+nf(v)+'</td><td class="num">'+(r?nf(r.valor):'<span class="zero">—</span>')+'</td></tr>';
-  }).join("");
-  const extras = adms.filter(a => !listaVenda.some(([n])=>a.nome.toUpperCase().includes(n.toUpperCase().split(" ")[0])))
-    .map(a=>'<tr><td>'+a.nome+'</td><td class="num zero">—</td><td class="num">'+nf(a.valor)+'</td></tr>').join("");
-
+  // calendário: quanto entra por dia (do mais próximo ao mais distante)
+  const futuros = venc.filter(v=>v.data>=hoje).slice(0,45);
+  const linhas = futuros.map(v=>
+    '<tr><td><b>'+dBR(v.data)+'</b> <span style="color:var(--muted);font-size:11px">'+diaSem(v.data)+'</span></td>'+
+    '<td class="num">'+nf(v.valor)+'</td></tr>').join("");
   document.getElementById("t-banco").innerHTML =
-    '<thead><tr><th style="text-align:left">Administradora</th><th>Vendido no período</th><th>A receber (em aberto)</th></tr></thead>'+
-    '<tbody>'+((linhas+extras) || '<tr><td colspan="3" class="vazio">Sem recebível de cartão coletado.</td></tr>')+'</tbody>';
+    '<thead><tr><th style="text-align:left">Vencimento</th><th>Entra no banco</th></tr></thead>'+
+    '<tbody>'+(linhas || '<tr><td colspan="2" class="vazio">Sem recebível em aberto.</td></tr>')+'</tbody>';
+
+  // administradoras do lado da venda
+  const tAdm = document.getElementById("t-banco-adm");
+  if (tAdm) {
+    tAdm.innerHTML =
+      '<thead><tr><th style="text-align:left">Administradora</th><th>Vendido no período</th></tr></thead><tbody>'+
+      (listaVenda.map(([n,v])=>'<tr><td>'+n+'</td><td class="num">'+nf(v)+'</td></tr>').join("")
+        || '<tr><td colspan="2" class="vazio">Sem venda no cartão no período.</td></tr>')+'</tbody>';
+  }
 }
 
 function render(){ rConf(); rFormas(); rSangria(); rBanco(); }

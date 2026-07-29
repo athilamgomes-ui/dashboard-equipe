@@ -61,8 +61,30 @@ Chrome MCP no Microvix continua PROIBIDO — ver REGRA Nº 1 do CLAUDE.md.
 
 ⚠️ A tela de Conferência de Caixas aceita **1 empresa + 1 dia por requisição** — não tem filtro de
 período nem multi-empresa. Por isso a coleta é dia×loja e usa cache incremental
-(`conferencia_caixa_raw.json`): dias com mais de 3 dias de idade não são recoletados. A primeira
-execução (45 dias × 4 lojas = 180 requisições) é longa; as seguintes fazem ~16.
+(`conferencia_caixa_raw.json`): dias com mais de 3 dias de idade não são recoletados.
+
+### Por que a coleta usa POST direto (e não navegação)
+
+Recarregar `relatorio_conferencia_caixa.asp` e submeter o form a cada consulta custava **~108s por
+item** — 45 dias × 4 lojas daria mais de 2 horas. O form posta em
+`faturamento/listagem_conferencia_caixa.asp`; o coletor serializa o form **uma vez**
+(`prepararFormBase`) e depois manda um `fetch` POST por item (`coletarDiaRapido`): **~11s por item**,
+10x mais rápido. Primeira execução (180 itens) ≈ 30 min; as diárias fazem ~16 itens ≈ 3 min.
+Validado em 29/07 contra o método antigo: resultados idênticos nas 4 lojas.
+
+⚠️ O HTML da resposta é injetado num container **fora da tela** (`position:absolute;left:-99999px`),
+**nunca `display:none`** — com `display:none` o `innerText` degrada para `textContent` e some com os
+`\t` que separam as colunas da tabela, quebrando o parser inteiro.
+
+Se `prepararFormBase` falhar, o coletor cai sozinho no caminho lento por navegação (`coletarDia`).
+
+⚠️ **Encoding:** o Microvix serve ASP em **windows-1252** e não manda charset no header. `r.text()`
+assume UTF-8 e "Cartão" vira "Cart�o" — aí os regexes de Cartão, Crediário, Convênio, Depósito e
+Devoluções param de casar e essas formas **somem sem erro nenhum** (Dinheiro e PIX, sem acento,
+continuam funcionando, então o bug fica invisível). Por isso `coletarDiaRapido` lê
+`arrayBuffer()` + `TextDecoder`, e `interpretarResposta` aborta se achar `�` no texto.
+Aconteceu em 29/07: o painel publicou Cartão R$ 0 enquanto o relatório de planos mostrava
+R$ 201 mil no mesmo período. Navegação normal não sofre disso (o browser lê o `<meta charset>`).
 
 ## ⚠️ Regras de negócio que já custaram caro
 
@@ -77,6 +99,12 @@ execução (45 dias × 4 lojas = 180 requisições) é longa; as seguintes fazem
   `não fechado` (âmbar) e os exclui do cálculo de falta/sobra. Nunca tratar como desvio.
 - **Status possíveis:** `sem_movimento` (domingo/feriado) · `nao_fechado` · `ok` · `divergente`.
 - Diferença = **informado − calculado**. Negativo = faltou dinheiro no caixa.
+- **Recebível de cartão:** o `RUNBOOK_FINANCEIRO` diz que "não existe contas a receber" porque o
+  grupo vende tudo à vista — isso vale para o *cliente*, não para a *adquirente*. Cada parcela de
+  cartão vira um recebível da administradora (STONE etc.) com data de vencimento; em 29/07 havia
+  R$ 360.862,57 em aberto para os 3 meses seguintes. É daí que sai a aba "Cartão → banco".
+  O parse pega as linhas `Subtotal do grupo X em reais` (soma confere com o "Total Geral a
+  Receber" do próprio relatório).
 
 ## Achados da primeira coleta (27/07/2026)
 
