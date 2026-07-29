@@ -169,8 +169,10 @@ function fornIgnorado(nome) {
   const lst = (FORN_MARCAS._ignorar_no_dashboard || {}).por_nome_substring || [];
   return lst.some(s => up.includes(String(s).toUpperCase()));
 }
-// marcas mapeadas mas que NÃO são p/ revenda (uso interno: sacolas etc) → fora da precificação
-const MARCAS_NAO_REVENDA = new Set(["SOLIDER", "MULTIBAG"]);
+// marcas mapeadas mas que NÃO são p/ revenda (uso interno: sacolas etc) → fora da precificação.
+// Fonte: fornecedor_marcas.json → _uso_interno.marcas (de-para versionado no repo compras; a lista
+// hardcoded antiga fica só de fallback se a chave sumir do JSON). (28/07/2026)
+const MARCAS_NAO_REVENDA = new Set(((FORN_MARCAS._uso_interno || {}).marcas || ["Solider", "MultiBag"]).map(m => norm(m)));
 const marcaNaoRevenda = mk => MARCAS_NAO_REVENDA.has(norm(mk));
 
 // excluir devoluções/transferências/bonificações/amostras/consignação (não é compra p/ revenda)
@@ -432,7 +434,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
     for (const E of EMPRESAS) {
       const loja = EMP_TO_LOJA[E];
       const nfes = (raw[String(E)] && raw[String(E)].NFes) || [];
-      let kept = 0;
+      let kept = 0, pend = 0;
       for (const nfe of nfes) {
         const de = nfe.DataEmissao; if (!de) continue;
         let dt; try { dt = new Date(String(de).replace("Z", "+00:00")); } catch { continue; }
@@ -442,12 +444,21 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         const emit = nfe.DadosEmitente || {};
         if (fornIgnorado(emit.Nome)) continue;
         const marcaForn = fornBrand(emit);
+        // ⚠️ MARCA NÃO MAPEADA NUNCA SOME (28/07/2026 — defeito mais caro do pipeline).
+        // Antes: `if (!marcaForn) continue` fazia a NFe DESAPARECER do dashboard sem deixar traço
+        // (nem entrava no rastreio T| do state) — em 15/07 o usuário precificou na mão e "foi pra
+        // venda com o preço errado"; em julho ditou 6+ códigos de marca no chat (La Bening=1015,
+        // Depimiel=313, Felps=1000, Talge=243, Depilflax=957, Catharine Hill=346).
+        // Agora: a NFe ENTRA com marca_pendente=true e marca = razão social do fornecedor. Sem o
+        // código da marca não há "preço atual ERP" (o filtro do relatório exige o código), mas o
+        // preço SUGERIDO sai normal e a tela mostra o badge "⚠️ marca não mapeada". Fornecedor
+        // multi-marca ('+', split pendente) também cai aqui. Fica na tela até "✅ Concluída".
+        const marcaPendente = !marcaForn;
         if (NF_FILTER) {
           if (!NF_FILTER.includes(String(nfe.Numero))) continue; // modo teste: só a(s) NF(s) pedida(s)
         } else {
           // GATILHO: entrada no ERP + visível por DIAS_ENTRADA dias a partir da 1ª aparição (depois some)
-          if (!marcaForn) continue; // sem marca mapeada não dá p/ buscar preço ERP nem precificar com referência
-          if (marcaNaoRevenda(marcaForn)) continue; // sacolas/uso interno não vão p/ precificação
+          if (marcaForn && marcaNaoRevenda(marcaForn)) continue; // sacolas/uso interno não vão p/ precificação
           if (!elegivel(loja, nfe)) continue;
         }
         const itens = (nfe.Produtos || []).map(p => {
@@ -460,7 +471,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
             descricao: String(p.DescricaoProduto || ""),
             qtd,
             cfop: String(p.CFOP || ""),
-            marca: marcaForn,
+            marca: marcaForn || String(emit.Nome || "").trim(), // sem marca mapeada → razão social (rótulo) + marca_pendente na NF
             valor_bruto: num(p.ValorBruto),
             desconto: num(p.ValorDesconto),
             frete: num(p.ValorFrete),
@@ -504,13 +515,15 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
           valor: num(nfe.Valor),
           lancada: !!nfe.LancadaNoMicrovix,
           natureza: String(nfe.NaturezaOperacao || ""),
+          ...(marcaPendente ? { marca_pendente: true } : {}), // badge "⚠️ marca não mapeada" na tela; ausente = mapeada (JSON não muda p/ NFes normais)
           itens,
         });
         kept++;
+        if (marcaPendente) { pend++; log(`  ⚠️ ${loja} NF ${nfe.Numero} SEM marca mapeada (forn "${emit.Nome}") — mantida com marca_pendente`); }
       }
       // mais recentes primeiro
       lojas[loja].sort((a, b) => (a.data_emissao < b.data_emissao ? 1 : -1));
-      log(`${loja}: ${kept} NFes mantidas (de ${nfes.length})`);
+      log(`${loja}: ${kept} NFes mantidas (de ${nfes.length})${pend ? ` — ${pend} com marca NÃO mapeada (pendente)` : ""}`);
     }
 
     // ===== Enriquecer lendo o XML da NFe, PRODUTO POR PRODUTO (fonte autoritativa) =====

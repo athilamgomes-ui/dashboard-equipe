@@ -29,9 +29,10 @@ const URL_NFE = "https://linx.microvix.com.br/gestor_web/produtos/entrada_nfe/in
 const EMPRESAS = [1, 3, 4, 10];
 const EMP_TO_LOJA = { 1: "L1", 3: "L3", 4: "L4", 10: "L5" };
 const FORN_MARCAS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/compras/fornecedor_marcas.json", "utf8"));
-const MARCAS_NAO_REVENDA = new Set(["SOLIDER", "MULTIBAG"]);
 const EXCL_NAT = /(AMOSTRA|REMESSA EM CONSIGNA|BONIFIC|DEVOLU|RETORNO|TRANSFER)/i;
 const norm = s => String(s || "").toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+// não-revenda (uso interno) vem do próprio fornecedor_marcas.json → _uso_interno.marcas (28/07/2026)
+const MARCAS_NAO_REVENDA = new Set(((FORN_MARCAS._uso_interno || {}).marcas || ["Solider", "MultiBag"]).map(m => norm(m)));
 const log = m => process.stderr.write(`[detecta] ${new Date().toISOString().slice(11, 19)} ${m}\n`);
 
 function fornBrand(emit) {
@@ -45,6 +46,11 @@ function fornBrand(emit) {
   }
   if (!v || String(v).includes("+")) return null;
   return v;
+}
+function fornIgnorado(nome) {
+  const up = String(nome || "").toUpperCase();
+  const lst = (FORN_MARCAS._ignorar_no_dashboard || {}).por_nome_substring || [];
+  return lst.some(s => up.includes(String(s).toUpperCase()));
 }
 
 // lock: se o coletor (cron/watcher) está rodando, pula — ele mesmo capta a transição
@@ -91,8 +97,11 @@ try {
       const loja = EMP_TO_LOJA[E];
       for (const nfe of ((raw[String(E)] && raw[String(E)].NFes) || [])) {
         if (EXCL_NAT.test(nfe.NaturezaOperacao || "")) continue;
+        if (fornIgnorado((nfe.DadosEmitente || {}).Nome)) continue; // não-revenda (posto, banco, embalagem...) não dispara coleta
         const mk = fornBrand(nfe.DadosEmitente || {});
-        if (!mk || MARCAS_NAO_REVENDA.has(norm(mk))) continue;
+        // ⚠️ 28/07/2026: marca NÃO mapeada TAMBÉM conta — a NF entra no dashboard com marca_pendente
+        // (antes o detector a ignorava e a entrada nunca disparava a coleta expressa).
+        if (mk && MARCAS_NAO_REVENDA.has(norm(mk))) continue;
         const ch = String(nfe.Chave || (loja + "-" + nfe.Numero));
         const tk = "T|" + ch;
         const lancNow = !!nfe.LancadaNoMicrovix;
@@ -101,7 +110,7 @@ try {
         if (!prev || prev.l !== lancNow) { state[tk] = { l: lancNow, ts: todayISO }; dirty = true; }
         if (transicao && !state[ch]) {
           state[ch] = { desde: todayISO, aplicadoDesde: null }; dirty = true;
-          novas.push(`${loja} NF ${nfe.Numero} (${mk})`);
+          novas.push(`${loja} NF ${nfe.Numero} (${mk || "⚠ marca não mapeada: " + ((nfe.DadosEmitente || {}).Nome || "?")})`);
         }
       }
     }

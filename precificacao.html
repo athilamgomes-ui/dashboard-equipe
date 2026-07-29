@@ -105,6 +105,7 @@
 
     <div class="card">
       <div id="paramsBar" class="params"></div>
+      <div id="avisoMarca" style="display:none;background:var(--critbg);color:var(--crit);border:1px solid #fca5a5;border-radius:8px;padding:8px 12px;margin-top:8px;font-size:13px"></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0;flex-wrap:wrap;gap:8px">
         <div style="display:flex;align-items:center;gap:12px">
           <strong id="itensTitulo">Itens</strong>
@@ -361,7 +362,7 @@ function renderNfes(){
   const html=arr.map((nf,i)=>`
     <div class="nfe ${nfeSel===i?'sel':''}" data-i="${i}">
       <div class="top"><span class="forn">${nf.fornecedor||"—"}</span>
-        <span class="pill ${nf.lancada?'l':'t'}">${nf.lancada?'lançada':'em trânsito'}</span></div>
+        <span>${nf.marca_pendente?'<span class="pill" style="background:var(--critbg);color:var(--crit)" title="fornecedor sem marca mapeada — precifique manualmente e registre a marca">⚠️ marca não mapeada</span> ':''}<span class="pill ${nf.lancada?'l':'t'}">${nf.lancada?'lançada':'em trânsito'}</span></span></div>
       <div class="meta">NF ${nf.numero}${nf.uf?` · ${nf.uf}`:''} · ${nf.data_emissao.split("-").reverse().join("/")} · ${nf.itens.length} itens · ${brl(nf.valor)}${nf.itens[0]&&nf.itens[0].marca?` · ${nf.itens[0].marca}`:''}</div>
     </div>`).join("") || `<div class="empty">Nenhuma NF-e nos últimos 90 dias.</div>`;
   document.getElementById("nfeList").innerHTML=html;
@@ -395,12 +396,21 @@ function renderItens(){
   paramsBar();
   const arr=DADOS.lojas[lojaAtual]||[]; const nf=arr[nfeSel];
   const boxM=document.getElementById("margemMarcaBox");
-  if(!nf){ document.getElementById("tbody").innerHTML=`<tr><td colspan="9" class="empty">Selecione uma NF-e ao lado.</td></tr>`; document.getElementById("itensTitulo").textContent="Itens"; if(boxM)boxM.style.display="none"; return; }
+  const avisoM=document.getElementById("avisoMarca");
+  if(!nf){ document.getElementById("tbody").innerHTML=`<tr><td colspan="9" class="empty">Selecione uma NF-e ao lado.</td></tr>`; document.getElementById("itensTitulo").textContent="Itens"; if(boxM)boxM.style.display="none"; if(avisoM)avisoM.style.display="none"; return; }
   document.getElementById("itensTitulo").textContent=`Itens — NF ${nf.numero} · ${nf.fornecedor}`;
+  // NF de fornecedor SEM marca mapeada (28/07/2026): ela NUNCA some da fila — precifique manualmente
+  // e registre a marca com o Claude; a coluna "Preço atual ERP" só preenche depois do mapeamento.
+  if(avisoM){
+    if(nf.marca_pendente){
+      avisoM.style.display="";
+      avisoM.innerHTML=`⚠️ <b>Marca não mapeada</b> — o fornecedor <b>${nf.fornecedor||"?"}</b> ainda não está no de-para de marcas, por isso não há "Preço atual ERP" (o filtro do relatório precisa do código da marca). <b>Precifique manualmente e registre a marca</b>: diga ao Claude «fornecedor ${nf.fornecedor||"X"} é da marca Y, código Z no ERP» (skill mapear-marca). Quando terminar de precificar, use "✅ Concluída".`;
+    } else avisoM.style.display="none";
+  }
   // Campo "Margem da marca": traz a última usada (memória) e, ao editar, aplica na marca toda + salva
   const marcaNF=(nf.itens[0]||{}).marca;
   if(boxM){
-    if(marcaNF){
+    if(marcaNF && !nf.marca_pendente){ // marca pendente = razão social como rótulo; não persistir margem "de marca" com essa chave
       boxM.style.display="";
       document.getElementById("margemMarcaNome").textContent=marcaNF;
       const inpM=document.getElementById("margemMarcaInp");
