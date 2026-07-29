@@ -633,11 +633,32 @@ function modoRender(arqE1, arqE2, arqStores, arqC8, coletadoEm) {
       if (JSON.stringify(v) !== JSON.stringify(mesDepois[lk].vendas[sid])) die(`IMUTABILIDADE VIOLADA: ${lk}.vendas.${sid} mudou — abortando`);
     }
   }
-  // SUGESTOES idêntico nos 2 arquivos
+  // SUGESTOES: o que a VENDEDORA vê tem que bater nos 2 arquivos.
+  // Não comparar byte a byte: o painel carrega, de propósito, campos do motor de avaliação
+  // (meta_valor, meta_semana_valor, alvo_semana) que o loja.html não usa — comparar tudo fazia
+  // o aviso disparar em TODO run e virar ruído ignorado (mesmo destino do sanity da L1, que
+  // gritou 22 dias sem ninguém agir). Aqui só avisa o que é acionável: id faltando num dos
+  // lados, ou campo que a vendedora realmente lê divergindo. (28/07/2026)
+  const CAMPOS_VENDEDORA = ["titulo", "descricao", "prazo", "status", "escopo", "loja", "vendedora", "tipo", "marca", "meta_alvo"];
   try {
     const sp = extractConst(painel, "SUGESTOES").obj;
     const sl = extractConst(loja, "SUGESTOES").obj;
-    if (JSON.stringify(sp) !== JSON.stringify(sl)) warn("SUGESTOES DIVERGE entre painel e loja.html (divergência pré-existente ou id ausente num deles) — revisar");
+    // forma real: SUGESTOES = { '2026-W31': { semana_label, geradas_em, itens: [ {id,...} ] } }
+    const idx = (o) => {
+      const m = {};
+      for (const sem of Object.values(o || {})) {
+        const itens = Array.isArray(sem) ? sem : (sem && Array.isArray(sem.itens) ? sem.itens : []);
+        for (const s of itens) if (s && s.id) m[s.id] = s;
+      }
+      return m;
+    };
+    const ip = idx(sp), il = idx(sl);
+    const faltaLoja = Object.keys(ip).filter((k) => !il[k]);
+    const faltaPainel = Object.keys(il).filter((k) => !ip[k]);
+    if (faltaLoja.length) warn(`SUGESTOES: ${faltaLoja.length} id(s) no painel e NÃO no loja.html (vendedora não vê): ${faltaLoja.slice(0, 5).join(", ")}`);
+    if (faltaPainel.length) warn(`SUGESTOES: ${faltaPainel.length} id(s) no loja.html e NÃO no painel: ${faltaPainel.slice(0, 5).join(", ")}`);
+    const dif = Object.keys(ip).filter((k) => il[k] && CAMPOS_VENDEDORA.some((c) => JSON.stringify(ip[k][c]) !== JSON.stringify(il[k][c])));
+    if (dif.length) warn(`SUGESTOES: ${dif.length} sugestão(ões) com texto/status divergente entre painel e loja.html — igualar: ${dif.slice(0, 5).join(", ")}`);
   } catch (e) { warn(`comparação de SUGESTOES falhou: ${e.message}`); }
 
   // ══ 6) GRAVAR + RESUMO ══
