@@ -115,6 +115,13 @@ A corrente **quebra** em dia `não fechado` (não há saldo confiável para o di
 ⚠️ Antes de 29/07 o painel fazia `informado − calculado` e acusava divergência em quase todo dia.
 Era erro de premissa, não do dado.
 
+⚠️ **Nunca exibir o "Saldo Inicial/Final (em Dinheiro)" do ERP.** Esse campo contradiz a
+conferência real: em 28/07 dava −R$ 38,85 para a L4 enquanto o caixa físico era R$ 1.047,40 e
+fechava com R$ 0,05 de diferença. Exibi-lo pintava de vermelho ("9 dias com saldo negativo")
+justamente a loja que mais acerta — duas abas do mesmo painel dizendo coisas opostas. Por isso
+`saldo_inicial`/`saldo_final` são coletados mas **não vão para o payload**. O saldo que vale é
+`caixa.inf` (o informado no fechamento), usado igual nas abas Conferência e Sangria.
+
 ## 🚩 "Não conferido": L3 e L5 não contam o caixa
 
 Em julho/2026, Itaituba (L3) e Santarém (L5) informaram valor **idêntico ao calculado, centavo a

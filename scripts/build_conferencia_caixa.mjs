@@ -151,8 +151,9 @@ const DADOS = {
     conf: d.conf,
     caixa: d.caixa,
     total: d.total,
-    saldoIni: d.saldo_inicial,
-    saldoFim: d.saldo_final,
+    // saldo_inicial/saldo_final do ERP NÃO são publicados de propósito: contradizem a
+    // conferência real (davam negativo para a L4 nos dias em que ela fechou certo) e
+    // só geravam alarme falso. O saldo que vale é caixa.inf.
     dinheiro: F(d, "dinheiro"),
     cartao: F(d, "cartao"),
     pix: F(d, "pix"),
@@ -410,12 +411,14 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
 <div class="pane" id="p-sangria">
   <div class="kpis" id="kpi-sangria"></div>
   <div class="box">
-    <div class="box-h"><h3>Sangria, suprimento e saldo em dinheiro</h3><span class="hint">movimento físico do caixa</span></div>
+    <div class="box-h"><h3>Sangria, suprimento e caixa em dinheiro</h3><span class="hint">movimento físico da gaveta</span></div>
     <div class="scroll"><table id="t-sangria"></table></div>
     <div class="nota">
-      <b>Sangria</b> = retirada de dinheiro do caixa (vai pro cofre/banco). <b>Suprimento</b> = dinheiro
-      colocado no caixa (troco). <b>Saldo final</b> negativo indica que saiu mais dinheiro do que entrou
-      — normalmente sangria lançada a maior ou troco não registrado.
+      <b>Sangria</b> = retirada de dinheiro do caixa (vai pro cofre/banco). <b>Suprimento</b> =
+      dinheiro colocado no caixa (troco). <b>Caixa no fim do dia</b> é o saldo informado no
+      fechamento — o mesmo valor conferido na primeira aba, então as duas telas sempre contam a
+      mesma história. Dia sem sangria não é erro: significa que o dinheiro ficou na gaveta e
+      entra no saldo do dia seguinte.
     </div>
   </div>
 </div>
@@ -622,36 +625,51 @@ function rFormas(){
 }
 
 // ══ 3. SANGRIA ══
+// ⚠️ NÃO usar o "Saldo Inicial/Final (em Dinheiro)" do ERP aqui. Esse campo contradiz a
+// conferência real: em 28/07 ele dava −R$ 38,85 para a L4 enquanto o caixa físico era
+// R$ 1.047,40 e fechava certo. Mostrá-lo pintava de vermelho justamente a loja que mais
+// acerta. O saldo exibido é o caixa informado (a gaveta), o mesmo da aba Conferência.
 function rSangria(){
   const ds = filtrados();
-  const sang = ds.reduce((a,d)=>a+(d.sangria?.calc||0),0);
-  const sup = ds.reduce((a,d)=>a+(d.suprimentos?.calc||0),0);
-  const negativos = ds.filter(d=>d.saldoFim!=null && d.saldoFim < 0);
-  const difSang = ds.filter(d=>(d.status==="ok"||d.status==="divergente") && Math.abs(d.sangria?.dif||0)>0.01);
+  const comMov = ds.filter(d=>d.conf!=="sem_movimento");
+  const sang = ds.reduce((a,d)=>a+(d.caixa?.sangria||0),0);
+  const sup = ds.reduce((a,d)=>a+(d.caixa?.suprimento||0),0);
+  const dinheiro = ds.reduce((a,d)=>a+(d.caixa?.calc||0),0);
+  const semSangria = comMov.filter(d=>(d.caixa?.calc||0)>0 && !(d.caixa?.sangria>0));
+
+  // caixa atual = último valor informado de cada loja no período
+  const lojas = selLoja.value ? [selLoja.value] : D.lojas.map(l=>l.key);
+  let caixaHoje = 0, comCaixa = 0;
+  lojas.forEach(lj=>{
+    const ult = ds.filter(d=>d.loja===lj && d.caixa && d.caixa.inf>0 && d.conf!=="nao_fechado" && d.conf!=="sem_movimento")[0];
+    if (ult) { caixaHoje += ult.caixa.inf; comCaixa++; }
+  });
 
   document.getElementById("kpi-sangria").innerHTML =
-    kpi("Sangria no período", nf(sang), "dinheiro retirado do caixa", "#7c3aed") +
+    kpi("Sangria no período", nf(sang), (dinheiro? (sang/dinheiro*100).toFixed(0)+"% do dinheiro vendido" : "dinheiro retirado"), "#7c3aed") +
+    kpi("Na gaveta agora", nf(caixaHoje), comCaixa+" loja(s) · último fechamento", "#059669") +
     kpi("Suprimento", nf(sup), "dinheiro colocado (troco)", "#0891b2") +
-    kpi("Dias com saldo negativo", negativos.length, "saiu mais do que entrou", "var(--alerta)", negativos.length?"#b45309":"") +
-    kpi("Sangria divergente", difSang.length, "informada ≠ registrada", "var(--falta)", difSang.length?"var(--falta)":"");
+    kpi("Dias sem sangria", semSangria.length, "vendeu em dinheiro e não retirou", "var(--alerta)", semSangria.length?"#b45309":"");
 
-  const linhas = ds.map(d=>
-    '<tr>'+
+  const linhas = ds.map(d=>{
+    const c = d.caixa || {};
+    const p = PILL[d.conf] || PILL.sem_movimento;
+    const mudo = d.conf==="nao_fechado" || d.conf==="sem_movimento";
+    return '<tr>'+
       '<td><b>'+dBR(d.data)+'</b> <span style="color:var(--muted);font-size:11px">'+diaSem(d.data)+'</span></td>'+
       '<td style="text-align:left"><span class="loja-tag" style="background:'+corLoja(d.loja)+'">'+d.loja+'</span></td>'+
-      '<td class="num">'+nf(d.dinheiro.calc)+'</td>'+
-      '<td class="num">'+nf(d.sangria?.calc||0)+'</td>'+
-      '<td class="'+(Math.abs(d.sangria?.dif||0)>0.01 && d.status!=="nao_fechado" ? "falta":"zero")+'">'+
-        (d.status==="nao_fechado" ? "—" : nf2(d.sangria?.dif||0))+'</td>'+
-      '<td class="num">'+nf(d.suprimentos?.calc||0)+'</td>'+
-      '<td class="num'+(d.saldoIni<0?" falta":"")+'">'+(d.saldoIni==null?"—":nf2(d.saldoIni))+'</td>'+
-      '<td class="num'+(d.saldoFim<0?" falta":"")+'">'+(d.saldoFim==null?"—":nf2(d.saldoFim))+'</td>'+
-    '</tr>').join("");
+      '<td class="num">'+nf(c.calc||0)+'</td>'+
+      '<td class="num">'+(c.sangria?nf(c.sangria):'<span class="zero">—</span>')+'</td>'+
+      '<td class="num">'+(c.suprimento?nf(c.suprimento):'<span class="zero">—</span>')+'</td>'+
+      '<td class="num"><b>'+(mudo?'<span class="zero">—</span>':nf(c.inf))+'</b></td>'+
+      '<td><span class="pill '+p[0]+'">'+p[1]+'</span></td>'+
+    '</tr>';
+  }).join("");
 
   document.getElementById("t-sangria").innerHTML =
-    '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>Dinheiro vendido</th><th>Sangria</th>'+
-    '<th>Dif. sangria</th><th>Suprimento</th><th>Saldo inicial</th><th>Saldo final</th></tr></thead>'+
-    '<tbody>'+(linhas || '<tr><td colspan="8" class="vazio">Sem dados no período.</td></tr>')+'</tbody>';
+    '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>Dinheiro do dia</th><th>Sangria</th>'+
+    '<th>Suprimento</th><th>Caixa no fim do dia</th><th style="text-align:left">Status</th></tr></thead>'+
+    '<tbody>'+(linhas || '<tr><td colspan="7" class="vazio">Sem dados no período.</td></tr>')+'</tbody>';
 }
 
 // ══ 4. BANCO ══
