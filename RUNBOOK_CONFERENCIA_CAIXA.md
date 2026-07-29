@@ -122,17 +122,39 @@ justamente a loja que mais acerta — duas abas do mesmo painel dizendo coisas o
 `saldo_inicial`/`saldo_final` são coletados mas **não vão para o payload**. O saldo que vale é
 `caixa.inf` (o informado no fechamento), usado igual nas abas Conferência e Sangria.
 
-## 🚩 "Não conferido": L3 e L5 não contam o caixa
+## 🚩 "Sem contagem": L3 e L5 fecham o caixa, mas não confrontam nada
 
-Em julho/2026, Itaituba (L3) e Santarém (L5) informaram valor **idêntico ao calculado, centavo a
-centavo, em 100% dos dias** — inclusive em dias com sangria, quando bater exato seria impossível.
-O operador está repetindo o número da tela em vez de contar a gaveta.
+Medido sobre 45 dias (15/06 a 29/07/2026), o resultado é **binário por loja**:
 
-O painel marca esses dias como **`não conferido`** (roxo) e os tira do cálculo de deriva — senão
-geraria falta fantasma de milhares de reais (L3 dava −R$ 5.818, L5 −R$ 2.418, puro artefato).
+| Loja | Dias fechados | Informado = sistema | Informado ≠ sistema |
+|---|---|---|---|
+| L1 | 33 | 0 | **33** |
+| L4 | 35 | 0 | **35** |
+| L3 | 35 | **35** | 0 |
+| L5 | 33 | **33** | 0 |
+
+O fechamento **existe** em L3 e L5 — o filtro "Listar apenas usuários com fechamentos" retorna
+`caixaitb.casadabeleza` e `marialuiza.casadabeleza`. O que muda é a estrutura: nessas lojas as
+vendas ficam num login (`admitb`) e o fechamento é lançado em outro (`caixaitb`), então o bloco
+do caixa vem com **Valor Calculado zerado** e os valores declarados (dinheiro, cartão, PIX)
+coincidem exatamente com os do outro login. Em 68 fechamentos, nenhuma diferença.
+
+Em L1 e L4 é o mesmo operador que vende e fecha, e o dinheiro declarado diverge do sistema em
+100% dos dias — contagem real. Deriva de julho: R$ 15,37 (L1) e R$ 1,95 (L4).
+
+O painel marca L3/L5 como **`sem contagem`** (roxo) e as tira do cálculo de deriva. Tratá-las como
+divergência gerava falta fantasma de −R$ 5.818 (L3) e −R$ 2.418 (L5), puro artefato.
 Regra: `informado == calculado` e (houve sangria **ou** existia saldo anterior).
 
-Altamira (L1 e L4) confere de verdade: deriva de julho R$ 15,37 e R$ 1,95 respectivamente.
+⚠️ Não afirmar que "não conferem" — o fechamento é lançado. O que o dado sustenta é que a
+declaração não apura diferença. Se o processo mudar (fechamento no login que tem as vendas),
+essas lojas passam a cair na conferência normal sozinhas.
+
+## 💰 Nunca arredondar
+
+Conferência de caixa se faz no centavo. O caixa da L1 em 03/07 tinha **786,85**, não 787 —
+arredondar esconde exatamente a diferença que o painel existe para achar. As tabelas de
+Conferência e Sangria usam `nf2` (2 casas) em todas as colunas de dinheiro.
 
 ## ⚠️ Regras de negócio que já custaram caro
 

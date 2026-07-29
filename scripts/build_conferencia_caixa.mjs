@@ -111,11 +111,12 @@ function reconciliar(lista) {
         continue;
       }
 
-      // Informado idêntico ao calculado, centavo a centavo, num dia em que o caixa
-      // tinha saldo anterior ou houve sangria: para bater exato seria preciso que a
-      // gaveta zerasse sozinha. Na prática é o operador repetindo o número da tela
-      // em vez de contar o dinheiro. Não é falta de caixa, é ausência de conferência
-      // — L3 e L5 fazem isso em 100% dos dias de julho.
+      // Informado idêntico ao calculado, centavo a centavo. Verificado em 29/07 sobre
+      // 45 dias: L1 e L4 divergem em 100% dos dias (contagem real), L3 e L5 coincidem
+      // em 100% (0 de 68 dias com qualquer diferença). Nessas duas o fechamento existe
+      // no POS, mas está lançado num login que não tem as vendas — o bloco do caixa vem
+      // com Valor Calculado zerado —, então a declaração não confronta nada.
+      // Não é falta de dinheiro: é conferência que não apura diferença.
       if (Math.abs(inf - calc) < 0.005 && (sangria > 0 || (caixaAnterior || 0) > 0.005)) {
         d.conf = "nao_conferido";
         caixaAnterior = inf; dataAnterior = d.data;
@@ -382,10 +383,14 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
       Diferenças abaixo de R$ 1,00 contam como acerto (arredondamento de troco).
       <br><br>
       <b>Não fechado</b> = ninguém lançou o fechamento no ERP; não há o que conferir, e a corrente
-      recomeça no dia seguinte. <b>Não conferido</b> = o valor informado é idêntico ao que o sistema
-      calculou mesmo tendo havido sangria — sinal de que o operador repetiu o número da tela em vez
-      de contar a gaveta. Itaituba lança venda e fechamento em usuários diferentes; os valores já
-      vêm somados por loja para não gerar falso alarme.
+      recomeça no dia seguinte.
+      <br><br>
+      <b>Sem contagem</b> = o valor informado é idêntico ao do sistema, centavo a centavo. Em 45
+      dias, Altamira (L1 e L4) divergiu em <b>100%</b> dos dias e Itaituba/Santarém (L3 e L5) em
+      <b>0%</b> — nenhuma diferença em 68 fechamentos. Nessas duas o fechamento existe no POS, mas
+      está lançado num login que não registrou as vendas: o bloco do caixa vem com Valor Calculado
+      zerado, então a declaração não confronta nada. Não é dinheiro faltando; é conferência que
+      não apura diferença. Enquanto for assim, essas lojas ficam fora do cálculo de deriva.
     </div>
   </div>
 </div>
@@ -492,7 +497,7 @@ const cls = v => Math.abs(v)<0.01 ? "zero" : (v<0 ? "falta" : "sobra");
 const PILL = {
   ok:['p-ok','bateu'], divergente:['p-div','diferença'],
   nao_fechado:['p-nf','não fechado'], sem_movimento:['p-sm','sem movimento'],
-  nao_conferido:['p-nc','não conferido'], sem_base:['p-sm','sem base']
+  nao_conferido:['p-nc','sem contagem'], sem_base:['p-sm','sem base']
 };
 
 const selLoja = document.getElementById("f-loja");
@@ -537,25 +542,27 @@ function rConf(){
         "var(--falta)", pior?"var(--falta)":"var(--ok)") +
     kpi("Caixas não fechados", naoFech.length, "de "+comMov.length+" dia(s) com movimento",
         "var(--alerta)", naoFech.length?"#b45309":"") +
-    kpi("Sem conferência real", naoConf.length,
-        lojasSemConf.length ? lojasSemConf.join(", ")+" repetem o valor do sistema" : "todas conferem",
+    kpi("Dias sem contagem", naoConf.length,
+        lojasSemConf.length ? lojasSemConf.join(", ")+": informado = sistema" : "todas contam o caixa",
         "#7c3aed", naoConf.length?"#6d28d9":"var(--ok)");
 
   const linhas = ds.map(d => {
     const p = PILL[d.conf] || PILL.sem_movimento;
     const c = d.caixa || {};
     const temCalculo = c.esperado != null;
-    const mostra = v => v==null ? '<span class="zero">—</span>' : nf(v);
+    // Conferência de caixa se faz no centavo: o caixa da L1 em 03/07 tinha 786,85,
+    // não 787. Nada de arredondar nesta tabela.
+    const mostra = v => v==null ? '<span class="zero">—</span>' : nf2(v);
     return '<tr>'+
       '<td><b>'+dBR(d.data)+'</b> <span style="color:var(--muted);font-size:11px">'+diaSem(d.data)+'</span></td>'+
       '<td style="text-align:left"><span class="loja-tag" style="background:'+corLoja(d.loja)+'">'+d.loja+'</span></td>'+
       '<td class="num zero">'+mostra(c.anterior)+'</td>'+
       '<td class="num">'+mostra(c.calc)+'</td>'+
-      '<td class="num">'+(c.sangria?nf(c.sangria):'<span class="zero">—</span>')+'</td>'+
-      '<td class="num">'+(temCalculo?nf(c.esperado):'<span class="zero">—</span>')+'</td>'+
+      '<td class="num">'+(c.sangria?nf2(c.sangria):'<span class="zero">—</span>')+'</td>'+
+      '<td class="num">'+(temCalculo?nf2(c.esperado):'<span class="zero">—</span>')+'</td>'+
       // Em dia sem movimento o ERP devolve 0, mas o dinheiro continua na gaveta:
       // mostrar "R$ 0" ali daria a entender que o caixa foi zerado.
-      '<td class="num"><b>'+((d.conf==="nao_fechado"||d.conf==="sem_movimento")?'<span class="zero">—</span>':nf(c.inf))+'</b></td>'+
+      '<td class="num"><b>'+((d.conf==="nao_fechado"||d.conf==="sem_movimento")?'<span class="zero">—</span>':nf2(c.inf))+'</b></td>'+
       '<td class="'+(temCalculo?cls(c.residuo):"zero")+'">'+(temCalculo?nf2(c.residuo):"—")+'</td>'+
       '<td><span class="pill '+p[0]+'">'+p[1]+'</span></td>'+
     '</tr>';
@@ -646,9 +653,9 @@ function rSangria(){
   });
 
   document.getElementById("kpi-sangria").innerHTML =
-    kpi("Sangria no período", nf(sang), (dinheiro? (sang/dinheiro*100).toFixed(0)+"% do dinheiro vendido" : "dinheiro retirado"), "#7c3aed") +
-    kpi("Na gaveta agora", nf(caixaHoje), comCaixa+" loja(s) · último fechamento", "#059669") +
-    kpi("Suprimento", nf(sup), "dinheiro colocado (troco)", "#0891b2") +
+    kpi("Sangria no período", nf2(sang), (dinheiro? (sang/dinheiro*100).toFixed(0)+"% do dinheiro vendido" : "dinheiro retirado"), "#7c3aed") +
+    kpi("Na gaveta agora", nf2(caixaHoje), comCaixa+" loja(s) · último fechamento", "#059669") +
+    kpi("Suprimento", nf2(sup), "dinheiro colocado (troco)", "#0891b2") +
     kpi("Dias sem sangria", semSangria.length, "vendeu em dinheiro e não retirou", "var(--alerta)", semSangria.length?"#b45309":"");
 
   const linhas = ds.map(d=>{
@@ -658,10 +665,10 @@ function rSangria(){
     return '<tr>'+
       '<td><b>'+dBR(d.data)+'</b> <span style="color:var(--muted);font-size:11px">'+diaSem(d.data)+'</span></td>'+
       '<td style="text-align:left"><span class="loja-tag" style="background:'+corLoja(d.loja)+'">'+d.loja+'</span></td>'+
-      '<td class="num">'+nf(c.calc||0)+'</td>'+
-      '<td class="num">'+(c.sangria?nf(c.sangria):'<span class="zero">—</span>')+'</td>'+
-      '<td class="num">'+(c.suprimento?nf(c.suprimento):'<span class="zero">—</span>')+'</td>'+
-      '<td class="num"><b>'+(mudo?'<span class="zero">—</span>':nf(c.inf))+'</b></td>'+
+      '<td class="num">'+nf2(c.calc||0)+'</td>'+
+      '<td class="num">'+(c.sangria?nf2(c.sangria):'<span class="zero">—</span>')+'</td>'+
+      '<td class="num">'+(c.suprimento?nf2(c.suprimento):'<span class="zero">—</span>')+'</td>'+
+      '<td class="num"><b>'+(mudo?'<span class="zero">—</span>':nf2(c.inf))+'</b></td>'+
       '<td><span class="pill '+p[0]+'">'+p[1]+'</span></td>'+
     '</tr>';
   }).join("");
