@@ -6,3 +6,7 @@ scripts/_debug_*.mjs
 scripts/_check_*.mjs
 .precificacao_nf
 precificacao_lancadas.json
+
+# Conferência de caixa: dado cru fica LOCAL (valores e nomes de operador; repo é público)
+conferencia_caixa_raw.json
+scripts/_tmp_*.mjs
