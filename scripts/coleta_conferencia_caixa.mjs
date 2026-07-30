@@ -438,6 +438,12 @@ async function coletarMovimentoDiario(page, empId, di, df) {
       const m = /^(\d{2})\/(\d{2})\/(\d{2,4})/.exec(cel[0] || "");
       if (!m) continue;
       const ano = m[3].length === 2 ? "20" + m[3] : m[3];
+      // O link do documento carrega o identificador usado por imprime_doc.asp, que é a
+      // única forma de chegar em hora, vendedor e produtos da venda.
+      const a = tr.querySelector("td.coluna-doc-emp a, a[onclick*=imprime_doc]");
+      const oc = a ? (a.getAttribute("onclick") || "") : "";
+      const gid = (/identificador=(\{[^}]+\})/.exec(oc) || [])[1] || null;
+      const ser = (/[?&]serie=([^&"']+)/.exec(oc) || [])[1] || null;
       out.push({
         d: `${ano}-${m[2]}-${m[1]}`,
         doc: (cel[iDoc] || "").replace(/\s*\|\s*/, "|"),
@@ -447,6 +453,7 @@ async function coletarMovimentoDiario(page, empId, di, df) {
         pix: n(cel[iPix]),
         lnk: iLink >= 0 ? n(cel[iLink]) : 0,
         pag: +idxPag.reduce((a, j) => a + n(cel[j]), 0).toFixed(2),   // soma de TODAS as formas
+        gid, ser,
       });
     }
     return { docs: out };
@@ -471,6 +478,8 @@ async function coletarCanceladas(page, empId, di, df) {
     const s = (id, v) => { const e = document.getElementById(id); if (e) { e.value = v; ["input", "change"].forEach(ev => e.dispatchEvent(new Event(ev, { bubbles: true }))); } };
     s("datePickerRelatorioReceb", di); s("datePickerDataFinal", df);
     const c = document.getElementById("chkExibirObservacaoCancelamento"); if (c && !c.checked) c.click();
+    // produtos são necessários para confirmar que a venda refeita é a MESMA venda
+    const d = document.getElementById("chkExibirDetalhamentoProdutos"); if (d && !d.checked) d.click();
   }, { di, df });
 
   // multiselect Vue: abre e escolhe a empresa
@@ -490,19 +499,119 @@ async function coletarCanceladas(page, empId, di, df) {
   const num = s => { const t = String(s || "").trim(); if (!t) return 0;
     const v = parseFloat(t.replace(/\./g, "").replace(",", ".")); return Number.isFinite(v) ? v : 0; };
   const out = [];
+  let atual = null;
   for (const linha of txt.split("\n")) {
     const c = linha.split("\t").map(x => x.trim());
     const m = /^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}:\d{2})$/.exec(c[0] || "");
-    if (!m || c.length < 9) continue;
-    const [doc, serie] = (c[1] || "").split("/").map(x => x.trim());
-    out.push({
-      d: `${m[3]}-${m[2]}-${m[1]}`, h: m[4],
-      doc, serie,
-      estacao: c[2] || "", usuario: c[3] || "", vendedor: c[4] || "",
-      cliente: c[5] || "", motivo: c[6] || "", v: num(c[8]),
-    });
+    if (m && c.length >= 9) {
+      const [doc, serie] = (c[1] || "").split("/").map(x => x.trim());
+      atual = {
+        d: `${m[3]}-${m[2]}-${m[1]}`, h: m[4],
+        doc, serie,
+        estacao: c[2] || "", usuario: c[3] || "", vendedor: c[4] || "",
+        cliente: c[5] || "", motivo: c[6] || "", v: num(c[8]), itens: [],
+      };
+      out.push(atual);
+      continue;
+    }
+    // linha de item; às vezes vem com o cabeçalho colado na frente
+    if (!atual) continue;
+    const r = (c.length > 7 && /^C[óo]digo/i.test(c[0] || "")) ? c.slice(7) : c;
+    if (r.length >= 7 && /^\d+ - /.test(r[0] || "")) {
+      const [cod, ...desc] = r[0].split(" - ");
+      atual.itens.push({ cod: cod.trim(), desc: desc.join(" - ").trim(), qtd: num(r[1]), v: num(r[6]) });
+    }
   }
   return out;
+}
+
+
+// ── Detalhe de um documento (hora, vendedor, produtos, formas) ───────────────
+// Vem de imprime_doc.asp, a mesma tela que abre ao clicar no Doc/Emp do movimento
+// diário. É o ÚNICO lugar com hora e vendedor por documento — o movimento diário
+// não traz nenhum dos dois.
+async function detalharDocumento(page, empId, mov) {
+  if (!mov.gid) return null;
+  const doc = String(mov.doc).split("|")[0];
+  const u = B + "faturamento/imprime_doc.asp?listarNotas=V&identificador=" + encodeURIComponent(mov.gid)
+          + "&documento=" + doc + "&serie=" + (mov.ser || "") + "&empresa_doc=" + empId
+          + "&operacao=S&ecf=0&cod_cliente=1&reinicio=0&chk_deposito_rel_mov_diario=";
+  await page.goto(u, { waitUntil: "domcontentloaded", timeout: 45000 });
+  await page.waitForTimeout(700);
+  const txt = await page.evaluate(() => document.body.innerText || "");
+  if (!/Detalhamento da Nota|Dados Complementares/i.test(txt)) return null;
+
+  const hora = (/Data de emiss[ãa]o:\s*\d{2}\/\d{2}\/\d{4}\s*-\s*(\d{2}:\d{2})/i.exec(txt) || [])[1] || null;
+  const mv = /Vend\.\/Comprador:\s*(\d+)\s*-\s*(.+)/i.exec(txt);
+  const vendedor = mv ? { cod: mv[1], nome: mv[2].trim() } : null;
+  const formas = [...txt.matchAll(/Forma de Pagamento:\s*(\d+)\s*-\s*([^\n\-]+?)\s*-\s*([\d.,]+)/gi)]
+    .map(m => ({ cod: m[1], nome: m[2].trim(), v: num(m[3]) }));
+
+  // Itens: o innerText quebra o código numa linha só, e a descrição vem 1 a 3 linhas
+  // depois começando com TAB. Formato da linha de continuação (split por \t):
+  //   ['', descrição, CST, CFOP, Und., Qtd., Valor Unit., Desc. Produto, Valor Total, ...]
+  const itens = [];
+  const linhas = txt.split("\n");
+  for (let i = 0; i < linhas.length; i++) {
+    const cod = linhas[i].trim();
+    if (!/^\d{3,}$/.test(cod)) continue;
+    for (let j = i + 1; j <= i + 3 && j < linhas.length; j++) {
+      if (!/^\t/.test(linhas[j])) continue;
+      const f = linhas[j].split("\t");
+      if (f.length < 9) continue;
+      itens.push({
+        cod,
+        desc: (f[1] || "").replace(/\s*\(Total aproximado[\s\S]*$/i, "").trim(),
+        qtd: num(f[5]),
+        v: num(f[8]),
+      });
+      break;
+    }
+  }
+  return { hora, vendedor, formas, itens };
+}
+
+// ── Confere se a venda cancelada foi mesmo refeita ───────────────────────────
+// Critérios pedidos pelo Athila: data, horário, vendedora e produtos.
+// Só roda na loja indicada em VERIFICAR_CANC (hoje L5) — cada documento custa uma
+// requisição, e verificar as 4 lojas multiplicaria o tempo de coleta por muito.
+async function verificarCanceladas(page, loja, empId, canceladas, movimento) {
+  const mov = movimento || [];
+  const saida = [];
+  for (const c of canceladas) {
+    // candidatos: mesmo valor, mesmo dia ou o seguinte
+    const cands = mov.filter(x => Math.abs(x.v - c.v) <= 0.02 &&
+      Math.abs((new Date(x.d) - new Date(c.d)) / 864e5) <= 1);
+    let melhor = null;
+    for (const cand of cands.slice(0, 4)) {
+      let det = null;
+      try { det = await detalharDocumento(page, empId, cand); } catch { /* segue */ }
+      if (!det) continue;
+
+      const mesmaVendedora = !!(det.vendedor && c.vendedor &&
+        det.vendedor.nome.toUpperCase() === c.vendedor.replace(/\s*\(\d+\)$/, "").trim().toUpperCase());
+      // produtos: mesmo conjunto de códigos e quantidades.
+      // Se um dos lados não trouxe itens, o critério fica NULO (não avaliável) — marcar
+      // como "não bate" penalizaria a venda por falha do relatório, não por divergência.
+      const chave = l => (l || []).map(i => i.cod + "x" + (i.qtd || 0)).sort().join("|");
+      const temDois = (det.itens || []).length > 0 && (c.itens || []).length > 0;
+      const mesmosProdutos = temDois ? (chave(det.itens) === chave(c.itens)) : null;
+      const minutos = det.hora && c.h
+        ? Math.abs((Number(det.hora.slice(0, 2)) * 60 + Number(det.hora.slice(3))) -
+                   (Number(c.h.slice(0, 2)) * 60 + Number(c.h.slice(3))))
+        : null;
+
+      const pontos = (cand.d === c.d ? 1 : 0) + (mesmaVendedora ? 1 : 0) +
+                     (mesmosProdutos === true ? 1 : 0) + (minutos !== null && minutos <= 30 ? 1 : 0);
+      const avaliaveis = 3 + (mesmosProdutos === null ? 0 : 1);   // data, hora, vendedora (+produtos)
+      const item = { doc: cand.doc, data: cand.d, hora: det.hora, minutos,
+                     vendedor: det.vendedor, formas: det.formas, itens: det.itens,
+                     mesmaVendedora, mesmosProdutos, mesmoDia: cand.d === c.d, pontos, avaliaveis };
+      if (!melhor || pontos > melhor.pontos) melhor = item;
+    }
+    saida.push({ ...c, verificacao: melhor });
+  }
+  return saida;
 }
 
 // ── Recebível de cartão (o que ainda vai cair no banco), agrupado por administradora ──
@@ -591,7 +700,22 @@ const page = ctx.pages()[0] || (await ctx.newPage());
 let erros = 0;
 
 try {
-  await garantirSessao(page, { log });
+  // O perfil do Microvix é compartilhado por ~20 scripts (a precificação roda a cada
+  // 15 min em dia útil). Quando dois pegam o perfil junto, o api_token_lma some e o
+  // login falha com NAV_FAIL. Tentar de novo depois de um tempo resolve.
+  let tentativa = 0;
+  while (true) {
+    try { await garantirSessao(page, { log }); break; }
+    catch (e) {
+      tentativa++;
+      // O cron da precificação roda a cada 15 min em dia útil e usa o mesmo perfil.
+      // A espera precisa cobrir um ciclo inteiro dele, senão a gente só encontra a
+      // janela ocupada de novo.
+      if (e.code !== "NAV_FAIL" || tentativa >= 6) throw e;
+      log(`sessão falhou (${e.code}) — tentativa ${tentativa}/6, aguardando 3min...`);
+      await page.waitForTimeout(180000);
+    }
+  }
 
   // Serializa o form uma vez; se falhar, cai no caminho lento (navegação por item).
   let formBase = null;
@@ -700,6 +824,20 @@ try {
         cache.canceladas[loja.key] = await coletarCanceladas(page, loja.id, iniMov, fimMov);
         log(`  ${loja.key}: ${cache.canceladas[loja.key].length} cancelamento(s)`);
       } catch (e) { log(`  ${loja.key} falhou: ${String(e).slice(0, 100)}`); }
+    }
+
+    // Conferência fina (data, hora, vendedora e produtos) — uma loja por vez, porque
+    // cada candidato custa uma requisição ao detalhe do documento.
+    const alvoVerif = process.env.VERIFICAR_CANC || "L5";
+    const lojaV = ALVO.find(l => l.key === alvoVerif);
+    if (lojaV && cache.canceladas[lojaV.key]) {
+      log(`verificando cancelamentos da ${lojaV.key} (data/hora/vendedora/produtos)...`);
+      try {
+        cache.canceladas[lojaV.key] = await verificarCanceladas(
+          page, lojaV.key, lojaV.id, cache.canceladas[lojaV.key], cache.movimento[lojaV.key]);
+        const ok = cache.canceladas[lojaV.key].filter(c => c.verificacao && c.verificacao.pontos >= 3).length;
+        log(`  ${lojaV.key}: ${ok} confirmadas com 3+ critérios`);
+      } catch (e) { log(`  verificação falhou: ${String(e).slice(0, 120)}`); }
     }
   } catch (e) { log("movimento diário falhou: " + String(e).slice(0, 120)); }
 

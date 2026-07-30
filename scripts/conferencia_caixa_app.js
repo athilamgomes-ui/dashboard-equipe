@@ -965,6 +965,7 @@ async function carregarArquivos(files){
 
 
 // ══ 6. VENDAS CANCELADAS ══
+const crit = (ok,t) => '<span class="crit '+(ok?'crit-ok':'crit-no')+'">'+(ok?'✓':'✗')+' '+t+'</span>';
 const CONF_CANC = { forte:['p-ok','voltou'], media:['p-nc','provável'], fraca:['p-nf','duvidoso'] };
 
 function rCanc(){
@@ -1000,9 +1001,16 @@ function rCanc(){
   const linhas = mostrar.map(c=>{
     const r=c.refeita;
     const p = r ? (CONF_CANC[r.conf]||CONF_CANC.fraca) : ['p-div','não voltou'];
-    const formas = r && r.formas.length
+    const formas = r && r.formas && r.formas.length
       ? r.formas.map(f=>f.k+" "+nf2(f.v)).join(", ")
       : (r ? "sem forma" : "—");
+    // Quando houve verificação fina, mostra QUAIS critérios bateram — é a diferença
+    // entre "achei uma venda do mesmo valor" e "é a mesma venda".
+    const criterios = r && r.verificada
+      ? '<div class="criterios">'+
+        crit(r.mesmoDia,"data") + crit(r.minutos!=null && r.minutos<=30, r.minutos!=null?("hora ±"+r.minutos+"min"):"hora") +
+        crit(r.mesmaVendedora,"vendedora") + crit(r.mesmosProdutos,"produtos") + '</div>'
+      : "";
     return '<tr class="'+(r?"":"linha-ruim")+'">'+
       '<td><b>'+dBR(c.d)+'</b> <span style="color:var(--muted);font-size:11px">'+esc2(c.h)+'</span></td>'+
       '<td style="text-align:left"><span class="loja-tag" style="background:'+corLoja(c.loja)+'">'+c.loja+'</span></td>'+
@@ -1011,7 +1019,7 @@ function rCanc(){
       '<td style="text-align:left" class="zero">'+esc2(c.vendedor.replace(/\s*\(\d+\)$/,""))+'</td>'+
       '<td style="text-align:left">'+(c.motivo?esc2(c.motivo):'<span class="zero">— em branco —</span>')+'</td>'+
       '<td style="text-align:left">'+(r?esc2(r.doc.split("|")[0])+' <span class="zero">'+dBR(r.data)+'</span>':'<span class="zero">—</span>')+'</td>'+
-      '<td style="text-align:left">'+(r?'<b>'+esc2(formas)+'</b>':'<span class="zero">—</span>')+'</td>'+
+      '<td style="text-align:left">'+(r?'<b>'+esc2(formas)+'</b>'+criterios:'<span class="zero">—</span>')+'</td>'+
       '<td><span class="pill '+p[0]+'">'+p[1]+'</span></td>'+
     '</tr>';
   }).join("");

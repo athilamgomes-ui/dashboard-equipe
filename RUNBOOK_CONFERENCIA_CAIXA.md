@@ -274,6 +274,30 @@ Validação (L5, julho): das 18 refeitas com indício forte, **todas as 18** tê
 correspondente no relatório da maquininha, e nenhuma cobrança em duplicidade. O horário mostra a
 sequência real: cobra no cartão/PIX → cancela no POS → refaz e finaliza, tudo em 1 a 2 minutos.
 
+### Verificação fina: data, hora, vendedora e produtos
+
+Pedido do Athila em 30/07. Só valor + dia não prova que a venda voltou. A verificação abre o
+**detalhe do documento** (`imprime_doc.asp`, a mesma tela que abre ao clicar no Doc/Emp do
+movimento diário) — é o **único** lugar com hora e vendedor por documento.
+
+Para chegar lá é preciso o `identificador` (GUID) que vem no `onclick` do link do documento no
+movimento diário; por isso o coletor guarda `gid` e `ser` de cada linha.
+Custa uma requisição por candidato, então roda **numa loja por vez** (`VERIFICAR_CANC`, hoje L5).
+
+Critérios: mesmo dia · hora dentro de 30 min · mesma vendedora · produtos.
+
+⚠️ **Produtos por contenção, não por igualdade.** O relatório de cancelamentos traz a lista de
+produtos **incompleta** (visto na L5: documento de R$ 67,83 listando um único item de R$ 34,90).
+Exigir conjunto idêntico marcava "produtos divergentes" em 18 de 18 — falha do relatório, não
+divergência real. O teste é: todo item da cancelada aparece na refeita, com quantidade
+compatível. Quando um dos lados não tem itens, o critério fica **nulo** em vez de falso.
+
+⚠️ O parse dos itens do documento depende do layout: o código fica sozinho numa linha e a
+descrição vem 1 a 3 linhas depois, começando com TAB, com os campos
+`['', desc, CST, CFOP, Und, Qtd, ValorUnit, DescProduto, ValorTotal]`.
+
+Resultado na L5 (jun+jul): 23 cancelamentos com candidato, **16 batendo os 4 critérios**.
+
 ## 💰 Nunca arredondar
 
 Conferência de caixa se faz no centavo. O caixa da L1 em 03/07 tinha **786,85**, não 787 —

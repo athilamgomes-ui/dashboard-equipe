@@ -184,6 +184,40 @@ function casarCanceladas(canceladas, movimento) {
           melhor = { peso, conf, gap, doc: x.doc, data: x.d,
                      formas: formasDe(x), total: x.v };
       }
+      // Quando existe verificação fina (data, hora, vendedora e produtos), ela manda:
+      // é evidência direta, enquanto a proximidade de documento é só indício.
+      if (c.verificacao) {
+        const v = c.verificacao;
+        // ⚠️ O relatório de cancelamentos às vezes traz a lista de produtos INCOMPLETA
+        // (visto na L5: documento de R$ 67,83 listando um único item de R$ 34,90).
+        // Exigir conjunto idêntico marcaria "produtos divergentes" por falha do
+        // relatório, não por diferença real. O teste honesto é de CONTENÇÃO: todo item
+        // da cancelada aparece na refeita, com quantidade compatível.
+        const itC = c.itens || [], itR = v.itens || [];
+        let produtosBatem = null, itensIguais = null;
+        if (itC.length && itR.length) {
+          const porCod = {};
+          itR.forEach(i => { porCod[i.cod] = (porCod[i.cod] || 0) + (i.qtd || 0); });
+          produtosBatem = itC.every(i => (porCod[i.cod] || 0) >= (i.qtd || 0) - 0.001);
+          const ch = l => l.map(i => i.cod + "x" + (i.qtd || 0)).sort().join("|");
+          itensIguais = ch(itC) === ch(itR);
+        }
+        v.produtosBatem = produtosBatem;
+        v.itensIguais = itensIguais;
+        v.pontos = (v.mesmoDia ? 1 : 0) + (v.mesmaVendedora ? 1 : 0) +
+                   (produtosBatem === true ? 1 : 0) +
+                   (v.minutos !== null && v.minutos <= 30 ? 1 : 0);
+        const conf = v.pontos >= 4 ? "forte" : v.pontos === 3 ? "forte" : v.pontos === 2 ? "media" : "fraca";
+        return { ...c, refeita: {
+          conf, verificada: true, pontos: v.pontos,
+          doc: v.doc, data: v.data, hora: v.hora, minutos: v.minutos,
+          mesmaVendedora: v.mesmaVendedora, mesmosProdutos: v.produtosBatem, itensIguais: v.itensIguais,
+          mesmoDia: v.mesmoDia, itensCancelada: c.itens || [],
+          vendedor: v.vendedor, itens: v.itens,
+          formas: (v.formas || []).map(f => ({ k: f.nome, v: f.v })),
+          total: c.v,
+        } };
+      }
       return { ...c, refeita: melhor };
     });
   }
@@ -388,6 +422,10 @@ tr.linha-ruim td:first-child{box-shadow:inset 3px 0 0 var(--falta)}
 .motivo{color:var(--falta);font-size:11.5px;font-weight:600}
 .filtro-inc{margin-left:auto;font-size:12px;color:var(--text2);font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer}
 .filtro-inc input{cursor:pointer}
+.criterios{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.crit{font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px;white-space:nowrap}
+.crit-ok{background:rgba(5,150,105,.12);color:var(--ok)}
+.crit-no{background:rgba(148,163,184,.16);color:var(--muted)}
 .hist-aviso{padding:16px 17px;color:var(--muted);font-size:12.5px}
 .btn-abrir{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:5px 12px;
   font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
