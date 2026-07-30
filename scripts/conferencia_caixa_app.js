@@ -512,6 +512,16 @@ function senhaAtual(){
   try { return sessionStorage.getItem("caixa_ok"); } catch(e){ return null; }
 }
 
+// ⚠️ btoa(String.fromCharCode(...arr)) estoura o limite de argumentos com array grande.
+// O payload aqui tem centenas de KB (resultado + CSVs originais) e o erro vinha como
+// RangeError, mascarado pelo catch como "sem conexão para salvar". Converter em blocos.
+function paraB64(buf){
+  const u = new Uint8Array(buf);
+  let s = "";
+  for (let i=0;i<u.length;i+=0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i+0x8000));
+  return btoa(s);
+}
+
 async function cifrarTexto(texto, senha){
   const enc = new TextEncoder();
   const salt = crypto.getRandomValues(new Uint8Array(16));
@@ -521,8 +531,7 @@ async function cifrarTexto(texto, senha){
     {name:"PBKDF2", salt, iterations:PAYLOAD.iters, hash:"SHA-256"}, km,
     {name:"AES-GCM", length:256}, false, ["encrypt"]);
   const ct = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, enc.encode(texto));
-  const b64 = u => btoa(String.fromCharCode(...new Uint8Array(u)));
-  return { salt:b64(salt), iv:b64(iv), iters:PAYLOAD.iters, payload:b64(ct) };
+  return { salt:paraB64(salt), iv:paraB64(iv), iters:PAYLOAD.iters, payload:paraB64(ct) };
 }
 async function decifrarTexto(env, senha){
   const km = await crypto.subtle.importKey("raw", new TextEncoder().encode(senha), "PBKDF2", false, ["deriveKey"]);
@@ -569,7 +578,11 @@ async function salvarConciliacao(lj){
     } else {
       c.statusSalvo = "não consegui salvar (erro "+r.status+")";
     }
-  }catch(e){ c.statusSalvo = "sem conexão para salvar"; }
+  }catch(e){
+    // Não engolir a causa: este catch já escondeu um RangeError da cifragem como se
+    // fosse falta de rede, e custou uma investigação inteira.
+    c.statusSalvo = "falhou ao salvar: " + (e && e.message ? e.message : e);
+  }
   rConcil();
   carregarHistorico();
 }
