@@ -852,12 +852,14 @@ function rConcil(){
           '<td class="num zero">'+(x.liq!=null?nf2(x.liq):"—")+' ⋯</td>'
         : cel(x.bruto) + cel(x.liq)) +
       (()=>{ const tr=taxaReal(x);
-        if (tr==null) return '<td class="num zero">—</td>';
-        const dif = (x.taxaInf!=null && x.taxaInf>0) ? Math.abs(tr-x.taxaInf) : 0;
-        const t = tr.toFixed(2).replace(".",",")+"%";
-        return '<td class="num'+(dif>0.05?" falta":"")+'"'+
-          (x.taxaInf!=null&&x.taxaInf>0?' title="a adquirente informa '+String(x.taxaInf).replace(".",",")+'%"':'')+
-          '>'+t+'</td>'; })() +
+        const inf = (x.taxaInf!=null && x.taxaInf>0) ? x.taxaInf : null;
+        const dif = (tr!=null && inf!=null) ? Math.abs(tr-inf) : 0;
+        const cel1 = tr==null ? '<td class="num zero">—</td>'
+          : '<td class="num'+(dif>0.05?" falta":"")+'"><b>'+tr.toFixed(2).replace(".",",")+'%</b></td>';
+        // a taxa que a adquirente DIZ cobrar, lado a lado com a que ela cobrou
+        const cel2 = inf==null ? '<td class="num zero">—</td>'
+          : '<td class="num'+(dif>0.05?" falta":" zero")+'">'+inf.toFixed(2).replace(".",",")+'%</td>';
+        return cel1 + cel2; })() +
       '<td style="text-align:left">'+(x.problemas.length
           ? '<span class="motivo">'+esc2(x.problemas[0])+(x.problemas.length>1?' (+'+(x.problemas.length-1)+')':'')+'</span>'
           : '<span class="pill p-ok">bateu</span>')+'</td></tr>').join("");
@@ -870,7 +872,8 @@ function rConcil(){
       '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th style="text-align:left">Documento</th>'+
       '<th style="text-align:left">Plano</th>'+
       '<th>1 · Venda no ERP</th><th>2 · Pagamentos no ERP</th>'+
-      '<th>3 · Venda na maquininha</th><th>4 · Recebimento</th><th>Taxa efetiva</th>'+
+      '<th>3 · Venda na maquininha</th><th>4 · Recebimento</th>'+
+      '<th>Taxa efetiva</th><th>Informada</th>'+
       '<th style="text-align:left">O que não bate</th></tr></thead><tbody>'+corpo+'</tbody></table></div>'+
       (mostrar.length>600?'<div class="nota">Mostrando as 600 primeiras de '+mostrar.length+' linhas.</div>':'')+
       resumoTaxas(linhas) +
