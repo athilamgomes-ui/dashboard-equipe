@@ -250,6 +250,30 @@ soltos travava o navegador.
 Validado em 29/07 contra a análise manual da L5 (julho): mesmas 4 formas trocadas, 4 cobranças sem
 venda (R$ 363,00), 4 vendas sem cobrança (R$ 415,03), 5 casos de centavos e 1 cobrança agrupada.
 
+## 🚫 Vendas canceladas no POS
+
+Fonte: Faturamento › Relatórios › **Vendas Cancelados no POS**
+(`faturamento/relatorios/vendas_canceladas_pos/vendas_canceladas_pos.html`, webapp Vue).
+
+⚠️ O relatório **não tem coluna de empresa** — só Estação e Usuário. Por isso o coletor consulta
+**uma loja por vez** (multiselect Vue: clicar em `.multiselect__placeholder` e depois no nome).
+Juntar as quatro numa consulta só deixaria sem saber de quem é cada linha.
+
+O casamento cancelada → venda refeita é feito no build (`casarCanceladas`): mesmo valor (±0,02),
+mesmo dia ou o seguinte, e classifica a confiança pela distância do número do documento:
+`forte` (mesmo dia, documento de 1 a 40 depois) · `media` · `fraca`.
+
+⚠️ Comparar número de documento só é exato **dentro da mesma série**, e o movimento diário não
+traz a série. Além disso o ERP às vezes repete o mesmo número para cancelamentos recentes
+(vimos 12937 em três linhas da L5). Por isso o painel **classifica a confiança em vez de afirmar**.
+
+Medido em 01/06–30/07/2026: **634 cancelamentos, R$ 91.697,14**. Nenhum com motivo preenchido
+nas quatro lojas — o campo existe no POS e ninguém usa. L4 concentra 382 (R$ 62 mil).
+
+Validação (L5, julho): das 18 refeitas com indício forte, **todas as 18** têm a cobrança
+correspondente no relatório da maquininha, e nenhuma cobrança em duplicidade. O horário mostra a
+sequência real: cobra no cartão/PIX → cancela no POS → refaz e finaliza, tudo em 1 a 2 minutos.
+
 ## 💰 Nunca arredondar
 
 Conferência de caixa se faz no centavo. O caixa da L1 em 03/07 tinha **786,85**, não 787 —

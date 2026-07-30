@@ -154,6 +154,51 @@ function reconciliar(lista) {
 }
 reconciliar(dias);
 
+// ── Vendas canceladas × vendas refeitas ───────────────────────────────────────
+// Cancelar e refazer é rotina de loja (cliente trocou de ideia, errou a forma de
+// pagamento). O que interessa é: a venda voltou? e paga como?
+// Sinal forte = mesmo valor, mesmo dia, e o documento finalizado logo em seguida —
+// medido em julho/2026 na L5, 18 de 23 casos tinham o número EXATAMENTE seguinte.
+// ⚠️ Comparar número de documento só vale dentro da MESMA SÉRIE: o movimento diário
+// não traz a série, então a proximidade é indício, não prova. Por isso o painel
+// classifica a confiança em vez de afirmar.
+function casarCanceladas(canceladas, movimento) {
+  const saida = {};
+  for (const loja of Object.keys(canceladas || {})) {
+    const mov = (movimento && movimento[loja]) || [];
+    saida[loja] = (canceladas[loja] || []).map(c => {
+      const dc = parseInt(c.doc, 10);
+      const cands = mov.filter(x => Math.abs(x.v - c.v) <= 0.02 && diffDias(x.d, c.d) <= 1);
+      let melhor = null;
+      for (const x of cands) {
+        const df = parseInt(String(x.doc).split("|")[0], 10);
+        const gap = Number.isFinite(df) && Number.isFinite(dc) ? df - dc : null;
+        const mesmoDia = x.d === c.d;
+        let conf;
+        if (mesmoDia && gap !== null && gap > 0 && gap <= 40) conf = "forte";
+        else if (mesmoDia && gap !== null && Math.abs(gap) <= 40) conf = "media";
+        else if (mesmoDia) conf = "fraca";
+        else conf = "fraca";
+        const peso = { forte: 3, media: 2, fraca: 1 }[conf];
+        if (!melhor || peso > melhor.peso || (peso === melhor.peso && Math.abs(gap ?? 1e9) < Math.abs(melhor.gap ?? 1e9)))
+          melhor = { peso, conf, gap, doc: x.doc, data: x.d,
+                     formas: formasDe(x), total: x.v };
+      }
+      return { ...c, refeita: melhor };
+    });
+  }
+  return saida;
+}
+const diffDias = (a, b) => Math.abs(Math.round((new Date(a + "T00:00:00") - new Date(b + "T00:00:00")) / 864e5));
+function formasDe(x) {
+  const f = [];
+  if (x.din > 0) f.push({ k: "dinheiro", v: x.din });
+  if (x.car > 0) f.push({ k: "cartão", v: x.car });
+  if (x.pix > 0) f.push({ k: "PIX", v: x.pix });
+  if (x.lnk > 0) f.push({ k: "link", v: x.lnk });
+  return f;
+}
+
 const DADOS = {
   geradoEm: raw.geradoEm || null,
   geradoEmBR: raw.geradoEmBR || "—",
@@ -195,6 +240,7 @@ const DADOS = {
   // Movimento documento a documento: insumo da conciliação de cartão feita no navegador.
   movimento: raw.movimento || null,
   movimentoPeriodo: raw.movimentoPeriodo || null,
+  canceladas: casarCanceladas(raw.canceladas, raw.movimento),
 };
 
 // ── Os dados são SENSÍVEIS (falta de caixa com nome de operador) e o repo do painel é
@@ -404,6 +450,7 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
   <div class="tab" data-p="sangria">📤 Sangria e saldo</div>
   <div class="tab" data-p="banco">🏦 Cartão → banco</div>
   <div class="tab" data-p="concil">🔎 Conciliação da maquininha</div>
+  <div class="tab" data-p="canc">🚫 Vendas canceladas</div>
 </div>
 
 <div class="filtros">
@@ -493,6 +540,28 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
   <div class="box">
     <div class="box-h"><h3>Administradoras usadas nas vendas</h3><span class="hint">no período filtrado</span></div>
     <div class="scroll"><table id="t-banco-adm"></table></div>
+  </div>
+</div>
+
+<!-- ══ 6. VENDAS CANCELADAS ══ -->
+<div class="pane" id="p-canc">
+  <div class="kpis" id="kpi-canc"></div>
+  <div class="box">
+    <div class="box-h"><h3>Cancelamentos no POS</h3>
+      <span class="hint">e se a venda voltou depois, com qual forma de pagamento</span>
+      <label class="filtro-inc"><input type="checkbox" id="canc-so-sem" onchange="rCanc()"> só as que não voltaram</label>
+    </div>
+    <div class="scroll"><table id="t-canc"></table></div>
+    <div class="nota">
+      Cancelar e refazer é rotina de loja — o cliente troca de ideia, o operador erra a forma de
+      pagamento. O que importa é se a venda <b>voltou</b>. <b>Indício forte</b> = mesmo valor, mesmo
+      dia e documento logo em seguida. Cancelamento que <b>não voltou</b> merece olhada: ou a venda
+      se perdeu, ou saiu sem registro.
+      <br><br>
+      ⚠️ A comparação de número de documento só é exata dentro da mesma série, e o movimento diário
+      não traz a série — por isso o painel classifica a confiança em vez de afirmar. O <b>motivo</b>
+      vem em branco quando ninguém preencheu no POS.
+    </div>
   </div>
 </div>
 

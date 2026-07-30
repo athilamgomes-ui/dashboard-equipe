@@ -453,6 +453,58 @@ async function coletarMovimentoDiario(page, empId, di, df) {
   });
 }
 
+// ── Vendas canceladas no POS ────────────────────────────────────────────────
+// Faturamento › Relatórios › Vendas Cancelados no POS (webapp Vue).
+// ⚠️ O relatório NÃO tem coluna de empresa — traz Estação e Usuário. Por isso é
+// consultado UMA LOJA POR VEZ; juntar as quatro numa consulta só deixaria sem saber
+// de quem é cada linha.
+const URL_CANCELADAS = B + "faturamento/relatorios/vendas_canceladas_pos/vendas_canceladas_pos.html";
+const NOME_EMPRESA = { 1: "1 – CASA DA BELEZA ALTAMIRA", 3: "3 – CASA DA BELEZA ITAITUBA",
+                       4: "4 – MISSBELEZA ALTAMIRA", 10: "10 – MISSBELEZA SANTAREM" };
+
+async function coletarCanceladas(page, empId, di, df) {
+  await page.goto(URL_CANCELADAS, { waitUntil: "domcontentloaded", timeout: 45000 });
+  await page.waitForSelector("#datePickerRelatorioReceb", { timeout: 25000 });
+  await page.waitForTimeout(2500);
+
+  await page.evaluate(({ di, df }) => {
+    const s = (id, v) => { const e = document.getElementById(id); if (e) { e.value = v; ["input", "change"].forEach(ev => e.dispatchEvent(new Event(ev, { bubbles: true }))); } };
+    s("datePickerRelatorioReceb", di); s("datePickerDataFinal", df);
+    const c = document.getElementById("chkExibirObservacaoCancelamento"); if (c && !c.checked) c.click();
+  }, { di, df });
+
+  // multiselect Vue: abre e escolhe a empresa
+  await page.click(".multiselect__placeholder").catch(() => {});
+  await page.waitForTimeout(900);
+  await page.click("text=" + NOME_EMPRESA[empId]).catch(() => {});
+  await page.waitForTimeout(400);
+  await page.keyboard.press("Escape").catch(() => {});
+  await page.waitForTimeout(400);
+
+  await page.click("button:has-text('Filtrar')").catch(() => {});
+  await page.waitForTimeout(7000);
+
+  const txt = await page.evaluate(() => document.body.innerText || "");
+  if (/informe pelo menos uma Empresa/i.test(txt)) throw new Error("empresa não foi selecionada no filtro");
+
+  const num = s => { const t = String(s || "").trim(); if (!t) return 0;
+    const v = parseFloat(t.replace(/\./g, "").replace(",", ".")); return Number.isFinite(v) ? v : 0; };
+  const out = [];
+  for (const linha of txt.split("\n")) {
+    const c = linha.split("\t").map(x => x.trim());
+    const m = /^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}:\d{2})$/.exec(c[0] || "");
+    if (!m || c.length < 9) continue;
+    const [doc, serie] = (c[1] || "").split("/").map(x => x.trim());
+    out.push({
+      d: `${m[3]}-${m[2]}-${m[1]}`, h: m[4],
+      doc, serie,
+      estacao: c[2] || "", usuario: c[3] || "", vendedor: c[4] || "",
+      cliente: c[5] || "", motivo: c[6] || "", v: num(c[8]),
+    });
+  }
+  return out;
+}
+
 // ── Recebível de cartão (o que ainda vai cair no banco), agrupado por administradora ──
 async function coletarRecebivelCartao(page, di, df) {
   await page.goto(URL_RECEBER, { waitUntil: "domcontentloaded", timeout: 45000 });
@@ -640,6 +692,15 @@ try {
       } catch (e) { log(`  ${loja.key} falhou: ${String(e).slice(0, 100)}`); }
     }
     cache.movimentoPeriodo = { ini: iniMov, fim: fimMov };
+
+    cache.canceladas = cache.canceladas || {};
+    for (const loja of ALVO) {
+      log(`vendas canceladas ${loja.key}...`);
+      try {
+        cache.canceladas[loja.key] = await coletarCanceladas(page, loja.id, iniMov, fimMov);
+        log(`  ${loja.key}: ${cache.canceladas[loja.key].length} cancelamento(s)`);
+      } catch (e) { log(`  ${loja.key} falhou: ${String(e).slice(0, 100)}`); }
+    }
   } catch (e) { log("movimento diário falhou: " + String(e).slice(0, 120)); }
 
   try {

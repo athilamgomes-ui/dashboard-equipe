@@ -963,7 +963,68 @@ async function carregarArquivos(files){
   }
 }
 
-function render(){ rConf(); rFormas(); rSangria(); rBanco(); }
+
+// ══ 6. VENDAS CANCELADAS ══
+const CONF_CANC = { forte:['p-ok','voltou'], media:['p-nc','provável'], fraca:['p-nf','duvidoso'] };
+
+function rCanc(){
+  const lj = selLoja.value;
+  const todas = [];
+  Object.keys(D.canceladas||{}).forEach(l=>{
+    if (lj && l!==lj) return;
+    (D.canceladas[l]||[]).forEach(c=>todas.push({...c, loja:l}));
+  });
+  // respeita o filtro de período da barra de cima
+  const datas=[...new Set(D.dias.map(d=>d.data))].sort();
+  const np=parseInt(document.getElementById("f-per").value,10);
+  const corte = np<999 ? datas[Math.max(0,datas.length-np)] : "0000";
+  const ds = todas.filter(c=>c.d>=corte).sort((a,b)=> a.d<b.d?1:a.d>b.d?-1:(a.h<b.h?1:-1));
+
+  const voltou = ds.filter(c=>c.refeita);
+  const fortes = ds.filter(c=>c.refeita && c.refeita.conf==="forte");
+  const sem    = ds.filter(c=>!c.refeita);
+  const valorSem = sem.reduce((a,c)=>a+c.v,0);
+  const semMotivo = ds.filter(c=>!c.motivo).length;
+
+  document.getElementById("kpi-canc").innerHTML =
+    kpi("Cancelamentos", ds.length, "no período filtrado", "#7c3aed") +
+    kpi("Valor cancelado", nf2(ds.reduce((a,c)=>a+c.v,0)), voltou.length+" voltaram depois", "#0891b2") +
+    kpi("Não voltaram", sem.length, nf2(valorSem)+" sem venda equivalente",
+        sem.length?"var(--falta)":"var(--ok)", sem.length?"var(--falta)":"var(--ok)") +
+    kpi("Sem motivo informado", semMotivo, semMotivo?"ninguém preencheu no POS":"todos justificados",
+        "var(--alerta)", semMotivo?"#b45309":"var(--ok)");
+
+  const soSem = document.getElementById("canc-so-sem");
+  const mostrar = (soSem && soSem.checked) ? sem : ds;
+
+  const linhas = mostrar.map(c=>{
+    const r=c.refeita;
+    const p = r ? (CONF_CANC[r.conf]||CONF_CANC.fraca) : ['p-div','não voltou'];
+    const formas = r && r.formas.length
+      ? r.formas.map(f=>f.k+" "+nf2(f.v)).join(", ")
+      : (r ? "sem forma" : "—");
+    return '<tr class="'+(r?"":"linha-ruim")+'">'+
+      '<td><b>'+dBR(c.d)+'</b> <span style="color:var(--muted);font-size:11px">'+esc2(c.h)+'</span></td>'+
+      '<td style="text-align:left"><span class="loja-tag" style="background:'+corLoja(c.loja)+'">'+c.loja+'</span></td>'+
+      '<td style="text-align:left">'+esc2(c.doc)+'<span class="zero">/'+esc2(c.serie)+'</span></td>'+
+      '<td class="num"><b>'+nf2(c.v)+'</b></td>'+
+      '<td style="text-align:left" class="zero">'+esc2(c.vendedor.replace(/\s*\(\d+\)$/,""))+'</td>'+
+      '<td style="text-align:left">'+(c.motivo?esc2(c.motivo):'<span class="zero">— em branco —</span>')+'</td>'+
+      '<td style="text-align:left">'+(r?esc2(r.doc.split("|")[0])+' <span class="zero">'+dBR(r.data)+'</span>':'<span class="zero">—</span>')+'</td>'+
+      '<td style="text-align:left">'+(r?'<b>'+esc2(formas)+'</b>':'<span class="zero">—</span>')+'</td>'+
+      '<td><span class="pill '+p[0]+'">'+p[1]+'</span></td>'+
+    '</tr>';
+  }).join("");
+
+  document.getElementById("t-canc").innerHTML =
+    '<thead><tr><th>Cancelada em</th><th style="text-align:left">Loja</th><th style="text-align:left">Documento</th>'+
+    '<th>Valor</th><th style="text-align:left">Vendedor</th><th style="text-align:left">Motivo</th>'+
+    '<th style="text-align:left">Venda refeita</th><th style="text-align:left">Paga como</th>'+
+    '<th style="text-align:left">Situação</th></tr></thead>'+
+    '<tbody>'+(linhas || '<tr><td colspan="9" class="vazio">Nenhum cancelamento no período.</td></tr>')+'</tbody>';
+}
+
+function render(){ rConf(); rFormas(); rSangria(); rBanco(); rCanc(); }
 
 // Só roda depois que a senha decifrou os dados (D deixa de ser null).
 let iniciado = false;
