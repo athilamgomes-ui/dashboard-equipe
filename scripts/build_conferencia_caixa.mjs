@@ -415,6 +415,13 @@ tbody tr:hover{background:var(--card2)}
   color:#047857;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:7px}
 .chip-arq button{background:none;border:none;color:#047857;cursor:pointer;font-size:14px;line-height:1;padding:0;opacity:.6}
 .chip-arq button:hover{opacity:1}
+/* Cruzamento tem 11 colunas: sem compactar, não cabe na tela e obriga a rolar de lado. */
+table.compacta{font-size:11.5px;min-width:0}
+table.compacta th{padding:7px 6px;font-size:9.5px;letter-spacing:.3px}
+table.compacta td{padding:6px 6px;white-space:nowrap}
+table.compacta td:last-child,table.compacta th:last-child{white-space:normal;max-width:190px}
+table.compacta .motivo{font-size:10.5px;line-height:1.3;display:inline-block}
+
 /* linha destacada no cruzamento das 4 pontas */
 tr.linha-ruim{background:color-mix(in srgb,var(--falta) 7%,transparent)}
 tr.linha-ruim:hover{background:color-mix(in srgb,var(--falta) 12%,transparent)}

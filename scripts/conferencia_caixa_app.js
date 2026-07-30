@@ -872,11 +872,10 @@ function rConcil(){
       '<label class="filtro-inc"><input type="checkbox" id="c-so-inconsistentes"'+
       ((soRuins&&soRuins.checked)?" checked":"")+' onchange="rConcil()"> só as inconsistentes</label>'+
       '</div><div class="scroll"><table>'+
-      '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th style="text-align:left">Documento</th>'+
+      '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th style="text-align:left">Doc.</th>'+
       '<th style="text-align:left">Plano</th>'+
-      '<th>1 · Venda no ERP</th><th>2 · Pagamentos no ERP</th>'+
-      '<th>3 · Venda na maquininha</th><th>4 · Recebimento</th>'+
-      '<th>Taxa efetiva</th><th>Informada</th>'+
+      '<th>1 · Venda</th><th>2 · Pagtos</th><th>3 · Maquin.</th><th>4 · Receb.</th>'+
+      '<th>Taxa</th><th>Inform.</th>'+
       '<th style="text-align:left">O que não bate</th></tr></thead><tbody>'+corpo+'</tbody></table></div>'+
       (mostrar.length>600?'<div class="nota">Mostrando as 600 primeiras de '+mostrar.length+' linhas.</div>':'')+
       '<div class="nota"><b>1</b> é o total do documento no ERP e <b>2</b> a soma de todas as formas de '+
