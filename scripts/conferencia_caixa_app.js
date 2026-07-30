@@ -368,7 +368,8 @@ function lerTransacoes(linhas){
   const cData=acharCol(a,"^data e hora","^data"), cValor=acharCol(a,"^valor \\(","^valor$","valor bruto"),
         cMeio=acharCol(a,"meio - meio","forma","tipo de pagamento","^meio"),
         cStatus=acharCol(a,"status"), cBand=acharCol(a,"bandeira"),
-        cNsu=acharCol(a,"nsu","identificador"), cNome=acharCol(a,"origem - nome","cliente","portador");
+        cNsu=acharCol(a,"nsu","identificador"), cNome=acharCol(a,"origem - nome","cliente","portador"),
+        cLiq=acharCol(a,"^l[íi]quido"), cTaxa=acharCol(a,"taxa aplicada - valor");
   if (!cData || !cValor || !cMeio)
     throw new Error("não reconheci as colunas. Preciso de data, valor e forma de pagamento (meio).");
 
@@ -385,6 +386,8 @@ function lerTransacoes(linhas){
       cartao:/cr[eé]dito|d[eé]bito|card|cart/.test(meio),
       meio:(l[cMeio]||"").trim(), band:cBand?(l[cBand]||"").trim():"",
       nsu:cNsu?(l[cNsu]||"").trim():"", nome:cNome?(l[cNome]||"").trim():"",
+      // "recebimento" = o líquido que a adquirente vai repassar (bruto menos taxa)
+      liq:cLiq?brNum(l[cLiq]):null, taxa:cTaxa?Math.abs(brNum(l[cTaxa])):null,
       u:false,
     });
   }
@@ -424,7 +427,7 @@ function conciliarForma(loja, externos, campo, rotulo, todosExternos){
       for (const e of erp){
         if (e.u || Math.abs(diasEntre(e.d,t.d))>jan) continue;
         if (Math.abs(e[campo]-t.v)<=tol){
-          t.u=e.u=true;
+          t.u=e.u=true; e.par=t; t.par=e;
           if (reg && Math.abs(e[campo]-t.v)>0.005) reg.push({e,t});
           break;
         }
@@ -442,7 +445,8 @@ function conciliarForma(loja, externos, campo, rotulo, todosExternos){
     for (const k of [2,3]){
       for (const combo of combinacoes(c,k)){
         if (Math.abs(combo.reduce((a,x)=>a+x[campo],0)-t.v)<=0.05){
-          t.u=true; combo.forEach(x=>x.u=true); agrupadas.push({t,docs:combo}); achou=true; break;
+          t.u=true; combo.forEach(x=>{x.u=true; x.par=t;}); t.parDocs=combo;
+          agrupadas.push({t,docs:combo}); achou=true; break;
         }
       }
       if (achou) break;
@@ -714,7 +718,83 @@ function rConcil(){
       "por isso não bate com o cartão vendido. <b>PIX enviado</b> é transferência para outra conta.");
   }
 
+
+  // ── CRUZAMENTO DAS 4 COLUNAS ──────────────────────────────────────────────
+  // 1 venda no ERP (total do documento) · 2 pagamentos lançados nesse documento
+  // 3 venda na maquininha (bruto cobrado) · 4 recebimento (líquido, já sem a taxa)
+  // A linha acende quando qualquer um dos cruzamentos não fecha.
+  function tabelaCruzamento(){
+    const TOLC = 0.05;
+    const linhas = [];
+    lojas.forEach(l=>{
+      const r = conciliacoes[l] && conciliacoes[l].cartao;
+      if (!r) return;
+      // pares casados + documentos sem cobrança
+      r.erp.forEach(e=>{
+        const t = e.par || null;
+        linhas.push({ loja:l, d:e.d, doc:e.doc, venda:e.v, pag:(e.pag!=null?e.pag:null),
+                      cartaoErp:e.car, bruto:t?t.v:null, liq:t?t.liq:null, taxa:t?t.taxa:null,
+                      hora:t?t.h:"", meio:t?((t.meio||"")+(t.band?" "+t.band:"")):"" });
+      });
+      // cobranças sem documento no ERP
+      r.externos.filter(t=>!t.u).forEach(t=>{
+        linhas.push({ loja:l, d:t.d, doc:null, venda:null, pag:null, cartaoErp:null,
+                      bruto:t.v, liq:t.liq, taxa:t.taxa, hora:t.h,
+                      meio:(t.meio||"")+(t.band?" "+t.band:"") });
+      });
+    });
+    if (!linhas.length) return "";
+
+    linhas.forEach(x=>{
+      const p=[];
+      if (x.venda!=null && x.pag!=null && Math.abs(x.venda-x.pag)>TOLC)
+        p.push("a venda ("+nf2(x.venda)+") não bate com os pagamentos lançados ("+nf2(x.pag)+")");
+      if (x.cartaoErp!=null && x.bruto==null)
+        p.push("cartão no ERP sem cobrança na maquininha");
+      if (x.bruto!=null && x.cartaoErp==null)
+        p.push("cobrança na maquininha sem venda no ERP");
+      if (x.cartaoErp!=null && x.bruto!=null && Math.abs(x.cartaoErp-x.bruto)>TOLC)
+        p.push("cartão no ERP ("+nf2(x.cartaoErp)+") ≠ cobrado na maquininha ("+nf2(x.bruto)+")");
+      if (x.bruto!=null && x.liq!=null && x.taxa!=null && Math.abs(x.bruto-x.taxa-x.liq)>TOLC)
+        p.push("bruto − taxa ≠ líquido");
+      x.problemas=p;
+    });
+
+    const ruins = linhas.filter(x=>x.problemas.length);
+    const soRuins = document.getElementById("c-so-inconsistentes");
+    const mostrar = (soRuins && soRuins.checked) ? ruins : linhas;
+    mostrar.sort((a,b)=> (b.problemas.length-a.problemas.length) || (a.d<b.d?1:a.d>b.d?-1:0));
+
+    const cel = (v, extra) => v==null ? '<td class="num zero">—</td>' : '<td class="num'+(extra||"")+'">'+nf2(v)+'</td>';
+    const corpo = mostrar.slice(0,600).map(x=>
+      '<tr class="'+(x.problemas.length?"linha-ruim":"")+'"'+
+        (x.problemas.length?' title="'+esc2(x.problemas.join(" · "))+'"':'')+'>'+
+      '<td><b>'+dBR(x.d)+'</b>'+(x.hora?' <span style="color:var(--muted);font-size:11px">'+esc2(x.hora)+'</span>':'')+'</td>'+
+      '<td style="text-align:left">'+tagLoja(x.loja)+'</td>'+
+      '<td style="text-align:left">'+(x.doc?esc2(x.doc):'<span class="zero">sem documento</span>')+'</td>'+
+      cel(x.venda) + cel(x.pag) + cel(x.bruto) + cel(x.liq) +
+      '<td style="text-align:left">'+(x.problemas.length
+          ? '<span class="motivo">'+esc2(x.problemas[0])+(x.problemas.length>1?' (+'+(x.problemas.length-1)+')':'')+'</span>'
+          : '<span class="pill p-ok">bateu</span>')+'</td></tr>').join("");
+
+    return '<div class="box"><div class="box-h"><h3>🔀 Cruzamento das 4 pontas</h3>'+
+      '<span class="hint">'+ruins.length+' de '+linhas.length+' linhas com inconsistência</span>'+
+      '<label class="filtro-inc"><input type="checkbox" id="c-so-inconsistentes"'+
+      ((soRuins&&soRuins.checked)?" checked":"")+' onchange="rConcil()"> só as inconsistentes</label>'+
+      '</div><div class="scroll"><table>'+
+      '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th style="text-align:left">Documento</th>'+
+      '<th>1 · Venda no ERP</th><th>2 · Pagamentos no ERP</th>'+
+      '<th>3 · Venda na maquininha</th><th>4 · Recebimento</th>'+
+      '<th style="text-align:left">O que não bate</th></tr></thead><tbody>'+corpo+'</tbody></table></div>'+
+      (mostrar.length>600?'<div class="nota">Mostrando as 600 primeiras de '+mostrar.length+' linhas.</div>':'')+
+      '<div class="nota"><b>1</b> é o total do documento no ERP e <b>2</b> a soma de todas as formas de '+
+      'pagamento lançadas nele — diferença aí é venda registrada sem o pagamento correspondente. '+
+      '<b>3</b> é o que a maquininha cobrou e <b>4</b> o líquido que a adquirente vai repassar '+
+      '(bruto menos a taxa), por isso 4 é sempre um pouco menor que 3.</div></div>';
+  }
+
   // ── blocos por forma ──
+  if (temCampo("cartao")) html += tabelaCruzamento();
   if (temCampo("cartao")) html += blocosForma("cartao","Cartão","maquininha");
   if (temCampo("pix"))    html += blocosForma("pix","PIX","conta");
   res.innerHTML = html;

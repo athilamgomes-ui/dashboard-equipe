@@ -335,6 +335,13 @@ tbody tr:hover{background:var(--card2)}
   color:#047857;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:7px}
 .chip-arq button{background:none;border:none;color:#047857;cursor:pointer;font-size:14px;line-height:1;padding:0;opacity:.6}
 .chip-arq button:hover{opacity:1}
+/* linha destacada no cruzamento das 4 pontas */
+tr.linha-ruim{background:color-mix(in srgb,var(--falta) 7%,transparent)}
+tr.linha-ruim:hover{background:color-mix(in srgb,var(--falta) 12%,transparent)}
+tr.linha-ruim td:first-child{box-shadow:inset 3px 0 0 var(--falta)}
+.motivo{color:var(--falta);font-size:11.5px;font-weight:600}
+.filtro-inc{margin-left:auto;font-size:12px;color:var(--text2);font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer}
+.filtro-inc input{cursor:pointer}
 .hist-aviso{padding:16px 17px;color:var(--muted);font-size:12.5px}
 .btn-abrir{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:5px 12px;
   font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}

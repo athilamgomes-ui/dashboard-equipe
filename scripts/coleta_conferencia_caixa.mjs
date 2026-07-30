@@ -425,6 +425,13 @@ async function coletarMovimentoDiario(page, empId, di, df) {
     const i = re => cols.findIndex(c => new RegExp(re, "i").test(c));
     const iDoc = i("Doc"), iVal = i("Valor do Documento"), iDin = i("^Dinheiro$"),
           iCar = i("^Cart"), iPix = i("^Pix$"), iLink = i("Link de Pagamento");
+    // TODAS as colunas de forma de pagamento. Sem somar todas, um documento pago em
+    // crediário ou convênio apareceria com "pagamentos < venda" e viraria inconsistência
+    // falsa no cruzamento das 4 colunas.
+    const COLS_PAG = ["^Dinheiro$", "^Ch\\.Vista$", "^Ch\\.Prazo$", "^Credi", "^Cart",
+                      "^Conv[êe]nio$", "^Pix$", "^Dep[óo]sito Banc", "Fidelidade",
+                      "QR Linx", "Link de Pagamento", "Outras Moedas"];
+    const idxPag = COLS_PAG.map(r => i(r)).filter(x => x >= 0);
     const out = [];
     for (const tr of alvo.querySelectorAll("tr")) {
       const cel = [...tr.children].map(c => (c.textContent || "").replace(/\s+/g, " ").trim());
@@ -439,6 +446,7 @@ async function coletarMovimentoDiario(page, empId, di, df) {
         car: n(cel[iCar]),
         pix: n(cel[iPix]),
         lnk: iLink >= 0 ? n(cel[iLink]) : 0,
+        pag: +idxPag.reduce((a, j) => a + n(cel[j]), 0).toFixed(2),   // soma de TODAS as formas
       });
     }
     return { docs: out };
