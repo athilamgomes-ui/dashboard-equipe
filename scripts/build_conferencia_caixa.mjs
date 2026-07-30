@@ -514,7 +514,8 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
       <div id="dropzone" class="dropzone">
         <div class="dz-ico">📄</div>
         <div class="dz-titulo">Arraste o relatório aqui, ou clique para escolher</div>
-        <div class="dz-sub">Arquivo <b>.csv</b> exportado da maquininha. Pode carregar vários, um por loja.</div>
+        <div class="dz-sub">Arquivo <b>.csv</b> da maquininha e/ou o extrato da conta — pode arrastar os dois juntos.<br>
+          <b>Uma loja por vez:</b> trocar a loja acima limpa a tela.</div>
         <input type="file" id="c-file" accept=".csv,text/csv" multiple hidden>
       </div>
       <div id="c-erro" class="dz-erro"></div>

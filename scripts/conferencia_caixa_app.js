@@ -644,6 +644,8 @@ async function abrirHistorico(id){
       loja: c.loja, arquivos: c.arquivos, cartao: c.cartao, pix: c.pix,
       conta: c.conta, statusSalvo: "salva", doHistorico: true,
     };
+    const cl=document.getElementById("c-loja");
+    if (cl) cl.value = c.loja;          // mantém o seletor coerente com o que está na tela
     rConcil();
     document.getElementById("c-resultado").scrollIntoView({behavior:"smooth"});
   }catch(e){
@@ -980,6 +982,15 @@ function iniciar(){
     o.value=l.key; o.textContent=l.key+" · "+l.nome+" "+l.cidade;
     cl.appendChild(o);
   });
+  // Trocar de loja limpa o resultado da tela. Antes o painel acumulava as lojas e a
+  // conferência da anterior ficava visível, dando a impressão de ser da loja recém
+  // selecionada. Só limpa a TELA — o histórico continua guardado.
+  cl.addEventListener("change", ()=>{
+    Object.keys(conciliacoes).forEach(k=>delete conciliacoes[k]);
+    const err=document.getElementById("c-erro"); if (err) err.innerHTML="";
+    rConcil();
+  });
+
   const dz=document.getElementById("dropzone"), fi=document.getElementById("c-file");
   dz.addEventListener("click", ()=>fi.click());
   fi.addEventListener("change", e=>{ carregarArquivos([...e.target.files]); fi.value=""; });
