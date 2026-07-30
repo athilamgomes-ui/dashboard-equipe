@@ -864,7 +864,10 @@ function rConcil(){
           ? '<span class="motivo">'+esc2(x.problemas[0])+(x.problemas.length>1?' (+'+(x.problemas.length-1)+')':'')+'</span>'
           : '<span class="pill p-ok">bateu</span>')+'</td></tr>').join("");
 
-    return '<div class="box"><div class="box-h"><h3>🔀 Cruzamento das 4 pontas</h3>'+
+    // O resumo vem ANTES da tabela: com 300+ linhas de detalhe, quem precisa da visão
+    // por plano nunca chegaria até ela rolando.
+    return resumoTaxas(linhas) +
+      '<div class="box"><div class="box-h"><h3>🔀 Cruzamento das 4 pontas</h3>'+
       '<span class="hint">'+ruins.length+' de '+linhas.length+' linhas com inconsistência</span>'+
       '<label class="filtro-inc"><input type="checkbox" id="c-so-inconsistentes"'+
       ((soRuins&&soRuins.checked)?" checked":"")+' onchange="rConcil()"> só as inconsistentes</label>'+
@@ -876,7 +879,6 @@ function rConcil(){
       '<th>Taxa efetiva</th><th>Informada</th>'+
       '<th style="text-align:left">O que não bate</th></tr></thead><tbody>'+corpo+'</tbody></table></div>'+
       (mostrar.length>600?'<div class="nota">Mostrando as 600 primeiras de '+mostrar.length+' linhas.</div>':'')+
-      resumoTaxas(linhas) +
       '<div class="nota"><b>1</b> é o total do documento no ERP e <b>2</b> a soma de todas as formas de '+
       'pagamento lançadas nele — diferença aí é venda registrada sem o pagamento correspondente. '+
       '<b>3</b> é o que a maquininha cobrou e <b>4</b> o líquido que a adquirente vai repassar '+
@@ -889,9 +891,12 @@ function rConcil(){
     linhas.forEach(x=>{
       const tr = taxaReal(x); if (tr==null) return;
       const p = planoDe(x);
-      (g[p] = g[p] || {n:0, bruto:0, liq:0, inf:[], min:Infinity, max:-Infinity});
+      (g[p] = g[p] || {n:0, bruto:0, liq:0, infPond:0, infBase:0, min:Infinity, max:-Infinity});
       g[p].n++; g[p].bruto += x.bruto; g[p].liq += x.liq;
-      if (x.taxaInf!=null && x.taxaInf>0) g[p].inf.push(x.taxaInf);
+      // ⚠️ A informada tem de ser ponderada pelo bruto, igual à efetiva. Média simples
+      // contra média ponderada acusava divergência onde não havia (Crédito 1x em vermelho
+      // só porque as operações grandes têm bandeira mais barata).
+      if (x.taxaInf!=null && x.taxaInf>0) { g[p].infPond += x.taxaInf * x.bruto; g[p].infBase += x.bruto; }
       g[p].min = Math.min(g[p].min, tr); g[p].max = Math.max(g[p].max, tr);
     });
     const chaves = Object.keys(g).sort((a,b)=>g[b].bruto-g[a].bruto);
@@ -903,7 +908,7 @@ function rConcil(){
       '<th>Informada</th></tr></thead><tbody>'+
       chaves.map(p=>{ const x=g[p];
         const ef = x.bruto>0 ? (x.bruto-x.liq)/x.bruto*100 : 0;
-        const inf = x.inf.length ? (x.inf.reduce((a,b)=>a+b,0)/x.inf.length) : null;
+        const inf = x.infBase > 0 ? (x.infPond / x.infBase) : null;
         const fora = inf!=null && Math.abs(ef-inf)>0.05;
         return '<tr><td style="text-align:left"><b>'+esc2(p)+'</b></td>'+
           '<td class="num zero">'+x.n+'</td>'+
