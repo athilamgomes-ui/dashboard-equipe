@@ -369,7 +369,8 @@ function lerTransacoes(linhas){
         cMeio=acharCol(a,"meio - meio","forma","tipo de pagamento","^meio"),
         cStatus=acharCol(a,"status"), cBand=acharCol(a,"bandeira"),
         cNsu=acharCol(a,"nsu","identificador"), cNome=acharCol(a,"origem - nome","cliente","portador"),
-        cLiq=acharCol(a,"^l[íi]quido"), cTaxa=acharCol(a,"taxa aplicada - valor");
+        cLiq=acharCol(a,"^l[íi]quido"), cTaxa=acharCol(a,"taxa aplicada - valor"),
+        cParc=acharCol(a,"parcelas"), cTaxaPct=acharCol(a,"taxa aplicada - aplicada");
   if (!cData || !cValor || !cMeio)
     throw new Error("não reconheci as colunas. Preciso de data, valor e forma de pagamento (meio).");
 
@@ -388,6 +389,7 @@ function lerTransacoes(linhas){
       nsu:cNsu?(l[cNsu]||"").trim():"", nome:cNome?(l[cNome]||"").trim():"",
       // "recebimento" = o líquido que a adquirente vai repassar (bruto menos taxa)
       liq:cLiq?brNum(l[cLiq]):null, taxa:cTaxa?Math.abs(brNum(l[cTaxa])):null,
+      parcelas:cParc?(l[cParc]||"").trim():"", taxaInf:cTaxaPct?parseFloat(String(l[cTaxaPct]).replace(",","."))||0:null,
       id:out.length, u:false,
     });
   }
@@ -682,6 +684,33 @@ async function abrirHistorico(id){
 // ── estado e render ──
 const conciliacoes = {};   // loja -> resultado
 
+// Plano de pagamento legível. Vem da maquininha quando a venda casou (é lá que está a
+// parcela); quando só existe no ERP, cai para a forma que o documento registrou.
+function planoDe(x){
+  if (x.meio){
+    const m = x.meio.toLowerCase();
+    if (/pix/.test(m)) return "PIX";
+    if (/d[ée]bito/.test(m)) return "Débito";
+    if (/dinheiro/.test(m)) return "Dinheiro";
+    if (/cr[ée]dito/.test(m)){
+      const p = String(x.parcelas||"").trim();
+      if (!p || /vista/i.test(p)) return "Crédito 1x";
+      const n = parseInt(p,10);
+      return Number.isFinite(n) ? "Crédito "+n+"x" : "Crédito "+p;
+    }
+    return x.meio;
+  }
+  const f=[];
+  if (x.din>0) f.push("Dinheiro");
+  if (x.pixErp>0) f.push("PIX");
+  if (x.cartaoErp>0) f.push("Cartão");
+  if (x.lnk>0) f.push("Link");
+  return f.join("+") || "—";
+}
+// Taxa REAL cobrada: (bruto − líquido) / bruto. É o que o dinheiro mostra, não o que a
+// adquirente informa na coluna dela — a comparação entre as duas é justamente o ponto.
+const taxaReal = x => (x.bruto>0 && x.liq!=null) ? ((x.bruto - x.liq) / x.bruto * 100) : null;
+
 function rConcil(){
   const chips=document.getElementById("c-carregados");
   const lojas=Object.keys(conciliacoes);
@@ -753,6 +782,7 @@ function rConcil(){
   // A linha acende quando qualquer um dos cruzamentos não fecha.
   function tabelaCruzamento(){
     const TOLC = 0.05;
+
     const linhas = [];
     lojas.forEach(l=>{
       const r = conciliacoes[l] && conciliacoes[l].cartao;
@@ -768,15 +798,18 @@ function rConcil(){
         const t = (e.parId!=null ? porId[e.parId] : null) || null;
         const agrupada = t && quantosDocs[e.parId] > 1;
         linhas.push({ loja:l, d:e.d, doc:e.doc, venda:e.v, pag:(e.pag!=null?e.pag:null),
-                      cartaoErp:e.car, bruto:t?t.v:null, liq:t?t.liq:null, taxa:t?t.taxa:null,
-                      hora:t?t.h:"", meio:t?((t.meio||"")+(t.band?" "+t.band:"")):"",
+                      cartaoErp:e.car, pixErp:e.pix, din:e.din, lnk:e.lnk,
+                      bruto:t?t.v:null, liq:t?t.liq:null, taxa:t?t.taxa:null,
+                      hora:t?t.h:"", meio:t?t.meio:"", band:t?t.band:"",
+                      parcelas:t?t.parcelas:"", taxaInf:t?t.taxaInf:null,
                       agrupada, nDocs:t?quantosDocs[e.parId]:0 });
       });
       // cobranças sem documento no ERP
       r.externos.filter(t=>!t.u).forEach(t=>{
         linhas.push({ loja:l, d:t.d, doc:null, venda:null, pag:null, cartaoErp:null,
+                      pixErp:0, din:0, lnk:0,
                       bruto:t.v, liq:t.liq, taxa:t.taxa, hora:t.h,
-                      meio:(t.meio||"")+(t.band?" "+t.band:"") });
+                      meio:t.meio, band:t.band, parcelas:t.parcelas, taxaInf:t.taxaInf });
       });
     });
     if (!linhas.length) return "";
@@ -793,6 +826,10 @@ function rConcil(){
         p.push("cartão no ERP ("+nf2(x.cartaoErp)+") ≠ cobrado na maquininha ("+nf2(x.bruto)+")");
       if (!x.agrupada && x.bruto!=null && x.liq!=null && x.taxa!=null && Math.abs(x.bruto-x.taxa-x.liq)>TOLC)
         p.push("bruto − taxa ≠ líquido");
+      // a adquirente informa uma taxa e cobra outra
+      const tr = taxaReal(x);
+      if (tr!=null && x.taxaInf!=null && x.taxaInf>0 && Math.abs(tr-x.taxaInf)>0.05)
+        p.push("taxa cobrada "+tr.toFixed(2).replace(".",",")+"% ≠ informada "+String(x.taxaInf).replace(".",",")+"%");
       x.problemas=p;
     });
 
@@ -808,11 +845,19 @@ function rConcil(){
       '<td><b>'+dBR(x.d)+'</b>'+(x.hora?' <span style="color:var(--muted);font-size:11px">'+esc2(x.hora)+'</span>':'')+'</td>'+
       '<td style="text-align:left">'+tagLoja(x.loja)+'</td>'+
       '<td style="text-align:left">'+(x.doc?esc2(x.doc):'<span class="zero">sem documento</span>')+'</td>'+
+      '<td style="text-align:left">'+esc2(planoDe(x))+'</td>' +
       cel(x.venda) + cel(x.pag) +
       (x.agrupada
         ? '<td class="num zero" title="uma cobrança pagou '+x.nDocs+' documentos">'+nf2(x.bruto)+' ⋯</td>'+
           '<td class="num zero">'+(x.liq!=null?nf2(x.liq):"—")+' ⋯</td>'
         : cel(x.bruto) + cel(x.liq)) +
+      (()=>{ const tr=taxaReal(x);
+        if (tr==null) return '<td class="num zero">—</td>';
+        const dif = (x.taxaInf!=null && x.taxaInf>0) ? Math.abs(tr-x.taxaInf) : 0;
+        const t = tr.toFixed(2).replace(".",",")+"%";
+        return '<td class="num'+(dif>0.05?" falta":"")+'"'+
+          (x.taxaInf!=null&&x.taxaInf>0?' title="a adquirente informa '+String(x.taxaInf).replace(".",",")+'%"':'')+
+          '>'+t+'</td>'; })() +
       '<td style="text-align:left">'+(x.problemas.length
           ? '<span class="motivo">'+esc2(x.problemas[0])+(x.problemas.length>1?' (+'+(x.problemas.length-1)+')':'')+'</span>'
           : '<span class="pill p-ok">bateu</span>')+'</td></tr>').join("");
@@ -823,14 +868,53 @@ function rConcil(){
       ((soRuins&&soRuins.checked)?" checked":"")+' onchange="rConcil()"> só as inconsistentes</label>'+
       '</div><div class="scroll"><table>'+
       '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th style="text-align:left">Documento</th>'+
+      '<th style="text-align:left">Plano</th>'+
       '<th>1 · Venda no ERP</th><th>2 · Pagamentos no ERP</th>'+
-      '<th>3 · Venda na maquininha</th><th>4 · Recebimento</th>'+
+      '<th>3 · Venda na maquininha</th><th>4 · Recebimento</th><th>Taxa efetiva</th>'+
       '<th style="text-align:left">O que não bate</th></tr></thead><tbody>'+corpo+'</tbody></table></div>'+
       (mostrar.length>600?'<div class="nota">Mostrando as 600 primeiras de '+mostrar.length+' linhas.</div>':'')+
+      resumoTaxas(linhas) +
       '<div class="nota"><b>1</b> é o total do documento no ERP e <b>2</b> a soma de todas as formas de '+
       'pagamento lançadas nele — diferença aí é venda registrada sem o pagamento correspondente. '+
       '<b>3</b> é o que a maquininha cobrou e <b>4</b> o líquido que a adquirente vai repassar '+
       '(bruto menos a taxa), por isso 4 é sempre um pouco menor que 3.</div></div>';
+  }
+
+  // Resumo por plano: é o que se compara com a tabela de taxas da adquirente.
+  function resumoTaxas(linhas){
+    const g = {};
+    linhas.forEach(x=>{
+      const tr = taxaReal(x); if (tr==null) return;
+      const p = planoDe(x);
+      (g[p] = g[p] || {n:0, bruto:0, liq:0, inf:[], min:Infinity, max:-Infinity});
+      g[p].n++; g[p].bruto += x.bruto; g[p].liq += x.liq;
+      if (x.taxaInf!=null && x.taxaInf>0) g[p].inf.push(x.taxaInf);
+      g[p].min = Math.min(g[p].min, tr); g[p].max = Math.max(g[p].max, tr);
+    });
+    const chaves = Object.keys(g).sort((a,b)=>g[b].bruto-g[a].bruto);
+    if (!chaves.length) return "";
+    return '<div class="box"><div class="box-h"><h3>💳 Taxa efetiva por plano</h3>'+
+      '<span class="hint">calculada de (bruto − líquido) ÷ bruto — para comparar com a tabela da adquirente</span></div>'+
+      '<div class="scroll"><table><thead><tr><th style="text-align:left">Plano</th><th>Operações</th>'+
+      '<th>Bruto</th><th>Líquido</th><th>Taxa paga</th><th>Taxa efetiva</th><th>Faixa</th>'+
+      '<th>Informada</th></tr></thead><tbody>'+
+      chaves.map(p=>{ const x=g[p];
+        const ef = x.bruto>0 ? (x.bruto-x.liq)/x.bruto*100 : 0;
+        const inf = x.inf.length ? (x.inf.reduce((a,b)=>a+b,0)/x.inf.length) : null;
+        const fora = inf!=null && Math.abs(ef-inf)>0.05;
+        return '<tr><td style="text-align:left"><b>'+esc2(p)+'</b></td>'+
+          '<td class="num zero">'+x.n+'</td>'+
+          '<td class="num">'+nf2(x.bruto)+'</td>'+
+          '<td class="num">'+nf2(x.liq)+'</td>'+
+          '<td class="num">'+nf2(x.bruto-x.liq)+'</td>'+
+          '<td class="num'+(fora?" falta":"")+'"><b>'+ef.toFixed(2).replace(".",",")+'%</b></td>'+
+          '<td class="num zero">'+(x.min===x.max?"—":x.min.toFixed(2).replace(".",",")+"% a "+x.max.toFixed(2).replace(".",",")+"%")+'</td>'+
+          '<td class="num zero">'+(inf!=null?inf.toFixed(2).replace(".",",")+"%":"—")+'</td></tr>'; }).join("")+
+      '</tbody></table></div>'+
+      '<div class="nota">A <b>taxa efetiva</b> sai do dinheiro que entrou, não do que a adquirente declara. '+
+      'Quando a coluna <b>informada</b> difere, a linha fica vermelha — é aí que vale abrir o contrato. '+
+      'A <b>faixa</b> mostra a menor e a maior taxa vista naquele plano: variação grande num mesmo plano '+
+      'costuma indicar bandeiras com preço diferente.</div></div>';
   }
 
   // ── blocos por forma ──

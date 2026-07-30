@@ -216,6 +216,16 @@ Tabela por documento/cobrança, com a linha destacada quando algo não fecha:
 | 3 | Venda na maquininha | valor bruto cobrado |
 | 4 | Recebimento | líquido (bruto − taxa da adquirente) |
 
+Mais duas colunas: **Plano** (PIX, Débito, Crédito 1x/2x/3x… vindo das parcelas da maquininha;
+quando a venda só existe no ERP, cai para a forma registrada) e **Taxa efetiva**, calculada de
+`(bruto − líquido) ÷ bruto`. Abaixo da tabela vai o resumo **Taxa efetiva por plano**, que é o
+que se compara com a tabela de taxas da adquirente.
+
+⚠️ A taxa efetiva sai do **dinheiro que entrou**, não da coluna "Taxa Aplicada (%)" do relatório.
+Quando as duas divergem em mais de 0,05 p.p., a linha acende — é justamente esse confronto que
+interessa. A **faixa** (menor e maior taxa do plano) revela bandeiras com preço diferente dentro
+do mesmo parcelamento.
+
 Acende quando: 1≠2 · cartão no ERP sem cobrança · cobrança sem venda · cartão no ERP ≠ bruto ·
 bruto − taxa ≠ líquido. Tolerância R$ 0,05.
 
