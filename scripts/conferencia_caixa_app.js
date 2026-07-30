@@ -399,6 +399,16 @@ function lerTransacoes(linhas){
 
 const diasEntre = (a,b) => Math.round((new Date(a+"T00:00:00") - new Date(b+"T00:00:00"))/864e5);
 
+// Como o documento do ERP foi finalizado, em texto.
+function formasDoDoc(e){
+  const f=[];
+  if(e.din>0) f.push("dinheiro "+nf2(e.din));
+  if(e.car>0) f.push("cartão "+nf2(e.car));
+  if(e.pix>0) f.push("PIX "+nf2(e.pix));
+  if(e.lnk>0) f.push("link "+nf2(e.lnk));
+  return f.join(", ") || "outra forma";
+}
+
 // Motor genérico: casa uma lista de lançamentos externos contra um campo de forma de
 // pagamento do ERP. Serve tanto para cartão (relatório da maquininha) quanto para PIX
 // (extrato da conta) — a lógica de casamento é a mesma, só muda o campo comparado.
@@ -463,14 +473,9 @@ function conciliarForma(loja, externos, campo, rotulo, todosExternos){
     const cand = movLoja
       .filter(e=>Math.abs(diasEntre(e.d,t.d))<=1 && Math.abs(e.v-t.v)<=0.05 && e[campo]<=0.005)
       .sort((a,b)=>Math.abs(a.v-t.v)-Math.abs(b.v-t.v) || Math.abs(diasEntre(a.d,t.d))-Math.abs(diasEntre(b.d,t.d)));
-    if (cand.length){
-      const e=cand[0], formas=[];
-      if(e.din>0) formas.push("dinheiro "+nf2(e.din));
-      if(e.car>0) formas.push("cartão "+nf2(e.car));
-      if(e.pix>0) formas.push("PIX "+nf2(e.pix));
-      if(e.lnk>0) formas.push("link "+nf2(e.lnk));
-      trocadas.push({lado:"externo", t, e, formas:formas.join(", ")||"outra forma", ambiguo:cand.length>1});
-    } else soExterno.push(t);
+    if (cand.length)
+      trocadas.push({lado:"externo", t, e:cand[0], formas:formasDoDoc(cand[0]), ambiguo:cand.length>1});
+    else soExterno.push(t);
   }
   // Do lado do ERP, só vale como "forma trocada" se houver no arquivo um lançamento que
   // seja PAGAMENTO DE CLIENTE em outra forma. Depósito de venda (liquidação do cartão),
@@ -480,7 +485,11 @@ function conciliarForma(loja, externos, campo, rotulo, todosExternos){
     !externos.includes(t) && (t.classe===undefined || t.classe==="pix_recebido"));
   for (const e of erp.filter(x=>!x.u)){
     const cand = pagamentos.filter(t=>Math.abs(diasEntre(t.d,e.d))<=1 && Math.abs(t.v-e[campo])<=0.05);
-    if (cand.length) trocadas.push({lado:"erp", t:cand[0], e, formas:cand[0].meio||cand[0].tipo||"outra forma", ambiguo:cand.length>1});
+    // `formas` é SEMPRE o lado do ERP — a tabela mostra essa coluna sob "No ERP". Aqui
+    // estava indo o meio do lançamento externo, que já aparece na coluna do lado, então
+    // a linha saía dizendo "na maquininha: Pix / no ERP: Pix" para uma venda que no ERP
+    // era cartão. As duas colunas mostravam a mesma coisa e escondiam a troca.
+    if (cand.length) trocadas.push({lado:"erp", t:cand[0], e, formas:formasDoDoc(e), ambiguo:cand.length>1});
     else soErp.push(e);
   }
 
@@ -947,6 +956,11 @@ function rConcil(){
   function vazioOk(msg){ return '<tbody><tr><td class="vazio-ok">✓ '+msg+'</td></tr></tbody>'; }
 
   function blocosForma(campo,rot,ladoExt){
+    // ⚠️ A chave do resultado ("cartao") NÃO é o nome do campo no movimento do ERP ("car").
+    // Usar "cartao" para ler o documento devolve undefined: a coluna do ERP saía R$ 0,00 em
+    // quatro tabelas do bloco de cartão (totais por dia, sem lançamento, centavos, agrupadas)
+    // e a diferença aparecia zerada. O PIX escapou só porque lá as duas chaves coincidem.
+    const cErp = (lojas.map(l=>conciliacoes[l][campo]).find(Boolean)||{}).campo || campo;
     const trocadas=juntar(campo,r=>r.trocadas), soExt=juntar(campo,r=>r.soExterno),
           soErp=juntar(campo,r=>r.soErp), cent=juntar(campo,r=>r.centavos), agr=juntar(campo,r=>r.agrupadas);
     let h="";
@@ -954,7 +968,7 @@ function rConcil(){
     // totais por dia
     const porDia={};
     lojas.forEach(l=>{ const r=conciliacoes[l][campo]; if(!r) return;
-      r.erp.forEach(e=>{ (porDia[e.d]=porDia[e.d]||{a:0,b:0,na:0,nb:0}).a+=e[campo]; porDia[e.d].na++; });
+      r.erp.forEach(e=>{ (porDia[e.d]=porDia[e.d]||{a:0,b:0,na:0,nb:0}).a+=e[cErp]; porDia[e.d].na++; });
       r.externos.forEach(t=>{ (porDia[t.d]=porDia[t.d]||{a:0,b:0,na:0,nb:0}).b+=t.v; porDia[t.d].nb++; });
     });
     const dias=Object.keys(porDia).sort().reverse();
@@ -1002,9 +1016,9 @@ function rConcil(){
           '<th>Total do documento</th><th style="text-align:left">Documento</th></tr></thead><tbody>'+
           soErp.sort((a,b)=>a.d<b.d?1:-1).map(e=>
             '<tr><td><b>'+dBR(e.d)+'</b></td><td style="text-align:left">'+tagLoja(e.loja)+'</td>'+
-            '<td class="num falta"><b>'+nf2(e[campo])+'</b></td><td class="num zero">'+nf2(e.v)+'</td>'+
+            '<td class="num falta"><b>'+nf2(e[cErp])+'</b></td><td class="num zero">'+nf2(e.v)+'</td>'+
             '<td style="text-align:left">'+esc2(e.doc)+'</td></tr>').join("")+
-          '<tr><td colspan="2"><b>Total</b></td><td class="num falta"><b>'+nf2(soErp.reduce((a,e)=>a+e[campo],0))+'</b></td><td colspan="2"></td></tr></tbody>'
+          '<tr><td colspan="2"><b>Total</b></td><td class="num falta"><b>'+nf2(soErp.reduce((a,e)=>a+e[cErp],0))+'</b></td><td colspan="2"></td></tr></tbody>'
         : vazioOk("todo "+rot+" do ERP tem lançamento na "+ladoExt),
       campo==="pix"
         ? "Venda registrada como PIX que não caiu nesta conta. Pode ter caído em outra chave — ou ter sido paga em dinheiro, e aí sobra na gaveta."
@@ -1015,15 +1029,15 @@ function rConcil(){
       '<th>Diferença</th><th style="text-align:left">Documento</th></tr></thead><tbody>'+
       cent.sort((a,b)=>a.e.d<b.e.d?1:-1).map(x=>
         '<tr><td><b>'+dBR(x.e.d)+'</b></td><td style="text-align:left">'+tagLoja(x.loja)+'</td>'+
-        '<td class="num">'+nf2(x.e[campo])+'</td><td class="num">'+nf2(x.t.v)+'</td>'+
-        '<td class="'+cls(x.e[campo]-x.t.v)+'">'+nf2(x.e[campo]-x.t.v)+'</td>'+
+        '<td class="num">'+nf2(x.e[cErp])+'</td><td class="num">'+nf2(x.t.v)+'</td>'+
+        '<td class="'+cls(x.e[cErp]-x.t.v)+'">'+nf2(x.e[cErp]-x.t.v)+'</td>'+
         '<td style="text-align:left">'+esc2(x.e.doc)+'</td></tr>').join("")+'</tbody>');
 
     if (agr.length) h += caixaBox("✅ "+rot+": um lançamento pagando vários documentos", "normal — registrado para conferência",
       '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>Lançamento</th><th style="text-align:left">Documentos</th></tr></thead><tbody>'+
       agr.map(x=>'<tr><td><b>'+dBR(x.t.d)+'</b></td><td style="text-align:left">'+tagLoja(x.loja)+'</td>'+
         '<td class="num">'+nf2(x.t.v)+'</td><td style="text-align:left">'+
-        x.docs.map(dd=>esc2(dd.doc)+" ("+nf2(dd[campo])+")").join(" + ")+'</td></tr>').join("")+'</tbody>');
+        x.docs.map(dd=>esc2(dd.doc)+" ("+nf2(dd[cErp])+")").join(" + ")+'</td></tr>').join("")+'</tbody>');
 
     return h;
   }
@@ -1049,7 +1063,25 @@ function impressao(txt){
   return txt.length + "-" + (h>>>0).toString(16);
 }
 
+// Tenta descobrir a loja pelo NOME do arquivo. O relatório da adquirente não tem nenhuma
+// coluna que identifique a empresa, então a única marca confiável é a que a própria equipe
+// põe ao salvar. Reconhece "L1"/"L3"/"L4"/"L5" isolado e as cidades sem ambiguidade —
+// Altamira não serve, tem duas lojas (L1 e L4).
+function lojaDoNome(nome){
+  const n = " " + nome.toLowerCase().replace(/[^a-z0-9]+/g," ") + " ";
+  const m = / (l[1345]) /.exec(n);
+  if (m) return m[1].toUpperCase();
+  if (/ itaituba /.test(n)) return "L3";
+  if (/ santar[eé]m | santarem /.test(n)) return "L5";
+  return null;
+}
+
 function processarConteudo(alvo, lj, nome, txt){
+  const dono = lojaDoNome(nome);
+  if (dono && dono !== lj)
+    throw new Error("o nome do arquivo diz que ele é da <b>"+dono+"</b>, mas a loja selecionada é a <b>"+lj+
+      "</b>. Troque a loja no seletor ou confira o arquivo.");
+
   const linhas=parseCSV(txt);
   const tipo=detectarTipo(linhas);
   const imp=impressao(txt);

@@ -632,7 +632,9 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
         <div class="dz-ico">📄</div>
         <div class="dz-titulo">Arraste o relatório aqui, ou clique para escolher</div>
         <div class="dz-sub">Arquivo <b>.csv</b> da maquininha e/ou o extrato da conta — pode arrastar os dois juntos.<br>
-          <b>Uma loja por vez:</b> trocar a loja acima limpa a tela.</div>
+          <b>Uma loja por vez:</b> trocar a loja acima limpa a tela.<br>
+          <b>Comece o nome do arquivo pela loja</b> (ex.: <code>L5 maquininha julho.csv</code>) — o relatório
+          da adquirente não diz de que empresa é, e assim o painel confere sozinho.</div>
         <input type="file" id="c-file" accept=".csv,text/csv" multiple hidden>
       </div>
       <div id="c-erro" class="dz-erro"></div>
