@@ -1119,8 +1119,15 @@ async function carregarArquivos(files){
       if (!/\.csv$/i.test(f.name))
         throw new Error("só aceito .csv — no xlsx eu não consigo ler. Exporte em CSV.");
       const txt=await f.text();
+      // Analisa num objeto à parte e só funde no estado se deu certo. Antes a loja era
+      // criada ANTES da análise: um arquivo recusado deixava o chip "✓ L5" na tela sem
+      // nenhum dado por trás.
+      const tmp = {loja:lj, arquivos:[]};
+      processarConteudo(tmp, lj, f.name, txt);
       const alvo = conciliacoes[lj] = conciliacoes[lj] || {loja:lj, arquivos:[]};
-      processarConteudo(alvo, lj, f.name, txt);
+      if (tmp.cartao) alvo.cartao = tmp.cartao;
+      if (tmp.pix){ alvo.pix = tmp.pix; alvo.conta = tmp.conta; }
+      alvo.arquivos.push(...tmp.arquivos);
     }catch(e){
       erros.push("❌ "+f.name+": "+(e.message||e));
     }
