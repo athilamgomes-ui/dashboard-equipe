@@ -199,6 +199,32 @@ Uma conciliação por (loja, período): recarregar o mesmo período substitui em
 O × no chip tira da tela, **não apaga do histórico**. Sem a tabela criada, o painel avisa e
 segue funcionando na sessão.
 
+### Cruzamento das 4 pontas
+
+Tabela por documento/cobrança, com a linha destacada quando algo não fecha:
+
+| # | Coluna | De onde vem |
+|---|---|---|
+| 1 | Venda no ERP | total do documento (`v`) |
+| 2 | Pagamentos no ERP | soma de **todas** as formas do documento (`pag`) |
+| 3 | Venda na maquininha | valor bruto cobrado |
+| 4 | Recebimento | líquido (bruto − taxa da adquirente) |
+
+Acende quando: 1≠2 · cartão no ERP sem cobrança · cobrança sem venda · cartão no ERP ≠ bruto ·
+bruto − taxa ≠ líquido. Tolerância R$ 0,05.
+
+⚠️ O campo `pag` soma **todas** as colunas de forma de pagamento. Guardar só dinheiro/cartão/
+PIX/link fazia documento pago em crediário ou convênio aparecer como "pagamentos < venda".
+Medido em 9.586 documentos (jun+jul): 1 e 2 batem em 100% — o cruzamento existe como rede de
+segurança, não porque haja erro hoje.
+
+⚠️ Cobrança que pagou vários documentos vem marcada com `⋯` e **fica fora** da checagem de
+valor: o bruto é do conjunto, comparar linha a linha acenderia falso.
+
+⚠️ O par ERP↔transação é guardado por **id**, nunca por referência mútua. `e.par = t` +
+`t.par = e` cria estrutura circular e quebra o `JSON.stringify` do salvamento no histórico —
+e como a chamada estava fora do `try`, a conciliação parava de ser guardada em silêncio.
+
 **Algoritmo de casamento** (nesta ordem, guloso):
 1. valor exato (± R$ 0,005), mesmo dia → ±1 dia → ±3 dias (venda no fim do expediente cai no dia seguinte);
 2. valor aproximado (± R$ 0,15) → classifica como **diferença de centavos**;
