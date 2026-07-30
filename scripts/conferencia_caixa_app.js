@@ -550,9 +550,15 @@ async function decifrarTexto(env, senha){
 
 // Salva (ou substitui) a conciliação da loja. Guarda resultado + arquivos originais,
 // para dar pra reprocessar se o algoritmo melhorar.
+// ?teste=1 na URL desliga a gravação. Existe porque minhas verificações automatizadas
+// rodavam contra a página publicada e cada upload regravava a conferência no Supabase —
+// o Athila apagava o registro e ele voltava sozinho. Teste não pode sujar dado real.
+const MODO_TESTE = typeof location !== "undefined" && /[?&]teste=1/.test(location.search);
+
 async function salvarConciliacao(lj){
   const c = conciliacoes[lj];
   if (!c) return;
+  if (MODO_TESTE) { c.statusSalvo = "modo teste — não gravado"; rConcil(); return; }
   const senha = senhaAtual();
   if (!senha) { c.statusSalvo = "sem senha na sessão — não deu para cifrar"; return; }
 

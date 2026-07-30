@@ -196,7 +196,13 @@ em texto puro**: são valores e nomes de clientes.
 Uma conciliação por (loja, período): recarregar o mesmo período substitui em vez de duplicar
 (índice único + `Prefer: resolution=merge-duplicates`).
 
-O × no chip tira da tela, **não apaga do histórico**. Sem a tabela criada, o painel avisa e
+O × no chip tira da tela, **não apaga do histórico**. Cada linha do histórico tem um × próprio,
+esse sim apaga no Supabase (com confirmação nomeando loja e período).
+
+⚠️ **Teste sempre com `?teste=1` na URL.** O upload grava sozinho no Supabase, e verificações
+automatizadas contra a página publicada regravavam a conferência a cada rodada — o Athila apagava
+o registro e ele reaparecia. Com a flag, o painel funciona igual mas não grava. Melhor ainda:
+testar numa cópia local, não na URL publicada. Sem a tabela criada, o painel avisa e
 segue funcionando na sessão.
 
 ⚠️ **Uma loja por vez na tela — inclusive no histórico.** Trocar o seletor de loja limpa o
