@@ -289,12 +289,26 @@ function parseCSV(txt){
   });
 }
 
+// Aceita "118,00", "R$ 1.234,56", "+R$ 53,90", "-R$ 2.838,00" e "'- 0,56" (o extrato
+// da InfinitePay exporta a taxa com apóstrofo na frente).
 const brNum = s => {
-  const t=String(s||"").trim().replace(/R\$\s*/,"");
+  let t=String(s||"").trim().replace(/^'/,"").replace(/R\$/g,"").replace(/\s/g,"");
   if(!t) return 0;
-  // "1.234,56" (pt-BR) ou "1234.56"
+  let sinal=1;
+  if (t.startsWith("-")){ sinal=-1; t=t.slice(1); }
+  else if (t.startsWith("+")) t=t.slice(1);
   const v = /,\d{1,2}$/.test(t) ? parseFloat(t.replace(/\./g,"").replace(",",".")) : parseFloat(t.replace(/,/g,""));
-  return Number.isFinite(v)? Math.round(v*100)/100 : 0;
+  return Number.isFinite(v)? sinal*Math.round(v*100)/100 : 0;
+};
+
+// Data em "dd/mm/aaaa" ou "aaaa-mm-dd" → ISO
+const dataISO = s => {
+  const t=String(s||"").trim();
+  let m=/(\d{4})-(\d{2})-(\d{2})/.exec(t);
+  if (m) return m[1]+"-"+m[2]+"-"+m[3];
+  m=/(\d{2})\/(\d{2})\/(\d{4})/.exec(t);
+  if (m) return m[3]+"-"+m[2]+"-"+m[1];
+  return null;
 };
 
 // Acha a coluna por palavras-chave, tolerando variações de nome entre adquirentes.
@@ -306,6 +320,46 @@ function acharCol(obj, ...alternativas){
     if (k) return k;
   }
   return null;
+}
+
+// A equipe carrega DOIS arquivos por loja e eles têm formatos diferentes:
+//  · relatório da maquininha — uma linha por cobrança (tem "Meio"/forma e Status)
+//  · extrato da conta        — uma linha por lançamento bancário (tem "Tipo de transação"
+//                              e "Detalhe": Pix Recebido/Enviado, Depósito de vendas...)
+// Antes o painel só conhecia o primeiro e devolvia "não reconheci as colunas" para o extrato.
+function detectarTipo(linhas){
+  if (!linhas.length) return null;
+  const a=linhas[0];
+  if (acharCol(a,"tipo de transa") && acharCol(a,"detalhe")) return "extrato";
+  if (acharCol(a,"meio - meio","^meio","forma de pagamento","tipo de pagamento")) return "maquininha";
+  return null;
+}
+
+// Extrato da conta: separa PIX recebido/enviado, depósitos de venda (liquidação de cartão)
+// e estornos. O sinal vem no próprio valor ("+R$ 53,90" / "-R$ 2.838,00").
+function lerExtrato(linhas){
+  const a=linhas[0];
+  const cData=acharCol(a,"^data$","^data"), cHora=acharCol(a,"^hora"),
+        cTipo=acharCol(a,"tipo de transa"), cDet=acharCol(a,"detalhe"),
+        cNome=acharCol(a,"^nome"), cValor=acharCol(a,"^valor");
+  if (!cData || !cTipo || !cValor)
+    throw new Error("é um extrato de conta, mas não achei as colunas de data, tipo e valor.");
+  const out=[];
+  for (const l of linhas){
+    const d=dataISO(l[cData]); if (!d) continue;
+    const tipo=(l[cTipo]||"").toLowerCase(), det=(cDet?l[cDet]:"").toLowerCase();
+    const v=brNum(l[cValor]);
+    let classe=null;
+    if (/pix/.test(tipo)) classe = /enviad/.test(det) ? "pix_enviado" : "pix_recebido";
+    else if (/dep[óo]sito/.test(tipo)) classe="deposito";
+    else if (/cancelamento|estorno/.test(tipo) || /estorno/.test(det)) classe="estorno";
+    else classe="outro";
+    out.push({ d, h:(cHora?l[cHora]:"").slice(0,5), v:Math.abs(v), sinal:v<0?-1:1,
+                classe, tipo:(l[cTipo]||"").trim(), det:(cDet?l[cDet]:"").trim(),
+                nome:cNome?(l[cNome]||"").trim():"", u:false });
+  }
+  if (!out.length) throw new Error("o extrato não tem lançamentos com data reconhecível");
+  return out;
 }
 
 function lerTransacoes(linhas){
@@ -340,37 +394,38 @@ function lerTransacoes(linhas){
 
 const diasEntre = (a,b) => Math.round((new Date(a+"T00:00:00") - new Date(b+"T00:00:00"))/864e5);
 
-function conciliar(loja, trans){
+// Motor genérico: casa uma lista de lançamentos externos contra um campo de forma de
+// pagamento do ERP. Serve tanto para cartão (relatório da maquininha) quanto para PIX
+// (extrato da conta) — a lógica de casamento é a mesma, só muda o campo comparado.
+function conciliarForma(loja, externos, campo, rotulo, todosExternos){
   const movLoja = (D.movimento && D.movimento[loja]) || [];
   if (!movLoja.length) throw new Error("o painel ainda não tem o movimento diário da "+loja+" — rode a atualização do dashboard antes.");
+  if (!externos.length) throw new Error("o arquivo não tem lançamentos de "+rotulo);
 
-  const cartoes = trans.filter(t=>t.cartao);
-  if (!cartoes.length) throw new Error("o arquivo não tem transações de cartão");
-  const datas = cartoes.map(t=>t.d).sort();
+  const datas = externos.map(t=>t.d).sort();
   const ini=datas[0], fim=datas[datas.length-1];
 
-  // O painel só tem o movimento de uma janela. Se o relatório da maquininha for de fora
-  // dela, o lado do ERP viria vazio e TODA transação apareceria como "sem venda" — erro
-  // grave e silencioso. Melhor recusar com a mensagem certa.
+  // O painel só tem o movimento de uma janela. Se o arquivo for de fora dela, o lado do
+  // ERP viria vazio e TODO lançamento apareceria como "sem venda" — erro grave e
+  // silencioso. Melhor recusar com a mensagem certa.
   if (D.movimentoPeriodo){
     const jIni=isoDe(D.movimentoPeriodo.ini), jFim=isoDe(D.movimentoPeriodo.fim);
-    if (ini < jIni || fim > jFim)
-      throw new Error("o relatório vai de "+dBR(ini)+" a "+dBR(fim)+", mas o painel só tem o movimento do ERP de "
-        +dBR(jIni)+" a "+dBR(jFim)+". Carregue um relatório desse período.");
+    if (fim < jIni || ini > jFim)
+      throw new Error("o arquivo vai de "+dBR(ini)+" a "+dBR(fim)+", mas o painel só tem o movimento do ERP de "
+        +dBR(jIni)+" a "+dBR(jFim)+". Carregue um arquivo desse período.");
   }
 
-  // ERP: só documentos com cartão, dentro da janela do relatório da maquininha
-  const erp = movLoja.filter(x=>x.car>0 && x.d>=ini && x.d<=fim).map(x=>({...x,u:false}));
-
+  const erp = movLoja.filter(x=>x[campo]>0 && x.d>=ini && x.d<=fim).map(x=>({...x,u:false}));
   const centavos=[], agrupadas=[];
+
   const casar=(jan,tol,reg)=>{
-    for (const t of cartoes){
+    for (const t of externos){
       if (t.u) continue;
       for (const e of erp){
         if (e.u || Math.abs(diasEntre(e.d,t.d))>jan) continue;
-        if (Math.abs(e.car-t.v)<=tol){
-          t.u=e.u=true; e.par=t;
-          if (reg && Math.abs(e.car-t.v)>0.005) reg.push({e,t});
+        if (Math.abs(e[campo]-t.v)<=tol){
+          t.u=e.u=true;
+          if (reg && Math.abs(e[campo]-t.v)>0.005) reg.push({e,t});
           break;
         }
       }
@@ -379,15 +434,14 @@ function conciliar(loja, trans){
   [0,1,3].forEach(j=>casar(j,0.005));
   [0,1].forEach(j=>casar(j,0.15,centavos));
 
-  // uma cobrança pagando 2 ou 3 documentos
-  for (const t of cartoes){
+  // um lançamento pagando 2 ou 3 documentos
+  for (const t of externos){
     if (t.u) continue;
     const c=erp.filter(e=>!e.u && Math.abs(diasEntre(e.d,t.d))<=1);
     let achou=false;
     for (const k of [2,3]){
-      const combos=combinacoes(c,k);
-      for (const combo of combos){
-        if (Math.abs(combo.reduce((a,x)=>a+x.car,0)-t.v)<=0.05){
+      for (const combo of combinacoes(c,k)){
+        if (Math.abs(combo.reduce((a,x)=>a+x[campo],0)-t.v)<=0.05){
           t.u=true; combo.forEach(x=>x.u=true); agrupadas.push({t,docs:combo}); achou=true; break;
         }
       }
@@ -396,32 +450,43 @@ function conciliar(loja, trans){
   }
 
   // sobras: tenta explicar como forma de pagamento trocada
-  const trocadas=[], soMaquina=[], soErp=[];
-  for (const t of cartoes.filter(x=>!x.u)){
-    const cand = movLoja.filter(e=>Math.abs(diasEntre(e.d,t.d))<=1 && Math.abs(e.v-t.v)<=0.10 && e.car<=0.005);
+  const trocadas=[], soExterno=[], soErp=[];
+  for (const t of externos.filter(x=>!x.u)){
+    // Ordena pelo mais próximo em valor e depois em data: com tolerância frouxa dava par
+    // errado (conta R$ 31,60 casando com documento de R$ 31,70, que era outra venda).
+    const cand = movLoja
+      .filter(e=>Math.abs(diasEntre(e.d,t.d))<=1 && Math.abs(e.v-t.v)<=0.05 && e[campo]<=0.005)
+      .sort((a,b)=>Math.abs(a.v-t.v)-Math.abs(b.v-t.v) || Math.abs(diasEntre(a.d,t.d))-Math.abs(diasEntre(b.d,t.d)));
     if (cand.length){
-      const e=cand[0];
-      const formas=[];
+      const e=cand[0], formas=[];
       if(e.din>0) formas.push("dinheiro "+nf2(e.din));
+      if(e.car>0) formas.push("cartão "+nf2(e.car));
       if(e.pix>0) formas.push("PIX "+nf2(e.pix));
       if(e.lnk>0) formas.push("link "+nf2(e.lnk));
-      trocadas.push({lado:"maquina", t, e, formas:formas.join(", ")||"outra forma", ambiguo:cand.length>1});
-    } else soMaquina.push(t);
+      trocadas.push({lado:"externo", t, e, formas:formas.join(", ")||"outra forma", ambiguo:cand.length>1});
+    } else soExterno.push(t);
   }
+  // Do lado do ERP, só vale como "forma trocada" se houver no arquivo um lançamento que
+  // seja PAGAMENTO DE CLIENTE em outra forma. Depósito de venda (liquidação do cartão),
+  // PIX enviado (transferência) e estorno não são pagamento — antes entravam aqui e
+  // produziam falso positivo do tipo "venda paga com Depósito de vendas".
+  const pagamentos = (todosExternos||[]).filter(t=>
+    !externos.includes(t) && (t.classe===undefined || t.classe==="pix_recebido"));
   for (const e of erp.filter(x=>!x.u)){
-    const cand = trans.filter(t=>!t.cartao && Math.abs(diasEntre(t.d,e.d))<=1 && Math.abs(t.v-e.car)<=0.10);
-    if (cand.length) trocadas.push({lado:"erp", t:cand[0], e, formas:cand[0].meio, ambiguo:cand.length>1});
+    const cand = pagamentos.filter(t=>Math.abs(diasEntre(t.d,e.d))<=1 && Math.abs(t.v-e[campo])<=0.05);
+    if (cand.length) trocadas.push({lado:"erp", t:cand[0], e, formas:cand[0].meio||cand[0].tipo||"outra forma", ambiguo:cand.length>1});
     else soErp.push(e);
   }
 
   return {
-    loja, ini, fim,
-    totERP: erp.reduce((a,e)=>a+e.car,0),
-    totMaq: cartoes.reduce((a,t)=>a+t.v,0),
-    nERP: erp.length, nMaq: cartoes.length,
-    trans, cartoes, erp, centavos, agrupadas, trocadas, soMaquina, soErp,
+    loja, campo, rotulo, ini, fim,
+    totERP: erp.reduce((a,e)=>a+e[campo],0),
+    totExt: externos.reduce((a,t)=>a+t.v,0),
+    nERP: erp.length, nExt: externos.length,
+    externos, erp, centavos, agrupadas, trocadas, soExterno, soErp,
   };
 }
+
 function combinacoes(arr,k){
   const out=[]; const rec=(i,atual)=>{
     if (atual.length===k){ out.push(atual.slice()); return; }
@@ -438,102 +503,159 @@ const conciliacoes = {};   // loja -> resultado
 function rConcil(){
   const chips=document.getElementById("c-carregados");
   const lojas=Object.keys(conciliacoes);
-  chips.innerHTML = lojas.map(lj=>
-    '<span class="chip-arq">✓ '+lj+' · '+conciliacoes[lj].nome+' <button onclick="removerConcil(\''+lj+'\')" title="remover">×</button></span>').join("");
+  chips.innerHTML = lojas.map(lj=>{
+    const c=conciliacoes[lj];
+    const arq=c.arquivos.map(a=>a.tipo==="extrato"?"extrato":"maquininha").join(" + ");
+    return '<span class="chip-arq">✓ '+lj+' · '+arq+' <button onclick="removerConcil(\''+lj+'\')" title="remover">×</button></span>';
+  }).join("");
 
   const res=document.getElementById("c-resultado");
-  if (!lojas.length){ res.style.display="none"; return; }
+  if (!lojas.length){ res.style.display="none"; res.innerHTML=""; return; }
   res.style.display="block";
 
-  // junta todas as lojas carregadas
-  const R=lojas.map(l=>conciliacoes[l].r);
-  const somar=f=>R.reduce((a,r)=>a+f(r),0);
-  const juntar=f=>R.flatMap(r=>f(r).map(x=>({...x,loja:r.loja})));
-
-  const totERP=somar(r=>r.totERP), totMaq=somar(r=>r.totMaq);
-  const trocadas=juntar(r=>r.trocadas), soMaq=juntar(r=>r.soMaquina),
-        soErp=juntar(r=>r.soErp), cent=juntar(r=>r.centavos), agr=juntar(r=>r.agrupadas);
-  const nInc=trocadas.length+soMaq.length+soErp.length;
-
-  document.getElementById("kpi-concil").innerHTML =
-    kpi("Cartão no ERP", nf2(totERP), somar(r=>r.nERP)+" documento(s)", "#6366f1") +
-    kpi("Cartão na maquininha", nf2(totMaq), somar(r=>r.nMaq)+" transação(ões)", "#0891b2") +
-    kpi("Diferença", nf2(totERP-totMaq), Math.abs(totERP-totMaq)<=0.5?"praticamente fecha":"o total não fecha",
-        Math.abs(totERP-totMaq)<=0.5?"var(--ok)":"var(--falta)", Math.abs(totERP-totMaq)<=0.5?"var(--ok)":"var(--falta)") +
-    kpi("Inconsistências", nInc, nInc? "exigem ação" : "nada a corrigir",
-        nInc?"var(--falta)":"var(--ok)", nInc?"var(--falta)":"var(--ok)");
-
-  // totais por dia
-  const porDia={};
-  R.forEach(r=>{
-    r.erp.forEach(e=>{ (porDia[e.d]=porDia[e.d]||{erp:0,maq:0,ne:0,nm:0}).erp+=e.car; porDia[e.d].ne++; });
-    r.cartoes.forEach(t=>{ (porDia[t.d]=porDia[t.d]||{erp:0,maq:0,ne:0,nm:0}).maq+=t.v; porDia[t.d].nm++; });
-  });
-  const dias=Object.keys(porDia).sort().reverse();
-  document.getElementById("t-concil-dias").innerHTML =
-    '<thead><tr><th>Data</th><th>ERP</th><th>Maquininha</th><th>Diferença</th><th>docs / transações</th></tr></thead><tbody>'+
-    dias.map(d=>{ const p=porDia[d]; const dif=Math.round((p.erp-p.maq)*100)/100;
-      return '<tr><td><b>'+dBR(d)+'</b> <span style="color:var(--muted);font-size:11px">'+diaSem(d)+'</span></td>'+
-        '<td class="num">'+nf2(p.erp)+'</td><td class="num">'+nf2(p.maq)+'</td>'+
-        '<td class="'+cls(dif)+'">'+nf2(dif)+'</td>'+
-        '<td class="num zero">'+p.ne+' / '+p.nm+'</td></tr>';}).join("")+'</tbody>';
-
   const tagLoja=l=>'<span class="loja-tag" style="background:'+corLoja(l)+'">'+l+'</span>';
-  const vazio=(id,msg)=>document.getElementById(id).innerHTML='<tbody><tr><td class="vazio-ok">✓ '+msg+'</td></tr></tbody>';
+  const juntar=(campo,f)=>lojas.flatMap(l=>{
+    const r=conciliacoes[l][campo];
+    return r? f(r).map(x=>({...x,loja:l})) : [];
+  });
+  const somar=(campo,f)=>lojas.reduce((a,l)=>{ const r=conciliacoes[l][campo]; return a+(r?f(r):0); },0);
+  const temCampo=campo=>lojas.some(l=>conciliacoes[l][campo]);
 
-  // trocadas
-  if (trocadas.length) document.getElementById("t-trocada").innerHTML =
-    '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>Valor</th>'+
-    '<th style="text-align:left">Na maquininha</th><th style="text-align:left">No ERP</th><th style="text-align:left">Documento</th></tr></thead><tbody>'+
-    trocadas.sort((a,b)=>a.t.d<b.t.d?1:-1).map(x=>
-      '<tr><td><b>'+dBR(x.t.d)+'</b> '+(x.t.h?'<span style="color:var(--muted);font-size:11px">'+x.t.h+'</span>':'')+'</td>'+
-      '<td style="text-align:left">'+tagLoja(x.loja)+'</td>'+
-      '<td class="num falta">'+nf2(x.t.v)+'</td>'+
-      '<td style="text-align:left">'+esc2(x.t.meio)+(x.t.band?" "+esc2(x.t.band):"")+'</td>'+
-      '<td style="text-align:left">'+esc2(x.formas)+'</td>'+
-      '<td style="text-align:left">'+esc2(x.e.doc)+(x.ambiguo?' <span style="color:var(--alerta)" title="mais de um documento com esse valor">⚠</span>':'')+'</td></tr>').join("")+'</tbody>';
-  else vazio("t-trocada","nenhuma forma de pagamento trocada");
+  let html="";
 
-  // só maquininha
-  if (soMaq.length) document.getElementById("t-so-maquina").innerHTML =
-    '<thead><tr><th>Data</th><th>Hora</th><th style="text-align:left">Loja</th><th>Valor</th>'+
-    '<th style="text-align:left">Forma</th><th style="text-align:left">Cliente / NSU</th></tr></thead><tbody>'+
-    soMaq.sort((a,b)=>a.d<b.d?1:-1).map(t=>
-      '<tr><td><b>'+dBR(t.d)+'</b></td><td class="num zero">'+esc2(t.h)+'</td>'+
-      '<td style="text-align:left">'+tagLoja(t.loja)+'</td>'+
-      '<td class="num falta"><b>'+nf2(t.v)+'</b></td>'+
-      '<td style="text-align:left">'+esc2(t.meio)+(t.band?" "+esc2(t.band):"")+'</td>'+
-      '<td style="text-align:left">'+esc2(t.nome||t.nsu)+'</td></tr>').join("")+
-    '<tr><td colspan="3"><b>Total</b></td><td class="num falta"><b>'+nf2(soMaq.reduce((a,t)=>a+t.v,0))+'</b></td><td colspan="2"></td></tr></tbody>';
-  else vazio("t-so-maquina","toda cobrança da maquininha tem venda no ERP");
+  // ── KPIs ──
+  const kpis=[];
+  if (temCampo("cartao")){
+    const e=somar("cartao",r=>r.totERP), m=somar("cartao",r=>r.totExt);
+    kpis.push(kpi("Cartão no ERP", nf2(e), somar("cartao",r=>r.nERP)+" documento(s)", "#6366f1"));
+    kpis.push(kpi("Cartão na maquininha", nf2(m), somar("cartao",r=>r.nExt)+" transação(ões)", "#0891b2"));
+    kpis.push(kpi("Diferença no cartão", nf2(e-m), Math.abs(e-m)<=0.5?"praticamente fecha":"não fecha",
+      Math.abs(e-m)<=0.5?"var(--ok)":"var(--falta)", Math.abs(e-m)<=0.5?"var(--ok)":"var(--falta)"));
+  }
+  if (temCampo("pix")){
+    const e=somar("pix",r=>r.totERP), m=somar("pix",r=>r.totExt);
+    kpis.push(kpi("PIX no ERP", nf2(e), somar("pix",r=>r.nERP)+" documento(s)", "#0891b2"));
+    kpis.push(kpi("PIX na conta", nf2(m), somar("pix",r=>r.nExt)+" recebimento(s)", "#059669"));
+    kpis.push(kpi("Diferença no PIX", nf2(e-m), Math.abs(e-m)<=0.5?"praticamente fecha":"não fecha",
+      Math.abs(e-m)<=0.5?"var(--ok)":"var(--falta)", Math.abs(e-m)<=0.5?"var(--ok)":"var(--falta)"));
+  }
+  const nInc = juntar("cartao",r=>r.trocadas).length+juntar("cartao",r=>r.soExterno).length+juntar("cartao",r=>r.soErp).length
+             + juntar("pix",r=>r.trocadas).length+juntar("pix",r=>r.soExterno).length+juntar("pix",r=>r.soErp).length;
+  kpis.push(kpi("Inconsistências", nInc, nInc?"exigem ação":"nada a corrigir",
+    nInc?"var(--falta)":"var(--ok)", nInc?"var(--falta)":"var(--ok)"));
+  html += '<div class="kpis">'+kpis.join("")+'</div>';
 
-  // só ERP
-  if (soErp.length) document.getElementById("t-so-erp").innerHTML =
-    '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>Cartão no ERP</th><th>Total do documento</th><th style="text-align:left">Documento</th></tr></thead><tbody>'+
-    soErp.sort((a,b)=>a.d<b.d?1:-1).map(e=>
-      '<tr><td><b>'+dBR(e.d)+'</b></td><td style="text-align:left">'+tagLoja(e.loja)+'</td>'+
-      '<td class="num falta"><b>'+nf2(e.car)+'</b></td><td class="num zero">'+nf2(e.v)+'</td>'+
-      '<td style="text-align:left">'+esc2(e.doc)+'</td></tr>').join("")+
-    '<tr><td colspan="2"><b>Total</b></td><td class="num falta"><b>'+nf2(soErp.reduce((a,e)=>a+e.car,0))+'</b></td><td colspan="2"></td></tr></tbody>';
-  else vazio("t-so-erp","todo cartão do ERP tem cobrança na maquininha");
+  // ── movimento da conta (só quando há extrato) ──
+  const contas=lojas.filter(l=>conciliacoes[l].conta);
+  if (contas.length){
+    html += caixaBox("🏦 Movimento da conta", "o que entrou e saiu no período do extrato",
+      '<thead><tr><th style="text-align:left">Loja</th><th>PIX recebido</th><th>Depósitos de venda</th>'+
+      '<th>PIX enviado</th><th>Estornos</th><th style="text-align:left">Período</th></tr></thead><tbody>'+
+      contas.map(l=>{const c=conciliacoes[l].conta;
+        return '<tr><td style="text-align:left">'+tagLoja(l)+'</td>'+
+        '<td class="num">'+nf2(c.pixRecebido)+'</td>'+
+        '<td class="num">'+nf2(c.depositos)+' <span class="zero">('+c.nDepositos+')</span></td>'+
+        '<td class="num zero">'+nf2(c.pixEnviado)+'</td>'+
+        '<td class="'+(c.estornos>0?"falta":"zero")+'">'+nf2(c.estornos)+'</td>'+
+        '<td style="text-align:left" class="zero">'+dBR(c.ini)+' a '+dBR(c.fim)+'</td></tr>';}).join("")+'</tbody>',
+      "<b>Depósitos de venda</b> é a liquidação do cartão caindo na conta (já líquida de taxa), "+
+      "por isso não bate com o cartão vendido. <b>PIX enviado</b> é transferência para outra conta.");
+  }
 
-  // centavos
-  if (cent.length) document.getElementById("t-centavos").innerHTML =
-    '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>ERP</th><th>Maquininha</th><th>Diferença</th><th style="text-align:left">Documento</th></tr></thead><tbody>'+
-    cent.sort((a,b)=>a.e.d<b.e.d?1:-1).map(x=>
-      '<tr><td><b>'+dBR(x.e.d)+'</b></td><td style="text-align:left">'+tagLoja(x.loja)+'</td>'+
-      '<td class="num">'+nf2(x.e.car)+'</td><td class="num">'+nf2(x.t.v)+'</td>'+
-      '<td class="'+cls(x.e.car-x.t.v)+'">'+nf2(x.e.car-x.t.v)+'</td>'+
-      '<td style="text-align:left">'+esc2(x.e.doc)+'</td></tr>').join("")+'</tbody>';
-  else vazio("t-centavos","nenhuma diferença de centavos");
+  // ── blocos por forma ──
+  if (temCampo("cartao")) html += blocosForma("cartao","Cartão","maquininha");
+  if (temCampo("pix"))    html += blocosForma("pix","PIX","conta");
+  res.innerHTML = html;
 
-  // agrupadas
-  document.getElementById("bx-agrupada").style.display = agr.length? "" : "none";
-  if (agr.length) document.getElementById("t-agrupada").innerHTML =
-    '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>Cobrança</th><th style="text-align:left">Documentos</th></tr></thead><tbody>'+
-    agr.map(x=>'<tr><td><b>'+dBR(x.t.d)+'</b></td><td style="text-align:left">'+tagLoja(x.loja)+'</td>'+
-      '<td class="num">'+nf2(x.t.v)+'</td><td style="text-align:left">'+
-      x.docs.map(dd=>esc2(dd.doc)+" ("+nf2(dd.car)+")").join(" + ")+'</td></tr>').join("")+'</tbody>';
+  function caixaBox(titulo,hint,tabela,nota){
+    return '<div class="box"><div class="box-h"><h3>'+titulo+'</h3>'+
+      (hint?'<span class="hint">'+hint+'</span>':'')+'</div>'+
+      '<div class="scroll"><table>'+tabela+'</table></div>'+
+      (nota?'<div class="nota">'+nota+'</div>':'')+'</div>';
+  }
+  function vazioOk(msg){ return '<tbody><tr><td class="vazio-ok">✓ '+msg+'</td></tr></tbody>'; }
+
+  function blocosForma(campo,rot,ladoExt){
+    const trocadas=juntar(campo,r=>r.trocadas), soExt=juntar(campo,r=>r.soExterno),
+          soErp=juntar(campo,r=>r.soErp), cent=juntar(campo,r=>r.centavos), agr=juntar(campo,r=>r.agrupadas);
+    let h="";
+
+    // totais por dia
+    const porDia={};
+    lojas.forEach(l=>{ const r=conciliacoes[l][campo]; if(!r) return;
+      r.erp.forEach(e=>{ (porDia[e.d]=porDia[e.d]||{a:0,b:0,na:0,nb:0}).a+=e[campo]; porDia[e.d].na++; });
+      r.externos.forEach(t=>{ (porDia[t.d]=porDia[t.d]||{a:0,b:0,na:0,nb:0}).b+=t.v; porDia[t.d].nb++; });
+    });
+    const dias=Object.keys(porDia).sort().reverse();
+    h += caixaBox(rot+" — totais por dia", "ERP × "+ladoExt,
+      '<thead><tr><th>Data</th><th>ERP</th><th>'+ladoExt.charAt(0).toUpperCase()+ladoExt.slice(1)+'</th>'+
+      '<th>Diferença</th><th>docs / lançamentos</th></tr></thead><tbody>'+
+      dias.map(d=>{const p=porDia[d], dif=Math.round((p.a-p.b)*100)/100;
+        return '<tr><td><b>'+dBR(d)+'</b> <span style="color:var(--muted);font-size:11px">'+diaSem(d)+'</span></td>'+
+          '<td class="num">'+nf2(p.a)+'</td><td class="num">'+nf2(p.b)+'</td>'+
+          '<td class="'+cls(dif)+'">'+nf2(dif)+'</td>'+
+          '<td class="num zero">'+p.na+' / '+p.nb+'</td></tr>';}).join("")+'</tbody>');
+
+    h += caixaBox("⚠️ "+rot+": forma de pagamento trocada",
+      "entrou como "+rot+" mas a venda foi finalizada de outro jeito",
+      trocadas.length
+        ? '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>Valor</th>'+
+          '<th style="text-align:left">Na '+ladoExt+'</th><th style="text-align:left">No ERP</th><th style="text-align:left">Documento</th></tr></thead><tbody>'+
+          trocadas.sort((a,b)=>a.t.d<b.t.d?1:-1).map(x=>
+            '<tr><td><b>'+dBR(x.t.d)+'</b> '+(x.t.h?'<span style="color:var(--muted);font-size:11px">'+x.t.h+'</span>':'')+'</td>'+
+            '<td style="text-align:left">'+tagLoja(x.loja)+'</td>'+
+            '<td class="num falta">'+nf2(x.t.v)+'</td>'+
+            '<td style="text-align:left">'+esc2((x.t.meio||x.t.tipo||"")+(x.t.band?" "+x.t.band:""))+'</td>'+
+            '<td style="text-align:left">'+esc2(x.formas)+'</td>'+
+            '<td style="text-align:left">'+esc2(x.e.doc)+(x.ambiguo?' <span style="color:var(--alerta)" title="mais de um documento com esse valor">⚠</span>':'')+'</td></tr>').join("")+'</tbody>'
+        : vazioOk("nenhuma forma de pagamento trocada"),
+      "O dinheiro entrou, mas está classificado errado no ERP. Não falta valor — falta corrigir a forma, "+
+      "senão a conferência de caixa e o recebível ficam ambos errados.");
+
+    h += caixaBox("🔴 "+rot+" na "+ladoExt+", sem venda no ERP", "entrou dinheiro e não há venda com esse valor",
+      soExt.length
+        ? '<thead><tr><th>Data</th><th>Hora</th><th style="text-align:left">Loja</th><th>Valor</th>'+
+          '<th style="text-align:left">Detalhe</th><th style="text-align:left">Cliente</th></tr></thead><tbody>'+
+          soExt.sort((a,b)=>a.d<b.d?1:-1).map(t=>
+            '<tr><td><b>'+dBR(t.d)+'</b></td><td class="num zero">'+esc2(t.h)+'</td>'+
+            '<td style="text-align:left">'+tagLoja(t.loja)+'</td>'+
+            '<td class="num falta"><b>'+nf2(t.v)+'</b></td>'+
+            '<td style="text-align:left">'+esc2((t.meio||t.tipo||"")+(t.band?" "+t.band:""))+'</td>'+
+            '<td style="text-align:left">'+esc2(t.nome||t.nsu||"")+'</td></tr>').join("")+
+          '<tr><td colspan="3"><b>Total</b></td><td class="num falta"><b>'+nf2(soExt.reduce((a,t)=>a+t.v,0))+'</b></td><td colspan="2"></td></tr></tbody>'
+        : vazioOk("todo "+rot+" da "+ladoExt+" tem venda no ERP"));
+
+    h += caixaBox("🟠 "+rot+" no ERP, sem lançamento na "+ladoExt, "venda finalizada sem entrada correspondente",
+      soErp.length
+        ? '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>'+rot+' no ERP</th>'+
+          '<th>Total do documento</th><th style="text-align:left">Documento</th></tr></thead><tbody>'+
+          soErp.sort((a,b)=>a.d<b.d?1:-1).map(e=>
+            '<tr><td><b>'+dBR(e.d)+'</b></td><td style="text-align:left">'+tagLoja(e.loja)+'</td>'+
+            '<td class="num falta"><b>'+nf2(e[campo])+'</b></td><td class="num zero">'+nf2(e.v)+'</td>'+
+            '<td style="text-align:left">'+esc2(e.doc)+'</td></tr>').join("")+
+          '<tr><td colspan="2"><b>Total</b></td><td class="num falta"><b>'+nf2(soErp.reduce((a,e)=>a+e[campo],0))+'</b></td><td colspan="2"></td></tr></tbody>'
+        : vazioOk("todo "+rot+" do ERP tem lançamento na "+ladoExt),
+      campo==="pix"
+        ? "Venda registrada como PIX que não caiu nesta conta. Pode ter caído em outra chave — ou ter sido paga em dinheiro, e aí sobra na gaveta."
+        : "Pode ser venda em outra maquininha, ou venda finalizada como cartão sem a cobrança ter acontecido.");
+
+    if (cent.length) h += caixaBox("🟡 "+rot+": diferença de centavos", "mesmo lançamento, valor diferente",
+      '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>ERP</th><th>'+ladoExt+'</th>'+
+      '<th>Diferença</th><th style="text-align:left">Documento</th></tr></thead><tbody>'+
+      cent.sort((a,b)=>a.e.d<b.e.d?1:-1).map(x=>
+        '<tr><td><b>'+dBR(x.e.d)+'</b></td><td style="text-align:left">'+tagLoja(x.loja)+'</td>'+
+        '<td class="num">'+nf2(x.e[campo])+'</td><td class="num">'+nf2(x.t.v)+'</td>'+
+        '<td class="'+cls(x.e[campo]-x.t.v)+'">'+nf2(x.e[campo]-x.t.v)+'</td>'+
+        '<td style="text-align:left">'+esc2(x.e.doc)+'</td></tr>').join("")+'</tbody>');
+
+    if (agr.length) h += caixaBox("✅ "+rot+": um lançamento pagando vários documentos", "normal — registrado para conferência",
+      '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>Lançamento</th><th style="text-align:left">Documentos</th></tr></thead><tbody>'+
+      agr.map(x=>'<tr><td><b>'+dBR(x.t.d)+'</b></td><td style="text-align:left">'+tagLoja(x.loja)+'</td>'+
+        '<td class="num">'+nf2(x.t.v)+'</td><td style="text-align:left">'+
+        x.docs.map(dd=>esc2(dd.doc)+" ("+nf2(dd[campo])+")").join(" + ")+'</td></tr>').join("")+'</tbody>');
+
+    return h;
+  }
 }
 const esc2 = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
@@ -543,17 +665,41 @@ async function carregarArquivos(files){
   const err=document.getElementById("c-erro");
   err.textContent="";
   const lj=document.getElementById("c-loja").value;
+  const erros=[];
   for (const f of files){
     try{
-      if (!/\.csv$/i.test(f.name)) throw new Error("só aceito .csv — exporte o relatório da maquininha em CSV.");
-      const txt=await f.text();
-      const trans=lerTransacoes(parseCSV(txt));
-      const r=conciliar(lj, trans);
-      conciliacoes[lj]={nome:f.name, r};
+      if (!/\.csv$/i.test(f.name))
+        throw new Error("só aceito .csv — no xlsx eu não consigo ler. Exporte em CSV.");
+      const linhas=parseCSV(await f.text());
+      const tipo=detectarTipo(linhas);
+      const alvo = conciliacoes[lj] = conciliacoes[lj] || {loja:lj, arquivos:[]};
+
+      if (tipo==="maquininha"){
+        const trans=lerTransacoes(linhas);
+        const cartoes=trans.filter(t=>t.cartao);
+        alvo.cartao = conciliarForma(lj, cartoes, "car", "cartão", trans);
+        alvo.arquivos.push({nome:f.name, tipo:"maquininha"});
+      } else if (tipo==="extrato"){
+        const ext=lerExtrato(linhas);
+        const recebidos=ext.filter(t=>t.classe==="pix_recebido");
+        alvo.pix = conciliarForma(lj, recebidos, "pix", "PIX recebido", ext);
+        alvo.conta = {
+          pixRecebido: recebidos.reduce((a,t)=>a+t.v,0),
+          pixEnviado: ext.filter(t=>t.classe==="pix_enviado").reduce((a,t)=>a+t.v,0),
+          depositos: ext.filter(t=>t.classe==="deposito").reduce((a,t)=>a+t.v,0),
+          nDepositos: ext.filter(t=>t.classe==="deposito").length,
+          estornos: ext.filter(t=>t.classe==="estorno").reduce((a,t)=>a+t.v,0),
+          ini: ext.map(t=>t.d).sort()[0], fim: ext.map(t=>t.d).sort().slice(-1)[0],
+        };
+        alvo.arquivos.push({nome:f.name, tipo:"extrato"});
+      } else {
+        throw new Error("não reconheci o arquivo. Espero o relatório da maquininha (com coluna de forma de pagamento) ou o extrato da conta (com \\u0022Tipo de transação\\u0022 e \\u0022Detalhe\\u0022).");
+      }
     }catch(e){
-      err.textContent="❌ "+f.name+": "+(e.message||e);
+      erros.push("❌ "+f.name+": "+(e.message||e));
     }
   }
+  err.innerHTML=erros.join("<br>");
   rConcil();
 }
 

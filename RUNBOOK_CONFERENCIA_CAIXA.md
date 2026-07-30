@@ -168,6 +168,19 @@ Insumo do lado do ERP: `movimento` no raw JSON — Movimento Diário **analític
 documento) por loja, janela do 1º dia do mês anterior até hoje, coletado por
 `coletarMovimentoDiario`. Sem isso a aba avisa que falta rodar a atualização.
 
+**Dois arquivos por loja, formatos diferentes** (`detectarTipo`):
+- **relatório da maquininha** — uma linha por cobrança; tem coluna de forma ("Meio") e Status.
+  Concilia contra o campo `car` do movimento diário.
+- **extrato da conta** — uma linha por lançamento; tem "Tipo de transação" e "Detalhe"
+  (Pix Recebido/Enviado, Depósito de vendas, Cancelamento). Concilia o **PIX recebido** contra o
+  campo `pix`, e resume o movimento da conta (depósitos = liquidação de cartão, já líquida de taxa).
+
+⚠️ Até 30/07 o painel só conhecia o primeiro e devolvia "não reconheci as colunas" para o extrato.
+
+⚠️ Depósito de venda, PIX enviado e estorno **não são pagamento de cliente** e não podem entrar
+como candidatos a "forma trocada" — geravam falso positivo do tipo "venda paga com Depósito de
+vendas". Só `pix_recebido` (e, no arquivo da maquininha, as próprias transações) valem.
+
 **Algoritmo de casamento** (nesta ordem, guloso):
 1. valor exato (± R$ 0,005), mesmo dia → ±1 dia → ±3 dias (venda no fim do expediente cai no dia seguinte);
 2. valor aproximado (± R$ 0,15) → classifica como **diferença de centavos**;

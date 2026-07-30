@@ -510,50 +510,9 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
     </div>
   </div>
 
-  <div id="c-resultado" style="display:none">
-    <div class="kpis" id="kpi-concil"></div>
-
-    <div class="box">
-      <div class="box-h"><h3>Totais por dia</h3><span class="hint">cartão no ERP × cartão na maquininha</span></div>
-      <div class="scroll"><table id="t-concil-dias"></table></div>
-    </div>
-
-    <div class="box" id="bx-trocada">
-      <div class="box-h"><h3>⚠️ Forma de pagamento trocada</h3>
-        <span class="hint">passou na maquininha como cartão, mas a venda foi finalizada de outro jeito</span></div>
-      <div class="scroll"><table id="t-trocada"></table></div>
-      <div class="nota">O dinheiro entrou, mas está classificado errado no ERP. Não falta valor — falta
-        corrigir a forma de pagamento, senão a conferência de caixa e o recebível de cartão ficam ambos errados.</div>
-    </div>
-
-    <div class="box" id="bx-so-maquina">
-      <div class="box-h"><h3>🔴 Cobrado na maquininha, sem venda no ERP</h3>
-        <span class="hint">entrou dinheiro e não existe venda registrada com esse valor</span></div>
-      <div class="scroll"><table id="t-so-maquina"></table></div>
-      <div class="nota">É o caso mais grave: a maquininha cobrou o cliente e o ERP não tem a venda.
-        Procurei o valor em qualquer forma de pagamento, inclusive no dia seguinte.</div>
-    </div>
-
-    <div class="box" id="bx-so-erp">
-      <div class="box-h"><h3>🟠 Cartão no ERP, sem transação na maquininha</h3>
-        <span class="hint">venda finalizada como cartão sem cobrança correspondente</span></div>
-      <div class="scroll"><table id="t-so-erp"></table></div>
-      <div class="nota">Pode ser venda em outra maquininha (aí é só conferir com o outro relatório) ou
-        venda finalizada como cartão sem a cobrança ter acontecido.</div>
-    </div>
-
-    <div class="box" id="bx-centavos">
-      <div class="box-h"><h3>🟡 Diferença de centavos</h3>
-        <span class="hint">mesma transação, valor cobrado ≠ valor registrado</span></div>
-      <div class="scroll"><table id="t-centavos"></table></div>
-    </div>
-
-    <div class="box" id="bx-agrupada">
-      <div class="box-h"><h3>✅ Uma cobrança pagando vários documentos</h3>
-        <span class="hint">normal — registrado apenas para você saber que foi conferido</span></div>
-      <div class="scroll"><table id="t-agrupada"></table></div>
-    </div>
-  </div>
+  <!-- Todo o resultado é gerado por rConcil() em conferencia_caixa_app.js:
+       cartão e PIX usam o mesmo motor, então gerar evita manter ids em dobro. -->
+  <div id="c-resultado" style="display:none"></div>
 </div>
 
 </div><!-- /#app -->
