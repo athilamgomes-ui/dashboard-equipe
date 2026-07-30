@@ -577,7 +577,7 @@ async function salvarConciliacao(lj){
     const env = await cifrarTexto(conteudo, senha);
     const corpo = {
       loja: lj, periodo_ini: per.ini, periodo_fim: per.fim,
-      arquivos: c.arquivos.map(a=>({nome:a.nome, tipo:a.tipo})),
+      arquivos: c.arquivos.map(a=>({nome:a.nome, tipo:a.tipo, imp:a.imp||null})),
       ...env,
     };
     const r = await fetch(SUPA_URL+"/rest/v1/"+SUPA_TAB+"?on_conflict=loja,periodo_ini,periodo_fim", {
@@ -1038,15 +1038,27 @@ function removerConcil(lj){ delete conciliacoes[lj]; rConcil(); }
 // do parser fica preso ao que ela sabia ler — foi exatamente o que aconteceu com parcela
 // e taxa informada: o resumo por plano reabria com só "Crédito 1x" e "Débito", e a coluna
 // Informada em branco, porque esses campos ainda não existiam quando o registro foi salvo.
+// Impressão digital do arquivo (FNV-1a + tamanho). Vai no metadado EM CLARO do registro
+// para dar para comparar entre lojas sem decifrar nada. Serve para um caso concreto: o
+// relatório da maquininha não diz de que loja é, então subir o arquivo da L5 com a L1
+// selecionada gera uma conferência silenciosamente errada — foi o que aconteceu com o
+// registro da L1 de 02/05 a 30/07.
+function impressao(txt){
+  let h = 0x811c9dc5;
+  for (let i=0;i<txt.length;i++){ h ^= txt.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return txt.length + "-" + (h>>>0).toString(16);
+}
+
 function processarConteudo(alvo, lj, nome, txt){
   const linhas=parseCSV(txt);
   const tipo=detectarTipo(linhas);
+  const imp=impressao(txt);
 
   if (tipo==="maquininha"){
     const trans=lerTransacoes(linhas);
     const cartoes=trans.filter(t=>t.cartao);
     alvo.cartao = conciliarForma(lj, cartoes, "car", "cartão", trans);
-    alvo.arquivos.push({nome, tipo:"maquininha", conteudo:txt});
+    alvo.arquivos.push({nome, tipo:"maquininha", conteudo:txt, imp});
   } else if (tipo==="extrato"){
     const ext=lerExtrato(linhas);
     const recebidos=ext.filter(t=>t.classe==="pix_recebido");
@@ -1059,7 +1071,7 @@ function processarConteudo(alvo, lj, nome, txt){
       estornos: ext.filter(t=>t.classe==="estorno").reduce((a,t)=>a+t.v,0),
       ini: ext.map(t=>t.d).sort()[0], fim: ext.map(t=>t.d).sort().slice(-1)[0],
     };
-    alvo.arquivos.push({nome, tipo:"extrato", conteudo:txt});
+    alvo.arquivos.push({nome, tipo:"extrato", conteudo:txt, imp});
   } else {
     throw new Error("não reconheci o arquivo. Espero o relatório da maquininha (com coluna de forma de pagamento) ou o extrato da conta (com \\u0022Tipo de transação\\u0022 e \\u0022Detalhe\\u0022).");
   }
@@ -1081,12 +1093,36 @@ async function carregarArquivos(files){
       erros.push("❌ "+f.name+": "+(e.message||e));
     }
   }
-  err.innerHTML=erros.join("<br>");
+  const avisos = await avisarArquivoDeOutraLoja(lj);
+  err.innerHTML = erros.concat(avisos).join("<br>");
   rConcil();
   // Guarda sozinho: o pedido é que a conferência não se perca ao fechar a aba.
   for (const lj2 of Object.keys(conciliacoes)) {
     if (!conciliacoes[lj2].doHistorico) await salvarConciliacao(lj2);
   }
+}
+
+// Confere se algum arquivo recém-carregado já foi usado numa conferência de OUTRA loja.
+// Se foi, é quase certo que uma das duas está com o relatório errado — o painel não tem
+// como saber qual, então avisa e deixa a decisão com quem carregou.
+async function avisarArquivoDeOutraLoja(lj){
+  const c = conciliacoes[lj];
+  if (!c) return [];
+  const meus = new Set(c.arquivos.map(a=>a.imp).filter(Boolean));
+  if (!meus.size) return [];
+  try{
+    const r = await fetch(SUPA_URL+"/rest/v1/"+SUPA_TAB+"?select=loja,arquivos&limit=200", {headers:supaHead()});
+    if (!r.ok) return [];
+    const outras = {};
+    (await r.json()).forEach(row=>{
+      if (row.loja===lj) return;
+      (row.arquivos||[]).forEach(a=>{ if (a.imp && meus.has(a.imp)) (outras[a.nome]=outras[a.nome]||new Set()).add(row.loja); });
+    });
+    return Object.entries(outras).map(([nome,ljs])=>
+      '⚠️ <b>'+esc2(nome)+'</b> é o mesmo arquivo já usado na conferência de <b>'+
+      [...ljs].join(", ")+'</b>. O relatório da maquininha não diz de que loja é — confira se '+
+      'este é mesmo o arquivo da '+lj+', senão uma das duas conferências está errada.');
+  }catch(e){ return []; }
 }
 
 
