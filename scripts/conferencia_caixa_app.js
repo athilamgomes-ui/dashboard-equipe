@@ -354,7 +354,7 @@ function lerExtrato(linhas){
     else if (/dep[óo]sito/.test(tipo)) classe="deposito";
     else if (/cancelamento|estorno/.test(tipo) || /estorno/.test(det)) classe="estorno";
     else classe="outro";
-    out.push({ d, h:(cHora?l[cHora]:"").slice(0,5), v:Math.abs(v), sinal:v<0?-1:1,
+    out.push({ id:out.length, d, h:(cHora?l[cHora]:"").slice(0,5), v:Math.abs(v), sinal:v<0?-1:1,
                 classe, tipo:(l[cTipo]||"").trim(), det:(cDet?l[cDet]:"").trim(),
                 nome:cNome?(l[cNome]||"").trim():"", u:false });
   }
@@ -388,7 +388,7 @@ function lerTransacoes(linhas){
       nsu:cNsu?(l[cNsu]||"").trim():"", nome:cNome?(l[cNome]||"").trim():"",
       // "recebimento" = o líquido que a adquirente vai repassar (bruto menos taxa)
       liq:cLiq?brNum(l[cLiq]):null, taxa:cTaxa?Math.abs(brNum(l[cTaxa])):null,
-      u:false,
+      id:out.length, u:false,
     });
   }
   if (!out.length) throw new Error("nenhuma transação aprovada encontrada no arquivo");
@@ -427,7 +427,7 @@ function conciliarForma(loja, externos, campo, rotulo, todosExternos){
       for (const e of erp){
         if (e.u || Math.abs(diasEntre(e.d,t.d))>jan) continue;
         if (Math.abs(e[campo]-t.v)<=tol){
-          t.u=e.u=true; e.par=t; t.par=e;
+          t.u=e.u=true; e.parId=t.id;
           if (reg && Math.abs(e[campo]-t.v)>0.005) reg.push({e,t});
           break;
         }
@@ -445,7 +445,7 @@ function conciliarForma(loja, externos, campo, rotulo, todosExternos){
     for (const k of [2,3]){
       for (const combo of combinacoes(c,k)){
         if (Math.abs(combo.reduce((a,x)=>a+x[campo],0)-t.v)<=0.05){
-          t.u=true; combo.forEach(x=>{x.u=true; x.par=t;}); t.parDocs=combo;
+          t.u=true; combo.forEach(x=>{x.u=true; x.parId=t.id;});
           agrupadas.push({t,docs:combo}); achou=true; break;
         }
       }
@@ -557,15 +557,15 @@ async function salvarConciliacao(lj){
   const per = periodoDe(c);
   if (!per) { c.statusSalvo = "sem período reconhecível"; return; }
 
-  const conteudo = JSON.stringify({
-    versao: 1,
-    loja: lj,
-    cartao: c.cartao || null,
-    pix: c.pix || null,
-    conta: c.conta || null,
-    arquivos: c.arquivos,          // inclui o conteúdo bruto (ver carregarArquivos)
-  });
   try{
+    const conteudo = JSON.stringify({
+      versao: 1,
+      loja: lj,
+      cartao: c.cartao || null,
+      pix: c.pix || null,
+      conta: c.conta || null,
+      arquivos: c.arquivos,        // inclui o conteúdo bruto (ver carregarArquivos)
+    });
     const env = await cifrarTexto(conteudo, senha);
     const corpo = {
       loja: lj, periodo_ini: per.ini, periodo_fim: per.fim,
@@ -730,11 +730,19 @@ function rConcil(){
       const r = conciliacoes[l] && conciliacoes[l].cartao;
       if (!r) return;
       // pares casados + documentos sem cobrança
+      const porId = {};
+      r.externos.forEach(t=>{ porId[t.id]=t; });
+      // uma cobrança pode ter pago vários documentos — nesses casos o bruto é do
+      // conjunto, não da linha, e comparar documento a documento acenderia falso.
+      const quantosDocs = {};
+      r.erp.forEach(e=>{ if (e.parId!=null) quantosDocs[e.parId]=(quantosDocs[e.parId]||0)+1; });
       r.erp.forEach(e=>{
-        const t = e.par || null;
+        const t = (e.parId!=null ? porId[e.parId] : null) || null;
+        const agrupada = t && quantosDocs[e.parId] > 1;
         linhas.push({ loja:l, d:e.d, doc:e.doc, venda:e.v, pag:(e.pag!=null?e.pag:null),
                       cartaoErp:e.car, bruto:t?t.v:null, liq:t?t.liq:null, taxa:t?t.taxa:null,
-                      hora:t?t.h:"", meio:t?((t.meio||"")+(t.band?" "+t.band:"")):"" });
+                      hora:t?t.h:"", meio:t?((t.meio||"")+(t.band?" "+t.band:"")):"",
+                      agrupada, nDocs:t?quantosDocs[e.parId]:0 });
       });
       // cobranças sem documento no ERP
       r.externos.filter(t=>!t.u).forEach(t=>{
@@ -753,9 +761,9 @@ function rConcil(){
         p.push("cartão no ERP sem cobrança na maquininha");
       if (x.bruto!=null && x.cartaoErp==null)
         p.push("cobrança na maquininha sem venda no ERP");
-      if (x.cartaoErp!=null && x.bruto!=null && Math.abs(x.cartaoErp-x.bruto)>TOLC)
+      if (!x.agrupada && x.cartaoErp!=null && x.bruto!=null && Math.abs(x.cartaoErp-x.bruto)>TOLC)
         p.push("cartão no ERP ("+nf2(x.cartaoErp)+") ≠ cobrado na maquininha ("+nf2(x.bruto)+")");
-      if (x.bruto!=null && x.liq!=null && x.taxa!=null && Math.abs(x.bruto-x.taxa-x.liq)>TOLC)
+      if (!x.agrupada && x.bruto!=null && x.liq!=null && x.taxa!=null && Math.abs(x.bruto-x.taxa-x.liq)>TOLC)
         p.push("bruto − taxa ≠ líquido");
       x.problemas=p;
     });
@@ -772,7 +780,11 @@ function rConcil(){
       '<td><b>'+dBR(x.d)+'</b>'+(x.hora?' <span style="color:var(--muted);font-size:11px">'+esc2(x.hora)+'</span>':'')+'</td>'+
       '<td style="text-align:left">'+tagLoja(x.loja)+'</td>'+
       '<td style="text-align:left">'+(x.doc?esc2(x.doc):'<span class="zero">sem documento</span>')+'</td>'+
-      cel(x.venda) + cel(x.pag) + cel(x.bruto) + cel(x.liq) +
+      cel(x.venda) + cel(x.pag) +
+      (x.agrupada
+        ? '<td class="num zero" title="uma cobrança pagou '+x.nDocs+' documentos">'+nf2(x.bruto)+' ⋯</td>'+
+          '<td class="num zero">'+(x.liq!=null?nf2(x.liq):"—")+' ⋯</td>'
+        : cel(x.bruto) + cel(x.liq)) +
       '<td style="text-align:left">'+(x.problemas.length
           ? '<span class="motivo">'+esc2(x.problemas[0])+(x.problemas.length>1?' (+'+(x.problemas.length-1)+')':'')+'</span>'
           : '<span class="pill p-ok">bateu</span>')+'</td></tr>').join("");
