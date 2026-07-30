@@ -199,6 +199,11 @@ Uma conciliação por (loja, período): recarregar o mesmo período substitui em
 O × no chip tira da tela, **não apaga do histórico**. Sem a tabela criada, o painel avisa e
 segue funcionando na sessão.
 
+⚠️ **Uma loja por vez na tela.** Trocar o seletor de loja limpa o resultado. O painel já
+acumulou várias lojas ao mesmo tempo e isso confundia: ao selecionar outra empresa, a
+conferência da anterior continuava visível e parecia ser da loja recém escolhida. Limpa só a
+tela — o histórico continua guardado, e abrir do histórico alinha o seletor com a loja aberta.
+
 ### Cruzamento das 4 pontas
 
 Tabela por documento/cobrança, com a linha destacada quando algo não fecha:
