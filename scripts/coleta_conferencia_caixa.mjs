@@ -382,6 +382,69 @@ async function coletarPlanos(page, di, df) {
   return formas.filter(f => f.planos.length);
 }
 
+// ── Movimento Diário ANALÍTICO (documento a documento) ──────────────────────
+// Base da conciliação de cartão contra o relatório da adquirente (InfinitePay etc.):
+// sem o valor por documento não há como achar "venda no cartão que não passou na
+// maquininha" nem "cobrança na maquininha sem venda".
+// ⚠️ O innerText desse relatório quebra cada documento em várias linhas (célula com
+// <br> e links). Extrair pelas <td> da tabela é o único jeito estável.
+const URL_MOVDIARIO = B + "faturamento/relatorio_diario.asp";
+
+async function coletarMovimentoDiario(page, empId, di, df) {
+  await page.goto(URL_MOVDIARIO, { waitUntil: "domcontentloaded", timeout: 45000 });
+  await page.waitForSelector("#empresas_" + empId, { timeout: 25000 });
+  await page.waitForTimeout(700);
+  await page.evaluate(({ di, df, empId }) => {
+    const s = (id, v) => { const e = document.getElementById(id); if (e) { e.disabled = false; e.value = v; e.dispatchEvent(new Event("change", { bubbles: true })); } };
+    s("f_datainicial", di); s("f_datafinal", df);
+    document.querySelectorAll('input[id^="empresas_"]').forEach(cb => { cb.checked = false; });
+    const e = document.getElementById("empresas_" + empId); if (e) e.checked = true;
+    const an = [...document.getElementsByName("f_sintetico")].find(r => r.value === "A"); if (an) an.checked = true;
+    const val = [...document.getElementsByName("ListarNotas")].find(r => r.value === "V"); if (val) val.checked = true;
+  }, { di, df, empId });
+
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 240000 }).catch(() => {}),
+    page.click('input[name="B1"]').catch(() => {}),
+  ]);
+  await page.waitForTimeout(3500);
+
+  return page.evaluate(() => {
+    const n = s => { const t = String(s || "").replace(/\s/g, "").trim();
+      if (!t || t === "-") return 0;
+      const v = parseFloat(t.replace(/\./g, "").replace(",", ".")); return Number.isFinite(v) ? v : 0; };
+    let alvo = null, cols = null;
+    for (const t of document.querySelectorAll("table")) {
+      for (const tr of t.querySelectorAll("tr")) {
+        const cel = [...tr.children].map(c => (c.textContent || "").replace(/\s+/g, " ").trim());
+        if (cel.some(c => /Valor do Documento/i.test(c)) && cel.some(c => /^Cart/i.test(c))) { alvo = t; cols = cel; break; }
+      }
+      if (alvo) break;
+    }
+    if (!alvo) return { erro: "tabela do movimento diário não encontrada" };
+    const i = re => cols.findIndex(c => new RegExp(re, "i").test(c));
+    const iDoc = i("Doc"), iVal = i("Valor do Documento"), iDin = i("^Dinheiro$"),
+          iCar = i("^Cart"), iPix = i("^Pix$"), iLink = i("Link de Pagamento");
+    const out = [];
+    for (const tr of alvo.querySelectorAll("tr")) {
+      const cel = [...tr.children].map(c => (c.textContent || "").replace(/\s+/g, " ").trim());
+      const m = /^(\d{2})\/(\d{2})\/(\d{2,4})/.exec(cel[0] || "");
+      if (!m) continue;
+      const ano = m[3].length === 2 ? "20" + m[3] : m[3];
+      out.push({
+        d: `${ano}-${m[2]}-${m[1]}`,
+        doc: (cel[iDoc] || "").replace(/\s*\|\s*/, "|"),
+        v: n(cel[iVal]),
+        din: n(cel[iDin]),
+        car: n(cel[iCar]),
+        pix: n(cel[iPix]),
+        lnk: iLink >= 0 ? n(cel[iLink]) : 0,
+      });
+    }
+    return { docs: out };
+  });
+}
+
 // ── Recebível de cartão (o que ainda vai cair no banco), agrupado por administradora ──
 async function coletarRecebivelCartao(page, di, df) {
   await page.goto(URL_RECEBER, { waitUntil: "domcontentloaded", timeout: 45000 });
@@ -551,6 +614,25 @@ try {
     log("mix de planos de pagamento...");
     cache.planos = { periodo: { ini: dIni, fim: dFim }, formas: await coletarPlanos(page, dIni, dFim) };
   } catch (e) { log("planos falhou: " + String(e).slice(0, 120)); }
+
+  // Movimento diário por documento, por loja — insumo da conciliação de cartão no painel.
+  // Janela: do 1º dia do mês anterior até hoje (cobre o mês fechado + o corrente).
+  try {
+    const hj = new Date();
+    const iniMov = br(new Date(hj.getFullYear(), hj.getMonth() - 1, 1));
+    const fimMov = br(hj);
+    cache.movimento = cache.movimento || {};
+    for (const loja of ALVO) {
+      log(`movimento diário ${loja.key} (${iniMov}–${fimMov})...`);
+      try {
+        const r = await coletarMovimentoDiario(page, loja.id, iniMov, fimMov);
+        if (r.erro) { log(`  ${loja.key}: ${r.erro}`); continue; }
+        cache.movimento[loja.key] = r.docs;
+        log(`  ${loja.key}: ${r.docs.length} documentos`);
+      } catch (e) { log(`  ${loja.key} falhou: ${String(e).slice(0, 100)}`); }
+    }
+    cache.movimentoPeriodo = { ini: iniMov, fim: fimMov };
+  } catch (e) { log("movimento diário falhou: " + String(e).slice(0, 120)); }
 
   try {
     log("recebível de cartão...");

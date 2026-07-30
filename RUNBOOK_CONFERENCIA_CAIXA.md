@@ -156,6 +156,37 @@ Regra: `informado == calculado` e (houve sangria **ou** existia saldo anterior).
 declaração não apura diferença. Se o processo mudar (fechamento no login que tem as vendas),
 essas lojas passam a cair na conferência normal sozinhas.
 
+## 🔎 Aba "Conciliação da maquininha" (upload da equipe financeira)
+
+A equipe escolhe a loja, arrasta o CSV exportado da adquirente e o painel cruza tudo na hora.
+
+**O arquivo NÃO sai do navegador.** Nada de upload para servidor, Supabase ou Worker: o CSV é lido
+com `File.text()`, conciliado em JavaScript e descartado ao fechar a aba. Foi decisão de projeto —
+é dado financeiro bruto com nome de cliente. Se algum dia precisar persistir, cifrar antes.
+
+Insumo do lado do ERP: `movimento` no raw JSON — Movimento Diário **analítico** (documento a
+documento) por loja, janela do 1º dia do mês anterior até hoje, coletado por
+`coletarMovimentoDiario`. Sem isso a aba avisa que falta rodar a atualização.
+
+**Algoritmo de casamento** (nesta ordem, guloso):
+1. valor exato (± R$ 0,005), mesmo dia → ±1 dia → ±3 dias (venda no fim do expediente cai no dia seguinte);
+2. valor aproximado (± R$ 0,15) → classifica como **diferença de centavos**;
+3. uma cobrança = soma de 2 ou 3 documentos → **cobrança agrupada** (normal);
+4. o que sobrou de cada lado tenta explicar como **forma de pagamento trocada**: procura no outro
+   lado um lançamento do mesmo valor (±0,10) pago de outro jeito (PIX, dinheiro, link);
+5. o resto vira **cobrado na maquininha sem venda no ERP** (mais grave) ou **cartão no ERP sem
+   cobrança na maquininha**.
+
+O parser de colunas é tolerante (`acharCol`) para aceitar outras adquirentes além da InfinitePay;
+se não achar data, valor e meio, avisa em vez de inventar. Só transações aprovadas entram
+(ignora negada/cancelada/falhou).
+
+⚠️ Combinações de documentos têm trava de 4.000 iterações — sem isso um dia com muitos documentos
+soltos travava o navegador.
+
+Validado em 29/07 contra a análise manual da L5 (julho): mesmas 4 formas trocadas, 4 cobranças sem
+venda (R$ 363,00), 4 vendas sem cobrança (R$ 415,03), 5 casos de centavos e 1 cobrança agrupada.
+
 ## 💰 Nunca arredondar
 
 Conferência de caixa se faz no centavo. O caixa da L1 em 03/07 tinha **786,85**, não 787 —
