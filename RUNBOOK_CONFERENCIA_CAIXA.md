@@ -363,3 +363,21 @@ fora da janela do financeiro das 19:55). O launchd `com.amgomes.dashboard` já a
 
 `max-age=600`. Depois de todo deploy, entregar a URL com `?v=<número novo>` e citar o selo
 "Coleta do ERP" visível no topo do painel. Reinstalar PWA nunca deve ser necessário.
+
+## Histórico: reabrir REPROCESSA os arquivos (30/07/2026)
+
+`abrirHistorico()` não usa mais o resultado congelado — ele roda `processarConteudo()` de novo
+sobre os CSVs originais guardados no registro. Motivo: os primeiros registros foram salvos antes
+de o parser ler `Meio - Parcelas` e `Taxa Aplicada - Aplicada(%)`, então reabrir mostrava o resumo
+por plano com só "Crédito 1x" e "Débito" e a coluna Informada vazia. Com o reprocessamento, todo
+registro antigo se beneficia de qualquer melhoria futura do parser. Se algum registro não tiver o
+conteúdo bruto de TODOS os arquivos, cai para o resultado salvo e o chip mostra "salva (resumo antigo)".
+
+## O relatório da maquininha NÃO diz de que loja é
+
+Subir o arquivo da L5 com a L1 selecionada gera uma conferência silenciosamente errada: o lado da
+maquininha é da L5 e o lado do ERP é da L1. Aconteceu de verdade — os registros de L1 e L5 de
+02/05 a 30/07 guardavam os MESMOS dois arquivos (byte a byte). Não há coluna no CSV que identifique
+a loja (`Origem - Nome` é o portador do cartão), então a defesa é `impressao()`: FNV-1a + tamanho,
+gravado no metadado EM CLARO de cada arquivo, comparado contra o histórico a cada upload. Se o mesmo
+arquivo aparecer em outra loja, o painel avisa na tela.
