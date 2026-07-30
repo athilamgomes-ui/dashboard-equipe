@@ -674,10 +674,22 @@ async function abrirHistorico(id){
     const [row] = await r.json();
     if (!row) throw new Error("registro não encontrado");
     const c = JSON.parse(await decifrarTexto(row, senha));
-    conciliacoes[c.loja] = {
-      loja: c.loja, arquivos: c.arquivos, cartao: c.cartao, pix: c.pix,
-      conta: c.conta, statusSalvo: "salva", doHistorico: true,
-    };
+
+    // Refaz a análise dos arquivos originais (o registro guarda os CSVs). Só cai para o
+    // resultado congelado se algum registro antigo não tiver o conteúdo bruto.
+    let novo = null;
+    const crus = (c.arquivos||[]).filter(a=>a && a.conteudo);
+    if (crus.length === (c.arquivos||[]).length && crus.length){
+      try{
+        const t = {loja:c.loja, arquivos:[]};
+        crus.forEach(a=>processarConteudo(t, c.loja, a.nome, a.conteudo));
+        novo = t;                      // só adota se TODOS os arquivos reprocessaram
+      }catch(e){ novo = null; }
+    }
+    conciliacoes[c.loja] = novo
+      ? Object.assign(novo, {statusSalvo:"salva", doHistorico:true})
+      : { loja:c.loja, arquivos:c.arquivos, cartao:c.cartao, pix:c.pix,
+          conta:c.conta, statusSalvo:"salva (resumo antigo)", doHistorico:true };
     const cl=document.getElementById("c-loja");
     if (cl) cl.value = c.loja;          // mantém o seletor coerente com o que está na tela
     rConcil();
@@ -1020,6 +1032,39 @@ const esc2 = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;"
 
 function removerConcil(lj){ delete conciliacoes[lj]; rConcil(); }
 
+// Analisa UM arquivo cru dentro de `alvo`. Está separado porque o histórico usa o mesmo
+// caminho: reabrir uma conferência guardada refaz a análise a partir do CSV original em
+// vez de confiar no resultado congelado. Sem isso, registro salvo por uma versão antiga
+// do parser fica preso ao que ela sabia ler — foi exatamente o que aconteceu com parcela
+// e taxa informada: o resumo por plano reabria com só "Crédito 1x" e "Débito", e a coluna
+// Informada em branco, porque esses campos ainda não existiam quando o registro foi salvo.
+function processarConteudo(alvo, lj, nome, txt){
+  const linhas=parseCSV(txt);
+  const tipo=detectarTipo(linhas);
+
+  if (tipo==="maquininha"){
+    const trans=lerTransacoes(linhas);
+    const cartoes=trans.filter(t=>t.cartao);
+    alvo.cartao = conciliarForma(lj, cartoes, "car", "cartão", trans);
+    alvo.arquivos.push({nome, tipo:"maquininha", conteudo:txt});
+  } else if (tipo==="extrato"){
+    const ext=lerExtrato(linhas);
+    const recebidos=ext.filter(t=>t.classe==="pix_recebido");
+    alvo.pix = conciliarForma(lj, recebidos, "pix", "PIX recebido", ext);
+    alvo.conta = {
+      pixRecebido: recebidos.reduce((a,t)=>a+t.v,0),
+      pixEnviado: ext.filter(t=>t.classe==="pix_enviado").reduce((a,t)=>a+t.v,0),
+      depositos: ext.filter(t=>t.classe==="deposito").reduce((a,t)=>a+t.v,0),
+      nDepositos: ext.filter(t=>t.classe==="deposito").length,
+      estornos: ext.filter(t=>t.classe==="estorno").reduce((a,t)=>a+t.v,0),
+      ini: ext.map(t=>t.d).sort()[0], fim: ext.map(t=>t.d).sort().slice(-1)[0],
+    };
+    alvo.arquivos.push({nome, tipo:"extrato", conteudo:txt});
+  } else {
+    throw new Error("não reconheci o arquivo. Espero o relatório da maquininha (com coluna de forma de pagamento) ou o extrato da conta (com \\u0022Tipo de transação\\u0022 e \\u0022Detalhe\\u0022).");
+  }
+}
+
 async function carregarArquivos(files){
   const err=document.getElementById("c-erro");
   err.textContent="";
@@ -1030,31 +1075,8 @@ async function carregarArquivos(files){
       if (!/\.csv$/i.test(f.name))
         throw new Error("só aceito .csv — no xlsx eu não consigo ler. Exporte em CSV.");
       const txt=await f.text();
-      const linhas=parseCSV(txt);
-      const tipo=detectarTipo(linhas);
       const alvo = conciliacoes[lj] = conciliacoes[lj] || {loja:lj, arquivos:[]};
-
-      if (tipo==="maquininha"){
-        const trans=lerTransacoes(linhas);
-        const cartoes=trans.filter(t=>t.cartao);
-        alvo.cartao = conciliarForma(lj, cartoes, "car", "cartão", trans);
-        alvo.arquivos.push({nome:f.name, tipo:"maquininha", conteudo:txt});
-      } else if (tipo==="extrato"){
-        const ext=lerExtrato(linhas);
-        const recebidos=ext.filter(t=>t.classe==="pix_recebido");
-        alvo.pix = conciliarForma(lj, recebidos, "pix", "PIX recebido", ext);
-        alvo.conta = {
-          pixRecebido: recebidos.reduce((a,t)=>a+t.v,0),
-          pixEnviado: ext.filter(t=>t.classe==="pix_enviado").reduce((a,t)=>a+t.v,0),
-          depositos: ext.filter(t=>t.classe==="deposito").reduce((a,t)=>a+t.v,0),
-          nDepositos: ext.filter(t=>t.classe==="deposito").length,
-          estornos: ext.filter(t=>t.classe==="estorno").reduce((a,t)=>a+t.v,0),
-          ini: ext.map(t=>t.d).sort()[0], fim: ext.map(t=>t.d).sort().slice(-1)[0],
-        };
-        alvo.arquivos.push({nome:f.name, tipo:"extrato", conteudo:txt});
-      } else {
-        throw new Error("não reconheci o arquivo. Espero o relatório da maquininha (com coluna de forma de pagamento) ou o extrato da conta (com \\u0022Tipo de transação\\u0022 e \\u0022Detalhe\\u0022).");
-      }
+      processarConteudo(alvo, lj, f.name, txt);
     }catch(e){
       erros.push("❌ "+f.name+": "+(e.message||e));
     }
