@@ -27,10 +27,26 @@ MES=$((10#$MM)); DIA=$((10#$DD)); ANO_ANT=$((AAAA-1)); DOW=$(date +%u)
 DI="01/$MM/$AAAA"
 log "período 01/$MM..$HOJE · DOW=$DOW"
 
-# ── 1) Coleta atual (faturamento + vendedores) em paralelo ──
-node coleta_amgomes_lojas.mjs "$DI" "$HOJE" > /tmp/lojas_out.json 2>/tmp/lojas_err.txt & P1=$!
-node coleta_amgomes_vendedores.mjs "$DI" "$HOJE" > /tmp/vend_out.json 2>/tmp/vend_err.txt & P2=$!
-wait $P1; R1=$?; wait $P2; R2=$?
+# ── 1) Coleta atual (faturamento + vendedores) — SERIAL, nunca em paralelo ──
+# Os dois coletores abrem Chromium no MESMO user-data-dir (~/.claude/microvix-profile).
+# Duas instâncias no mesmo perfil = a segunda não lê api_token_lma do localStorage e
+# morre com "NAV_FAIL api_token_lma indisponível após login" — o vend_out.json sai
+# vazio e o build quebra (exit 20). Diagnosticado em 30/07/2026: rodando sozinho o
+# coletor de vendedores dá rc=0; em paralelo com o de lojas, rc=1 de forma reprodutível.
+# Retry em ambos: o perfil é compartilhado por ~20 scripts (precificacao roda de
+# 15/15min e detecta_entrada de 2/2min), então colisão externa é rotina, não exceção.
+node coleta_amgomes_lojas.mjs "$DI" "$HOJE" > /tmp/lojas_out.json 2>/tmp/lojas_err.txt; R1=$?
+if [ $R1 -ne 0 ]; then
+  log "coleta lojas rc=$R1 — retry em 30s"
+  sleep 30
+  node coleta_amgomes_lojas.mjs "$DI" "$HOJE" > /tmp/lojas_out.json 2>/tmp/lojas_err.txt; R1=$?
+fi
+node coleta_amgomes_vendedores.mjs "$DI" "$HOJE" > /tmp/vend_out.json 2>/tmp/vend_err.txt; R2=$?
+if [ $R2 -ne 0 ]; then
+  log "coleta vendedores rc=$R2 — retry em 30s"
+  sleep 30
+  node coleta_amgomes_vendedores.mjs "$DI" "$HOJE" > /tmp/vend_out.json 2>/tmp/vend_err.txt; R2=$?
+fi
 log "coleta lojas rc=$R1 · vendedores rc=$R2"
 
 # Sanity da coleta: arquivos não-vazios + 4 lojas presentes em lojas_out
