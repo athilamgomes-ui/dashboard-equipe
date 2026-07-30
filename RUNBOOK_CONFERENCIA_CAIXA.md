@@ -181,6 +181,24 @@ documento) por loja, janela do 1º dia do mês anterior até hoje, coletado por
 como candidatos a "forma trocada" — geravam falso positivo do tipo "venda paga com Depósito de
 vendas". Só `pix_recebido` (e, no arquivo da maquininha, as próprias transações) valem.
 
+### Histórico (Supabase, cifrado no navegador)
+
+Cada conciliação é **guardada sozinha** ao terminar, na tabela `conferencia_caixa_conciliacoes`
+(SQL versionado em `scripts/conferencia_caixa_conciliacoes.sql` — rodar uma vez no editor SQL
+do Supabase). Guarda o resultado **e os CSVs originais**, para dar pra reprocessar se o
+algoritmo melhorar.
+
+⚠️ O conteúdo é cifrado **no navegador**, com a senha do painel, antes de subir (AES-256-GCM +
+PBKDF2, mesmo envelope do painel). O Supabase e a chave anon só veem um blob. Em claro sobem
+apenas loja, período, data e nome dos arquivos — o mínimo para listar. **Nunca subir o payload
+em texto puro**: são valores e nomes de clientes.
+
+Uma conciliação por (loja, período): recarregar o mesmo período substitui em vez de duplicar
+(índice único + `Prefer: resolution=merge-duplicates`).
+
+O × no chip tira da tela, **não apaga do histórico**. Sem a tabela criada, o painel avisa e
+segue funcionando na sessão.
+
 **Algoritmo de casamento** (nesta ordem, guloso):
 1. valor exato (± R$ 0,005), mesmo dia → ±1 dia → ±3 dias (venda no fim do expediente cai no dia seguinte);
 2. valor aproximado (± R$ 0,15) → classifica como **diferença de centavos**;

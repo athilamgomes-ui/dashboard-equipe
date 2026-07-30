@@ -335,6 +335,11 @@ tbody tr:hover{background:var(--card2)}
   color:#047857;border-radius:8px;padding:6px 11px;font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:7px}
 .chip-arq button{background:none;border:none;color:#047857;cursor:pointer;font-size:14px;line-height:1;padding:0;opacity:.6}
 .chip-arq button:hover{opacity:1}
+.hist-aviso{padding:16px 17px;color:var(--muted);font-size:12.5px}
+.btn-abrir{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:5px 12px;
+  font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-abrir:hover{background:#6d28d9}
+.chip-alerta{color:#b45309}
 .vazio-ok{padding:22px 18px;text-align:center;color:var(--ok);font-size:13px;font-weight:600}
 
 /* tela de senha */
@@ -507,6 +512,13 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
       </div>
       <div id="c-erro" class="dz-erro"></div>
       <div id="c-carregados" class="chips-carregados"></div>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-h"><h3>📚 Conferências guardadas</h3>
+      <span class="hint">cifradas com a senha do painel — abrem em qualquer computador da equipe</span></div>
+    <div class="scroll" id="c-historico"><div class="hist-aviso">carregando…</div></div>
     </div>
   </div>
 

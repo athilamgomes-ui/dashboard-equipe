@@ -497,6 +497,143 @@ function combinacoes(arr,k){
 }
 const isoDe = br => { const p=br.split("/"); return p[2]+"-"+p[1]+"-"+p[0]; };
 
+
+// ══ HISTÓRICO DAS CONCILIAÇÕES (Supabase, cifrado no navegador) ══════════════
+// O conteúdo é cifrado AQUI, com a senha do painel, antes de sair da máquina.
+// O Supabase guarda um blob que nem ele nem quem tiver a chave anon consegue ler.
+// Em claro sobem só loja, período e nome dos arquivos, para dar pra listar.
+const SUPA_URL = "https://valhewbvjwdkkvuejrxa.supabase.co";
+const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4";
+const SUPA_TAB = "conferencia_caixa_conciliacoes";
+const supaHead = extra => Object.assign(
+  { apikey: SUPA_KEY, Authorization: "Bearer " + SUPA_KEY, "Content-Type": "application/json" }, extra||{});
+
+function senhaAtual(){
+  try { return sessionStorage.getItem("caixa_ok"); } catch(e){ return null; }
+}
+
+async function cifrarTexto(texto, senha){
+  const enc = new TextEncoder();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const km = await crypto.subtle.importKey("raw", enc.encode(senha), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey(
+    {name:"PBKDF2", salt, iterations:PAYLOAD.iters, hash:"SHA-256"}, km,
+    {name:"AES-GCM", length:256}, false, ["encrypt"]);
+  const ct = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, enc.encode(texto));
+  const b64 = u => btoa(String.fromCharCode(...new Uint8Array(u)));
+  return { salt:b64(salt), iv:b64(iv), iters:PAYLOAD.iters, payload:b64(ct) };
+}
+async function decifrarTexto(env, senha){
+  const km = await crypto.subtle.importKey("raw", new TextEncoder().encode(senha), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey(
+    {name:"PBKDF2", salt:b64(env.salt), iterations:env.iters, hash:"SHA-256"}, km,
+    {name:"AES-GCM", length:256}, false, ["decrypt"]);
+  return new TextDecoder().decode(
+    await crypto.subtle.decrypt({name:"AES-GCM", iv:b64(env.iv)}, key, b64(env.payload)));
+}
+
+// Salva (ou substitui) a conciliação da loja. Guarda resultado + arquivos originais,
+// para dar pra reprocessar se o algoritmo melhorar.
+async function salvarConciliacao(lj){
+  const c = conciliacoes[lj];
+  if (!c) return;
+  const senha = senhaAtual();
+  if (!senha) { c.statusSalvo = "sem senha na sessão — não deu para cifrar"; return; }
+
+  const per = periodoDe(c);
+  if (!per) { c.statusSalvo = "sem período reconhecível"; return; }
+
+  const conteudo = JSON.stringify({
+    versao: 1,
+    loja: lj,
+    cartao: c.cartao || null,
+    pix: c.pix || null,
+    conta: c.conta || null,
+    arquivos: c.arquivos,          // inclui o conteúdo bruto (ver carregarArquivos)
+  });
+  try{
+    const env = await cifrarTexto(conteudo, senha);
+    const corpo = {
+      loja: lj, periodo_ini: per.ini, periodo_fim: per.fim,
+      arquivos: c.arquivos.map(a=>({nome:a.nome, tipo:a.tipo})),
+      ...env,
+    };
+    const r = await fetch(SUPA_URL+"/rest/v1/"+SUPA_TAB+"?on_conflict=loja,periodo_ini,periodo_fim", {
+      method:"POST", headers: supaHead({Prefer:"resolution=merge-duplicates,return=minimal"}),
+      body: JSON.stringify(corpo),
+    });
+    if (r.ok){ c.statusSalvo = "salva"; }
+    else if (r.status===404 || r.status===400){
+      c.statusSalvo = "a tabela do histórico ainda não existe no Supabase (rode conferencia_caixa_conciliacoes.sql)";
+    } else {
+      c.statusSalvo = "não consegui salvar (erro "+r.status+")";
+    }
+  }catch(e){ c.statusSalvo = "sem conexão para salvar"; }
+  rConcil();
+  carregarHistorico();
+}
+
+function periodoDe(c){
+  const ps=[c.cartao, c.pix].filter(Boolean);
+  if (!ps.length) return null;
+  return { ini: ps.map(p=>p.ini).sort()[0], fim: ps.map(p=>p.fim).sort().slice(-1)[0] };
+}
+
+let historico = [];
+async function carregarHistorico(){
+  const el = document.getElementById("c-historico");
+  if (!el) return;
+  try{
+    const r = await fetch(SUPA_URL+"/rest/v1/"+SUPA_TAB+
+      "?select=id,loja,periodo_ini,periodo_fim,arquivos,criado_em&order=criado_em.desc&limit=100",
+      { headers: supaHead() });
+    if (!r.ok){
+      el.innerHTML = '<div class="hist-aviso">Histórico indisponível'+
+        (r.status===404?': a tabela ainda não foi criada no Supabase.':' (erro '+r.status+').')+'</div>';
+      return;
+    }
+    historico = await r.json();
+  }catch(e){
+    el.innerHTML = '<div class="hist-aviso">Sem conexão para ler o histórico.</div>';
+    return;
+  }
+  if (!historico.length){ el.innerHTML = '<div class="hist-aviso">Nenhuma conferência guardada ainda.</div>'; return; }
+  el.innerHTML =
+    '<table><thead><tr><th>Guardada em</th><th style="text-align:left">Loja</th>'+
+    '<th style="text-align:left">Período</th><th style="text-align:left">Arquivos</th><th></th></tr></thead><tbody>'+
+    historico.map(h=>{
+      const dt=new Date(h.criado_em);
+      const quando=String(dt.getDate()).padStart(2,"0")+"/"+String(dt.getMonth()+1).padStart(2,"0")+" "+
+                   String(dt.getHours()).padStart(2,"0")+":"+String(dt.getMinutes()).padStart(2,"0");
+      return '<tr><td>'+quando+'</td>'+
+        '<td style="text-align:left"><span class="loja-tag" style="background:'+corLoja(h.loja)+'">'+esc2(h.loja)+'</span></td>'+
+        '<td style="text-align:left">'+dBR(h.periodo_ini)+' a '+dBR(h.periodo_fim)+'</td>'+
+        '<td style="text-align:left" class="zero">'+esc2((h.arquivos||[]).map(a=>a.tipo).join(" + "))+'</td>'+
+        '<td><button class="btn-abrir" onclick="abrirHistorico('+h.id+')">abrir</button></td></tr>';
+    }).join("")+'</tbody></table>';
+}
+
+async function abrirHistorico(id){
+  const err=document.getElementById("c-erro"); err.textContent="";
+  const senha=senhaAtual();
+  if (!senha){ err.textContent="❌ senha não está na sessão — recarregue e entre de novo."; return; }
+  try{
+    const r = await fetch(SUPA_URL+"/rest/v1/"+SUPA_TAB+"?id=eq."+id+"&select=*", { headers: supaHead() });
+    const [row] = await r.json();
+    if (!row) throw new Error("registro não encontrado");
+    const c = JSON.parse(await decifrarTexto(row, senha));
+    conciliacoes[c.loja] = {
+      loja: c.loja, arquivos: c.arquivos, cartao: c.cartao, pix: c.pix,
+      conta: c.conta, statusSalvo: "salva", doHistorico: true,
+    };
+    rConcil();
+    document.getElementById("c-resultado").scrollIntoView({behavior:"smooth"});
+  }catch(e){
+    err.textContent="❌ não consegui abrir: "+(e.message||e);
+  }
+}
+
 // ── estado e render ──
 const conciliacoes = {};   // loja -> resultado
 
@@ -506,7 +643,9 @@ function rConcil(){
   chips.innerHTML = lojas.map(lj=>{
     const c=conciliacoes[lj];
     const arq=c.arquivos.map(a=>a.tipo==="extrato"?"extrato":"maquininha").join(" + ");
-    return '<span class="chip-arq">✓ '+lj+' · '+arq+' <button onclick="removerConcil(\''+lj+'\')" title="remover">×</button></span>';
+    const st=c.statusSalvo==="salva" ? ' <span title="guardada no histórico">💾</span>'
+           : c.statusSalvo ? ' <span class="chip-alerta" title="'+esc2(c.statusSalvo)+'">⚠</span>' : '';
+    return '<span class="chip-arq">✓ '+lj+' · '+arq+st+' <button onclick="removerConcil(\''+lj+'\')" title="tirar da tela (não apaga do histórico)">×</button></span>';
   }).join("");
 
   const res=document.getElementById("c-resultado");
@@ -670,7 +809,8 @@ async function carregarArquivos(files){
     try{
       if (!/\.csv$/i.test(f.name))
         throw new Error("só aceito .csv — no xlsx eu não consigo ler. Exporte em CSV.");
-      const linhas=parseCSV(await f.text());
+      const txt=await f.text();
+      const linhas=parseCSV(txt);
       const tipo=detectarTipo(linhas);
       const alvo = conciliacoes[lj] = conciliacoes[lj] || {loja:lj, arquivos:[]};
 
@@ -678,7 +818,7 @@ async function carregarArquivos(files){
         const trans=lerTransacoes(linhas);
         const cartoes=trans.filter(t=>t.cartao);
         alvo.cartao = conciliarForma(lj, cartoes, "car", "cartão", trans);
-        alvo.arquivos.push({nome:f.name, tipo:"maquininha"});
+        alvo.arquivos.push({nome:f.name, tipo:"maquininha", conteudo:txt});
       } else if (tipo==="extrato"){
         const ext=lerExtrato(linhas);
         const recebidos=ext.filter(t=>t.classe==="pix_recebido");
@@ -691,7 +831,7 @@ async function carregarArquivos(files){
           estornos: ext.filter(t=>t.classe==="estorno").reduce((a,t)=>a+t.v,0),
           ini: ext.map(t=>t.d).sort()[0], fim: ext.map(t=>t.d).sort().slice(-1)[0],
         };
-        alvo.arquivos.push({nome:f.name, tipo:"extrato"});
+        alvo.arquivos.push({nome:f.name, tipo:"extrato", conteudo:txt});
       } else {
         throw new Error("não reconheci o arquivo. Espero o relatório da maquininha (com coluna de forma de pagamento) ou o extrato da conta (com \\u0022Tipo de transação\\u0022 e \\u0022Detalhe\\u0022).");
       }
@@ -701,6 +841,10 @@ async function carregarArquivos(files){
   }
   err.innerHTML=erros.join("<br>");
   rConcil();
+  // Guarda sozinho: o pedido é que a conferência não se perca ao fechar a aba.
+  for (const lj2 of Object.keys(conciliacoes)) {
+    if (!conciliacoes[lj2].doHistorico) await salvarConciliacao(lj2);
+  }
 }
 
 function render(){ rConf(); rFormas(); rSangria(); rBanco(); }
@@ -737,6 +881,7 @@ function iniciar(){
   ["dragenter","dragover"].forEach(ev=>dz.addEventListener(ev, e=>{ e.preventDefault(); dz.classList.add("on"); }));
   ["dragleave","drop"].forEach(ev=>dz.addEventListener(ev, e=>{ e.preventDefault(); dz.classList.remove("on"); }));
   dz.addEventListener("drop", e=>{ carregarArquivos([...(e.dataTransfer?.files||[])]); });
+  carregarHistorico();
 
   render();
 }
