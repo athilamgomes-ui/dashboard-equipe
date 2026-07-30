@@ -381,3 +381,28 @@ maquininha é da L5 e o lado do ERP é da L1. Aconteceu de verdade — os regist
 a loja (`Origem - Nome` é o portador do cartão), então a defesa é `impressao()`: FNV-1a + tamanho,
 gravado no metadado EM CLARO de cada arquivo, comparado contra o histórico a cada upload. Se o mesmo
 arquivo aparecer em outra loja, o painel avisa na tela.
+
+## A chave do resultado ≠ o campo do ERP (30/07/2026)
+
+`conciliarForma(loja, externos, campo, ...)` recebe o campo do movimento diário: **`car`** para
+cartão, `pix` para PIX. O resultado, porém, é guardado em `conciliacoes[loja].cartao`. `blocosForma`
+usava a chave do resultado (`"cartao"`) para ler o documento do ERP (`e[campo]`) — devolve `undefined`,
+e quatro tabelas do bloco de cartão saíam com a coluna do ERP em **R$ 0,00** e a diferença zerada
+(totais por dia, "no ERP sem lançamento na maquininha", diferença de centavos, um lançamento pagando
+vários documentos). O PIX escapou por coincidência: lá as duas chaves são a mesma palavra.
+O resultado carrega `campo` — use `r.campo` para ler o ERP, nunca a chave do bloco.
+
+## Colunas "na maquininha" × "no ERP" saíam invertidas
+
+Em `trocadas`, o campo `formas` é sempre a descrição do lado do **ERP** (a tabela mostra sob "No ERP").
+Nas sobras do lado do ERP ele recebia `cand[0].meio`, que é o lado externo — a linha saía dizendo
+"na maquininha: Pix / no ERP: Pix" para uma venda que no ERP era cartão, escondendo exatamente a
+troca que a tabela existe para mostrar. Agora as duas pontas usam `formasDoDoc(e)`.
+
+## Identificar a loja do arquivo: pelo NOME
+
+O relatório da adquirente não tem coluna de empresa (`Origem - Nome` é o portador do cartão), então
+a convenção é a equipe começar o nome do arquivo pela loja: `L5 maquininha julho.csv`. `lojaDoNome()`
+reconhece `L1`/`L3`/`L4`/`L5` isolado e as cidades sem ambiguidade (Itaituba→L3, Santarém→L5;
+**Altamira não serve**, tem duas lojas). Nome divergente da loja selecionada **recusa** o arquivo.
+Arquivo recusado não cria a loja no estado — a análise roda num objeto à parte e só funde se passar.
