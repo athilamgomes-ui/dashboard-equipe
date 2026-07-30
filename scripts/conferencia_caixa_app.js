@@ -871,7 +871,7 @@ function rConcil(){
       '<span class="hint">'+ruins.length+' de '+linhas.length+' linhas com inconsistência</span>'+
       '<label class="filtro-inc"><input type="checkbox" id="c-so-inconsistentes"'+
       ((soRuins&&soRuins.checked)?" checked":"")+' onchange="rConcil()"> só as inconsistentes</label>'+
-      '</div><div class="scroll"><table>'+
+      '</div><div class="scroll"><table class="compacta">'+
       '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th style="text-align:left">Doc.</th>'+
       '<th style="text-align:left">Plano</th>'+
       '<th>1 · Venda</th><th>2 · Pagtos</th><th>3 · Maquin.</th><th>4 · Receb.</th>'+
