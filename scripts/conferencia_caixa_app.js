@@ -601,9 +601,15 @@ let historico = [];
 async function carregarHistorico(){
   const el = document.getElementById("c-historico");
   if (!el) return;
+  // Mostra só a loja selecionada. Listar todas ao mesmo tempo confundia tanto quanto
+  // o resultado acumulado: a pessoa escolhia uma empresa e via conferências de outras.
+  const cl = document.getElementById("c-loja");
+  const lj = cl ? cl.value : "";
   try{
     const r = await fetch(SUPA_URL+"/rest/v1/"+SUPA_TAB+
-      "?select=id,loja,periodo_ini,periodo_fim,arquivos,criado_em&order=criado_em.desc&limit=100",
+      "?select=id,loja,periodo_ini,periodo_fim,arquivos,criado_em"+
+      (lj ? "&loja=eq."+encodeURIComponent(lj) : "")+
+      "&order=criado_em.desc&limit=100",
       { headers: supaHead() });
     if (!r.ok){
       el.innerHTML = '<div class="hist-aviso">Histórico indisponível'+
@@ -615,7 +621,10 @@ async function carregarHistorico(){
     el.innerHTML = '<div class="hist-aviso">Sem conexão para ler o histórico.</div>';
     return;
   }
-  if (!historico.length){ el.innerHTML = '<div class="hist-aviso">Nenhuma conferência guardada ainda.</div>'; return; }
+  if (!historico.length){
+    el.innerHTML = '<div class="hist-aviso">Nenhuma conferência guardada'+(lj?" para a "+esc2(lj):"")+' ainda.</div>';
+    return;
+  }
   el.innerHTML =
     '<table><thead><tr><th>Guardada em</th><th style="text-align:left">Loja</th>'+
     '<th style="text-align:left">Período</th><th style="text-align:left">Arquivos</th><th></th></tr></thead><tbody>'+
@@ -989,6 +998,7 @@ function iniciar(){
     Object.keys(conciliacoes).forEach(k=>delete conciliacoes[k]);
     const err=document.getElementById("c-erro"); if (err) err.innerHTML="";
     rConcil();
+    carregarHistorico();
   });
 
   const dz=document.getElementById("dropzone"), fi=document.getElementById("c-file");

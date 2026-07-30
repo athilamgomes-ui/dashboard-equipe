@@ -525,7 +525,7 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
 
   <div class="box">
     <div class="box-h"><h3>📚 Conferências guardadas</h3>
-      <span class="hint">cifradas com a senha do painel — abrem em qualquer computador da equipe</span></div>
+      <span class="hint">só da loja selecionada · cifradas com a senha do painel, abrem em qualquer computador da equipe</span></div>
     <div class="scroll" id="c-historico"><div class="hist-aviso">carregando…</div></div>
     </div>
   </div>
