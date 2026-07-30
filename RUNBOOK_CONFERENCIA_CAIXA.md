@@ -112,6 +112,12 @@ Tolerância: **R$ 1,00/dia** (troco arredondado). No acumulado, o limite escala 
 A corrente **quebra** em dia `não fechado` (não há saldo confiável para o dia seguinte partir) e
 **atravessa** dias `sem movimento` (domingo: a gaveta não é tocada, o saldo continua o mesmo).
 
+⚠️ **O saldo de partida só vale se o dia anterior foi realmente contado.** Depois de um dia
+`sem contagem` o "informado" é o dinheiro do dia, não a gaveta — usar isso como base acusa
+sobra/falta inexistente. Em 29/07 a L3 contou o caixa pela primeira vez e a base era o valor
+espelhado de 28/07: daria **+R$ 647,45 de sobra fantasma**. O dia vira `sem base` até existir
+uma contagem real anterior. Um dia contado, mesmo divergente, é base válida.
+
 ⚠️ Antes de 29/07 o painel fazia `informado − calculado` e acusava divergência em quase todo dia.
 Era erro de premissa, não do dado.
 

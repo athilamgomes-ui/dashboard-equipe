@@ -92,6 +92,12 @@ function reconciliar(lista) {
   for (const loja of Object.keys(porLoja)) {
     const dias = porLoja[loja].sort((a, b) => (a.data < b.data ? -1 : 1));
     let caixaAnterior = null, dataAnterior = null;
+    // O saldo de partida só vale se o dia anterior foi realmente CONTADO. Se veio de um dia
+    // "sem contagem" (informado = sistema), ele é o dinheiro do dia, não a gaveta — usar isso
+    // como base acusa sobra/falta que não existe. Aconteceu na L3 em 29/07: primeiro dia em
+    // que Itaituba contou de verdade, e a base era o valor espelhado de 28/07 → daria
+    // +R$ 647,45 de "sobra" fantasma.
+    let baseConfiavel = false;
 
     for (const d of dias) {
       const f = k => d.formas?.[k] || { calc: 0, inf: 0 };
@@ -107,7 +113,7 @@ function reconciliar(lista) {
       // Ninguém lançou o fechamento: não há o que conferir e a corrente quebra.
       if (d.total.inf === 0 && d.total.calc > 0) {
         d.conf = "nao_fechado";
-        caixaAnterior = null; dataAnterior = null;
+        caixaAnterior = null; dataAnterior = null; baseConfiavel = false;
         continue;
       }
 
@@ -119,12 +125,13 @@ function reconciliar(lista) {
       // Não é falta de dinheiro: é conferência que não apura diferença.
       if (Math.abs(inf - calc) < 0.005 && (sangria > 0 || (caixaAnterior || 0) > 0.005)) {
         d.conf = "nao_conferido";
-        caixaAnterior = inf; dataAnterior = d.data;
+        caixaAnterior = inf; dataAnterior = d.data; baseConfiavel = false;
         continue;
       }
 
-      if (caixaAnterior === null) {
-        d.conf = "sem_base";                       // primeiro dia da série ou pós-buraco
+      if (caixaAnterior === null || !baseConfiavel) {
+        // Sem saldo de partida contado, não há conferência possível — só registra o dia.
+        d.conf = "sem_base";
       } else {
         const esperado = +(caixaAnterior + calc + suprimento - sangria).toFixed(2);
         const residuo = +(inf - esperado).toFixed(2);
@@ -132,7 +139,8 @@ function reconciliar(lista) {
         d.caixa.residuo = residuo;
         d.conf = Math.abs(residuo) <= TOL ? "ok" : "divergente";
       }
-      caixaAnterior = inf; dataAnterior = d.data;
+      // Dia contado (mesmo divergente) vira base confiável para o dia seguinte.
+      caixaAnterior = inf; dataAnterior = d.data; baseConfiavel = true;
     }
   }
   return lista;
