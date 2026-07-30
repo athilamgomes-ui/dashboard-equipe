@@ -430,6 +430,9 @@ tr.linha-ruim td:first-child{box-shadow:inset 3px 0 0 var(--falta)}
 .btn-abrir{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:5px 12px;
   font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
 .btn-abrir:hover{background:#6d28d9}
+.btn-excluir{background:none;border:1px solid var(--border);color:var(--muted);border-radius:7px;
+  padding:4px 9px;font-size:13px;font-weight:700;cursor:pointer;margin-left:6px;line-height:1;font-family:inherit}
+.btn-excluir:hover{border-color:var(--falta);color:var(--falta);background:color-mix(in srgb,var(--falta) 8%,transparent)}
 .chip-alerta{color:#b45309}
 .vazio-ok{padding:22px 18px;text-align:center;color:var(--ok);font-size:13px;font-weight:600}
 

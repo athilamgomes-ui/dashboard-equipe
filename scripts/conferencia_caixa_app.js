@@ -636,8 +636,25 @@ async function carregarHistorico(){
         '<td style="text-align:left"><span class="loja-tag" style="background:'+corLoja(h.loja)+'">'+esc2(h.loja)+'</span></td>'+
         '<td style="text-align:left">'+dBR(h.periodo_ini)+' a '+dBR(h.periodo_fim)+'</td>'+
         '<td style="text-align:left" class="zero">'+esc2((h.arquivos||[]).map(a=>a.tipo).join(" + "))+'</td>'+
-        '<td><button class="btn-abrir" onclick="abrirHistorico('+h.id+')">abrir</button></td></tr>';
+        '<td><button class="btn-abrir" onclick="abrirHistorico('+h.id+')">abrir</button>'+
+        '<button class="btn-excluir" title="excluir do histórico" onclick="excluirHistorico('+h.id+')">×</button></td></tr>';
     }).join("")+'</tbody></table>';
+}
+
+// Excluir é irreversível e some para todo mundo (o histórico é compartilhado) — por isso
+// pede confirmação nomeando loja e período, não só "tem certeza?".
+async function excluirHistorico(id){
+  const h = historico.find(x=>x.id===id);
+  const alvo = h ? (h.loja+" · "+dBR(h.periodo_ini)+" a "+dBR(h.periodo_fim)) : ("registro "+id);
+  if (!confirm("Excluir a conferência de "+alvo+" do histórico?\n\nIsso apaga para toda a equipe e não dá para desfazer.")) return;
+  const err=document.getElementById("c-erro"); err.textContent="";
+  try{
+    const r = await fetch(SUPA_URL+"/rest/v1/"+SUPA_TAB+"?id=eq."+id, { method:"DELETE", headers: supaHead() });
+    if (!r.ok) throw new Error("erro "+r.status);
+    // se estava aberta na tela, tira também
+    if (h && conciliacoes[h.loja] && conciliacoes[h.loja].doHistorico) { delete conciliacoes[h.loja]; rConcil(); }
+    await carregarHistorico();
+  }catch(e){ err.textContent="❌ não consegui excluir: "+(e.message||e); }
 }
 
 async function abrirHistorico(id){

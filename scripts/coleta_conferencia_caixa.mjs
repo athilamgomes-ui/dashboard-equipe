@@ -802,9 +802,12 @@ try {
   // Movimento diário por documento, por loja — insumo da conciliação de cartão no painel.
   // Janela: do 1º dia do mês anterior até hoje (cobre o mês fechado + o corrente).
   try {
+    // Janela do movimento/cancelamentos: por padrão do 1º dia do mês anterior até hoje.
+    // MOV_INI/MOV_FIM (dd/mm/aaaa) ampliam para análises retroativas — foi preciso para
+    // conferir os cancelamentos de maio da L5, que ficavam sem base de comparação.
     const hj = new Date();
-    const iniMov = br(new Date(hj.getFullYear(), hj.getMonth() - 1, 1));
-    const fimMov = br(hj);
+    const iniMov = process.env.MOV_INI || br(new Date(hj.getFullYear(), hj.getMonth() - 1, 1));
+    const fimMov = process.env.MOV_FIM || br(hj);
     cache.movimento = cache.movimento || {};
     for (const loja of ALVO) {
       log(`movimento diário ${loja.key} (${iniMov}–${fimMov})...`);
