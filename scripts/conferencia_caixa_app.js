@@ -699,11 +699,16 @@ async function salvarConciliacao(chave){
       arquivos: c.arquivos.map(a=>({nome:a.nome, tipo:a.tipo, imp:a.imp||null})),
       ...env,
     };
-    const r = await fetch(SUPA_URL+"/rest/v1/"+SUPA_TAB+"?on_conflict=loja,periodo_ini,periodo_fim", {
-      method:"POST", headers: supaHead({Prefer:"resolution=merge-duplicates,return=minimal"}),
+    const r = await fetch(SUPA_URL+"/rest/v1/"+SUPA_TAB+"?on_conflict=loja,periodo_ini,periodo_fim&select=id", {
+      method:"POST", headers: supaHead({Prefer:"resolution=merge-duplicates,return=representation"}),
       body: JSON.stringify(corpo),
     });
-    if (r.ok){ c.statusSalvo = "salva"; }
+    if (r.ok){
+      c.statusSalvo = "salva";
+      // Guarda o id devolvido para a memória automática não buscar de novo o que acabou
+      // de ser carregado (e para o × do histórico saber o que tirar da tela).
+      try{ const [row]=await r.json(); if (row && row.id!=null){ c.id=row.id; jaBuscados.add(row.id); } }catch(e){}
+    }
     else if (r.status===404 || r.status===400){
       c.statusSalvo = "a tabela do histórico ainda não existe no Supabase (rode conferencia_caixa_conciliacoes.sql)";
     } else {
@@ -731,13 +736,10 @@ async function carregarHistorico(){
   // Filtro próprio, com "todas" como padrão: agora a tela soma várias lojas e o histórico
   // precisa deixar abrir as quatro. Antes seguia o seletor de upload, o que impedia montar
   // um relatório do grupo inteiro.
-  const fl = document.getElementById("c-hist-loja");
-  const lj = fl ? fl.value : "";
   try{
     const r = await fetch(SUPA_URL+"/rest/v1/"+SUPA_TAB+
       "?select=id,loja,periodo_ini,periodo_fim,arquivos,criado_em"+
-      (lj ? "&loja=eq."+encodeURIComponent(lj) : "")+
-      "&order=periodo_fim.desc,loja.asc&limit=500",
+      "&order=periodo_fim.desc,loja.asc&limit=1000",
       { headers: supaHead() });
     if (!r.ok){
       el.innerHTML = '<div class="hist-aviso">Histórico indisponível'+
@@ -750,25 +752,32 @@ async function carregarHistorico(){
     return;
   }
   if (!historico.length){
-    el.innerHTML = '<div class="hist-aviso">Nenhuma conferência guardada'+(lj?" para a "+esc2(lj):"")+' ainda.</div>';
+    el.innerHTML = '<div class="hist-aviso">Nenhuma conferência guardada ainda. Carregue os arquivos do dia acima — '+
+      'a partir daí o painel guarda sozinho e vai juntando.</div>';
     return;
   }
+  // Sem coluna "guardada em" e sem botão "abrir": a hora em que alguém subiu o arquivo não
+  // muda nada na conferência (o que importa é o período do movimento), e abrir virou
+  // automático — o período escolhido lá em cima é que manda. Aqui fica só a prestação de
+  // contas do que o painel tem na memória, e o × para tirar um arquivo carregado errado.
+  const fx=faixaConcil(), ljRel=filtroLojaRel();
+  const noPeriodo = h => (!ljRel || h.loja===ljRel) &&
+    (!fx.ate || h.periodo_ini<=fx.ate) && (!fx.ini || h.periodo_fim>=fx.ini);
+  const dentro = historico.filter(noPeriodo).length;
   el.innerHTML =
-    '<table><thead><tr><th>Guardada em</th><th style="text-align:left">Loja</th>'+
+    '<div class="hist-aviso" style="padding-bottom:6px">'+historico.length+' conferência(s) na memória · '+
+      '<b>'+dentro+'</b> dentro do período escolhido, já somada(s) no relatório.'+
+      '<span id="c-sinc" style="margin-left:10px;color:var(--accent);font-weight:600"></span></div>'+
+    '<table><thead><tr><th style="text-align:left">Loja</th>'+
     '<th style="text-align:left">Período</th><th style="text-align:left">Arquivos</th><th></th></tr></thead><tbody>'+
-    historico.map(h=>{
-      const dt=new Date(h.criado_em);
-      const quando=String(dt.getDate()).padStart(2,"0")+"/"+String(dt.getMonth()+1).padStart(2,"0")+" "+
-                   String(dt.getHours()).padStart(2,"0")+":"+String(dt.getMinutes()).padStart(2,"0");
-      const naTela = Object.keys(conciliacoes).some(k=>conciliacoes[k].id===h.id);
-      return '<tr><td>'+quando+'</td>'+
+    historico.map(h=>
+      '<tr'+(noPeriodo(h)?'':' style="opacity:.45"')+'>'+
         '<td style="text-align:left"><span class="loja-tag" style="background:'+corLoja(h.loja)+'">'+esc2(h.loja)+'</span></td>'+
         '<td style="text-align:left">'+(h.periodo_ini===h.periodo_fim ? dBR(h.periodo_ini)
               : dBR(h.periodo_ini)+' a '+dBR(h.periodo_fim))+'</td>'+
         '<td style="text-align:left" class="zero">'+esc2((h.arquivos||[]).map(a=>a.tipo).join(" + "))+'</td>'+
-        '<td><button class="btn-abrir" onclick="abrirHistorico('+h.id+')">'+(naTela?"na tela ✓":"abrir")+'</button>'+
-        '<button class="btn-excluir" title="excluir do histórico" onclick="excluirHistorico('+h.id+')">×</button></td></tr>';
-    }).join("")+'</tbody></table>';
+        '<td><button class="btn-excluir" title="tirar da memória (apaga para toda a equipe)" '+
+        'onclick="excluirHistorico('+h.id+')">×</button></td></tr>').join("")+'</tbody></table>';
 }
 
 // Excluir é irreversível e some para todo mundo (o histórico é compartilhado) — por isso
@@ -826,27 +835,36 @@ async function abrirHistorico(id, silencioso){
   }
 }
 
-// Abre de uma vez todas as conferências guardadas que tocam o período escolhido. É o
-// caminho normal para "quero ver o mês inteiro": o dia a dia foi salvo em N registros.
-async function abrirPeriodo(){
-  const err=document.getElementById("c-erro"); err.textContent="";
-  const fx=faixaConcil();
+// ── memória automática ────────────────────────────────────────────────────────
+// Não existe botão "abrir": o Athila carrega os arquivos do dia e pronto. Quando ele
+// escolhe um período, o painel busca sozinho no histórico tudo que toca aquelas datas e
+// junta. É por isso que ver "o mês" não exige carregar um arquivo do mês — o mês é a soma
+// dos dias que já foram carregados, cada um salvo no seu registro.
+const jaBuscados = new Set();     // ids já decifrados nesta sessão (decifrar é caro)
+let sincronizando = false;
+
+async function sincronizarPeriodo(){
+  if (sincronizando) return;
+  const fx=faixaConcil(), lj=filtroLojaRel();
   const alvos = historico.filter(h=>
-    (!fx.ate || h.periodo_ini<=fx.ate) && (!fx.ini || h.periodo_fim>=fx.ini));
-  if (!alvos.length){
-    err.innerHTML="Nenhuma conferência guardada toca esse período. Carregue os arquivos desses dias.";
-    return;
+    (!lj || h.loja===lj) &&
+    (!fx.ate || h.periodo_ini<=fx.ate) && (!fx.ini || h.periodo_fim>=fx.ini) &&
+    !jaBuscados.has(h.id));
+  if (!alvos.length) return;
+
+  sincronizando = true;
+  const av=document.getElementById("c-sinc");
+  let ok=0, falhas=0;
+  for (let i=0;i<alvos.length;i++){
+    if (av) av.textContent = "buscando conferências guardadas… "+(i+1)+" de "+alvos.length;
+    jaBuscados.add(alvos[i].id);
+    if (await abrirHistorico(alvos[i].id, true)) ok++; else falhas++;
   }
-  const bt=document.getElementById("c-abrir-per");
-  if (bt){ bt.disabled=true; bt.textContent="abrindo…"; }
-  let ok=0;
-  for (const h of alvos) if (await abrirHistorico(h.id, true)) ok++;
-  if (bt){ bt.disabled=false; bt.textContent="abrir todas do período"; }
-  rConcil();
-  err.innerHTML = ok===alvos.length
-    ? "✓ "+ok+" conferência(s) na tela."
-    : "⚠️ abri "+ok+" de "+alvos.length+" — as outras deram erro ao decifrar.";
-  document.getElementById("c-resultado").scrollIntoView({behavior:"smooth"});
+  sincronizando = false;
+  if (av) av.textContent = falhas
+    ? "⚠️ "+falhas+" conferência(s) guardada(s) não abriram (erro ao decifrar)."
+    : "";
+  if (ok) { rConcil(); carregarHistorico(); }
 }
 
 // ── estado e render ──
@@ -906,15 +924,20 @@ function faixaConcil(){
   const de=document.getElementById("c-de"), ate=document.getElementById("c-ate");
   return { ini: de && de.value ? de.value : null, ate: ate && ate.value ? ate.value : null };
 }
+function filtroLojaRel(){
+  const s=document.getElementById("c-rel-loja");
+  return s && s.value ? s.value : null;
+}
 
 // Diz em uma linha o que está na tela: sem isso não dá para saber se o número é de um dia,
 // de um mês ou de tudo que já foi carregado.
 function resumoPeriodo(){
   const el=document.getElementById("c-per-resumo");
   if (!el) return;
-  const fx=faixaConcil();
-  const n=ordemCarga.filter(k=>conciliacoes[k]).length;
-  const ljs=new Set(ordemCarga.filter(k=>conciliacoes[k]).map(k=>conciliacoes[k].loja));
+  const fx=faixaConcil(), ljRel=filtroLojaRel();
+  const usadas=ordemCarga.filter(k=>conciliacoes[k] && (!ljRel || conciliacoes[k].loja===ljRel));
+  const n=usadas.length;
+  const ljs=new Set(usadas.map(k=>conciliacoes[k].loja));
   const per = fx.ini||fx.ate
     ? (fx.ini&&fx.ate&&fx.ini===fx.ate ? dBR(fx.ini)
        : (fx.ini?dBR(fx.ini):"início")+" a "+(fx.ate?dBR(fx.ate):"hoje"))
@@ -971,11 +994,12 @@ function rConcil(){
   // ── recorte por data + desempate de dias cobertos por duas conferências ──
   // Sem o desempate, carregar o arquivo do mês e depois o do dia 30 contaria o dia 30
   // duas vezes: dobraria o faturamento do dia e inventaria divergência dos dois lados.
-  const fx=faixaConcil();
+  const fx=faixaConcil(), ljRel=filtroLojaRel();
   const dono={};                       // loja|dia -> chave que manda naquele dia
   const repetidos=new Set();
   carregadas.forEach(k=>{
     const c=conciliacoes[k];
+    if (ljRel && c.loja!==ljRel) return;
     diasDe(c).forEach(d=>{
       const id=c.loja+"|"+d;
       if (dono[id] && dono[id]!==k) repetidos.add(dBR(d)+" "+c.loja);
@@ -986,12 +1010,14 @@ function rConcil(){
   const vis={};
   carregadas.forEach(k=>{
     const c=conciliacoes[k];
+    if (ljRel && c.loja!==ljRel) return;
     const permitido = d => dono[c.loja+"|"+d]===k;
     const cartao=recorte(c.cartao, fx.ini, fx.ate, permitido);
     const pix=recorte(c.pix, fx.ini, fx.ate, permitido);
     if (cartao||pix) vis[k]={loja:c.loja, cartao, pix, conta:c.conta, per:periodoDe(c)};
   });
   const chaves=carregadas.filter(k=>vis[k]);
+  const lojasVisiveis=new Set(chaves.map(k=>vis[k].loja));
 
   if (!chaves.length){
     res.style.display="block";
@@ -1236,21 +1262,36 @@ function rConcil(){
           divs=juntar(campo,r=>r.divididas), fora=juntar(campo,r=>r.foraJanela);
     let h="";
 
-    // totais por dia
-    const porDia={};
+    // Totais por LOJA quando o relatório é do grupo, por DIA quando é de uma loja só.
+    // Num relatório de vários meses das quatro lojas, a lista por data vira uma parede de
+    // linhas que não responde a pergunta nenhuma; o que se quer saber é qual loja não fecha.
+    const porLoja = lojasVisiveis.size > 1;
+    const grupo={};
     chaves.forEach(k=>{ const r=vis[k][campo]; if(!r) return;
-      r.erp.forEach(e=>{ (porDia[e.d]=porDia[e.d]||{a:0,b:0,na:0,nb:0}).a+=e[cErp]; porDia[e.d].na++; });
-      r.externos.forEach(t=>{ (porDia[t.d]=porDia[t.d]||{a:0,b:0,na:0,nb:0}).b+=t.v; porDia[t.d].nb++; });
+      const gl=vis[k].loja;
+      r.erp.forEach(e=>{ const g=porLoja?gl:e.d; (grupo[g]=grupo[g]||{a:0,b:0,na:0,nb:0}).a+=e[cErp]; grupo[g].na++; });
+      r.externos.forEach(t=>{ const g=porLoja?gl:t.d; (grupo[g]=grupo[g]||{a:0,b:0,na:0,nb:0}).b+=t.v; grupo[g].nb++; });
     });
-    const dias=Object.keys(porDia).sort().reverse();
-    h += caixaBox(rot+" — totais por dia", "ERP × "+ladoExt,
-      '<thead><tr><th>Data</th><th>ERP</th><th>'+ladoExt.charAt(0).toUpperCase()+ladoExt.slice(1)+'</th>'+
+    const gs = porLoja ? Object.keys(grupo).sort() : Object.keys(grupo).sort().reverse();
+    const somaG = f => gs.reduce((a,g)=>a+grupo[g][f],0);
+    h += caixaBox(rot+" — totais por "+(porLoja?"loja":"dia"), "ERP × "+ladoExt,
+      '<thead><tr><th'+(porLoja?' style="text-align:left"':'')+'>'+(porLoja?"Loja":"Data")+'</th>'+
+      '<th>ERP</th><th>'+ladoExt.charAt(0).toUpperCase()+ladoExt.slice(1)+'</th>'+
       '<th>Diferença</th><th>docs / lançamentos</th></tr></thead><tbody>'+
-      dias.map(d=>{const p=porDia[d], dif=Math.round((p.a-p.b)*100)/100;
-        return '<tr><td><b>'+dBR(d)+'</b> <span style="color:var(--muted);font-size:11px">'+diaSem(d)+'</span></td>'+
+      gs.map(g=>{const p=grupo[g], dif=Math.round((p.a-p.b)*100)/100;
+        return '<tr><td'+(porLoja?' style="text-align:left"':'')+'>'+
+          (porLoja ? tagLoja(g)+' <span style="color:var(--muted);font-size:11px">'+esc2(nomeLoja(g))+'</span>'
+                   : '<b>'+dBR(g)+'</b> <span style="color:var(--muted);font-size:11px">'+diaSem(g)+'</span>')+'</td>'+
           '<td class="num">'+nf2(p.a)+'</td><td class="num">'+nf2(p.b)+'</td>'+
           '<td class="'+cls(dif)+'">'+nf2(dif)+'</td>'+
-          '<td class="num zero">'+p.na+' / '+p.nb+'</td></tr>';}).join("")+'</tbody>');
+          '<td class="num zero">'+p.na+' / '+p.nb+'</td></tr>';}).join("")+
+      (gs.length>1 ? '<tr><td'+(porLoja?' style="text-align:left"':'')+'><b>Total</b></td>'+
+        '<td class="num"><b>'+nf2(somaG("a"))+'</b></td><td class="num"><b>'+nf2(somaG("b"))+'</b></td>'+
+        '<td class="'+cls(somaG("a")-somaG("b"))+'"><b>'+nf2(somaG("a")-somaG("b"))+'</b></td>'+
+        '<td class="num zero">'+somaG("na")+' / '+somaG("nb")+'</td></tr>' : '')+
+      '</tbody>',
+      porLoja ? "Relatório de mais de uma loja: a quebra é por empresa. Escolha uma loja em <b>O que mostrar</b> "+
+                "para ver o mesmo quadro dia a dia." : null);
 
     h += caixaBox("⚠️ "+rot+": forma de pagamento trocada",
       "entrou como "+rot+" mas a venda foi finalizada de outro jeito",
@@ -1347,7 +1388,6 @@ function rConcil(){
 const esc2 = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
 function removerConcil(k){ delete conciliacoes[k]; ordemCarga=ordemCarga.filter(x=>x!==k); rConcil(); }
-function limparConcil(){ Object.keys(conciliacoes).forEach(k=>delete conciliacoes[k]); ordemCarga=[]; rConcil(); }
 
 // Analisa UM arquivo cru dentro de `alvo`. Está separado porque o histórico usa o mesmo
 // caminho: reabrir uma conferência guardada refaz a análise a partir do CSV original em
@@ -1433,8 +1473,12 @@ async function carregarArquivos(files){
       // outro no upsert. Junta quando a loja é a mesma e os períodos se cruzam; um dia
       // diferente vira conferência nova, que é o que acontece na carga do dia a dia.
       const pt = periodoDe(tmp);
+      // Vale inclusive para conferência que veio da memória: subir hoje o extrato de um
+      // dia cujo relatório da maquininha já foi carregado ontem tem que COMPLETAR aquela
+      // conferência, não criar outra por cima (a chave é a mesma e a segunda apagaria o
+      // cartão da primeira).
       const irmao = ordemCarga.map(k=>conciliacoes[k]).find(c=>{
-        if (!c || c.loja!==lj || c.doHistorico) return false;
+        if (!c || c.loja!==lj) return false;
         const pc = periodoDe(c);
         return pc && pt && pc.ini<=pt.fim && pt.ini<=pc.fim;
       });
@@ -1448,6 +1492,7 @@ async function carregarArquivos(files){
       if (tmp.pix){ alvo.pix = tmp.pix; alvo.conta = tmp.conta; }
       alvo.arquivos.push(...tmp.arquivos);
       delete alvo.statusSalvo;
+      delete alvo.doHistorico;          // voltou a ser rascunho: precisa ser regravado
       novas.add(inserirConcil(alvo));
     }catch(e){
       erros.push("❌ "+f.name+": "+(e.message||e));
@@ -1587,21 +1632,17 @@ function iniciar(){
   // o que aparece é o período.
   cl.addEventListener("change", ()=>{ const e=document.getElementById("c-erro"); if (e) e.innerHTML=""; });
 
-  // ── período do relatório ──
-  const fl=document.getElementById("c-hist-loja");
+  // ── o que mostrar: loja + período ──
+  const rl=document.getElementById("c-rel-loja");
   D.lojas.forEach(l=>{
     const o=document.createElement("option");
     o.value=l.key; o.textContent=l.key+" · "+l.nome+" "+l.cidade;
-    fl.appendChild(o);
-  });
-  fl.addEventListener("change", carregarHistorico);
-  document.getElementById("c-abrir-per").addEventListener("click", abrirPeriodo);
-  document.getElementById("c-limpar").addEventListener("click", ()=>{
-    limparConcil(); carregarHistorico();
+    rl.appendChild(o);
   });
 
   const de=document.getElementById("c-de"), ate=document.getElementById("c-ate");
-  [de,ate].forEach(el=>el.addEventListener("change", ()=>{ rConcil(); resumoPeriodo(); }));
+  const aplicar = ()=>{ rConcil(); carregarHistorico(); sincronizarPeriodo(); };
+  [rl,de,ate].forEach(el=>el.addEventListener("change", aplicar));
   document.querySelectorAll(".per-atalho[data-per]").forEach(b=>b.addEventListener("click", ()=>{
     const p=n=>String(n).padStart(2,"0");
     const iso=dt=>dt.getFullYear()+"-"+p(dt.getMonth()+1)+"-"+p(dt.getDate());
@@ -1615,8 +1656,13 @@ function iniciar(){
       tudo:        ()=>["",""],
     }[b.dataset.per];
     const [a,z]=cfg(); de.value=a; ate.value=z;
-    rConcil(); resumoPeriodo();
+    aplicar();
   }));
+  // Abre no mês corrente: é o recorte do dia a dia e evita puxar todo o histórico de uma
+  // vez só para quem entrou no painel para conferir o movimento de hoje.
+  { const p=n=>String(n).padStart(2,"0"), hoje=new Date();
+    de.value = hoje.getFullYear()+"-"+p(hoje.getMonth()+1)+"-01";
+    ate.value = hoje.getFullYear()+"-"+p(hoje.getMonth()+1)+"-"+p(hoje.getDate()); }
   resumoPeriodo();
 
   const dz=document.getElementById("dropzone"), fi=document.getElementById("c-file");
@@ -1625,7 +1671,7 @@ function iniciar(){
   ["dragenter","dragover"].forEach(ev=>dz.addEventListener(ev, e=>{ e.preventDefault(); dz.classList.add("on"); }));
   ["dragleave","drop"].forEach(ev=>dz.addEventListener(ev, e=>{ e.preventDefault(); dz.classList.remove("on"); }));
   dz.addEventListener("drop", e=>{ carregarArquivos([...(e.dataTransfer?.files||[])]); });
-  carregarHistorico();
+  carregarHistorico().then(sincronizarPeriodo);
 
   render();
 }

@@ -505,3 +505,40 @@ sobrescrevem no upsert. `carregarArquivos` funde quando a loja é a mesma e os p
 
 Corrigido de passagem: `#c-resultado` estava **fora** de `#p-concil` (um `</div>` sobrando fechava a
 aba antes da hora), então o resultado ficava visível em qualquer aba.
+
+## Memória automática: não existe botão "abrir" (31/07/2026)
+
+O Athila perguntou por que havia um botão **abrir** se ele só quer carregar os arquivos e depois
+escolher períodos. Estava certo — o botão era trabalho manual para uma decisão que o painel já tem
+como tomar sozinho. Hoje:
+
+- ao entrar na aba, o painel lê o índice do histórico e **busca sozinho** todas as conferências que
+  tocam o período escolhido (`sincronizarPeriodo`);
+- mudar loja ou período dispara a busca de novo, e `jaBuscados` impede decifrar duas vezes o mesmo
+  registro na sessão (decifrar + reprocessar o CSV é a parte cara);
+- a caixa "Conferências na memória" perdeu a coluna *Guardada em* e o botão *abrir*. A hora em que
+  alguém subiu o arquivo não muda nada na conferência — o que importa é o período do movimento.
+  Sobrou o × para tirar da memória um arquivo carregado errado, e a linha some do relatório junto.
+
+**Consequência prática: ver "o mês" não exige carregar um arquivo do mês.** O mês é a soma dos dias
+já carregados, cada um no seu registro. É esse o pedido do Athila e é o que o `dono` por `loja|dia`
+torna seguro — dias repetidos entre registros contam uma vez só.
+
+O padrão abre em **mês corrente**, não em "tudo": quem entra para conferir o movimento de hoje não
+precisa esperar o histórico inteiro ser decifrado.
+
+⚠️ Subir o extrato de um dia cujo relatório da maquininha já está na memória tem que **completar**
+aquela conferência, não criar outra. `carregarArquivos` funde por loja + período que se cruzam,
+inclusive quando a conferência veio do histórico (`doHistorico`) — sem isso a segunda carga
+sobrescreveria a primeira, que tem a mesma chave, e o cartão sumiria.
+
+## Quebra por loja quando o relatório é do grupo (31/07/2026)
+
+`Loja do relatório` = todas → o quadro de totais sai **por loja**, com linha de Total. Uma loja
+escolhida → volta a sair **por dia**. Pedido do Athila: numa visão de várias lojas e vários meses, a
+lista por data é uma parede de linhas que não responde nada; a pergunta é *qual loja não fecha*.
+A regra no código é `lojasVisiveis.size > 1`, não o valor do seletor — assim escolher "todas" com só
+uma loja carregada ainda mostra o dia a dia, que é o útil.
+
+Há dois seletores de loja e eles são coisas diferentes: **Loja do arquivo** (de quem é o CSV que vou
+subir) e **Loja do relatório** (o que quero ver). Estão rotulados assim de propósito.

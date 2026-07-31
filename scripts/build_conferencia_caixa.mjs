@@ -626,7 +626,7 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
       <span class="hint">o arquivo é lido aqui no seu navegador e não sai do seu computador</span></div>
     <div style="padding:16px 17px">
       <div class="up-linha">
-        <label>Loja</label>
+        <label>Loja do arquivo</label>
         <select id="c-loja"></select>
         <label>Adquirente</label>
         <select id="c-adq">
@@ -649,10 +649,12 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
   </div>
 
   <div class="box">
-    <div class="box-h"><h3>📅 Período do relatório</h3>
-      <span class="hint">um dia, um mês ou vários — vale para tudo que aparece abaixo</span></div>
+    <div class="box-h"><h3>📅 O que mostrar</h3>
+      <span class="hint">o painel busca sozinho as conferências guardadas desse período</span></div>
     <div style="padding:16px 17px">
       <div class="up-linha" style="margin-bottom:0">
+        <label>Loja do relatório</label>
+        <select id="c-rel-loja"><option value="">todas as lojas</option></select>
         <label>De</label><input type="date" id="c-de">
         <label>Até</label><input type="date" id="c-ate">
         <button class="per-atalho" data-per="hoje">hoje</button>
@@ -666,16 +668,8 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
   </div>
 
   <div class="box">
-    <div class="box-h"><h3>📚 Conferências guardadas</h3>
-      <span class="hint">cifradas com a senha do painel, abrem em qualquer computador da equipe</span></div>
-    <div style="padding:14px 17px 0">
-      <div class="up-linha" style="margin-bottom:10px">
-        <label>Loja</label>
-        <select id="c-hist-loja"><option value="">todas</option></select>
-        <button class="btn-abrir" id="c-abrir-per" style="padding:7px 14px">abrir todas do período</button>
-        <button class="per-atalho" id="c-limpar">limpar a tela</button>
-      </div>
-    </div>
+    <div class="box-h"><h3>📚 Conferências na memória</h3>
+      <span class="hint">tudo que já foi carregado, cifrado com a senha do painel · entram sozinhas no relatório conforme o período</span></div>
     <div class="scroll" id="c-historico"><div class="hist-aviso">carregando…</div></div>
   </div>
 
