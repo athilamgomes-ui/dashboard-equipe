@@ -2247,6 +2247,18 @@ const PRZ_FAIXAS = [
   {pct:120, base:420, bonus:470},
 ];
 
+// Prêmio INDIVIDUAL do mês (fim do mês). base = normal · bonus = com ≥30% Marcas A
+// no acumulado do mês. Recebe se a loja fizer ≥90% da meta mensal OU a vendedora
+// fizer MAIS de R$40.000 sozinha (Athila 31/07/2026). Ver [[premiacao-regras]].
+const PRZ_FAIXAS_IND = [
+  {v:31000, base:100, bonus:150},
+  {v:35000, base:200, bonus:250},
+  {v:40000, base:300, bonus:350},
+  {v:45000, base:400, bonus:450},
+  {v:50000, base:500, bonus:550},
+  {v:55000, base:600, bonus:650},
+];
+
 // ─── STATE ───────────────────────────────────────────────────────────────────
 
 let pinsDB = null;
@@ -2254,6 +2266,7 @@ let mensagensDB = null;
 let selectedVend = null;
 let currentUser = null;
 let currentTab = 'hoje';
+let premioSub = 'semana'; // sub-aba da aba Prêmio: 'semana' | 'mes'
 let leuTudo = false;
 // Quiz state
 let quizSemana = null;     // ID da semana em quiz (ex: 'S2')
@@ -3765,13 +3778,19 @@ function renderPremio() {
     </div>`;
   }
 
+  // Sub-aba "Meu prêmio do mês": progresso individual rumo ao prêmio de fim de mês.
+  // Não tem gate de quiz (o quiz destrava o prêmio SEMANAL, não o mensal).
+  if (premioSub === 'mes') {
+    return _premioSubToggle('mes') + renderMeuPremioMes();
+  }
+
   // 1. Encontrar semanas com prêmio pendente de quiz (semanas fechadas, loja bateu pool, vendedora ainda não respondeu)
   const semanasComPremio = listarSemanasFechadasComPremio(LOJA_KEY);
   // Pendente = ainda não respondeu o quiz UMA vez. Quem já respondeu (passou ou não)
   // não vê mais o gate, vai direto pro histórico.
   const pendentes = semanasComPremio.filter(semId => !quizJaRespondeu(semId));
 
-  // Se existe quiz aberto agora, render o quiz
+  // Se existe quiz aberto agora, render o quiz (foco total, sem toggle)
   if (quizSemana) {
     return renderQuizAtivo();
   }
@@ -3782,7 +3801,103 @@ function renderPremio() {
   }
 
   // Caso normal: histórico + projeção da semana atual
-  return renderHistoricoPremios();
+  return _premioSubToggle('semana') + renderHistoricoPremios();
+}
+
+function setPremioSub(t) {
+  premioSub = t;
+  renderContent();
+}
+
+// Toggle "Prêmio da semana" | "Meu prêmio do mês" no topo da aba Prêmio.
+function _premioSubToggle(ativo) {
+  const btn = (id, label) => {
+    const on = ativo === id;
+    return `<button onclick="setPremioSub('${id}')" style="flex:1;padding:9px 6px;font-size:12px;font-weight:${on?'700':'500'};cursor:pointer;border:none;border-radius:8px;background:${on?'var(--blue)':'transparent'};color:${on?'#fff':'var(--muted)'}">${label}</button>`;
+  };
+  return `<div style="display:flex;gap:4px;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:14px">
+    ${btn('semana','💰 Prêmio da semana')}
+    ${btn('mes','🏅 Meu prêmio do mês')}
+  </div>`;
+}
+
+// Sub-aba individual: onde a vendedora está rumo ao prêmio individual do mês.
+function renderMeuPremioMes() {
+  const ld = DADOS_LOJA[LOJA_KEY];
+  const me = ld.vendedoras[currentUser] || {};
+  const mesTotal = me.mes || 0;
+  const maMes = me.ma_mes || 0;
+  const maOk = maMes >= 30;
+  const lojaPct = ld.meta_mensal > 0 ? ld.vendido_mes / ld.meta_mensal * 100 : 0;
+  const liberadoLoja = lojaPct >= 90;
+  const liberadoSolo = mesTotal > 40000;
+  const liberado = liberadoLoja || liberadoSolo;
+
+  // Faixa atual (maior v já alcançado) e próxima
+  let atual = null, prox = null;
+  for (const f of PRZ_FAIXAS_IND) {
+    if (mesTotal >= f.v) atual = f;
+    else { prox = f; break; }
+  }
+  const premioAtual = atual ? (maOk ? atual.bonus : atual.base) : 0;
+  const falta = prox ? prox.v - mesTotal : 0;
+  const teto = PRZ_FAIXAS_IND[PRZ_FAIXAS_IND.length - 1].v; // 55k = fim da barra
+
+  // Card do topo: quanto ela fez + prêmio atual (ou "ainda não")
+  const topo = `
+    <div class="card">
+      <h3>Seu total do mês</h3>
+      <div class="big">${fR(mesTotal)}</div>
+      ${atual
+        ? `<div class="sub">prêmio atual: <b style="color:var(--green)">${fR(premioAtual)}</b>${maOk?' (com bônus Marcas A)':''}</div>`
+        : `<div class="sub">faltam ${fR(31000 - mesTotal)} pro seu primeiro prêmio (R$ 31 mil)</div>`}
+      <div class="prog" style="margin-top:10px">
+        <div class="prog-fill" style="width:${Math.min(mesTotal / teto * 100, 100)}%;background:var(--green)"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px">
+        <span>R$ 31k</span><span>40k</span><span>55k</span>
+      </div>
+    </div>`;
+
+  // Tabela das faixas individuais
+  const tabela = `
+    <div class="faixa-card">
+      <h3>Tabela do prêmio individual (mês)</h3>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">
+        Base = prêmio normal. Com 30% Marcas A no mês = você ganha mais.
+        ${maOk ? `<b style="color:var(--green)">Você está em ${fP(maMes)} — ganhando a coluna de cima! 🎉</b>` : `Você está em <b>${fP(maMes)}</b> — falta chegar a 30%.`}
+      </div>
+      <div style="display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:6px;padding:6px 0;border-bottom:2px solid var(--border);font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px">
+        <div>Vendeu no mês</div><div style="text-align:right">Base</div><div style="text-align:right">Com 30% MA</div>
+      </div>
+      ${PRZ_FAIXAS_IND.map(f => {
+        const isAtual = atual && f.v === atual.v;
+        const isProx = prox && f.v === prox.v;
+        const corBase = maOk ? 'var(--muted)' : (isAtual ? 'var(--green)' : 'var(--text)');
+        const corBonus = maOk ? (isAtual ? 'var(--green)' : 'var(--text)') : '#a78bfa';
+        return `<div style="display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:6px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);${isAtual?'background:rgba(34,197,94,.08)':''}${isProx?'background:rgba(234,179,8,.06)':''}">
+          <span style="font-weight:${isAtual?'700':'500'}">${fR(f.v)}${isAtual?' ★':''}${isProx?' ↑':''}</span>
+          <span style="text-align:right;color:${corBase};font-weight:${maOk?'400':(isAtual?'700':'500')}">${fR(f.base)}</span>
+          <span style="text-align:right;color:${corBonus};font-weight:${maOk?(isAtual?'700':'500'):'600'}">${fR(f.bonus)}</span>
+        </div>`;
+      }).join('')}
+      ${prox && falta > 0 ? `<div class="falta-meta" style="margin-top:10px">
+        Faltam <b>${fR(falta)}</b> pra subir de <b>${fR(atual?(maOk?atual.bonus:atual.base):0)}</b> pra <b>${fR(maOk?prox.bonus:prox.base)}</b>
+      </div>` : ''}
+    </div>`;
+
+  // Card da trava: liberado (verde) ou travado (amarelo)
+  const trava = liberado
+    ? `<div style="margin-top:12px;padding:12px 14px;background:rgba(34,197,94,.12);border-radius:10px;border-left:3px solid var(--green);font-size:12px;line-height:1.55">
+        ✅ <b style="color:var(--green)">Prêmio liberado.</b> ${liberadoLoja
+          ? `A loja está em <b>${fP(lojaPct)}</b> da meta do mês (precisa 90%).`
+          : `Você passou de <b>R$ 40 mil</b> sozinha — garante o prêmio mesmo se a loja não bater 90%.`}
+      </div>`
+    : `<div style="margin-top:12px;padding:12px 14px;background:rgba(234,179,8,.10);border-radius:10px;border-left:3px solid var(--yellow);font-size:12px;line-height:1.55">
+        🔒 <b style="color:var(--yellow)">Prêmio ainda travado.</b> A loja está em <b>${fP(lojaPct)}</b> da meta do mês — precisa de <b>90%</b> pra liberar. Ou você fazer <b>mais de R$ 40 mil</b> sozinha. Bora! A loja inteira sobe junto.
+      </div>`;
+
+  return topo + tabela + trava;
 }
 
 function renderHistoricoPremios() {
