@@ -138,7 +138,7 @@ async function coletaEmpresa(page, E) {
 const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true, viewport: { width: 1600, height: 1000 } });
 const page = ctx.pages()[0] || (await ctx.newPage());
 try {
-  await garantirSessao(page, { log });
+  await garantirSessao(page, { log, tokenOpcional: true });  // raspa relatorio_manut.asp (só sessão; ERP migrou 30/07)
   const result = {};
   for (const E of argEmp) {
     try { result[EMP_TO_LOJA[E] || E] = await coletaEmpresa(page, E); }

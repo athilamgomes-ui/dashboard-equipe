@@ -224,7 +224,7 @@ async function runOnce() {
   const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true, viewport: { width: 1400, height: 900 } });
   const page = ctx.pages()[0] || (await ctx.newPage());
   try {
-    await garantirSessao(page, { log });
+    await garantirSessao(page, { log, tokenOpcional: true });  // usa token_api (sobreviveu); só travava no garantirSessao (ERP migrou 30/07)
     const pend = await coletaPendentes(page);
     let lanc = [];
     try { lanc = await coletaLancadas(page); } catch (e) { log(`lançadas FALHOU (segue só com pendentes): ${e.message}`); }

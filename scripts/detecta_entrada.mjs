@@ -62,7 +62,7 @@ try {
   const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true, viewport: { width: 1400, height: 900 } });
   const page = ctx.pages()[0] || (await ctx.newPage());
   try {
-    await garantirSessao(page, { log: () => {} });
+    await garantirSessao(page, { log: () => {}, tokenOpcional: true });  // usa token_api (sobreviveu); só travava no garantirSessao (ERP migrou 30/07)
     await page.goto(URL_NFE, { waitUntil: "domcontentloaded", timeout: 45000 });
     let token = null;
     for (let i = 0; i < 30; i++) { token = await page.evaluate(() => localStorage.getItem("token_api")).catch(() => null); if (token) break; await page.waitForTimeout(500); }

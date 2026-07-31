@@ -42,7 +42,7 @@ if (!arquivo) { log("uso: node aplica_precos_erp.mjs <arquivo.txt> [--tipo S|K|R
   const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true, viewport: { width: 1400, height: 900 } });
   const page = ctx.pages()[0] || (await ctx.newPage());
   try {
-    await garantirSessao(page, { log });
+    await garantirSessao(page, { log, tokenOpcional: true });  // só auth p/ o usuário aplicar via .txt (ERP migrou 30/07); NÃO altera a lógica de escrita
     await page.goto(URL_LOTE, { waitUntil: "domcontentloaded", timeout: 45000 });
     await page.waitForSelector("#file1", { timeout: 20000 });
     await page.setInputFiles("#file1", arquivo);

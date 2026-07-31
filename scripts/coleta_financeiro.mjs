@@ -189,7 +189,7 @@ async function main() {
   const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true, viewport: { width: 1400, height: 900 } });
   const page = ctx.pages()[0] || (await ctx.newPage());
   try {
-    await garantirSessao(page, { log });
+    await garantirSessao(page, { log, tokenOpcional: true });  // raspa relatorio_faturas_periodo.asp (só sessão; ERP migrou 30/07)
   } catch (e) {
     log(`garantirSessao falhou: ${e.code || ""} ${e.message}`);
     await ctx.close().catch(() => {});

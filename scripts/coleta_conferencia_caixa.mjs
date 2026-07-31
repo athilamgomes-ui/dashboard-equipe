@@ -705,7 +705,7 @@ try {
   // login falha com NAV_FAIL. Tentar de novo depois de um tempo resolve.
   let tentativa = 0;
   while (true) {
-    try { await garantirSessao(page, { log }); break; }
+    try { await garantirSessao(page, { log, tokenOpcional: true }); break; }  // raspa/POST ASP só com sessão (ERP migrou 30/07)
     catch (e) {
       tentativa++;
       // O cron da precificação roda a cada 15 min em dia útil e usa o mesmo perfil.

@@ -331,7 +331,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
   const page = ctx.pages()[0] || (await ctx.newPage());
   page.on("dialog", d => d.accept().catch(() => {})); // "Sessão expirada" no relatório de preços é espúrio/não-fatal — aceitar e seguir (o relatório renderiza mesmo assim)
   try {
-    await garantirSessao(page, { log });
+    await garantirSessao(page, { log, tokenOpcional: true });  // usa token_api (sobreviveu); só travava no garantirSessao (ERP migrou api_token_lma 30/07)
     await gotoRetry(page, URL_NFE);
     let token = null;
     for (let i = 0; i < 30; i++) { token = await page.evaluate(() => localStorage.getItem("token_api")).catch(() => null); if (token) break; await page.waitForTimeout(500); }
