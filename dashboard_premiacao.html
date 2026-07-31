@@ -1260,40 +1260,41 @@ const HISTORICO_PREMIOS = {
     // snapshot anterior de 18/07 12:16 era parcial — lock órfão barrou os crons de sáb/dom).
     // Meta Real S3: L1=28507 L3=19500 L4=28515 L5=20389. Cliente 8 = R$0. L4 com bônus Marcas A (33,9%).
     // S4 CONGELADA 26/07/2026 09:34 (fechou sáb 25/07; coleta final 20–25/07 com sábado completo).
+    // S5 CONGELADA 31/07/2026 19:02 (fechou sex 31/07; coleta final 27–31/07). Meta Real S5: L1=19130 L3=15915 L4=14558 L5=22993. L1 (32,1%) bônus MA. L5 64% (<70%) sem pool.
     // Meta Real S4: L1=25000 L3=16065 L4=25000 L5=20000. Cliente 8 = R$0.
     // L1 (118,5%, MA 30,2%≥30→bônus, faixa 110) e L4 (128,7%, MA 30,0%≥30→bônus, faixa 120) com bônus Marcas A.
     L1: {
       // Tatiane de FÉRIAS até agosto — R$89 lançados no código dela na S2 foram
       // movidos pra Outros (correção manual do admin 13/07) e o pool redistribuído.
-      'Rayra': {S1:157, S2:67, S3:129, S4:146},
-      'Sofia': {S1:101, S2:47, S3:111, S4:107},
-      'Bárbara': {S1:162, S2:66, S3:110, S4:147},
-      _em_pct: {S1:125, S2:99, S3:115, S4:119},
-      _pool:   {S1:420, S2:180, S3:350, S4:400},  // S4: faixa 110 (400) com bônus Marcas A (30,2%)
+      'Rayra': {S1:157, S2:67, S3:129, S4:146, S5:135},
+      'Sofia': {S1:101, S2:47, S3:111, S4:107, S5:200},
+      'Bárbara': {S1:162, S2:66, S3:110, S4:147, S5:122},
+      _em_pct: {S1:125, S2:99, S3:115, S4:119, S5:122},
+      _pool:   {S1:420, S2:180, S3:350, S4:400, S5:470},  // S4: faixa 110 (400) com bônus Marcas A (30,2%)
     },
     L3: {
-      'Ana Mira': {S1:89, S2:92, S3:24, S4:93},
-      'Raimunda': {S1:143, S2:50, S3:30, S4:60},
-      'Brunna': {S1:88, S2:52, S3:17, S4:53},
-      'Naila': {S1:100, S2:86, S3:29, S4:74},
-      _em_pct: {S1:126, S2:110, S3:89, S4:104},
-      _pool:   {S1:420, S2:280, S3:100, S4:280},  // S4: faixa 100 (280), sem bônus (MA 15,5%)
+      'Ana Mira': {S1:89, S2:92, S3:24, S4:93, S5:122},
+      'Raimunda': {S1:143, S2:50, S3:30, S4:60, S5:121},
+      'Brunna': {S1:88, S2:52, S3:17, S4:53, S5:38},
+      'Naila': {S1:100, S2:86, S3:29, S4:74, S5:139},
+      _em_pct: {S1:126, S2:110, S3:89, S4:104, S5:126},
+      _pool:   {S1:420, S2:280, S3:100, S4:280, S5:420},  // S4: faixa 100 (280), sem bônus (MA 15,5%)
     },
     L4: {
-      'Tanaia': {S1:27, S2:6, S3:1, S4:23},
-      'Josilene': {S1:123, S2:50, S3:110, S4:184},
-      'Bruna F.': {S1:166, S2:85, S3:227, S4:134},
-      'Débora': {S1:154, S2:39, S3:132, S4:129},
-      _em_pct: {S1:130, S2:99, S3:122, S4:129},
-      _pool:   {S1:470, S2:180, S3:470, S4:470},  // S1/S3/S4: 420 + 50 bônus Marcas A
+      'Tanaia': {S1:27, S2:6, S3:1, S4:23, S5:10},
+      'Josilene': {S1:123, S2:50, S3:110, S4:184, S5:122},
+      'Bruna F.': {S1:166, S2:85, S3:227, S4:134, S5:152},
+      'Débora': {S1:154, S2:39, S3:132, S4:129, S5:136},
+      _em_pct: {S1:130, S2:99, S3:122, S4:129, S5:207},
+      _pool:   {S1:470, S2:180, S3:470, S4:470, S5:420},  // S1/S3/S4: 420 + 50 bônus Marcas A
     },
     L5: {
-      'Rosiene': {S1:177, S2:25, S3:43, S4:15},
-      'Joyce': {S1:129, S2:5, S3:46, S4:23},
-      'Rayssa': {S1:169, S2:24, S3:53, S4:24},
-      'Karina': {S1:155, S2:26, S3:38, S4:18},
-      _em_pct: {S1:154, S2:72, S3:98, S4:77},
-      _pool:   {S1:630, S2:80, S3:180, S4:80},  // S4: faixa 70 (80), sem bônus (MA 15,4%)
+      'Rosiene': {S1:177, S2:25, S3:43, S4:15, S5:0},
+      'Joyce': {S1:129, S2:5, S3:46, S4:23, S5:0},
+      'Rayssa': {S1:169, S2:24, S3:53, S4:24, S5:0},
+      'Karina': {S1:155, S2:26, S3:38, S4:18, S5:0},
+      _em_pct: {S1:154, S2:72, S3:98, S4:77, S5:64},
+      _pool:   {S1:630, S2:80, S3:180, S4:80, S5:0},  // S4: faixa 70 (80), sem bônus (MA 15,4%)
     },
   },
 };
