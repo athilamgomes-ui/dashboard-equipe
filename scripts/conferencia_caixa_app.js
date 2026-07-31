@@ -539,8 +539,13 @@ function conciliarForma(loja, externos, campo, rotulo, todosExternos){
     const cand = movLoja
       .filter(e=>Math.abs(diasEntre(e.d,t.d))<=1 && Math.abs(e.v-t.v)<=0.05 && e[campo]<=0.005)
       .sort((a,b)=>Math.abs(a.v-t.v)-Math.abs(b.v-t.v) || Math.abs(diasEntre(a.d,t.d))-Math.abs(diasEntre(b.d,t.d)));
-    if (cand.length)
+    if (cand.length){
       trocadas.push({lado:"externo", t, e:cand[0], formas:formasDoDoc(cand[0]), ambiguo:cand.length>1});
+      // A tabela de cruzamento monta as linhas sem documento a partir das cobranças não
+      // casadas e escrevia "sem venda no ERP" também para estas — contradizendo o quadro
+      // logo abaixo, que explica a mesma cobrança como forma de pagamento trocada.
+      t.troca = {doc:cand[0].doc, formas:formasDoDoc(cand[0])};
+    }
     else soExterno.push(t);
   }
   // Do lado do ERP, só vale como "forma trocada" se houver no arquivo um lançamento que
@@ -927,10 +932,11 @@ function rConcil(){
       });
       // cobranças sem documento no ERP
       r.externos.filter(t=>!t.u).forEach(t=>{
-        linhas.push({ loja:l, d:t.d, doc:null, venda:null, pag:null, cartaoErp:null,
+        linhas.push({ loja:l, d:t.d, doc:t.troca?t.troca.doc:null, venda:null, pag:null, cartaoErp:null,
                       pixErp:0, din:0, lnk:0,
                       bruto:t.v, liq:t.liq, taxa:t.taxa, hora:t.h,
-                      meio:t.meio, band:t.band, parcelas:t.parcelas, taxaInf:t.taxaInf });
+                      meio:t.meio, band:t.band, parcelas:t.parcelas, taxaInf:t.taxaInf,
+                      troca:t.troca||null });
       });
     });
     if (!linhas.length) return "";
@@ -942,7 +948,9 @@ function rConcil(){
       if (x.cartaoErp!=null && x.bruto==null)
         p.push("cartão no ERP sem cobrança na maquininha");
       if (x.bruto!=null && x.cartaoErp==null)
-        p.push("cobrança na maquininha sem venda no ERP");
+        p.push(x.troca
+          ? "no ERP a venda foi finalizada como "+x.troca.formas+" (doc "+x.troca.doc+")"
+          : "cobrança na maquininha sem venda no ERP");
       if (!x.agrupada && !x.dividido && x.cartaoErp!=null && x.bruto!=null && Math.abs(x.cartaoErp-x.bruto)>TOLC)
         p.push("cartão no ERP ("+nf2(x.cartaoErp)+") ≠ cobrado na maquininha ("+nf2(x.bruto)+")");
       if (!x.agrupada && !x.dividido && x.bruto!=null && x.liq!=null && x.taxa!=null && Math.abs(x.bruto-x.taxa-x.liq)>TOLC)
