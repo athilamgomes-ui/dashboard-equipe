@@ -417,37 +417,61 @@ function conciliarForma(loja, externos, campo, rotulo, todosExternos){
   if (!movLoja.length) throw new Error("o painel ainda não tem o movimento diário da "+loja+" — rode a atualização do dashboard antes.");
   if (!externos.length) throw new Error("o arquivo não tem lançamentos de "+rotulo);
 
-  const datas = externos.map(t=>t.d).sort();
-  const ini=datas[0], fim=datas[datas.length-1];
+  let datas = externos.map(t=>t.d).sort();
+  let ini=datas[0], fim=datas[datas.length-1];
 
   // O painel só tem o movimento de uma janela. Se o arquivo for de fora dela, o lado do
   // ERP viria vazio e TODO lançamento apareceria como "sem venda" — erro grave e
   // silencioso. Melhor recusar com a mensagem certa.
+  // ⚠️ Sobreposição PARCIAL é o caso perigoso: o arquivo vai até 31/07 e o movimento
+  // termina em 30/07, então o dia 31 inteiro virava "cobrança sem venda no ERP" sem
+  // nenhum aviso. Aqui esses dias saem da análise e são mostrados à parte.
+  let foraJanela=[];
   if (D.movimentoPeriodo){
     const jIni=isoDe(D.movimentoPeriodo.ini), jFim=isoDe(D.movimentoPeriodo.fim);
     if (fim < jIni || ini > jFim)
       throw new Error("o arquivo vai de "+dBR(ini)+" a "+dBR(fim)+", mas o painel só tem o movimento do ERP de "
         +dBR(jIni)+" a "+dBR(jFim)+". Carregue um arquivo desse período.");
+    foraJanela = externos.filter(t=>t.d<jIni || t.d>jFim);
+    if (foraJanela.length){
+      externos = externos.filter(t=>t.d>=jIni && t.d<=jFim);
+      if (!externos.length)
+        throw new Error("nenhum lançamento de "+rotulo+" dentro do período que o painel tem do ERP ("
+          +dBR(jIni)+" a "+dBR(jFim)+").");
+      datas = externos.map(t=>t.d).sort();
+      ini=datas[0]; fim=datas[datas.length-1];
+    }
   }
 
   const erp = movLoja.filter(x=>x[campo]>0 && x.d>=ini && x.d<=fim).map(x=>({...x,u:false}));
-  const centavos=[], agrupadas=[];
+  const centavos=[], agrupadas=[], divididas=[];
 
-  const casar=(jan,tol,reg)=>{
+  // Casamento por MELHOR AJUSTE, não pelo primeiro que aparecer. O laço antigo percorria
+  // as cobranças na ordem do arquivo e ficava com o primeiro documento dentro da janela:
+  // uma cobrança de 19/06 roubava o documento de 18/06 que era de outra, e a legítima
+  // acabava em "sem venda no ERP". Agora monta todos os pares possíveis, ordena pelo mais
+  // próximo (dia, depois valor, depois hora) e consome nessa ordem.
+  const parear=(janela,tol,reg)=>{
+    const pares=[];
     for (const t of externos){
       if (t.u) continue;
       for (const e of erp){
-        if (e.u || Math.abs(diasEntre(e.d,t.d))>jan) continue;
-        if (Math.abs(e[campo]-t.v)<=tol){
-          t.u=e.u=true; e.parId=t.id;
-          if (reg && Math.abs(e[campo]-t.v)>0.005) reg.push({e,t});
-          break;
-        }
+        if (e.u) continue;
+        const dd=Math.abs(diasEntre(e.d,t.d));
+        if (dd>janela) continue;
+        const dv=Math.abs(e[campo]-t.v);
+        if (dv>tol(t.v)) continue;
+        pares.push({t,e,dd,dv});
       }
     }
+    pares.sort((a,b)=>a.dd-b.dd || a.dv-b.dv);
+    for (const p of pares){
+      if (p.t.u || p.e.u) continue;
+      p.t.u=p.e.u=true; p.e.parId=p.t.id;
+      if (reg && p.dv>0.005) reg.push({e:p.e,t:p.t});
+    }
   };
-  [0,1,3].forEach(j=>casar(j,0.005));
-  [0,1].forEach(j=>casar(j,0.15,centavos));
+  parear(3, ()=>0.005);
 
   // um lançamento pagando 2 ou 3 documentos
   for (const t of externos){
@@ -456,6 +480,7 @@ function conciliarForma(loja, externos, campo, rotulo, todosExternos){
     let achou=false;
     for (const k of [2,3]){
       for (const combo of combinacoes(c,k)){
+        if (combo.some(x=>x.u)) continue;
         if (Math.abs(combo.reduce((a,x)=>a+x[campo],0)-t.v)<=0.05){
           t.u=true; combo.forEach(x=>{x.u=true; x.parId=t.id;});
           agrupadas.push({t,docs:combo}); achou=true; break;
@@ -464,6 +489,47 @@ function conciliarForma(loja, externos, campo, rotulo, todosExternos){
       if (achou) break;
     }
   }
+
+  // UMA VENDA PAGA COM DOIS OU TRÊS CARTÕES — o espelho do caso acima, e o que mais
+  // sujava o relatório. O cliente divide a compra em duas máquinas/cartões: o ERP tem UM
+  // documento de R$ 131,94 e a adquirente tem DUAS cobranças (R$ 31,94 + R$ 100,00, às
+  // 14:27 as duas). Sem isto o painel acusava três erros de uma venda certa: as duas
+  // cobranças como "sem venda no ERP" e o documento como "sem lançamento" — e ainda por
+  // cima uma delas costumava ser adotada como "forma de pagamento trocada" por bater com
+  // o total de outra venda qualquer.
+  // Exige proximidade de HORA: pagamento dividido acontece na mesma venda, um cartão
+  // logo depois do outro. Sem essa trava, somas coincidentes entre cobranças distantes
+  // do dia gerariam par falso.
+  const minutos = h => { const m=/^(\d{2}):(\d{2})/.exec(h||""); return m ? (+m[1])*60+(+m[2]) : null; };
+  const juntas = combo => {
+    const ms=combo.map(x=>minutos(x.h));
+    if (ms.some(x=>x===null)) return combo.every(x=>x.d===combo[0].d);
+    return (Math.max(...ms)-Math.min(...ms)) <= 30 && combo.every(x=>x.d===combo[0].d);
+  };
+  for (const e of erp){
+    if (e.u) continue;
+    const c=externos.filter(t=>!t.u && Math.abs(diasEntre(t.d,e.d))<=1);
+    let achou=false;
+    for (const k of [2,3]){
+      for (const combo of combinacoes(c,k)){
+        if (combo.some(x=>x.u) || !juntas(combo)) continue;
+        if (Math.abs(combo.reduce((a,x)=>a+x.v,0)-e[campo])<=0.05){
+          e.u=true; combo.forEach(x=>{x.u=true;});
+          e.parId=combo[0].id; e.parIds=combo.map(x=>x.id);
+          divididas.push({e,tt:combo}); achou=true; break;
+        }
+      }
+      if (achou) break;
+    }
+  }
+
+  // Sobrou dos dois lados com valor PARECIDO: é a mesma venda com diferença de valor, não
+  // duas ocorrências separadas. Contá-las como "sem venda" + "sem lançamento" dobrava o
+  // erro e escondia que os dois lados se referem ao mesmo negócio. Tolerância proporcional
+  // (1% do valor, no máximo R$ 5,00) porque R$ 0,30 em R$ 703 e R$ 3,00 em R$ 459 são a
+  // mesma coisa, e um valor de fato diferente — R$ 149,50 × R$ 159,50 — precisa continuar
+  // aparecendo como pendência de verdade.
+  parear(1, v=>Math.max(0.15, Math.min(Math.abs(v)*0.01, 5)), centavos);
 
   // sobras: tenta explicar como forma de pagamento trocada
   const trocadas=[], soExterno=[], soErp=[];
@@ -482,7 +548,7 @@ function conciliarForma(loja, externos, campo, rotulo, todosExternos){
   // PIX enviado (transferência) e estorno não são pagamento — antes entravam aqui e
   // produziam falso positivo do tipo "venda paga com Depósito de vendas".
   const pagamentos = (todosExternos||[]).filter(t=>
-    !externos.includes(t) && (t.classe===undefined || t.classe==="pix_recebido"));
+    !externos.includes(t) && !foraJanela.includes(t) && (t.classe===undefined || t.classe==="pix_recebido"));
   for (const e of erp.filter(x=>!x.u)){
     const cand = pagamentos.filter(t=>Math.abs(diasEntre(t.d,e.d))<=1 && Math.abs(t.v-e[campo])<=0.05);
     // `formas` é SEMPRE o lado do ERP — a tabela mostra essa coluna sob "No ERP". Aqui
@@ -493,12 +559,30 @@ function conciliarForma(loja, externos, campo, rotulo, todosExternos){
     else soErp.push(e);
   }
 
+  // O que sobrou de verdade vai para a tela com o vizinho mais próximo do outro lado. Dizer
+  // só "sem venda no ERP" faz o Athila ir conferir no ERP e achar a venda lá — a informação
+  // que falta é qual documento chegou perto e por quanto ele erra.
+  // Só vale como pista se o vizinho for realmente parecido (até 20% de diferença). Um
+  // documento de R$ 335,90 apontado como pista de uma cobrança de R$ 22,90 não ajuda
+  // ninguém — atrapalha, porque parece uma sugestão de par.
+  const pista = (a,b) => Math.abs(a-b) <= Math.max(5, Math.abs(a)*0.2);
+  soExterno.forEach(t=>{
+    const p = soErp.filter(e=>Math.abs(diasEntre(e.d,t.d))<=1 && pista(t.v,e[campo]))
+                   .sort((a,b)=>Math.abs(a[campo]-t.v)-Math.abs(b[campo]-t.v))[0];
+    if (p) t.dica = "parecido: doc "+p.doc+" "+nf2(p[campo])+" (dif. "+nf2(t.v-p[campo])+")";
+  });
+  soErp.forEach(e=>{
+    const p = soExterno.filter(t=>Math.abs(diasEntre(t.d,e.d))<=1 && pista(e[campo],t.v))
+                       .sort((a,b)=>Math.abs(a.v-e[campo])-Math.abs(b.v-e[campo]))[0];
+    if (p) e.dica = "parecido: cobrança de "+nf2(p.v)+(p.h?" às "+p.h:"")+" (dif. "+nf2(e[campo]-p.v)+")";
+  });
+
   return {
     loja, campo, rotulo, ini, fim,
     totERP: erp.reduce((a,e)=>a+e[campo],0),
     totExt: externos.reduce((a,t)=>a+t.v,0),
     nERP: erp.length, nExt: externos.length,
-    externos, erp, centavos, agrupadas, trocadas, soExterno, soErp,
+    externos, erp, centavos, agrupadas, divididas, trocadas, soExterno, soErp, foraJanela,
   };
 }
 
@@ -824,12 +908,22 @@ function rConcil(){
       r.erp.forEach(e=>{
         const t = (e.parId!=null ? porId[e.parId] : null) || null;
         const agrupada = t && quantosDocs[e.parId] > 1;
+        // Venda paga com mais de um cartão: o documento tem N cobranças. O bruto, o
+        // líquido e a taxa da linha são a SOMA delas — comparar o documento com uma só
+        // acusaria "cartão no ERP ≠ cobrado na maquininha" numa venda perfeitamente certa.
+        const div = e.parIds && e.parIds.length>1 ? e.parIds.map(i=>porId[i]).filter(Boolean) : null;
+        const som = (f) => div.reduce((a,x)=>a+(x[f]!=null?x[f]:0),0);
         linhas.push({ loja:l, d:e.d, doc:e.doc, venda:e.v, pag:(e.pag!=null?e.pag:null),
                       cartaoErp:e.car, pixErp:e.pix, din:e.din, lnk:e.lnk,
-                      bruto:t?t.v:null, liq:t?t.liq:null, taxa:t?t.taxa:null,
-                      hora:t?t.h:"", meio:t?t.meio:"", band:t?t.band:"",
-                      parcelas:t?t.parcelas:"", taxaInf:t?t.taxaInf:null,
-                      agrupada, nDocs:t?quantosDocs[e.parId]:0 });
+                      bruto: div ? som("v") : (t?t.v:null),
+                      liq:   div ? som("liq") : (t?t.liq:null),
+                      taxa:  div ? som("taxa") : (t?t.taxa:null),
+                      hora:  div ? div[0].h : (t?t.h:""),
+                      meio:  div ? div.length+" cartões" : (t?t.meio:""),
+                      band:  div ? "" : (t?t.band:""),
+                      parcelas: div ? "" : (t?t.parcelas:""),
+                      taxaInf:  div ? null : (t?t.taxaInf:null),
+                      agrupada, dividido:!!div, nDocs:t?quantosDocs[e.parId]:0 });
       });
       // cobranças sem documento no ERP
       r.externos.filter(t=>!t.u).forEach(t=>{
@@ -849,9 +943,9 @@ function rConcil(){
         p.push("cartão no ERP sem cobrança na maquininha");
       if (x.bruto!=null && x.cartaoErp==null)
         p.push("cobrança na maquininha sem venda no ERP");
-      if (!x.agrupada && x.cartaoErp!=null && x.bruto!=null && Math.abs(x.cartaoErp-x.bruto)>TOLC)
+      if (!x.agrupada && !x.dividido && x.cartaoErp!=null && x.bruto!=null && Math.abs(x.cartaoErp-x.bruto)>TOLC)
         p.push("cartão no ERP ("+nf2(x.cartaoErp)+") ≠ cobrado na maquininha ("+nf2(x.bruto)+")");
-      if (!x.agrupada && x.bruto!=null && x.liq!=null && x.taxa!=null && Math.abs(x.bruto-x.taxa-x.liq)>TOLC)
+      if (!x.agrupada && !x.dividido && x.bruto!=null && x.liq!=null && x.taxa!=null && Math.abs(x.bruto-x.taxa-x.liq)>TOLC)
         p.push("bruto − taxa ≠ líquido");
       // a adquirente informa uma taxa e cobra outra
       const tr = taxaReal(x);
@@ -874,8 +968,10 @@ function rConcil(){
       '<td style="text-align:left">'+(x.doc?esc2(x.doc):'<span class="zero">sem documento</span>')+'</td>'+
       '<td style="text-align:left">'+esc2(planoDe(x))+'</td>' +
       cel(x.venda) + cel(x.pag) +
-      (x.agrupada
-        ? '<td class="num zero" title="uma cobrança pagou '+x.nDocs+' documentos">'+nf2(x.bruto)+' ⋯</td>'+
+      (x.agrupada || x.dividido
+        ? '<td class="num zero" title="'+(x.dividido
+              ? 'a venda foi paga com mais de um cartão — soma das cobranças'
+              : 'uma cobrança pagou '+x.nDocs+' documentos')+'">'+nf2(x.bruto)+' ⋯</td>'+
           '<td class="num zero">'+(x.liq!=null?nf2(x.liq):"—")+' ⋯</td>'
         : cel(x.bruto) + cel(x.liq)) +
       '<td style="text-align:left">'+(x.problemas.length
@@ -962,7 +1058,8 @@ function rConcil(){
     // e a diferença aparecia zerada. O PIX escapou só porque lá as duas chaves coincidem.
     const cErp = (lojas.map(l=>conciliacoes[l][campo]).find(Boolean)||{}).campo || campo;
     const trocadas=juntar(campo,r=>r.trocadas), soExt=juntar(campo,r=>r.soExterno),
-          soErp=juntar(campo,r=>r.soErp), cent=juntar(campo,r=>r.centavos), agr=juntar(campo,r=>r.agrupadas);
+          soErp=juntar(campo,r=>r.soErp), cent=juntar(campo,r=>r.centavos), agr=juntar(campo,r=>r.agrupadas),
+          divs=juntar(campo,r=>r.divididas), fora=juntar(campo,r=>r.foraJanela);
     let h="";
 
     // totais por dia
@@ -1000,31 +1097,59 @@ function rConcil(){
     h += caixaBox("🔴 "+rot+" na "+ladoExt+", sem venda no ERP", "entrou dinheiro e não há venda com esse valor",
       soExt.length
         ? '<thead><tr><th>Data</th><th>Hora</th><th style="text-align:left">Loja</th><th>Valor</th>'+
-          '<th style="text-align:left">Detalhe</th><th style="text-align:left">Cliente</th></tr></thead><tbody>'+
+          '<th style="text-align:left">Detalhe</th><th style="text-align:left">Cliente</th>'+
+          '<th style="text-align:left">Mais próximo no ERP</th></tr></thead><tbody>'+
           soExt.sort((a,b)=>a.d<b.d?1:-1).map(t=>
             '<tr><td><b>'+dBR(t.d)+'</b></td><td class="num zero">'+esc2(t.h)+'</td>'+
             '<td style="text-align:left">'+tagLoja(t.loja)+'</td>'+
             '<td class="num falta"><b>'+nf2(t.v)+'</b></td>'+
             '<td style="text-align:left">'+esc2((t.meio||t.tipo||"")+(t.band?" "+t.band:""))+'</td>'+
-            '<td style="text-align:left">'+esc2(t.nome||t.nsu||"")+'</td></tr>').join("")+
-          '<tr><td colspan="3"><b>Total</b></td><td class="num falta"><b>'+nf2(soExt.reduce((a,t)=>a+t.v,0))+'</b></td><td colspan="2"></td></tr></tbody>'
+            '<td style="text-align:left">'+esc2(t.nome||t.nsu||"")+'</td>'+
+            '<td style="text-align:left" class="zero">'+esc2(t.dica||"—")+'</td></tr>').join("")+
+          '<tr><td colspan="3"><b>Total</b></td><td class="num falta"><b>'+nf2(soExt.reduce((a,t)=>a+t.v,0))+'</b></td><td colspan="3"></td></tr></tbody>'
         : vazioOk("todo "+rot+" da "+ladoExt+" tem venda no ERP"));
 
     h += caixaBox("🟠 "+rot+" no ERP, sem lançamento na "+ladoExt, "venda finalizada sem entrada correspondente",
       soErp.length
         ? '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>'+rot+' no ERP</th>'+
-          '<th>Total do documento</th><th style="text-align:left">Documento</th></tr></thead><tbody>'+
+          '<th>Total do documento</th><th style="text-align:left">Documento</th>'+
+          '<th style="text-align:left">Mais próximo na '+ladoExt+'</th></tr></thead><tbody>'+
           soErp.sort((a,b)=>a.d<b.d?1:-1).map(e=>
             '<tr><td><b>'+dBR(e.d)+'</b></td><td style="text-align:left">'+tagLoja(e.loja)+'</td>'+
             '<td class="num falta"><b>'+nf2(e[cErp])+'</b></td><td class="num zero">'+nf2(e.v)+'</td>'+
-            '<td style="text-align:left">'+esc2(e.doc)+'</td></tr>').join("")+
-          '<tr><td colspan="2"><b>Total</b></td><td class="num falta"><b>'+nf2(soErp.reduce((a,e)=>a+e[cErp],0))+'</b></td><td colspan="2"></td></tr></tbody>'
+            '<td style="text-align:left">'+esc2(e.doc)+'</td>'+
+            '<td style="text-align:left" class="zero">'+esc2(e.dica||"—")+'</td></tr>').join("")+
+          '<tr><td colspan="2"><b>Total</b></td><td class="num falta"><b>'+nf2(soErp.reduce((a,e)=>a+e[cErp],0))+'</b></td><td colspan="3"></td></tr></tbody>'
         : vazioOk("todo "+rot+" do ERP tem lançamento na "+ladoExt),
       campo==="pix"
         ? "Venda registrada como PIX que não caiu nesta conta. Pode ter caído em outra chave — ou ter sido paga em dinheiro, e aí sobra na gaveta."
         : "Pode ser venda em outra maquininha, ou venda finalizada como cartão sem a cobrança ter acontecido.");
 
-    if (cent.length) h += caixaBox("🟡 "+rot+": diferença de centavos", "mesmo lançamento, valor diferente",
+    if (fora.length) h += caixaBox("⚪ "+rot+": fora do período que o painel tem do ERP",
+      "não dá para conferir — não é falta de venda",
+      '<thead><tr><th>Data</th><th>Hora</th><th style="text-align:left">Loja</th><th>Valor</th>'+
+      '<th style="text-align:left">Detalhe</th></tr></thead><tbody>'+
+      fora.sort((a,b)=>a.d<b.d?1:-1).map(t=>
+        '<tr><td><b>'+dBR(t.d)+'</b></td><td class="num zero">'+esc2(t.h)+'</td>'+
+        '<td style="text-align:left">'+tagLoja(t.loja)+'</td><td class="num zero">'+nf2(t.v)+'</td>'+
+        '<td style="text-align:left">'+esc2((t.meio||t.tipo||"")+(t.band?" "+t.band:""))+'</td></tr>').join("")+
+      '<tr><td colspan="3"><b>Total</b></td><td class="num zero"><b>'+nf2(fora.reduce((a,t)=>a+t.v,0))+
+      '</b></td><td></td></tr></tbody>',
+      "O arquivo tem lançamentos de dias que o painel ainda não coletou do ERP. Eles ficam de fora da "+
+      "conferência em vez de aparecerem como venda faltando. Rode a atualização do painel e recarregue o arquivo.");
+
+    if (divs.length) h += caixaBox("✅ "+rot+": venda paga com mais de um cartão", "normal — registrado para conferência",
+      '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th style="text-align:left">Documento</th>'+
+      '<th>Valor no ERP</th><th style="text-align:left">Cobranças na '+ladoExt+'</th></tr></thead><tbody>'+
+      divs.sort((a,b)=>a.e.d<b.e.d?1:-1).map(x=>
+        '<tr><td><b>'+dBR(x.e.d)+'</b></td><td style="text-align:left">'+tagLoja(x.loja)+'</td>'+
+        '<td style="text-align:left">'+esc2(x.e.doc)+'</td><td class="num">'+nf2(x.e[cErp])+'</td>'+
+        '<td style="text-align:left">'+x.tt.map(t=>nf2(t.v)+(t.h?' <span class="zero">'+esc2(t.h)+'</span>':'')).join(" + ")+
+        '</td></tr>').join("")+'</tbody>',
+      "O cliente dividiu a compra em dois ou três cartões. Antes cada uma dessas vendas gerava três alarmes "+
+      "falsos: as cobranças como “sem venda no ERP” e o documento como “sem lançamento”.");
+
+    if (cent.length) h += caixaBox("🟡 "+rot+": mesma venda, valor diferente", "diferença de centavos ou poucos reais",
       '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th>ERP</th><th>'+ladoExt+'</th>'+
       '<th>Diferença</th><th style="text-align:left">Documento</th></tr></thead><tbody>'+
       cent.sort((a,b)=>a.e.d<b.e.d?1:-1).map(x=>
@@ -1105,7 +1230,7 @@ function processarConteudo(alvo, lj, nome, txt){
     };
     alvo.arquivos.push({nome, tipo:"extrato", conteudo:txt, imp});
   } else {
-    throw new Error("não reconheci o arquivo. Espero o relatório da maquininha (com coluna de forma de pagamento) ou o extrato da conta (com \\u0022Tipo de transação\\u0022 e \\u0022Detalhe\\u0022).");
+    throw new Error("não reconheci o arquivo. Espero o relatório da maquininha (com coluna de forma de pagamento) ou o extrato da conta (com “Tipo de transação” e “Detalhe”).");
   }
 }
 
