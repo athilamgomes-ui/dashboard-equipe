@@ -406,3 +406,51 @@ a convenção é a equipe começar o nome do arquivo pela loja: `L5 maquininha j
 reconhece `L1`/`L3`/`L4`/`L5` isolado e as cidades sem ambiguidade (Itaituba→L3, Santarém→L5;
 **Altamira não serve**, tem duas lojas). Nome divergente da loja selecionada **recusa** o arquivo.
 Arquivo recusado não cria a loja no estado — a análise roda num objeto à parte e só funde se passar.
+
+## Como o casamento funciona hoje (31/07/2026) — e o que ele já errou
+
+O Athila viu cobranças de R$ 53,80 e R$ 200,82 marcadas como "cobrança na maquininha sem venda no
+ERP" com a venda presente no movimento diário. **Não era dado faltando** — o movimento do painel
+bate com o fechamento de caixa dia a dia (confira com a soma de `car` por dia × `dias[].formas.cartao.calc`).
+Era o motor de casamento.
+
+Ordem dos passos em `conciliarForma`, e por que cada um existe:
+
+| # | Passo | Motivo |
+|---|---|---|
+| 1 | valor exato, ±3 dias, **melhor ajuste** | antes era primeiro-que-serve: uma cobrança de 19/06 ficava com o documento de 18/06 que era de outra, e a legítima sobrava como "sem venda" |
+| 2 | 1 cobrança pagando N documentos | cliente paga duas compras numa passada só |
+| 3 | **N cobranças pagando 1 documento** | cliente divide a compra em dois cartões — era a maior fonte de alarme falso |
+| 4 | mesma venda, valor diferente (1%, teto R$ 5) | R$ 0,30 em R$ 703 virava DOIS erros: "sem venda" de um lado e "sem lançamento" do outro |
+| 5 | forma de pagamento trocada | entrou como cartão, no ERP foi finalizada de outro jeito |
+| 6 | sobra de verdade, com o vizinho mais próximo | dizer só "sem venda" manda o Athila procurar no ERP às cegas |
+
+**Passo 3 é o que consertou a queixa.** O ERP tem UM documento de R$ 131,94; a adquirente tem DUAS
+cobranças (R$ 31,94 + R$ 100,00, às 14:27 as duas). Sem esse passo, uma venda certa gerava três
+alarmes: as duas cobranças como "sem venda no ERP" e o documento como "sem lançamento" — e ainda
+sobrava uma delas para ser adotada como "forma trocada" por coincidir com o total de outra venda.
+A trava é **hora**: as cobranças precisam estar a até 30 min uma da outra, senão somas coincidentes
+do dia inteiro casariam por acaso.
+
+⚠️ **Passos 3 e 4 são os que mais podem criar par falso.** Se um dia for preciso afrouxar, afrouxe
+o passo 4 (tolerância) e não o 3 (janela de hora). E rode o teste de invariante antes de publicar:
+toda cobrança tem que cair em **exatamente uma** categoria e a soma das categorias tem que bater
+com o total do arquivo.
+
+L5, maio–junho: "sem venda no ERP" caiu de 13 (R$ 2.144,30) para 5 (R$ 312,50); "sem lançamento",
+de 20 para 12.
+
+## Sobreposição PARCIAL do período é pior que nenhuma (31/07/2026)
+
+`conciliarForma` recusava o arquivo quando ele estava TODO fora da janela de movimento coletada,
+mas deixava passar a sobreposição parcial: arquivo até 31/07 com movimento até 30/07 fazia o dia 31
+inteiro virar "cobrança sem venda no ERP", sem nenhum aviso. Agora esses dias saem da análise e
+aparecem no quadro **"fora do período que o painel tem do ERP"**. Se ele aparecer, a resposta é
+rodar `atualizar_conferencia_caixa.sh` e recarregar o arquivo — não é falta de venda.
+
+## Rodar o motor fora do navegador (para depurar)
+
+Não dá para depurar isso clicando na página. O jeito rápido é carregar `conferencia_caixa_app.js`
+num contexto `vm` do Node com stubs de `document`/`PUBLICO`, injetar `D = {movimento, movimentoPeriodo}`
+do `conferencia_caixa_raw.json` e chamar `processarConteudo()` direto com o CSV. Aí dá para listar
+o que sobrou de cada lado e testar hipótese em segundos, sem senha, sem Pages e sem gravar nada.
