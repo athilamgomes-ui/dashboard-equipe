@@ -126,7 +126,7 @@ async function main() {
   const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true, viewport: { width: 1280, height: 900 } });
   const page = ctx.pages()[0] || (await ctx.newPage());
   try {
-    await garantirSessao(page, { log });
+    await garantirSessao(page, { log, tokenOpcional: true });  // raspa ASP: só precisa da sessão (ERP matou o token 30/07)
   } catch (e) {
     log(`login falhou: ${e.code || ""} ${e.message}`);
     await ctx.close();

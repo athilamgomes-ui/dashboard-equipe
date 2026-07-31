@@ -21,6 +21,14 @@ try {
   await garantirSessao(page, { log: logErr });
 } catch (e) {
   logErr(`garantirSessao falhou: ${e.code || ""} ${e.message}`);
+  // ERP migrou auth 30/07/2026: sem api_token_lma este coletor REST não funciona (aguardando Parte 2/JWT).
+  // Em vez de sair vazio (quebra o build no JSON.parse), emite {} → build PRESERVA a aba Vendedores anterior.
+  if (e.code === "NAV_FAIL") {
+    logErr("token indisponível — emitindo {} p/ preservar a aba Vendedores anterior (Parte 2 restaura via JWT)");
+    process.stdout.write("{}");
+    await ctx.close().catch(() => {});
+    process.exit(0);
+  }
   await ctx.close().catch(() => {});
   process.exit(e.code === "NO_CREDS" || e.code === "LOGIN_FAIL" ? 2 : 1);
 }

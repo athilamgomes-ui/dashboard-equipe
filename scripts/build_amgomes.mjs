@@ -52,7 +52,14 @@ const primeiroNome = full => {
 const arqLojas = process.argv[2] || "/tmp/lojas_out.json";
 const arqVend = process.argv[3] || "/tmp/vend_out.json";
 const lojasData = JSON.parse(fs.readFileSync(arqLojas, "utf8"));
-const vendData = JSON.parse(fs.readFileSync(arqVend, "utf8"));
+// vend_out pode vir vazio/{} quando o coletor REST não pôde autenticar (ERP migrou auth 30/07/2026).
+// Nesse caso NÃO regeneramos a aba Vendedores — preservamos o bloco anterior do HTML (em vez de estourar no JSON.parse).
+let vendData = {};
+try {
+  const _v = JSON.parse(fs.readFileSync(arqVend, "utf8"));
+  if (_v && typeof _v === "object") vendData = _v;
+} catch { /* vend_out ausente/inválido → vendData {} → preserva bloco anterior */ }
+const vendVazio = !["L1", "L3", "L4", "L5"].some(L => Array.isArray(vendData[L]) && vendData[L].length);
 let html = fs.readFileSync(HTML, "utf8");
 
 // ── Data/hora atuais ──
@@ -273,7 +280,9 @@ ${cards}
 }
 
 // ── 5) Vendedores (preserva m12 por nome) ──
-{
+if (vendVazio) {
+  log("aba Vendedores: vend_out vazio (ERP migrou auth, coletor REST sem token) — PRESERVANDO bloco anterior do HTML.");
+} else {
   const iIni = html.indexOf("// ─── VENDEDORES_INICIO");
   const iFim = html.indexOf("// ─── VENDEDORES_FIM");
   if (iIni < 0 || iFim < 0) die("marcadores VENDEDORES não encontrados");

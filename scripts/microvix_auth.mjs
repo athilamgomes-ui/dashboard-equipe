@@ -125,7 +125,7 @@ async function doLogin(page, log) {
  *
  * Retorna o token api_token_lma. Lança em caso de falha (.code definido).
  */
-export async function garantirSessao(page, { log = () => {} } = {}) {
+export async function garantirSessao(page, { log = () => {}, tokenOpcional = false } = {}) {
   log("garantindo sessão (v4/home — valida sessão ASP real)...");
   await page.goto(URL_HOME, { waitUntil: "domcontentloaded", timeout: 30000 });
 
@@ -149,6 +149,10 @@ export async function garantirSessao(page, { log = () => {} } = {}) {
     await page.waitForTimeout(500);
   }
   if (!token) {
+    if (tokenOpcional) {
+      log("api_token_lma indisponível — seguindo em modo SÓ-SESSÃO (tokenOpcional). ERP migrou auth ~30/07/2026; raspagem ASP funciona só com a sessão.");
+      return null;
+    }
     const e = new Error("api_token_lma indisponível após login");
     e.code = "NAV_FAIL";
     throw e;

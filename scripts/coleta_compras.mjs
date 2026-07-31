@@ -278,7 +278,10 @@ async function coletaPendentes(page) {
     if (token) break;
     await page.waitForTimeout(500);
   }
-  if (!token) throw new Error("pendentes: token_api indisponível");
+  if (!token) {
+    log("pendentes: token_api indisponível (ERP migrou auth 30/07) — retornando VAZIO; trânsito/divergencias ficam sem atualizar até a Parte 2 (JWT).");
+    return {};
+  }
   log(`pendentes: token_api OK (${token.length} chars)`);
 
   const out = await page.evaluate(async (empresas) => {
@@ -320,7 +323,7 @@ const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true
 const page = ctx.pages()[0] || (await ctx.newPage());
 
 try {
-  await garantirSessao(page, { log });
+  await garantirSessao(page, { log, tokenOpcional: true });  // saldos/notas raspam ASP (só sessão); ERP matou api_token_lma 30/07
 } catch (e) {
   log(`garantirSessao falhou: ${e.code || ""} ${e.message}`);
   await ctx.close().catch(() => {});
