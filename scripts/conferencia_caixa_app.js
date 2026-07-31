@@ -766,8 +766,7 @@ async function carregarHistorico(){
   const dentro = historico.filter(noPeriodo).length;
   el.innerHTML =
     '<div class="hist-aviso" style="padding-bottom:6px">'+historico.length+' conferência(s) na memória · '+
-      '<b>'+dentro+'</b> dentro do período escolhido, já somada(s) no relatório.'+
-      '<span id="c-sinc" style="margin-left:10px;color:var(--accent);font-weight:600"></span></div>'+
+      '<b>'+dentro+'</b> dentro do período escolhido, já somada(s) no relatório.</div>'+
     '<table><thead><tr><th style="text-align:left">Loja</th>'+
     '<th style="text-align:left">Período</th><th style="text-align:left">Arquivos</th><th></th></tr></thead><tbody>'+
     historico.map(h=>
@@ -841,30 +840,52 @@ async function abrirHistorico(id, silencioso){
 // junta. É por isso que ver "o mês" não exige carregar um arquivo do mês — o mês é a soma
 // dos dias que já foram carregados, cada um salvo no seu registro.
 const jaBuscados = new Set();     // ids já decifrados nesta sessão (decifrar é caro)
-let sincronizando = false;
+let sincronizando = false, pedidoPendente = false;
+
+function avisoSinc(txt){
+  const av=document.getElementById("c-sinc");
+  if (av) av.innerHTML = txt || "";
+}
 
 async function sincronizarPeriodo(){
-  if (sincronizando) return;
+  // Se chega um pedido no meio de outro, ele fica marcado para rodar em seguida em vez de
+  // ser descartado — trocar a loja durante a busca inicial deixava a escolha sem efeito e
+  // dava a impressão de painel travado, sem nada em que clicar.
+  if (sincronizando) { pedidoPendente = true; return; }
   const fx=faixaConcil(), lj=filtroLojaRel();
   const alvos = historico.filter(h=>
     (!lj || h.loja===lj) &&
     (!fx.ate || h.periodo_ini<=fx.ate) && (!fx.ini || h.periodo_fim>=fx.ini) &&
     !jaBuscados.has(h.id));
-  if (!alvos.length) return;
+  if (!alvos.length){ avisoSinc(""); return; }
 
   sincronizando = true;
-  const av=document.getElementById("c-sinc");
   let ok=0, falhas=0;
   for (let i=0;i<alvos.length;i++){
-    if (av) av.textContent = "buscando conferências guardadas… "+(i+1)+" de "+alvos.length;
+    avisoSinc("buscando conferências guardadas… "+(i+1)+" de "+alvos.length);
     jaBuscados.add(alvos[i].id);
     if (await abrirHistorico(alvos[i].id, true)) ok++; else falhas++;
   }
   sincronizando = false;
-  if (av) av.textContent = falhas
-    ? "⚠️ "+falhas+" conferência(s) guardada(s) não abriram (erro ao decifrar)."
-    : "";
+  avisoSinc(falhas ? "⚠️ "+falhas+" conferência(s) guardada(s) não abriram (erro ao decifrar)." : "");
   if (ok) { rConcil(); carregarHistorico(); }
+  if (pedidoPendente){ pedidoPendente = false; await sincronizarPeriodo(); }
+}
+
+// Botão 🔄 Atualizar. Relê o índice do Supabase (outra pessoa pode ter carregado arquivo
+// de outro computador) e busca de novo o que faltar para o período escolhido.
+async function atualizarConcil(){
+  const bt=document.getElementById("c-atualizar");
+  if (bt){ bt.disabled=true; bt.textContent="atualizando…"; }
+  avisoSinc("relendo o que está guardado…");
+  const antes = historico.length;
+  await carregarHistorico();
+  await sincronizarPeriodo();
+  rConcil();
+  if (bt){ bt.disabled=false; bt.textContent="🔄 Atualizar"; }
+  const novas = historico.length - antes;
+  avisoSinc("✓ atualizado · "+historico.length+" conferência(s) guardada(s)"+
+    (novas>0 ? " ("+novas+" nova(s) desde a última vez)" : ""));
 }
 
 // ── estado e render ──
@@ -1020,11 +1041,29 @@ function rConcil(){
   const lojasVisiveis=new Set(chaves.map(k=>vis[k].loja));
 
   if (!chaves.length){
+    // Vazio tem que dizer POR QUE está vazio. "Nenhum lançamento no período" mandava o
+    // Athila procurar botão de atualizar quando o que faltava era arquivo daquela loja.
+    const porLojaMem={};
+    historico.forEach(h=>{
+      const a=porLojaMem[h.loja]=porLojaMem[h.loja]||{ini:h.periodo_ini, fim:h.periodo_fim, n:0};
+      a.n++; if (h.periodo_ini<a.ini) a.ini=h.periodo_ini; if (h.periodo_fim>a.fim) a.fim=h.periodo_fim;
+    });
+    const temAlgo = Object.keys(porLojaMem).length;
+    const semALoja = ljRel && !porLojaMem[ljRel];
     res.style.display="block";
-    res.innerHTML='<div class="box"><div style="padding:22px 18px;color:var(--muted);font-size:13.5px">'+
-      'Nenhum lançamento das conferências carregadas cai no período escolhido'+
-      (fx.ini||fx.ate ? ' ('+(fx.ini?dBR(fx.ini):"início")+' a '+(fx.ate?dBR(fx.ate):"fim")+')' : '')+
-      '. Aumente o período ou carregue o arquivo desses dias.</div></div>';
+    res.innerHTML='<div class="box"><div style="padding:22px 18px;color:var(--muted);font-size:13.5px;line-height:1.65">'+
+      '<b style="color:var(--text)">Não há conferência para '+(ljRel?'a '+ljRel:'esse filtro')+
+        (fx.ini||fx.ate ? ' entre '+(fx.ini?dBR(fx.ini):"o início")+' e '+(fx.ate?dBR(fx.ate):"hoje") : '')+'.</b><br>'+
+      (semALoja
+        ? 'Nunca foi carregado nenhum arquivo da <b>'+ljRel+'</b>. Suba o relatório da maquininha e/ou o extrato dela ali em cima.'
+        : temAlgo
+          ? 'O que já está guardado:<br>'+Object.keys(porLojaMem).sort().map(l=>
+              '&nbsp;&nbsp;· <b>'+l+'</b> — '+dBR(porLojaMem[l].ini)+' a '+dBR(porLojaMem[l].fim)+
+              ' ('+porLojaMem[l].n+' conferência'+(porLojaMem[l].n>1?'s':'')+')').join("<br>")+
+            '<br>Escolha um período dentro disso, ou carregue o arquivo dos dias que faltam.'
+          : 'Nada foi carregado ainda. Suba o relatório da maquininha e/ou o extrato da conta ali em cima — '+
+            'a partir daí o painel guarda sozinho e vai juntando dia após dia.')+
+      '</div></div>';
     return;
   }
   res.style.display="block";
@@ -1643,6 +1682,7 @@ function iniciar(){
   const de=document.getElementById("c-de"), ate=document.getElementById("c-ate");
   const aplicar = ()=>{ rConcil(); carregarHistorico(); sincronizarPeriodo(); };
   [rl,de,ate].forEach(el=>el.addEventListener("change", aplicar));
+  document.getElementById("c-atualizar").addEventListener("click", atualizarConcil);
   document.querySelectorAll(".per-atalho[data-per]").forEach(b=>b.addEventListener("click", ()=>{
     const p=n=>String(n).padStart(2,"0");
     const iso=dt=>dt.getFullYear()+"-"+p(dt.getMonth()+1)+"-"+p(dt.getDate());

@@ -542,3 +542,21 @@ uma loja carregada ainda mostra o dia a dia, que é o útil.
 
 Há dois seletores de loja e eles são coisas diferentes: **Loja do arquivo** (de quem é o CSV que vou
 subir) e **Loja do relatório** (o que quero ver). Estão rotulados assim de propósito.
+
+## Botão 🔄 Atualizar e vazio que explica (31/07/2026)
+
+O Athila relatou "não há botão para rodar a atualização, então mesmo selecionando loja e período não
+consigo ver os dados". Duas coisas por trás:
+
+1. **A tela ficava muda quando não havia dado.** Só existiam conferências da L5; escolher L1/L3/L4
+   dava a mensagem genérica "nenhum lançamento no período", que soa como painel travado. Agora o
+   vazio diz o que **existe** na memória — loja por loja, com o intervalo de datas — ou avisa que
+   nunca foi carregado arquivo daquela loja. Vazio tem que explicar por que está vazio.
+2. **Pedido de sincronização durante outro era descartado** (`if (sincronizando) return`). Trocar a
+   loja enquanto a busca inicial rodava deixava a escolha sem efeito. Agora fica `pedidoPendente` e
+   roda em seguida.
+
+O botão **🔄 Atualizar** existe mesmo com a busca automática, por um motivo que a automação não
+cobre: outra pessoa pode carregar arquivo de outro computador. Ele relê o índice do Supabase e busca
+o que faltar. O andamento aparece em `#c-sinc`, na própria barra — antes o aviso morava dentro da
+caixa do histórico, que é reescrita durante a sincronização e apagava o texto.

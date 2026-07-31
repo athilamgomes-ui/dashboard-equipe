@@ -662,8 +662,10 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
         <button class="per-atalho" data-per="mes">este mês</button>
         <button class="per-atalho" data-per="mespassado">mês passado</button>
         <button class="per-atalho" data-per="tudo">tudo</button>
+        <button class="btn-abrir" id="c-atualizar" style="padding:7px 14px">🔄 Atualizar</button>
         <span class="per-resumo" id="c-per-resumo"></span>
       </div>
+      <div id="c-sinc" style="font-size:12.5px;color:var(--accent);font-weight:600;margin-top:9px;min-height:15px"></div>
     </div>
   </div>
 
