@@ -403,6 +403,12 @@ tbody tr:hover{background:var(--card2)}
 .up-linha label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
 .up-linha select{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:8px 11px;
   font-size:12.5px;font-weight:600;color:var(--text2);font-family:inherit;cursor:pointer}
+.up-linha input[type=date]{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:7px 10px;
+  font-size:12.5px;font-weight:600;color:var(--text2);font-family:inherit}
+.per-atalho{background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:5px 13px;
+  font-size:12px;font-weight:600;color:var(--text2);font-family:inherit;cursor:pointer;transition:.12s}
+.per-atalho:hover{border-color:var(--accent);color:var(--accent)}
+.per-resumo{font-size:12.5px;color:var(--muted);margin-left:auto;font-weight:600}
 .dropzone{border:2px dashed color-mix(in srgb,var(--accent) 35%,var(--border));border-radius:14px;
   padding:26px 18px;text-align:center;cursor:pointer;transition:.15s;background:var(--card2)}
 .dropzone:hover,.dropzone.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,var(--card2))}
@@ -632,8 +638,8 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
         <div class="dz-ico">📄</div>
         <div class="dz-titulo">Arraste o relatório aqui, ou clique para escolher</div>
         <div class="dz-sub">Arquivo <b>.csv</b> da maquininha e/ou o extrato da conta — pode arrastar os dois juntos.<br>
-          <b>Uma loja por vez:</b> trocar a loja acima limpa a tela.<br>
-          <b>Comece o nome do arquivo pela loja</b> (ex.: <code>L5 maquininha julho.csv</code>) — o relatório
+          Carregue quantos dias e lojas quiser: <b>as conferências se somam na tela</b> e o período abaixo escolhe o que aparece.<br>
+          <b>Comece o nome do arquivo pela loja</b> (ex.: <code>L5 maquininha 30-07.csv</code>) — o relatório
           da adquirente não diz de que empresa é, e assim o painel confere sozinho.</div>
         <input type="file" id="c-file" accept=".csv,text/csv" multiple hidden>
       </div>
@@ -643,10 +649,34 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
   </div>
 
   <div class="box">
-    <div class="box-h"><h3>📚 Conferências guardadas</h3>
-      <span class="hint">só da loja selecionada · cifradas com a senha do painel, abrem em qualquer computador da equipe</span></div>
-    <div class="scroll" id="c-historico"><div class="hist-aviso">carregando…</div></div>
+    <div class="box-h"><h3>📅 Período do relatório</h3>
+      <span class="hint">um dia, um mês ou vários — vale para tudo que aparece abaixo</span></div>
+    <div style="padding:16px 17px">
+      <div class="up-linha" style="margin-bottom:0">
+        <label>De</label><input type="date" id="c-de">
+        <label>Até</label><input type="date" id="c-ate">
+        <button class="per-atalho" data-per="hoje">hoje</button>
+        <button class="per-atalho" data-per="ontem">ontem</button>
+        <button class="per-atalho" data-per="mes">este mês</button>
+        <button class="per-atalho" data-per="mespassado">mês passado</button>
+        <button class="per-atalho" data-per="tudo">tudo</button>
+        <span class="per-resumo" id="c-per-resumo"></span>
+      </div>
     </div>
+  </div>
+
+  <div class="box">
+    <div class="box-h"><h3>📚 Conferências guardadas</h3>
+      <span class="hint">cifradas com a senha do painel, abrem em qualquer computador da equipe</span></div>
+    <div style="padding:14px 17px 0">
+      <div class="up-linha" style="margin-bottom:10px">
+        <label>Loja</label>
+        <select id="c-hist-loja"><option value="">todas</option></select>
+        <button class="btn-abrir" id="c-abrir-per" style="padding:7px 14px">abrir todas do período</button>
+        <button class="per-atalho" id="c-limpar">limpar a tela</button>
+      </div>
+    </div>
+    <div class="scroll" id="c-historico"><div class="hist-aviso">carregando…</div></div>
   </div>
 
   <!-- Todo o resultado é gerado por rConcil() em conferencia_caixa_app.js:

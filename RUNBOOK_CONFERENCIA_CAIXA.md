@@ -474,3 +474,34 @@ com o motivo escrito na linha. Some sozinho quando a coleta da noite roda depois
 **Regra geral que vale para todo painel:** dia coletado ≠ dia fechado. Se o pipeline não roda depois
 do fechamento da loja, o último dia é parcial e qualquer cruzamento contra ele acusa falta que não
 existe. Antes de investigar divergência do dia mais recente, confira `geradoEm`.
+
+## Várias conferências na tela + recorte por data (31/07/2026)
+
+O Athila vai carregar arquivo **todo dia, das quatro lojas**, e quer poder ver o relatório de um dia
+escolhido ou de um mês / vários meses. O modelo antigo não servia: era **uma conferência por loja**
+(`conciliacoes[loja]`), trocar a loja limpava a tela e abrir outro período substituía o anterior.
+
+Hoje:
+
+- `conciliacoes` é chaveado por **`loja|ini|fim`** e `ordemCarga` guarda a ordem de entrada.
+  Cabem quantas conferências forem carregadas, de qualquer loja e período.
+- A barra **Período do relatório** (`c-de` / `c-ate` + atalhos hoje / ontem / este mês / mês passado /
+  tudo) recorta TUDO que aparece abaixo. `recorte()` refaz os totais a partir das listas — usar os
+  totais originais mostraria o mês inteiro num relatório de um dia só.
+- **Abrir do histórico ACRESCENTA**, não substitui. `abrir todas do período` abre de uma vez todas as
+  guardadas que tocam a faixa escolhida — é o caminho normal para "quero ver o mês", já que o dia a
+  dia fica salvo em N registros.
+- O histórico lista as **quatro lojas** (filtro próprio, "todas" por padrão). Antes seguia o seletor
+  de upload, o que impedia montar um relatório do grupo.
+
+⚠️ **Dia coberto por duas conferências**: carregar o arquivo do mês e depois o do dia 30 contaria o
+dia 30 duas vezes — dobraria o faturamento e inventaria divergência dos dois lados. `rConcil` resolve
+por dono: cada `loja|dia` pertence à conferência **carregada por último**, e um aviso amarelo lista os
+dias repetidos. Ao mexer no render, não perca esse desempate.
+
+⚠️ Arquivos do mesmo dia e loja (maquininha + extrato) têm que cair na **mesma** conferência: o
+histórico grava por `(loja, periodo_ini, periodo_fim)` e dois registros com a mesma chave se
+sobrescrevem no upsert. `carregarArquivos` funde quando a loja é a mesma e os períodos se cruzam.
+
+Corrigido de passagem: `#c-resultado` estava **fora** de `#p-concil` (um `</div>` sobrando fechava a
+aba antes da hora), então o resultado ficava visível em qualquer aba.

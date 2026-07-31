@@ -673,9 +673,10 @@ async function decifrarTexto(env, senha){
 // o Athila apagava o registro e ele voltava sozinho. Teste não pode sujar dado real.
 const MODO_TESTE = typeof location !== "undefined" && /[?&]teste=1/.test(location.search);
 
-async function salvarConciliacao(lj){
-  const c = conciliacoes[lj];
+async function salvarConciliacao(chave){
+  const c = conciliacoes[chave];
   if (!c) return;
+  const lj = c.loja;
   if (MODO_TESTE) { c.statusSalvo = "modo teste — não gravado"; rConcil(); return; }
   const senha = senhaAtual();
   if (!senha) { c.statusSalvo = "sem senha na sessão — não deu para cifrar"; return; }
@@ -727,15 +728,16 @@ let historico = [];
 async function carregarHistorico(){
   const el = document.getElementById("c-historico");
   if (!el) return;
-  // Mostra só a loja selecionada. Listar todas ao mesmo tempo confundia tanto quanto
-  // o resultado acumulado: a pessoa escolhia uma empresa e via conferências de outras.
-  const cl = document.getElementById("c-loja");
-  const lj = cl ? cl.value : "";
+  // Filtro próprio, com "todas" como padrão: agora a tela soma várias lojas e o histórico
+  // precisa deixar abrir as quatro. Antes seguia o seletor de upload, o que impedia montar
+  // um relatório do grupo inteiro.
+  const fl = document.getElementById("c-hist-loja");
+  const lj = fl ? fl.value : "";
   try{
     const r = await fetch(SUPA_URL+"/rest/v1/"+SUPA_TAB+
       "?select=id,loja,periodo_ini,periodo_fim,arquivos,criado_em"+
       (lj ? "&loja=eq."+encodeURIComponent(lj) : "")+
-      "&order=criado_em.desc&limit=100",
+      "&order=periodo_fim.desc,loja.asc&limit=500",
       { headers: supaHead() });
     if (!r.ok){
       el.innerHTML = '<div class="hist-aviso">Histórico indisponível'+
@@ -758,11 +760,13 @@ async function carregarHistorico(){
       const dt=new Date(h.criado_em);
       const quando=String(dt.getDate()).padStart(2,"0")+"/"+String(dt.getMonth()+1).padStart(2,"0")+" "+
                    String(dt.getHours()).padStart(2,"0")+":"+String(dt.getMinutes()).padStart(2,"0");
+      const naTela = Object.keys(conciliacoes).some(k=>conciliacoes[k].id===h.id);
       return '<tr><td>'+quando+'</td>'+
         '<td style="text-align:left"><span class="loja-tag" style="background:'+corLoja(h.loja)+'">'+esc2(h.loja)+'</span></td>'+
-        '<td style="text-align:left">'+dBR(h.periodo_ini)+' a '+dBR(h.periodo_fim)+'</td>'+
+        '<td style="text-align:left">'+(h.periodo_ini===h.periodo_fim ? dBR(h.periodo_ini)
+              : dBR(h.periodo_ini)+' a '+dBR(h.periodo_fim))+'</td>'+
         '<td style="text-align:left" class="zero">'+esc2((h.arquivos||[]).map(a=>a.tipo).join(" + "))+'</td>'+
-        '<td><button class="btn-abrir" onclick="abrirHistorico('+h.id+')">abrir</button>'+
+        '<td><button class="btn-abrir" onclick="abrirHistorico('+h.id+')">'+(naTela?"na tela ✓":"abrir")+'</button>'+
         '<button class="btn-excluir" title="excluir do histórico" onclick="excluirHistorico('+h.id+')">×</button></td></tr>';
     }).join("")+'</tbody></table>';
 }
@@ -778,15 +782,17 @@ async function excluirHistorico(id){
     const r = await fetch(SUPA_URL+"/rest/v1/"+SUPA_TAB+"?id=eq."+id, { method:"DELETE", headers: supaHead() });
     if (!r.ok) throw new Error("erro "+r.status);
     // se estava aberta na tela, tira também
-    if (h && conciliacoes[h.loja] && conciliacoes[h.loja].doHistorico) { delete conciliacoes[h.loja]; rConcil(); }
+    Object.keys(conciliacoes).forEach(k=>{ if (conciliacoes[k].id===id) removerConcil(k); });
     await carregarHistorico();
   }catch(e){ err.textContent="❌ não consegui excluir: "+(e.message||e); }
 }
 
-async function abrirHistorico(id){
-  const err=document.getElementById("c-erro"); err.textContent="";
+// Abrir ACRESCENTA à tela — não substitui. É assim que a conferência de um dia passa a
+// aparecer junto com as demais; o recorte de data em cima decide o que se vê.
+async function abrirHistorico(id, silencioso){
+  const err=document.getElementById("c-erro"); if (!silencioso) err.textContent="";
   const senha=senhaAtual();
-  if (!senha){ err.textContent="❌ senha não está na sessão — recarregue e entre de novo."; return; }
+  if (!senha){ err.textContent="❌ senha não está na sessão — recarregue e entre de novo."; return false; }
   try{
     const r = await fetch(SUPA_URL+"/rest/v1/"+SUPA_TAB+"?id=eq."+id+"&select=*", { headers: supaHead() });
     const [row] = await r.json();
@@ -804,21 +810,119 @@ async function abrirHistorico(id){
         novo = t;                      // só adota se TODOS os arquivos reprocessaram
       }catch(e){ novo = null; }
     }
-    conciliacoes[c.loja] = novo
-      ? Object.assign(novo, {statusSalvo:"salva", doHistorico:true})
+    const conf = novo
+      ? Object.assign(novo, {statusSalvo:"salva", doHistorico:true, id})
       : { loja:c.loja, arquivos:c.arquivos, cartao:c.cartao, pix:c.pix,
-          conta:c.conta, statusSalvo:"salva (resumo antigo)", doHistorico:true };
-    const cl=document.getElementById("c-loja");
-    if (cl) cl.value = c.loja;          // mantém o seletor coerente com o que está na tela
-    rConcil();
-    document.getElementById("c-resultado").scrollIntoView({behavior:"smooth"});
+          conta:c.conta, statusSalvo:"salva (resumo antigo)", doHistorico:true, id };
+    inserirConcil(conf);
+    if (!silencioso){
+      rConcil();
+      document.getElementById("c-resultado").scrollIntoView({behavior:"smooth"});
+    }
+    return true;
   }catch(e){
     err.textContent="❌ não consegui abrir: "+(e.message||e);
+    return false;
   }
 }
 
+// Abre de uma vez todas as conferências guardadas que tocam o período escolhido. É o
+// caminho normal para "quero ver o mês inteiro": o dia a dia foi salvo em N registros.
+async function abrirPeriodo(){
+  const err=document.getElementById("c-erro"); err.textContent="";
+  const fx=faixaConcil();
+  const alvos = historico.filter(h=>
+    (!fx.ate || h.periodo_ini<=fx.ate) && (!fx.ini || h.periodo_fim>=fx.ini));
+  if (!alvos.length){
+    err.innerHTML="Nenhuma conferência guardada toca esse período. Carregue os arquivos desses dias.";
+    return;
+  }
+  const bt=document.getElementById("c-abrir-per");
+  if (bt){ bt.disabled=true; bt.textContent="abrindo…"; }
+  let ok=0;
+  for (const h of alvos) if (await abrirHistorico(h.id, true)) ok++;
+  if (bt){ bt.disabled=false; bt.textContent="abrir todas do período"; }
+  rConcil();
+  err.innerHTML = ok===alvos.length
+    ? "✓ "+ok+" conferência(s) na tela."
+    : "⚠️ abri "+ok+" de "+alvos.length+" — as outras deram erro ao decifrar.";
+  document.getElementById("c-resultado").scrollIntoView({behavior:"smooth"});
+}
+
 // ── estado e render ──
-const conciliacoes = {};   // loja -> resultado
+// Antes era uma conferência POR LOJA: carregar outro período apagava o anterior e trocar
+// de loja limpava a tela. O Athila carrega arquivo todo dia, das quatro lojas, e quer ver
+// o dia escolhido ou vários meses juntos — então a tela guarda VÁRIAS conferências ao
+// mesmo tempo, cada uma com sua loja e seu período, e o que se vê é um recorte por data.
+const conciliacoes = {};   // "L5|2026-07-30|2026-07-30" -> conferência
+let ordemCarga = [];       // chaves na ordem em que entraram (a última ganha nos dias repetidos)
+
+const chaveDe = c => { const p=periodoDe(c); return c.loja+"|"+(p?p.ini:"?")+"|"+(p?p.fim:"?"); };
+
+function inserirConcil(c){
+  const k = chaveDe(c);
+  conciliacoes[k] = c;
+  ordemCarga = ordemCarga.filter(x=>x!==k).concat(k);
+  return k;
+}
+
+// Recorta um resultado do motor para uma faixa de datas. Os totais são recalculados a
+// partir das listas — usar os totais originais mostraria o mês inteiro num relatório de
+// um dia só. `permitido` resolve dias cobertos por mais de uma conferência carregada.
+function recorte(r, ini, ate, permitido){
+  if (!r) return null;
+  const ok = d => (!ini || d>=ini) && (!ate || d<=ate) && (!permitido || permitido(d));
+  if (!ok(r.ini) || !ok(r.fim)){
+    const erp=r.erp.filter(e=>ok(e.d)), ext=r.externos.filter(t=>ok(t.d));
+    if (!erp.length && !ext.length) return null;
+    return Object.assign({}, r, {
+      erp, externos: ext,
+      totERP: erp.reduce((a,e)=>a+e[r.campo],0),
+      totExt: ext.reduce((a,t)=>a+t.v,0),
+      nERP: erp.length, nExt: ext.length,
+      centavos:   r.centavos.filter(x=>ok(x.e.d)),
+      agrupadas:  r.agrupadas.filter(x=>ok(x.t.d)),
+      divididas:  r.divididas.filter(x=>ok(x.e.d)),
+      trocadas:   r.trocadas.filter(x=>ok(x.t.d)),
+      soExterno:  r.soExterno.filter(t=>ok(t.d)),
+      soErp:      r.soErp.filter(e=>ok(e.d)),
+      foraJanela: (r.foraJanela||[]).filter(t=>ok(t.d)),
+    });
+  }
+  return r;
+}
+
+// Dias cobertos por uma conferência, para saber quem manda quando duas se sobrepõem.
+function diasDe(c){
+  const s=new Set();
+  [c.cartao, c.pix].filter(Boolean).forEach(r=>{
+    r.erp.forEach(e=>s.add(e.d)); r.externos.forEach(t=>s.add(t.d));
+  });
+  return s;
+}
+
+// Faixa escolhida na barra de período da aba.
+function faixaConcil(){
+  const de=document.getElementById("c-de"), ate=document.getElementById("c-ate");
+  return { ini: de && de.value ? de.value : null, ate: ate && ate.value ? ate.value : null };
+}
+
+// Diz em uma linha o que está na tela: sem isso não dá para saber se o número é de um dia,
+// de um mês ou de tudo que já foi carregado.
+function resumoPeriodo(){
+  const el=document.getElementById("c-per-resumo");
+  if (!el) return;
+  const fx=faixaConcil();
+  const n=ordemCarga.filter(k=>conciliacoes[k]).length;
+  const ljs=new Set(ordemCarga.filter(k=>conciliacoes[k]).map(k=>conciliacoes[k].loja));
+  const per = fx.ini||fx.ate
+    ? (fx.ini&&fx.ate&&fx.ini===fx.ate ? dBR(fx.ini)
+       : (fx.ini?dBR(fx.ini):"início")+" a "+(fx.ate?dBR(fx.ate):"hoje"))
+    : "todo o período carregado";
+  el.textContent = n
+    ? per+" · "+n+" conferência"+(n>1?"s":"")+" de "+ljs.size+" loja"+(ljs.size>1?"s":"")
+    : per+" · nada carregado ainda";
+}
 
 // Plano de pagamento legível. Vem da maquininha quando a venda casou (é lá que está a
 // parcela); quando só existe no ERP, cai para a forma que o documento registrou.
@@ -849,28 +953,70 @@ const taxaReal = x => (x.bruto>0 && x.liq!=null) ? ((x.bruto - x.liq) / x.bruto 
 
 function rConcil(){
   const chips=document.getElementById("c-carregados");
-  const lojas=Object.keys(conciliacoes);
-  chips.innerHTML = lojas.map(lj=>{
-    const c=conciliacoes[lj];
+  const carregadas=ordemCarga.filter(k=>conciliacoes[k]);
+  chips.innerHTML = carregadas.map(k=>{
+    const c=conciliacoes[k], p=periodoDe(c);
     const arq=c.arquivos.map(a=>a.tipo==="extrato"?"extrato":"maquininha").join(" + ");
     const st=c.statusSalvo==="salva" ? ' <span title="guardada no histórico">💾</span>'
            : c.statusSalvo ? ' <span class="chip-alerta" title="'+esc2(c.statusSalvo)+'">⚠</span>' : '';
-    return '<span class="chip-arq">✓ '+lj+' · '+arq+st+' <button onclick="removerConcil(\''+lj+'\')" title="tirar da tela (não apaga do histórico)">×</button></span>';
+    const per=p ? (p.ini===p.fim ? dBR(p.ini) : dBR(p.ini)+"–"+dBR(p.fim)) : "";
+    return '<span class="chip-arq">✓ '+c.loja+' · '+per+' · '+arq+st+
+      ' <button onclick="removerConcil(\''+k+'\')" title="tirar da tela (não apaga do histórico)">×</button></span>';
   }).join("");
 
+  resumoPeriodo();
   const res=document.getElementById("c-resultado");
-  if (!lojas.length){ res.style.display="none"; res.innerHTML=""; return; }
+  if (!carregadas.length){ res.style.display="none"; res.innerHTML=""; return; }
+
+  // ── recorte por data + desempate de dias cobertos por duas conferências ──
+  // Sem o desempate, carregar o arquivo do mês e depois o do dia 30 contaria o dia 30
+  // duas vezes: dobraria o faturamento do dia e inventaria divergência dos dois lados.
+  const fx=faixaConcil();
+  const dono={};                       // loja|dia -> chave que manda naquele dia
+  const repetidos=new Set();
+  carregadas.forEach(k=>{
+    const c=conciliacoes[k];
+    diasDe(c).forEach(d=>{
+      const id=c.loja+"|"+d;
+      if (dono[id] && dono[id]!==k) repetidos.add(dBR(d)+" "+c.loja);
+      dono[id]=k;                      // a última carregada ganha
+    });
+  });
+
+  const vis={};
+  carregadas.forEach(k=>{
+    const c=conciliacoes[k];
+    const permitido = d => dono[c.loja+"|"+d]===k;
+    const cartao=recorte(c.cartao, fx.ini, fx.ate, permitido);
+    const pix=recorte(c.pix, fx.ini, fx.ate, permitido);
+    if (cartao||pix) vis[k]={loja:c.loja, cartao, pix, conta:c.conta, per:periodoDe(c)};
+  });
+  const chaves=carregadas.filter(k=>vis[k]);
+
+  if (!chaves.length){
+    res.style.display="block";
+    res.innerHTML='<div class="box"><div style="padding:22px 18px;color:var(--muted);font-size:13.5px">'+
+      'Nenhum lançamento das conferências carregadas cai no período escolhido'+
+      (fx.ini||fx.ate ? ' ('+(fx.ini?dBR(fx.ini):"início")+' a '+(fx.ate?dBR(fx.ate):"fim")+')' : '')+
+      '. Aumente o período ou carregue o arquivo desses dias.</div></div>';
+    return;
+  }
   res.style.display="block";
 
   const tagLoja=l=>'<span class="loja-tag" style="background:'+corLoja(l)+'">'+l+'</span>';
-  const juntar=(campo,f)=>lojas.flatMap(l=>{
-    const r=conciliacoes[l][campo];
-    return r? f(r).map(x=>({...x,loja:l})) : [];
+  const juntar=(campo,f)=>chaves.flatMap(k=>{
+    const r=vis[k][campo];
+    return r? f(r).map(x=>({...x,loja:vis[k].loja})) : [];
   });
-  const somar=(campo,f)=>lojas.reduce((a,l)=>{ const r=conciliacoes[l][campo]; return a+(r?f(r):0); },0);
-  const temCampo=campo=>lojas.some(l=>conciliacoes[l][campo]);
+  const somar=(campo,f)=>chaves.reduce((a,k)=>{ const r=vis[k][campo]; return a+(r?f(r):0); },0);
+  const temCampo=campo=>chaves.some(k=>vis[k][campo]);
 
   let html="";
+
+  if (repetidos.size)
+    html += '<div class="hist-aviso" style="margin-bottom:12px">⚠️ '+
+      [...repetidos].slice(0,8).join(", ")+(repetidos.size>8?" e mais "+(repetidos.size-8):"")+
+      ' — esses dias aparecem em mais de uma conferência carregada. Contei uma vez só, pela mais recente.</div>';
 
   // ── KPIs ──
   const kpis=[];
@@ -895,13 +1041,13 @@ function rConcil(){
   html += '<div class="kpis">'+kpis.join("")+'</div>';
 
   // ── movimento da conta (só quando há extrato) ──
-  const contas=lojas.filter(l=>conciliacoes[l].conta);
+  const contas=chaves.filter(k=>vis[k].conta);
   if (contas.length){
     html += caixaBox("🏦 Movimento da conta", "o que entrou e saiu no período do extrato",
       '<thead><tr><th style="text-align:left">Loja</th><th>PIX recebido</th><th>Depósitos de venda</th>'+
       '<th>PIX enviado</th><th>Estornos</th><th style="text-align:left">Período</th></tr></thead><tbody>'+
-      contas.map(l=>{const c=conciliacoes[l].conta;
-        return '<tr><td style="text-align:left">'+tagLoja(l)+'</td>'+
+      contas.map(k=>{const c=vis[k].conta;
+        return '<tr><td style="text-align:left">'+tagLoja(vis[k].loja)+'</td>'+
         '<td class="num">'+nf2(c.pixRecebido)+'</td>'+
         '<td class="num">'+nf2(c.depositos)+' <span class="zero">('+c.nDepositos+')</span></td>'+
         '<td class="num zero">'+nf2(c.pixEnviado)+'</td>'+
@@ -920,8 +1066,8 @@ function rConcil(){
     const TOLC = 0.05;
 
     const linhas = [];
-    lojas.forEach(l=>{
-      const r = conciliacoes[l] && conciliacoes[l].cartao;
+    chaves.forEach(k=>{
+      const r = vis[k].cartao, l = vis[k].loja;
       if (!r) return;
       // pares casados + documentos sem cobrança
       const porId = {};
@@ -1084,7 +1230,7 @@ function rConcil(){
     // Usar "cartao" para ler o documento devolve undefined: a coluna do ERP saía R$ 0,00 em
     // quatro tabelas do bloco de cartão (totais por dia, sem lançamento, centavos, agrupadas)
     // e a diferença aparecia zerada. O PIX escapou só porque lá as duas chaves coincidem.
-    const cErp = (lojas.map(l=>conciliacoes[l][campo]).find(Boolean)||{}).campo || campo;
+    const cErp = (chaves.map(k=>vis[k][campo]).find(Boolean)||{}).campo || campo;
     const trocadas=juntar(campo,r=>r.trocadas), soExt=juntar(campo,r=>r.soExterno),
           soErp=juntar(campo,r=>r.soErp), cent=juntar(campo,r=>r.centavos), agr=juntar(campo,r=>r.agrupadas),
           divs=juntar(campo,r=>r.divididas), fora=juntar(campo,r=>r.foraJanela);
@@ -1092,7 +1238,7 @@ function rConcil(){
 
     // totais por dia
     const porDia={};
-    lojas.forEach(l=>{ const r=conciliacoes[l][campo]; if(!r) return;
+    chaves.forEach(k=>{ const r=vis[k][campo]; if(!r) return;
       r.erp.forEach(e=>{ (porDia[e.d]=porDia[e.d]||{a:0,b:0,na:0,nb:0}).a+=e[cErp]; porDia[e.d].na++; });
       r.externos.forEach(t=>{ (porDia[t.d]=porDia[t.d]||{a:0,b:0,na:0,nb:0}).b+=t.v; porDia[t.d].nb++; });
     });
@@ -1200,7 +1346,8 @@ function rConcil(){
 }
 const esc2 = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
-function removerConcil(lj){ delete conciliacoes[lj]; rConcil(); }
+function removerConcil(k){ delete conciliacoes[k]; ordemCarga=ordemCarga.filter(x=>x!==k); rConcil(); }
+function limparConcil(){ Object.keys(conciliacoes).forEach(k=>delete conciliacoes[k]); ordemCarga=[]; rConcil(); }
 
 // Analisa UM arquivo cru dentro de `alvo`. Está separado porque o histórico usa o mesmo
 // caminho: reabrir uma conferência guardada refaz a análise a partir do CSV original em
@@ -1269,7 +1416,7 @@ async function carregarArquivos(files){
   const err=document.getElementById("c-erro");
   err.textContent="";
   const lj=document.getElementById("c-loja").value;
-  const erros=[];
+  const erros=[], novas=new Set();
   for (const f of files){
     try{
       if (!/\.csv$/i.test(f.name))
@@ -1280,30 +1427,48 @@ async function carregarArquivos(files){
       // nenhum dado por trás.
       const tmp = {loja:lj, arquivos:[]};
       processarConteudo(tmp, lj, f.name, txt);
-      const alvo = conciliacoes[lj] = conciliacoes[lj] || {loja:lj, arquivos:[]};
+
+      // A maquininha e o extrato do MESMO dia têm que virar uma conferência só — senão o
+      // histórico grava dois registros com o mesmo (loja, período) e um sobrescreve o
+      // outro no upsert. Junta quando a loja é a mesma e os períodos se cruzam; um dia
+      // diferente vira conferência nova, que é o que acontece na carga do dia a dia.
+      const pt = periodoDe(tmp);
+      const irmao = ordemCarga.map(k=>conciliacoes[k]).find(c=>{
+        if (!c || c.loja!==lj || c.doHistorico) return false;
+        const pc = periodoDe(c);
+        return pc && pt && pc.ini<=pt.fim && pt.ini<=pc.fim;
+      });
+      const alvo = irmao || {loja:lj, arquivos:[]};
+      if (irmao){                                        // a chave muda se o período cresceu
+        const antiga=chaveDe(irmao);
+        delete conciliacoes[antiga];
+        ordemCarga=ordemCarga.filter(x=>x!==antiga);
+      }
       if (tmp.cartao) alvo.cartao = tmp.cartao;
       if (tmp.pix){ alvo.pix = tmp.pix; alvo.conta = tmp.conta; }
       alvo.arquivos.push(...tmp.arquivos);
+      delete alvo.statusSalvo;
+      novas.add(inserirConcil(alvo));
     }catch(e){
       erros.push("❌ "+f.name+": "+(e.message||e));
     }
   }
-  const avisos = await avisarArquivoDeOutraLoja(lj);
+  const avisos = await avisarArquivoDeOutraLoja(lj, novas);
   err.innerHTML = erros.concat(avisos).join("<br>");
   rConcil();
   // Guarda sozinho: o pedido é que a conferência não se perca ao fechar a aba.
-  for (const lj2 of Object.keys(conciliacoes)) {
-    if (!conciliacoes[lj2].doHistorico) await salvarConciliacao(lj2);
-  }
+  for (const k of novas) if (conciliacoes[k] && !conciliacoes[k].doHistorico) await salvarConciliacao(k);
 }
 
 // Confere se algum arquivo recém-carregado já foi usado numa conferência de OUTRA loja.
 // Se foi, é quase certo que uma das duas está com o relatório errado — o painel não tem
 // como saber qual, então avisa e deixa a decisão com quem carregou.
-async function avisarArquivoDeOutraLoja(lj){
-  const c = conciliacoes[lj];
-  if (!c) return [];
-  const meus = new Set(c.arquivos.map(a=>a.imp).filter(Boolean));
+async function avisarArquivoDeOutraLoja(lj, chaves){
+  const meus = new Set();
+  [...(chaves||[])].forEach(k=>{
+    const c=conciliacoes[k]; if (!c) return;
+    c.arquivos.forEach(a=>{ if (a.imp) meus.add(a.imp); });
+  });
   if (!meus.size) return [];
   try{
     const r = await fetch(SUPA_URL+"/rest/v1/"+SUPA_TAB+"?select=loja,arquivos&limit=200", {headers:supaHead()});
@@ -1417,15 +1582,42 @@ function iniciar(){
     o.value=l.key; o.textContent=l.key+" · "+l.nome+" "+l.cidade;
     cl.appendChild(o);
   });
-  // Trocar de loja limpa o resultado da tela. Antes o painel acumulava as lojas e a
-  // conferência da anterior ficava visível, dando a impressão de ser da loja recém
-  // selecionada. Só limpa a TELA — o histórico continua guardado.
-  cl.addEventListener("change", ()=>{
-    Object.keys(conciliacoes).forEach(k=>delete conciliacoes[k]);
-    const err=document.getElementById("c-erro"); if (err) err.innerHTML="";
-    rConcil();
-    carregarHistorico();
+  // O seletor de loja agora só diz de quem é o PRÓXIMO arquivo. Ele limpava a tela porque
+  // antes só cabia uma conferência por vez; hoje as conferências convivem e quem escolhe
+  // o que aparece é o período.
+  cl.addEventListener("change", ()=>{ const e=document.getElementById("c-erro"); if (e) e.innerHTML=""; });
+
+  // ── período do relatório ──
+  const fl=document.getElementById("c-hist-loja");
+  D.lojas.forEach(l=>{
+    const o=document.createElement("option");
+    o.value=l.key; o.textContent=l.key+" · "+l.nome+" "+l.cidade;
+    fl.appendChild(o);
   });
+  fl.addEventListener("change", carregarHistorico);
+  document.getElementById("c-abrir-per").addEventListener("click", abrirPeriodo);
+  document.getElementById("c-limpar").addEventListener("click", ()=>{
+    limparConcil(); carregarHistorico();
+  });
+
+  const de=document.getElementById("c-de"), ate=document.getElementById("c-ate");
+  [de,ate].forEach(el=>el.addEventListener("change", ()=>{ rConcil(); resumoPeriodo(); }));
+  document.querySelectorAll(".per-atalho[data-per]").forEach(b=>b.addEventListener("click", ()=>{
+    const p=n=>String(n).padStart(2,"0");
+    const iso=dt=>dt.getFullYear()+"-"+p(dt.getMonth()+1)+"-"+p(dt.getDate());
+    const hoje=new Date();
+    const cfg={
+      hoje:        ()=>[iso(hoje), iso(hoje)],
+      ontem:       ()=>{ const d=new Date(hoje); d.setDate(d.getDate()-1); return [iso(d), iso(d)]; },
+      mes:         ()=>[iso(new Date(hoje.getFullYear(), hoje.getMonth(), 1)), iso(hoje)],
+      mespassado:  ()=>[iso(new Date(hoje.getFullYear(), hoje.getMonth()-1, 1)),
+                        iso(new Date(hoje.getFullYear(), hoje.getMonth(), 0))],
+      tudo:        ()=>["",""],
+    }[b.dataset.per];
+    const [a,z]=cfg(); de.value=a; ate.value=z;
+    rConcil(); resumoPeriodo();
+  }));
+  resumoPeriodo();
 
   const dz=document.getElementById("dropzone"), fi=document.getElementById("c-file");
   dz.addEventListener("click", ()=>fi.click());
