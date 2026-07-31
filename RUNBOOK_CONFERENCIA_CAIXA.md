@@ -454,3 +454,23 @@ Não dá para depurar isso clicando na página. O jeito rápido é carregar `con
 num contexto `vm` do Node com stubs de `document`/`PUBLICO`, injetar `D = {movimento, movimentoPeriodo}`
 do `conferencia_caixa_raw.json` e chamar `processarConteudo()` direto com o CSV. Aí dá para listar
 o que sobrou de cada lado e testar hipótese em segundos, sem senha, sem Pages e sem gravar nada.
+
+## O último dia da janela é MEIO DIA (31/07/2026)
+
+Caso real: o Athila viu a venda de R$ 53,80 da L5 em **30/07** como "sem venda no ERP". A venda
+existia (doc 12966|10, cartão R$ 53,80) — o painel é que não tinha a **tarde** daquele dia.
+
+Por quê: a coleta roda em hora fixa. A última boa tinha sido 30/07 às **14:50**, porque a das 20:40
+morreu em `NAV_FAIL / api_token_lma indisponível` (migração de auth do Microvix — ver memória
+`microvix_migracao_auth_jwt_2026_07`; o `tokenOpcional: true` no coletor da conferência só entrou
+em 31/07 09:41). O movimento do dia 30 parava no doc 12951|10, mas a data entrava na janela como
+se o dia estivesse fechado. Tudo o que a loja vendeu depois das 14:50 virava cobrança sem venda —
+inclusive o R$ 53,80 e o R$ 200,82, documentos 12965 e 12966, feitos no fim da tarde.
+
+`conciliarForma` agora compara a hora da cobrança com `D.geradoEm` **quando a coleta caiu no último
+dia da janela**, e manda as posteriores para o quadro "o painel ainda não tem essa parte do ERP",
+com o motivo escrito na linha. Some sozinho quando a coleta da noite roda depois do fechamento.
+
+**Regra geral que vale para todo painel:** dia coletado ≠ dia fechado. Se o pipeline não roda depois
+do fechamento da loja, o último dia é parcial e qualquer cruzamento contra ele acusa falta que não
+existe. Antes de investigar divergência do dia mais recente, confira `geradoEm`.
