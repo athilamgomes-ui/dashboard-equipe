@@ -38,7 +38,7 @@ const num = (s) => parseFloat(String(s).replace(/\./g, "").replace(",", ".")) ||
 
 const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true });
 const page = ctx.pages()[0] || (await ctx.newPage());
-try { await garantirSessao(page, { log }); }
+try { await garantirSessao(page, { log, tokenOpcional: true }); }  // raspa relatorio_ranking.asp (só sessão; ERP migrou 30/07)
 catch (e) { log(`auth fail ${e.code||""}`); await ctx.close().catch(()=>{}); process.exit(e.code==="NO_CREDS"||e.code==="LOGIN_FAIL"?2:1); }
 
 // Roda o ranking de UM empresa × período e extrai a linha do cliente COD.
