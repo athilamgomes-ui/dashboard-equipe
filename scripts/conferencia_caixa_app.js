@@ -433,8 +433,28 @@ function conciliarForma(loja, externos, campo, rotulo, todosExternos){
       throw new Error("o arquivo vai de "+dBR(ini)+" a "+dBR(fim)+", mas o painel só tem o movimento do ERP de "
         +dBR(jIni)+" a "+dBR(jFim)+". Carregue um arquivo desse período.");
     foraJanela = externos.filter(t=>t.d<jIni || t.d>jFim);
+    foraJanela.forEach(t=>t.motivo="fora do período coletado");
+
+    // ⚠️ O ÚLTIMO DIA DA JANELA COSTUMA SER MEIO DIA. A coleta roda numa hora fixa; se ela
+    // rodou às 14:50, o movimento daquele dia só tem as vendas até 14:50 — mas a data
+    // aparece na janela como se o dia estivesse inteiro. Toda venda da tarde virava
+    // "cobrança na maquininha sem venda no ERP". Foi exatamente o caso do R$ 53,80 da L5
+    // em 30/07: a coleta das 20:40 falhou (ERP migrou a autenticação) e a última boa foi
+    // a das 14:50, então a tarde inteira do dia 30 apareceu como venda faltando.
+    if (D.geradoEm){
+      const g=new Date(D.geradoEm), p=n=>String(n).padStart(2,"0");
+      const gDia=g.getFullYear()+"-"+p(g.getMonth()+1)+"-"+p(g.getDate());
+      const gMin=g.getHours()*60+g.getMinutes();
+      const hMin=h=>{ const m=/^(\d{2}):(\d{2})/.exec(h||""); return m?(+m[1])*60+(+m[2]):null; };
+      if (gDia===jFim){
+        const tarde=externos.filter(t=>t.d===gDia && hMin(t.h)!==null && hMin(t.h)>gMin);
+        tarde.forEach(t=>t.motivo="depois da hora da coleta ("+p(g.getHours())+":"+p(g.getMinutes())+")");
+        foraJanela=foraJanela.concat(tarde);
+      }
+    }
+
     if (foraJanela.length){
-      externos = externos.filter(t=>t.d>=jIni && t.d<=jFim);
+      externos = externos.filter(t=>!foraJanela.includes(t));
       if (!externos.length)
         throw new Error("nenhum lançamento de "+rotulo+" dentro do período que o painel tem do ERP ("
           +dBR(jIni)+" a "+dBR(jFim)+").");
@@ -1133,18 +1153,21 @@ function rConcil(){
         ? "Venda registrada como PIX que não caiu nesta conta. Pode ter caído em outra chave — ou ter sido paga em dinheiro, e aí sobra na gaveta."
         : "Pode ser venda em outra maquininha, ou venda finalizada como cartão sem a cobrança ter acontecido.");
 
-    if (fora.length) h += caixaBox("⚪ "+rot+": fora do período que o painel tem do ERP",
+    if (fora.length) h += caixaBox("⚪ "+rot+": o painel ainda não tem essa parte do ERP",
       "não dá para conferir — não é falta de venda",
       '<thead><tr><th>Data</th><th>Hora</th><th style="text-align:left">Loja</th><th>Valor</th>'+
-      '<th style="text-align:left">Detalhe</th></tr></thead><tbody>'+
+      '<th style="text-align:left">Detalhe</th><th style="text-align:left">Por quê</th></tr></thead><tbody>'+
       fora.sort((a,b)=>a.d<b.d?1:-1).map(t=>
         '<tr><td><b>'+dBR(t.d)+'</b></td><td class="num zero">'+esc2(t.h)+'</td>'+
         '<td style="text-align:left">'+tagLoja(t.loja)+'</td><td class="num zero">'+nf2(t.v)+'</td>'+
-        '<td style="text-align:left">'+esc2((t.meio||t.tipo||"")+(t.band?" "+t.band:""))+'</td></tr>').join("")+
+        '<td style="text-align:left">'+esc2((t.meio||t.tipo||"")+(t.band?" "+t.band:""))+'</td>'+
+        '<td style="text-align:left" class="zero">'+esc2(t.motivo||"")+'</td></tr>').join("")+
       '<tr><td colspan="3"><b>Total</b></td><td class="num zero"><b>'+nf2(fora.reduce((a,t)=>a+t.v,0))+
-      '</b></td><td></td></tr></tbody>',
-      "O arquivo tem lançamentos de dias que o painel ainda não coletou do ERP. Eles ficam de fora da "+
-      "conferência em vez de aparecerem como venda faltando. Rode a atualização do painel e recarregue o arquivo.");
+      '</b></td><td colspan="2"></td></tr></tbody>',
+      "São lançamentos de dias — ou de horas — que o painel ainda não coletou do ERP. O último dia da "+
+      "janela costuma ser MEIO DIA: a coleta roda numa hora fixa e o que a loja vendeu depois dela ainda "+
+      "não existe aqui. Antes isso aparecia como venda faltando. Rode a atualização do painel e recarregue "+
+      "o arquivo para conferir esses lançamentos.");
 
     if (divs.length) h += caixaBox("✅ "+rot+": venda paga com mais de um cartão", "normal — registrado para conferência",
       '<thead><tr><th>Data</th><th style="text-align:left">Loja</th><th style="text-align:left">Documento</th>'+
