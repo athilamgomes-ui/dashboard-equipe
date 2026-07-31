@@ -68,8 +68,9 @@ function canonicalizarNome(loja, nomeApi) {
  * Retorna [{nome_vendedor, vlr_vendas, ...}] ou lança erro.
  */
 async function fetchPerformance(empresaId, dataInicial, dataFinal) {
-  const token = localStorage.getItem("api_token_lma");
-  if (!token) throw new Error("token api_token_lma ausente — abrir gestor_web e logar");
+  // ERP migrou auth 30/07/2026: o service.asp autoriza pela SESSÃO (cookie); o header Authorization é ignorado.
+  // Mantido só por compatibilidade (vem "" quando o api_token_lma não existe mais).
+  const token = localStorage.getItem("api_token_lma") || "";
 
   const body = JSON.stringify({
     EmpresasSelecionadasParam: String(empresaId),

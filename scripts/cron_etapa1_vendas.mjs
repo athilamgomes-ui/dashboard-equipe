@@ -65,7 +65,7 @@ async function main() {
 
     let token;
     try {
-      token = await garantirSessao(page, { log: err });
+      token = await garantirSessao(page, { log: err, tokenOpcional: true });  // service.asp autoriza pela sessão (ERP migrou 30/07)
     } catch (e) {
       err(`falha ao garantir sessão: ${e.message} (code=${e.code || "?"})`);
       if (e.code === "NO_CREDS" || e.code === "LOGIN_FAIL") {
@@ -97,7 +97,7 @@ async function main() {
         // Tenta um retry: re-garantir sessão (pode ter expirado entre garantir e fetch)
         err(`tentando re-login e retry...`);
         try {
-          await garantirSessao(page, { log: err });
+          await garantirSessao(page, { log: err, tokenOpcional: true });
           await page.addScriptTag({ path: FETCH_SCRIPT });
           const result2 = await page.evaluate(async (sem) => {
             try { return { ok: true, data: await window.fetchVendasMicrovix(sem) }; }

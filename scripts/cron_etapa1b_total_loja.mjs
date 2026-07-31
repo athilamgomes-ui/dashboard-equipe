@@ -112,7 +112,7 @@ async function main(semanas) {
   const page = ctx.pages()[0] || (await ctx.newPage());
 
   try {
-    await garantirSessao(page, { log: logErr });
+    await garantirSessao(page, { log: logErr, tokenOpcional: true });  // raspa relatorio_vendas_lojas.asp (só sessão; ERP migrou 30/07)
   } catch (e) {
     logErr(`garantirSessao falhou: ${e.code || ""} ${e.message}`);
     await ctx.close().catch(() => {});

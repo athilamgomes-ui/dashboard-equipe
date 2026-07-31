@@ -18,7 +18,7 @@ const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true
 const page = ctx.pages()[0] || (await ctx.newPage());
 
 try {
-  await garantirSessao(page, { log: logErr });
+  await garantirSessao(page, { log: logErr, tokenOpcional: true });  // service.asp autoriza pela SESSÃO; token não é mais necessário (ERP migrou 30/07)
 } catch (e) {
   logErr(`garantirSessao falhou: ${e.code || ""} ${e.message}`);
   // ERP migrou auth 30/07/2026: sem api_token_lma este coletor REST não funciona (aguardando Parte 2/JWT).
@@ -35,8 +35,8 @@ try {
 
 logErr(`buscando vendedores via API REST para ${di}–${df}`);
 const out = await page.evaluate(async ({di, df, lojaMap}) => {
-  const token = localStorage.getItem("api_token_lma");
-  if (!token) throw new Error("token ausente");
+  // ERP migrou auth 30/07/2026: o service.asp autoriza pela SESSÃO (cookie); o header Authorization é ignorado.
+  const token = localStorage.getItem("api_token_lma") || "";
   const result = {};
   for (const empStr of Object.keys(lojaMap)) {
     const emp = parseInt(empStr, 10);
