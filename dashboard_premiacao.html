@@ -683,6 +683,67 @@ function isCaixa(nome) { return (VENDEDORAS_META[nome]?.badges||[]).includes('ca
 // Metas: atingir_meta, marcas_a, ticket_medio, conversao, vendas_individuais
 
 const SUGESTOES = {
+  '2026-W32': {
+    semana_label: 'Semana 03/08 – 08/08',
+    geradas_em: '01/08/2026',
+    itens: [
+      {id:'2026-W32-GE-01', escopo:'geral', tipo:'meta', meta_alvo:'corrida_mensal', meta_valor:31000,
+       titulo:'Agosto começa agora — a corrida dos R$31.000 zera pra todo mundo',
+       descricao:'Julho fechou muito bem: o grupo vendeu R$470.755 contra R$405.590 em junho (+16%), e três das quatro lojas passaram da meta — Miss Altamira 111%, Itaituba 105% e Casa da Beleza Altamira 103%. Agora o contador volta pra zero. O prêmio individual do mês começa em R$31.000 e sobe de faixa em faixa até R$55.000. Uma coisa mudou e é importante: você recebe se a sua loja fizer 90% da meta mensal OU se você sozinha passar de R$40.000 — antes dependia só da loja. Essa semana (03 a 08/08) é a maior de agosto em todas as lojas, então é ela que decide se o mês começa no ritmo certo. Abram a aba Meu Progresso na segunda-feira e vejam a linha do ritmo.', prazo:'curto', status:'pendente'},
+
+      {id:'2026-W32-L1-01', escopo:'loja', loja:'L1', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'L1 — R$40.000 na maior semana do mês (R$6.700/dia)',
+       descricao:'A meta da semana é R$40.000 em 6 dias, ou seja R$6.700 por dia. Pra comparar: a melhor semana de 6 dias de julho foi R$33.514, então essa pede um degrau a mais. As faixas do prêmio da equipe são R$28.000 (70%), R$32.000 (80%), R$36.000 (90%) e R$40.000 (100%) — a partir de R$36.000 o pool já pula pra R$180, e com Marcas A acima de 30% vira R$230. Vocês fecharam julho em 103% e abriram agosto com 87% no sábado: o ritmo está lá. Conferir o acumulado no fim de cada tarde e dizer quanto falta pro dia seguinte é o que segurou julho e é o que segura essa.', prazo:'curto', status:'pendente'},
+      {id:'2026-W32-L1-02', escopo:'loja', loja:'L1', tipo:'marca', meta_alvo:'marcas_a', alvo_semana:30,
+       titulo:'L1 — manter as Marcas A acima de 30% (piso do bônus de R$50)',
+       descricao:'As Marcas A da loja subiram o mês inteiro em julho (21,9% → 32,1%) e o sábado de agosto abriu em 36,9% — o melhor número do grupo. Passar de 30% na semana vale +R$50 no pool da equipe, e aqui o desafio não é subir, é NÃO deixar cair. Santa Clara e Itallian foram as que mais giraram em julho e continuam como primeira oferta pra todo cliente novo. A Tatiane voltou e fechou o sábado com 38,5% de Marcas A no pessoal dela — vale ela mostrar pras outras como está montando a oferta.', prazo:'curto', status:'pendente'},
+      {id:'2026-W32-L1-03', escopo:'vendedora', loja:'L1', vendedora:'Sofia', tipo:'meta', meta_alvo:'meta_mensal_individual', meta_valor:40000, meta_semana_valor:9000,
+       titulo:'Sofia — repetir os R$40.000 do mês (você cresceu 93% de junho pra julho)',
+       descricao:'Você saiu de R$21.461 em junho pra R$41.370 em julho — 93% de crescimento, o maior da loja — e cruzou os R$40.000 pela primeira vez, que é a faixa de R$300 (ou R$350 com Marcas A acima de 30%). Suas duas últimas semanas foram as melhores do mês: R$7.817 e R$9.911. O objetivo de agosto não é inventar um número novo, é repetir o que você já provou que faz: R$40.000 no mês, o que dá algo perto de R$9.000 nessa semana de 6 dias. Seu ponto mais fraco continua sendo Marcas A (24,6% no mês, o menor da L1) — é exatamente aí que estão os R$50 a mais.', prazo:'medio', status:'pendente'},
+      {id:'2026-W32-L1-04', escopo:'vendedora', loja:'L1', vendedora:'Bárbara', tipo:'meta', meta_alvo:'vendas_individuais', alvo_semana:11700,
+       titulo:'Bárbara — R$11.700 essa semana',
+       descricao:'Você cresceu 60% de junho pra julho (R$29.499 → R$47.126) e sua última semana fechada foi R$10.662. O alvo de R$11.700 nessa semana de 6 dias é um degrau acima da sua melhor marca — você já passou desse patamar 2 vezes nas últimas 7 semanas, então é desafio, não é impossível. Seu ticket médio está em R$98 e sua venda por atendimento é a mais alta da loja: o caminho mais curto pros R$11.700 é atender mais gente, não vender mais caro. E lembra que passar de R$40.000 no mês agora garante seu prêmio individual mesmo que a loja fique abaixo de 90%.', prazo:'curto', status:'pendente'},
+
+      {id:'2026-W32-L3-01', escopo:'loja', loja:'L3', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'L3 — a meta é R$25.000; a escada começa em R$17.500',
+       descricao:'A meta dessa semana é R$25.000 em 6 dias (R$4.170/dia). Pra ser honesto com vocês: a melhor semana de 6 dias de julho foi R$22.500, então os R$25.000 são um degrau real acima de tudo que a loja já fez. Por isso vale olhar a escada inteira do prêmio: R$17.500 (70%) já paga R$80 · R$20.000 (80%) paga R$100 · R$22.500 (90%) paga R$180 · R$25.000 (100%) paga R$280. Ou seja, empatar com a melhor semana de julho já triplica o prêmio em relação ao piso. O sábado de abertura de agosto ficou em R$1.349 de R$4.000 — dá pra recuperar já na segunda, e chegou muita mercadoria nova (Beauty Color, Salon Line, Kamaleão, CBB) pra sustentar isso.', prazo:'curto', status:'pendente'},
+      {id:'2026-W32-L3-02', escopo:'loja', loja:'L3', tipo:'marca', meta_alvo:'marcas_a', alvo_semana:19,
+       titulo:'L3 — chegar a 19% de Marcas A (é o gargalo da loja)',
+       descricao:'Esse é o ponto que mais custa dinheiro pra vocês: em julho as Marcas A ficaram em 14,8% · 10,5% · 22,5% · 15,5% · 15,3% e o bônus de R$50 nunca entrou uma vez sequer. No sábado de agosto ficou em 0% — nenhuma peça de Marca A no dia inteiro. O alvo dessa semana é 19%: não é os 30% do bônus ainda, é o degrau que coloca vocês na direção certa e que a loja já mostrou que consegue (22,5% na terceira semana de julho). Comecem pelo básico: Santa Clara e Itallian como primeira sugestão de todo atendimento, não como segunda opção quando o cliente já decidiu outra coisa.', prazo:'curto', status:'pendente'},
+      {id:'2026-W32-L3-03', escopo:'loja', loja:'L3', tipo:'elogio',
+       titulo:'L3 — o maior crescimento do grupo em julho (+33%)',
+       descricao:'Julho foi o melhor mês de vocês: R$67.051 em junho viraram R$89.178, um crescimento de 33% — o maior das quatro lojas junto com a Miss Altamira — e a loja fechou em 105% da meta. E foi crescimento de todo mundo, não de uma pessoa só: Ana Mira +43%, Naila +42%, Raimunda +32%, Brunna +8%. Vocês são a loja com o time mais parelho do grupo. Vale registrar isso e usar como referência: o que vocês fizeram em julho deu certo, o desafio de agosto é sustentar com um mercado que vende mais barato que Altamira.', prazo:'curto', status:'pendente'},
+      {id:'2026-W32-L3-04', escopo:'vendedora', loja:'L3', vendedora:'Naila', tipo:'meta', meta_alvo:'vendas_individuais', alvo_semana:4800,
+       titulo:'Naila — R$4.800 essa semana',
+       descricao:'Você fechou julho como a maior vendedora da loja (R$25.916, crescimento de 42% sobre junho) e sua média por semana está bem estável em torno de R$4.383. O alvo de R$4.800 nessa semana de 6 dias é uns 10% acima da sua média — você já passou desse número 2 das últimas 9 semanas, então é um desafio de verdade e não um número de enfeite. Você foi quem mais vendeu peças na última semana (241), o que mostra volume de atendimento: o que falta é subir o valor médio de cada venda, e Marcas A é o caminho mais direto pra isso.', prazo:'curto', status:'pendente'},
+
+      {id:'2026-W32-L4-01', escopo:'loja', loja:'L4', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'L4 — R$40.000 na semana, defendendo o título de melhor loja de julho',
+       descricao:'Vocês fecharam julho em 111% da meta (R$155.625 de R$140.000), o melhor resultado do grupo, e abriram agosto com 105% no sábado. A meta dessa semana é R$40.000 em 6 dias — R$6.700/dia, contra os R$34.801 da melhor semana de julho. As faixas: R$28.000 (70%) · R$32.000 (80%) · R$36.000 (90%) · R$40.000 (100%) · R$44.000 (110%). Vocês foram a única loja que passou de 120% numa semana em julho, então já sabem como é a sensação. A meta mensal de agosto subiu de R$140.000 pra R$160.000 — essa semana é 25% dela.', prazo:'curto', status:'pendente'},
+      {id:'2026-W32-L4-02', escopo:'loja', loja:'L4', tipo:'marca', meta_alvo:'marcas_a', alvo_semana:30,
+       titulo:'L4 — voltar a fechar acima de 30% em Marcas A',
+       descricao:'As Marcas A de vocês oscilaram em julho: 33,7% · 25,2% · 33,9% · 30,0% · 28,5%. Nas semanas em que ficou acima de 30% o pool da equipe subiu R$50; nas duas em que caiu, esse dinheiro ficou na mesa. O sábado de agosto abriu em 32,7%, então o mês começou do lado certo. Santa Clara foi disparado a marca que mais girou em julho (242 peças na quarta semana) e Itallian vem logo atrás — as duas juntas resolvem o piso. Débora está com 25,5% no acumulado individual, o menor do trio: vale ela combinar com a Bruna F. (34%) uma ou duas frases prontas de oferta.', prazo:'curto', status:'pendente'},
+      {id:'2026-W32-L4-03', escopo:'vendedora', loja:'L4', vendedora:'Bruna F.', tipo:'meta', meta_alvo:'vendas_individuais', alvo_semana:12400,
+       titulo:'Bruna F. — R$12.400 essa semana',
+       descricao:'Você fechou julho com R$61.331, o maior número individual do grupo inteiro, e caiu na faixa de R$600 do prêmio mensal (R$650 com Marcas A acima de 30% — e você está em 34%, ou seja, já garantiu). Sua média por semana é R$11.264 e o alvo de R$12.400 é 10% acima dela: você já passou desse patamar 4 das últimas 10 semanas. Sua última semana veio mais fraca (R$9.191), então esse número é mais retomar o seu normal do que inventar recorde. Com R$61.000 em julho, os R$55.000 de agosto estão na sua mão desde que o ritmo se mantenha.', prazo:'curto', status:'pendente'},
+      {id:'2026-W32-L4-04', escopo:'vendedora', loja:'L4', vendedora:'Débora', tipo:'meta', meta_alvo:'vendas_individuais', alvo_semana:7800,
+       titulo:'Débora — R$7.800 essa semana',
+       descricao:'Você cresceu 66% de junho pra julho (R$26.544 → R$43.942), o maior salto da loja, e passou dos R$40.000 no mês — o que pela regra nova garante seu prêmio individual mesmo que a loja não feche os 90%. O alvo de R$7.800 nessa semana está 10% acima da sua média (R$7.085) e você já passou disso 3 das últimas 7 semanas. Um ponto pra cuidar: seu ticket médio caiu pra R$68 na última semana contra uma média de R$80, e você atendeu 106 clientes — ou seja, gente não está faltando, está faltando fechar venda maior. Suas Marcas A em 25,5% são a alavanca mais direta.', prazo:'curto', status:'pendente'},
+
+      {id:'2026-W32-L5-01', escopo:'loja', loja:'L5', tipo:'meta', meta_alvo:'atingir_meta',
+       titulo:'L5 — recomeço: a escada do prêmio começa em R$17.500',
+       descricao:'Julho foi o único mês em que a loja não bateu a meta (R$81.814 de R$90.000, 91%) e as três últimas semanas vieram em queda: 98%, 77% e 64%. Agosto zera isso. A meta da semana é R$25.000 em 6 dias, e a melhor semana de julho foi R$20.055 — então vamos por degraus: R$17.500 (70%) paga R$80 · R$20.000 (80%) paga R$100 · R$22.500 (90%) paga R$180 · R$25.000 (100%) paga R$280. Chegar em R$20.000 já é empatar com o melhor de julho; R$22.500 já é a loja num patamar novo. Santarém tem fluxo de rua maior que Altamira e vocês vendem bem — o que faltou em julho foi constância no fim do mês, não capacidade.', prazo:'curto', status:'pendente'},
+      {id:'2026-W32-L5-02', escopo:'loja', loja:'L5', tipo:'marca', meta_alvo:'marcas_a', alvo_semana:24,
+       titulo:'L5 — 24% de Marcas A (vocês já fizeram 27,5%)',
+       descricao:'As Marcas A de vocês balançaram muito em julho: 26,9% · 18,4% · 27,5% · 15,4% · 22,9%, e o sábado de agosto abriu em 13,4%. O alvo de 24% dessa semana é acima da média de julho e abaixo do que vocês já provaram que conseguem (27,5%). O bônus de R$50 continua nos 30% — chegando aos 24% de forma consistente, ele passa a ser questão de tempo. Santa Clara e Itallian foram as que mais giraram e Beauty Color entrou forte na terceira semana: essas três resolvem. Rayssa está com 3,4% de Marcas A no acumulado do sábado, o menor da loja — vale a Rosiene dar uma passada com ela na oferta de entrada.', prazo:'curto', status:'pendente'},
+      {id:'2026-W32-L5-03', escopo:'vendedora', loja:'L5', vendedora:'Karina', tipo:'meta', meta_alvo:'vendas_individuais', alvo_semana:5250,
+       titulo:'Karina — R$5.250 essa semana',
+       descricao:'Sua média por semana é R$4.781 e você já passou dos R$5.250 em 3 das últimas 10 semanas — inclusive R$6.350 e R$5.666 em semanas seguidas, então esse número está no seu alcance. As duas últimas vieram mais fracas (R$4.205 e R$3.531) e é isso que essa semana vem corrigir. Um dado a favor: você vendeu 237 peças na última semana, de longe o maior volume da loja. O gargalo não é movimento, é valor por atendimento — seu ticket caiu de R$89 de média pra R$75. Uma peça a mais de Marca A por venda já fecha essa diferença.', prazo:'curto', status:'pendente'},
+      {id:'2026-W32-L5-04', escopo:'vendedora', loja:'L5', vendedora:'Rosiene', tipo:'meta', meta_alvo:'vendas_individuais', alvo_semana:5450,
+       titulo:'Rosiene — R$5.450 essa semana, puxando o time',
+       descricao:'Sua média é R$4.979 por semana e você já fez R$6.884, R$6.485 e R$6.048 em semanas de julho e junho — o alvo de R$5.450 é bem dentro do que você entrega quando está no seu ritmo. A última semana foi R$2.833, a mais baixa em muito tempo, e é o que puxou a loja pra baixo junto com o resto. Suas Marcas A estão em 29,2%, as melhores da loja e quase no bônus: você é a referência natural pra virar esse número da L5 inteira. Como gerente, o que mais rende essa semana é combinar com as meninas quanto falta todo fim de tarde — foi o que segurou Altamira e Itaituba em julho.', prazo:'curto', status:'pendente'},
+    ],
+  },
   '2026-W31': {
     semana_label: 'Semana 27/07 – 31/07',
     geradas_em: '26/07/2026',
@@ -1256,8 +1317,11 @@ const MENSAL_TABLE = [
 function getPool(em_pct, marcasA_pct) {
   const bonus = marcasA_pct >= 30;
   if (em_pct >= 120) {
+    // ≥120%: +R$10 por CADA 10pp completos acima de 120% (Athila, 01/08/2026,
+    // ajustado de +R$70→+R$35→+R$10). Espelha calcPoolFaixa() do loja.html —
+    // os dois arquivos TÊM que dar o mesmo número. 130%=430 · 140%=440 · 207%=500.
     const extra = Math.floor((em_pct - 120) / 10);
-    const base = 420 + extra * 70;
+    const base = 420 + extra * 10;
     return bonus ? base + 50 : base;
   }
   for (const [min, b, bn] of SEMANAL_TABLE) {
