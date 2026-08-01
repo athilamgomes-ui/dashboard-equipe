@@ -1313,12 +1313,12 @@ const HISTORICO_PREMIOS = {
       _pool:   {S1:420, S2:280, S3:100, S4:280, S5:420},  // S4: faixa 100 (280), sem bônus (MA 15,5%)
     },
     L4: {
-      'Tanaia': {S1:27, S2:6, S3:1, S4:23, S5:24},
-      'Josilene': {S1:123, S2:50, S3:110, S4:184, S5:284},
-      'Bruna F.': {S1:166, S2:85, S3:227, S4:134, S5:355},
-      'Débora': {S1:154, S2:39, S3:132, S4:129, S5:317},
+      'Tanaia': {S1:27, S2:6, S3:1, S4:23, S5:17},
+      'Josilene': {S1:123, S2:50, S3:110, S4:184, S5:203},
+      'Bruna F.': {S1:166, S2:85, S3:227, S4:134, S5:254},
+      'Débora': {S1:154, S2:39, S3:132, S4:129, S5:227},
       _em_pct: {S1:130, S2:99, S3:122, S4:129, S5:207},
-      _pool:   {S1:470, S2:180, S3:470, S4:470, S5:980},  // S1/S3/S4: 420+50 bônus MA · S5: 207% = 420 + 8×70 (+R$70/10pp)
+      _pool:   {S1:470, S2:180, S3:470, S4:470, S5:700},  // S1/S3/S4: 420+50 bônus MA · S5: 207% = 420 + 8×70 (+R$70/10pp)
     },
     L5: {
       'Rosiene': {S1:177, S2:25, S3:43, S4:15, S5:0},
@@ -2663,12 +2663,12 @@ function calcPoolFaixa(em_pct, bonusMA) {
   for (let i = PRZ_FAIXAS.length - 1; i >= 0; i--) {
     if (em_pct >= PRZ_FAIXAS[i].pct) {
       let pool = bonusMA ? PRZ_FAIXAS[i].bonus : PRZ_FAIXAS[i].base;
-      // ≥120%: +R$70 por CADA 10pp completos acima de 120% (Tabela de Premiação).
-      // Antes o código capava em 420/470 — mas os congelamentos históricos já
-      // aplicavam o +R$70 na mão (ex: L5 S1/jul = 630 = 420+3×70). Corrigido
-      // 31/07/2026 (Athila) pra o cálculo dinâmico bater com o histórico.
+      // ≥120%: +R$35 por CADA 10pp completos acima de 120% (Athila, 01/08/2026,
+      // corrigido de +R$70). Ex: 130% = 420+35 = 455 · 140% = 490 · 207% = 420+8×35 = 700.
+      // Semanas já congeladas ficam com o valor gravado (imutável) — a regra nova
+      // vale pro cálculo dinâmico das semanas seguintes.
       if (PRZ_FAIXAS[i].pct === 120 && em_pct > 120) {
-        pool += Math.floor((em_pct - 120) / 10) * 70;
+        pool += Math.floor((em_pct - 120) / 10) * 35;
       }
       return {faixa: PRZ_FAIXAS[i].pct, pool};
     }
