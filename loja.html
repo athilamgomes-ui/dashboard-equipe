@@ -1333,9 +1333,8 @@ const HISTORICO_PREMIOS = {
 
 // Helper: lookup do mês atual. Se chave novo mês não existe, retorna {}.
 function _histMes(lojaKey) {
-  const hoje = new Date();
-  const mk = hoje.getFullYear() + '-' + String(hoje.getMonth()+1).padStart(2,'0');
-  return (HISTORICO_PREMIOS[mk] || {})[lojaKey] || {};
+  // Mesmo mês dos dados (coleta), não o relógio — ver _mesCorrenteKey (bug 01/08/2026).
+  return (HISTORICO_PREMIOS[_mesCorrenteKey()] || {})[lojaKey] || {};
 }
 
 // Semanas do mês corrente
@@ -2696,6 +2695,13 @@ function _isCaixa(vendedora) {
 // retroativamente nenhuma semana já fechada (os valores ficam congelados aqui).
 // Só um admin, por recálculo manual explícito, pode reescrever esse snapshot.
 function _mesCorrenteKey() {
+  // ⚠️ Deriva do TIMESTAMP DA COLETA (o mês dos dados que o app REALMENTE tem),
+  // NÃO do relógio. Bug 01/08/2026: no 1º dia do mês novo, antes do rollover, o
+  // app ainda tem dados de julho mas new Date() já dava agosto — aí procurava o
+  // HISTORICO_PREMIOS no mês errado, IGNORAVA o congelamento de julho e recalculava
+  // tudo dinâmico, mostrando prêmios errados como se agosto tivesse fechado.
+  const m = String(typeof DADOS_COLETADO_EM !== 'undefined' ? DADOS_COLETADO_EM : '').match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if (m) return m[3] + '-' + m[2];
   const h = new Date();
   return h.getFullYear() + '-' + String(h.getMonth() + 1).padStart(2, '0');
 }
