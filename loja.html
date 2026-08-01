@@ -3495,7 +3495,7 @@ function renderProgresso() {
     })() : '';
     // Faixa do prazo - quando vai ser avaliado
     const prazo = s.prazo || 'curto';
-    const mesAtualNome = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][new Date().getMonth()];
+    const mesAtualNome = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][parseInt(_mesCorrenteKey().split('-')[1],10)-1];
     const prazoTextos = {
       curto: {emoji:'🟢', cor:'rgba(34,197,94,.15)', bd:'var(--green)', txt:`Essa recomendação vai ser avaliada pela gestão em 1 semana. <b>Foco nessa semana!</b>`},
       medio: {emoji:'🟡', cor:'rgba(234,179,8,.15)', bd:'var(--yellow)', txt:`Essa recomendação vai ser avaliada pela gestão daqui 1 mês. <b>Foco em construir isso ao longo de ${mesAtualNome}.</b>`},
@@ -4054,8 +4054,7 @@ function renderHistoricoPremios() {
 
   // Render bloco de meses anteriores (todos os meses passados em HISTORICO_PREMIOS,
   // exceto o mês corrente). Mostra cada mês como mini-tabela com S1-S4 e total.
-  const _hojeBloco = new Date();
-  const _mesAtual = _hojeBloco.getFullYear() + '-' + String(_hojeBloco.getMonth()+1).padStart(2,'0');
+  const _mesAtual = _mesCorrenteKey(); // mês dos DADOS, não do relógio (bug virada 01/08/2026)
   const _nomesMes = {1:'janeiro',2:'fevereiro',3:'março',4:'abril',5:'maio',6:'junho',7:'julho',8:'agosto',9:'setembro',10:'outubro',11:'novembro',12:'dezembro'};
   const blocosAnteriores = Object.keys(HISTORICO_PREMIOS)
     .filter(mk => mk !== _mesAtual)
@@ -4099,7 +4098,7 @@ function renderHistoricoPremios() {
       </div>`;
     }).join('');
 
-  const _mesCorrenteNome = _nomesMes[_hojeBloco.getMonth()+1];
+  const _mesCorrenteNome = _nomesMes[parseInt(_mesAtual.split('-')[1],10)];
   return `
     <div class="historico-card">
       <h3>💰 Seu histórico de prêmios em ${_mesCorrenteNome}</h3>
