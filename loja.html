@@ -1329,6 +1329,47 @@ const HISTORICO_PREMIOS = {
       _pool:   {S1:630, S2:80, S3:180, S4:80, S5:0},  // S4: faixa 70 (80), sem bônus (MA 15,4%)
     },
   },
+  '2026-08': {
+    // S1 CONGELADA 03/08/2026 (semana-toco de virada de mes: SO o sabado 01/08, 1 dia).
+    // Coleta final de 01/08 refeita hoje (cron_etapa1_vendas + coleta_cliente8) — resultado
+    // IDENTICO ao do fechamento, nada mudou. Cliente 8 (R Maura) = R$0 nas 4 lojas.
+    // Meta REAL S1 (Worker /metas-loja + Supabase metas_semanais): L1=6000 L3=4000 L4=6000 L5=5000.
+    // L1 86,9% -> faixa 80 (100) + bonus Marcas A 36,9% = 120.
+    // L4 104,8% -> faixa 100 (280) + bonus Marcas A 32,7% = 330.
+    // L3 33,7% e L5 69,9% sem pool — L5 parou R$5 abaixo dos R$3.500 da faixa 70. IMUTAVEL.
+    L1: {
+      'Tatiane': {S1:53},
+      'Rayra': {S1:21},
+      'Sofia': {S1:18},
+      'Bárbara': {S1:28},
+      _em_pct: {S1:87},
+      _pool:   {S1:120},  // faixa 80 (100) + bonus Marcas A (36,9%)
+    },
+    L3: {
+      'Ana Mira': {S1:0},
+      'Raimunda': {S1:0},
+      'Brunna': {S1:0},
+      'Naila': {S1:0},
+      _em_pct: {S1:33.7},
+      _pool:   {S1:0},  // 33,7% da meta — abaixo de 70%, sem pool
+    },
+    L4: {
+      'Tanaia': {S1:0},
+      'Josilene': {S1:123},
+      'Bruna F.': {S1:97},
+      'Débora': {S1:110},
+      _em_pct: {S1:105},
+      _pool:   {S1:330},  // faixa 100 (280) + bonus Marcas A (32,7%)
+    },
+    L5: {
+      'Rayssa': {S1:0},
+      'Joyce': {S1:0},
+      'Rosiene': {S1:0},
+      'Karina': {S1:0},
+      _em_pct: {S1:69.9},
+      _pool:   {S1:0},  // 69,9% — R$5 abaixo da faixa 70 (R$3.500), sem pool
+    },
+  },
 };
 
 // Helper: lookup do mês atual. Se chave novo mês não existe, retorna {}.
