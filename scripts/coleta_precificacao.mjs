@@ -175,14 +175,19 @@ function fornIgnorado(nome) {
 const MARCAS_NAO_REVENDA = new Set(((FORN_MARCAS._uso_interno || {}).marcas || ["Solider", "MultiBag"]).map(m => norm(m)));
 const marcaNaoRevenda = mk => MARCAS_NAO_REVENDA.has(norm(mk));
 
-// excluir devoluções/transferências/bonificações/amostras/consignação (não é compra p/ revenda)
-const EXCL_NAT = /(AMOSTRA|REMESSA EM CONSIGNA|BONIFIC|DEVOLU|RETORNO|TRANSFER)/i;
-const EXCL_CFOP = new Set(["5152","6152","5910","6910","5911","6911","5912","6912","5201","6201","5202","6202","1411","2411","3411"]);
+// CFOP de amostra/bonificação/devolução/transferência/consignação — NÃO é compra p/ revenda.
+const EXCL_CFOP = new Set(["5152","6152","5910","6910","5911","6911","5912","6912","5201","6201","5202","6202","1411","2411","3411","5917","6917","5918","6918"]);
+// item de compra/revenda = tem CFOP e ele NÃO está na lista de excluídos
+const cfopRevenda = c => { c = String(c || ""); return !!c && !EXCL_CFOP.has(c); };
+// Mantém a NF se tiver PELO MENOS UM item de compra real. Assim uma NF MISTA — itens de venda +
+// alguns sachês de amostra, que o fornecedor emite como "REMESSA DE AMOSTRA GRÁTIS" (ex. Franca NF
+// 926: 53 itens CFOP 6102 de compra + 6 linhas de amostra/brinde) — NÃO é jogada fora inteira pela
+// natureza; as linhas de amostra/bonificação saem depois no filtro POR-ITEM. Uma NF 100% amostra/
+// devolução/transferência/consignação tem todos os CFOPs excluídos → cai fora aqui. (04/08/2026,
+// antes a natureza "AMOSTRA" derrubava a NF inteira e sumia uma compra de R$18 mil.)
 function keepNfe(nfe) {
-  if (EXCL_NAT.test(nfe.NaturezaOperacao || "")) return false;
   const cfops = (nfe.Produtos || []).map(p => String(p.CFOP || ""));
-  if (cfops.length && cfops.every(c => EXCL_CFOP.has(c))) return false;
-  return true;
+  return cfops.some(cfopRevenda);
 }
 const num = v => { const n = Number(v); return isNaN(n) ? 0 : n; };
 
@@ -488,6 +493,15 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
           };
         });
         if (!itens.length) continue;
+        // FILTRO POR-ITEM: numa NF mista de compra, tira as linhas de amostra/bonificação/devolução
+        // (CFOP excluído) p/ não precificar sachê grátis. (04/08/2026 — Franca NF 926)
+        {
+          const antes = itens.length;
+          const rev = itens.filter(it => cfopRevenda(it.cfop));
+          if (rev.length < antes) log(`  NF ${nfe.Numero}/${loja}: ${antes - rev.length} linha(s) de amostra/bonificação removida(s)`);
+          itens.length = 0; itens.push(...rev);
+          if (!itens.length) continue;
+        }
         // DEDUP: a NFe pode trazer o MESMO produto em várias linhas (<det>) — para precificar
         // queremos 1 linha por produto. Agrupa por cprod (fallback ean/descrição), somando qtd e
         // custos; recalcula o custo unitário. (14/07/2026 — NF 538 trazia 1003329 duplicado.)
