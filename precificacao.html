@@ -363,7 +363,7 @@ function renderNfes(){
     <div class="nfe ${nfeSel===i?'sel':''}" data-i="${i}">
       <div class="top"><span class="forn">${nf.fornecedor||"—"}</span>
         <span>${nf.marca_pendente?'<span class="pill" style="background:var(--critbg);color:var(--crit)" title="fornecedor sem marca mapeada — precifique manualmente e registre a marca">⚠️ marca não mapeada</span> ':''}<span class="pill ${nf.lancada?'l':'t'}">${nf.lancada?'lançada':'em trânsito'}</span></span></div>
-      <div class="meta">NF ${nf.numero}${nf.uf?` · ${nf.uf}`:''} · ${nf.data_emissao.split("-").reverse().join("/")} · ${nf.itens.length} itens · ${brl(nf.valor)}${nf.itens[0]&&nf.itens[0].marca?` · ${nf.itens[0].marca}`:''}</div>
+      <div class="meta">NF ${nf.numero}${nf.uf?` · ${nf.uf}`:''} · ${nf.data_emissao.split("-").reverse().join("/")} · ${nf.itens.length} itens · ${brl(nf.valor)}${(()=>{const ms=[...new Set(nf.itens.map(i=>i.marca).filter(Boolean))];return ms.length?` · ${ms.join(", ")}`:'';})()}</div>
     </div>`).join("") || `<div class="empty">Nenhuma NF-e nos últimos 90 dias.</div>`;
   document.getElementById("nfeList").innerHTML=html;
   document.querySelectorAll(".nfe").forEach(el=>el.onclick=()=>{nfeSel=+el.dataset.i; renderNfes(); renderItens();});

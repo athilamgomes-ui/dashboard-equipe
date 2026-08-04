@@ -97,9 +97,32 @@ const divisorDescricao = desc => {
 };
 // marca (normalizada) \u2192 c\u00f3digos no ERP (ex.: PROBELLE \u2192 ["858","366"])
 const MARCA_TO_CODES = {};
+const MARCA_CANON = {}; // marca normalizada \u2192 nome can\u00f4nico (p/ rotular o item com a grafia oficial)
 for (const [nome, v] of Object.entries(MARCA_IDS)) {
   if (nome.startsWith("_")) continue;
   MARCA_TO_CODES[norm(nome)] = (Array.isArray(v) ? v : [v]).map(String);
+  MARCA_CANON[norm(nome)] = nome;
+}
+// Keywords marca\u2192[termos] de FONTE \u00daNICA (mesma que o dashboard de Compras usa). Fallback p/ detectar
+// a marca de um PRODUTO NOVO (ainda sem pre\u00e7o no ERP) numa NF multi-marca, pela descri\u00e7\u00e3o. Termos
+// que come\u00e7am com "\b" s\u00e3o regex (word-boundary); demais s\u00e3o substring (comparado em norm()). (04/08/2026)
+const BRAND_KEYWORDS = {};
+try {
+  const kwRaw = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/compras/marca_keywords.json", "utf8"));
+  for (const [mk, kws] of Object.entries(kwRaw)) {
+    if (mk.startsWith("_") || !Array.isArray(kws)) continue;
+    BRAND_KEYWORDS[mk] = kws.map(kw => String(kw).startsWith("\\b") ? { re: new RegExp(kw, "i") } : { sub: norm(kw) });
+  }
+} catch (e) { /* sem keywords \u2192 fallback por descri\u00e7\u00e3o fica inativo (s\u00f3 ERP resolve a marca) */ }
+// detecta a marca de UM produto pela descri\u00e7\u00e3o; `restrito` (Set de marcas can\u00f4nicas) limita \u00e0s candidatas.
+// Retorna a marca can\u00f4nica s\u00f3 se houver match \u00daNICO (amb\u00edguo entre 2+ ou nenhum \u2192 null, mais seguro).
+function marcaPorDescricao(desc, restrito) {
+  const d = norm(desc); const hits = [];
+  for (const [mk, kws] of Object.entries(BRAND_KEYWORDS)) {
+    if (restrito && !restrito.has(mk)) continue;
+    if (kws.some(k => k.re ? k.re.test(d) : d.includes(k.sub))) hits.push(mk);
+  }
+  return hits.length === 1 ? hits[0] : null;
 }
 // tokens p/ casar descri\u00e7\u00e3o (sem acento; separa letra/d\u00edgito: "20VOL"\u2192["20","VOL"]; descarta ru\u00eddo)
 const STOP_TOK = new Set(["ML", "UN", "G", "KG", "DE", "DA", "DO", "C", "P"]);
@@ -151,8 +174,8 @@ async function dataLctoErp() {
   return map;
 }
 
-// fornecedor (CNPJ ou nome) → marca; multi-marca ('+') ou desconhecido → null
-function fornBrand(emit) {
+// valor bruto do mapa fornecedor→marca (CNPJ tem prioridade sobre substring do nome); pode ter '+' (multi-marca)
+function fornBrandRaw(emit) {
   const cnpj = String(emit?.Documento || "").replace(/[.\/-]/g, "");
   let v = (FORN_MARCAS.por_cnpj || {})[cnpj];
   if (v == null) {
@@ -161,8 +184,21 @@ function fornBrand(emit) {
       if (nome.includes(String(sub).toUpperCase())) { v = mk; break; }
     }
   }
+  return v || null;
+}
+// fornecedor (CNPJ ou nome) → marca; multi-marca ('+') ou desconhecido → null
+function fornBrand(emit) {
+  const v = fornBrandRaw(emit);
   if (!v || String(v).includes("+")) return null;
   return v;
+}
+// fornecedor multi-marca ('+') → lista de marcas CANDIDATAS (ex. Franca → ["Varcare","Nathydras"]).
+// A marca de cada item é resolvida POR-ITEM na fase de preços do ERP: consulta o relatório de cada
+// candidata e atribui ao item a marca cujo relatório contém o EAN/referência dele. (04/08/2026)
+function fornMarcasCandidatas(emit) {
+  const v = fornBrandRaw(emit);
+  if (!v || !String(v).includes("+")) return [];
+  return String(v).split("+").map(s => s.trim()).filter(Boolean);
 }
 function fornIgnorado(nome) {
   const up = String(nome || "").toUpperCase();
@@ -459,6 +495,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         // preço SUGERIDO sai normal e a tela mostra o badge "⚠️ marca não mapeada". Fornecedor
         // multi-marca ('+', split pendente) também cai aqui. Fica na tela até "✅ Concluída".
         const marcaPendente = !marcaForn;
+        const marcaCandidatas = marcaPendente ? fornMarcasCandidatas(emit) : []; // multi-marca: resolver por-item na fase de preços
         if (NF_FILTER) {
           if (!NF_FILTER.includes(String(nfe.Numero))) continue; // modo teste: só a(s) NF(s) pedida(s)
         } else {
@@ -530,6 +567,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
           lancada: !!nfe.LancadaNoMicrovix,
           natureza: String(nfe.NaturezaOperacao || ""),
           ...(marcaPendente ? { marca_pendente: true } : {}), // badge "⚠️ marca não mapeada" na tela; ausente = mapeada (JSON não muda p/ NFes normais)
+          ...(marcaCandidatas.length ? { marca_candidatas: marcaCandidatas } : {}), // multi-marca: marca resolvida por-item na fase de preços do ERP
           itens,
         });
         kept++;
@@ -644,7 +682,14 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
     }
 
     // ===== Preço de venda atual no ERP (Lista de Preços), por LOJA × MARCA =====
-    // Filtra o relatório pela marca (códigos do ERP) e casa cada item por EAN, senão por descrição.
+    // Consulta o relatório por marca (código do ERP) e casa cada item por EAN (fallback: referência/cprod).
+    // MULTI-MARCA (04/08/2026): fornecedor com marcas candidatas (ex. Franca → Varcare+Nathydras) tem a
+    // marca de CADA item resolvida aqui — o item recebe a marca cujo relatório de preços contém o EAN/ref
+    // dele (o ERP é a fonte da verdade da marca, não a descrição). Assim multi-marca também ganha "preço
+    // atual do ERP" e passa a usar a margem da marca correta.
+    const setPreco = (it, r, tipo) => { it.preco_atual = r.preco; it.cod_erp = r.cod; it.custo_erp = r.custo; it.match_tipo = tipo; };
+    const matchEan = (it, ix) => (it.ean && it.ean !== "SEM GTIN" && ix.porEan[it.ean] != null) ? ix.porEan[it.ean] : null;
+    const matchRef = (it, ix) => { const k = String(it.cprod || "").toUpperCase().trim(); return (k && ix.refMap[k]) ? ix.refMap[k] : null; };
     for (const L of Object.keys(lojas)) {
       if (PROC_SKIP_PRECO) break;
       if (!lojas[L].length) continue;
@@ -652,41 +697,77 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       const tabelaNome = (PARAMS.lojas[L] || {}).tabela_preco;
       const tabelaId = (PARAMS.lojas[L] || {}).tabela_id;
       if (!empresa) continue;
-      // agrupar itens por marca
+      // (a) itens já com marca mapeada, agrupados por marca
       const porMarca = {};
       for (const nf of lojas[L]) for (const it of nf.itens) {
         const codes = MARCA_TO_CODES[norm(it.marca)];
         if (!codes) continue;
-        (porMarca[norm(it.marca)] = porMarca[norm(it.marca)] || { codes, itens: [] }).itens.push(it);
+        (porMarca[norm(it.marca)] = porMarca[norm(it.marca)] || { codes, mk: it.marca, itens: [] }).itens.push(it);
       }
-      for (const [mk, g] of Object.entries(porMarca)) {
+      // (b) itens de NF multi-marca (marca ainda pendente) + marcas candidatas a consultar
+      const multiItens = []; const candSet = new Set();
+      for (const nf of lojas[L]) {
+        if (!nf.marca_candidatas || !nf.marca_candidatas.length) continue;
+        const cands = nf.marca_candidatas.map(norm).filter(m => MARCA_TO_CODES[m]);
+        for (const m of cands) candSet.add(m);
+        for (const it of nf.itens) if (it.preco_atual == null) multiItens.push({ it, cands });
+      }
+      // consulta cada marca (mapeada + candidata) UMA vez; guarda os índices por EAN e referência
+      const idx = {};
+      for (const m of new Set([...Object.keys(porMarca), ...candSet])) {
+        const codes = MARCA_TO_CODES[m]; if (!codes) continue;
         try {
-          const { tabela, rows } = await relatorioPrecosErp(page, empresa, tabelaNome, g.codes, tabelaId);
-          // Índice por EAN (código de barras exibido no relatório).
+          const { tabela, rows } = await relatorioPrecosErp(page, empresa, tabelaNome, codes, tabelaId);
           const porEan = {}; for (const r of rows) if (r.ean) porEan[r.ean] = r;
-          // Índice por REFERÊNCIA (= código do fornecedor/cprod). SEGURO: só usa referências ÚNICAS —
-          // se duas linhas têm a mesma referência com preços diferentes, marca ambígua e NÃO associa.
-          // Necessário porque o relatório mostra só UM código de barras por produto (às vezes o interno,
-          // não o EAN da NF) — aí o match por EAN falha mesmo o produto existindo. A referência resolve.
+          // Índice por REFERÊNCIA (= cprod). SEGURO: só referências ÚNICAS — duas linhas com a mesma
+          // referência e preços diferentes = ambíguo → descarta (o relatório mostra só 1 código de barras
+          // por produto, às vezes o interno, então o match por EAN às vezes falha e a referência resolve).
           const refMap = {};
           for (const r of rows) {
             const k = String(r.ref || "").toUpperCase().trim(); if (!k) continue;
             if (refMap[k] === undefined) refMap[k] = r;
-            else if (refMap[k] === null || refMap[k].preco !== r.preco) refMap[k] = null; // ambígua → descarta
+            else if (refMap[k] === null || refMap[k].preco !== r.preco) refMap[k] = null;
           }
-          let porEanN = 0, porRefN = 0;
-          for (const it of g.itens) {
-            if (it.preco_atual != null) continue;
-            // 1º: EAN exato (código de barras). 2º (fallback): referência exata (cprod ↔ Referência).
-            if (it.ean && it.ean !== "SEM GTIN" && porEan[it.ean] != null) {
-              const r = porEan[it.ean]; it.preco_atual = r.preco; it.cod_erp = r.cod; it.custo_erp = r.custo; it.match_tipo = "ean"; porEanN++;
-            } else {
-              const k = String(it.cprod || "").toUpperCase().trim();
-              if (k && refMap[k]) { const r = refMap[k]; it.preco_atual = r.preco; it.cod_erp = r.cod; it.custo_erp = r.custo; it.match_tipo = "ref"; porRefN++; }
-            }
+          idx[m] = { porEan, refMap, tabela, rows };
+        } catch (e) { log(`preços ERP ${L}/${m} FALHOU: ${String(e.message || e).split("\n")[0]}`); }
+      }
+      // 1) itens de marca mapeada: casam na própria marca (EAN → senão referência)
+      for (const [m, g] of Object.entries(porMarca)) {
+        const ix = idx[m]; if (!ix) continue;
+        let ean = 0, ref = 0;
+        for (const it of g.itens) {
+          if (it.preco_atual != null) continue;
+          const re = matchEan(it, ix); if (re) { setPreco(it, re, "ean"); ean++; continue; }
+          const rr = matchRef(it, ix); if (rr) { setPreco(it, rr, "ref"); ref++; }
+        }
+        log(`preços ERP ${L}/${g.mk} (emp ${empresa}, ${ix.tabela || "?"}, ${ix.rows.length} prod): ${ean} por EAN + ${ref} por referência = ${ean + ref}/${g.itens.length}`);
+      }
+      // 2) itens multi-marca: a 1ª candidata que casar define a marca real do item (EAN tem prioridade
+      //    sobre referência entre TODAS as candidatas, p/ não fixar a marca errada por um ref ambíguo).
+      if (multiItens.length) {
+        let porErp = 0, porDesc = 0;
+        for (const { it, cands } of multiItens) {
+          if (it.preco_atual != null) continue;
+          // (a) ERP é a fonte da verdade: casa por EAN em qualquer candidata (prioridade), senão por referência
+          let m = cands.find(c => idx[c] && matchEan(it, idx[c]));
+          if (!m) m = cands.find(c => idx[c] && matchRef(it, idx[c]));
+          if (m) {
+            const ix = idx[m]; const re = matchEan(it, ix);
+            setPreco(it, re || matchRef(it, ix), re ? "ean" : "ref");
+            it.marca = MARCA_CANON[m] || it.marca; it.marca_detectada = true; it.marca_fonte = "erp"; porErp++;
+            continue;
           }
-          log(`preços ERP ${L}/${mk} (emp ${empresa}, ${tabela || "?"}, ${rows.length} prod): ${porEanN} por EAN + ${porRefN} por referência = ${porEanN + porRefN}/${g.itens.length}`);
-        } catch (e) { log(`preços ERP ${L}/${mk} FALHOU: ${String(e.message || e).split("\n")[0]}`); }
+          // (b) produto NOVO (ainda sem preço no ERP) → detecta marca pela DESCRIÇÃO, restrito às candidatas
+          const restr = new Set(cands.map(c => MARCA_CANON[c]).filter(Boolean));
+          const mk = marcaPorDescricao(it.descricao, restr);
+          if (mk) { it.marca = mk; it.marca_detectada = true; it.marca_fonte = "descricao"; porDesc++; }
+        }
+        log(`multi-marca ${L}: ${porErp} por ERP + ${porDesc} por descrição = ${porErp + porDesc}/${multiItens.length} itens com marca`);
+      }
+      // 3) NF multi-marca com TODOS os itens resolvidos deixa de ser "pendente" (some o badge da tela)
+      for (const nf of lojas[L]) {
+        if (!nf.marca_candidatas) continue;
+        if (nf.itens.every(it => it.marca_detectada)) { delete nf.marca_pendente; delete nf.marca_candidatas; }
       }
     }
 
