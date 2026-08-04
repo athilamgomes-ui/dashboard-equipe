@@ -119,14 +119,21 @@ export default {
       // === FEEDBACK DA VENDEDORA ===
       if (method === 'POST' && url.pathname === '/feedback') {
         const body = await request.json();
-        const { id_sugestao, loja, vendedora, acao, comentario } = body;
-        if (!id_sugestao || !loja || !vendedora || !acao) {
-          return jsonResponse(request, { error: 'Campos obrigatorios: id_sugestao, loja, vendedora, acao' }, 400);
+        const { id_sugestao, loja, vendedora, acao, comentario, aceite } = body;
+        // Feedback v2: aceite no início (acao vazio) OU resultado no fim (acao).
+        // Exige pelo menos um dos dois. Aceite e resultado chegam em POSTs
+        // separados — mesclamos com o registro anterior pra não sobrescrever.
+        if (!id_sugestao || !loja || !vendedora || (!acao && !aceite)) {
+          return jsonResponse(request, { error: 'Campos obrigatorios: id_sugestao, loja, vendedora e (acao ou aceite)' }, 400);
         }
         const key = `feedback:${id_sugestao}:${loja}:${vendedora}`;
+        let prev = {};
+        try { const raw = await KV.get(key); if (raw) prev = JSON.parse(raw); } catch (e) { /* sem anterior */ }
         const reg = {
-          id_sugestao, loja, vendedora, acao,
-          comentario: comentario || '',
+          id_sugestao, loja, vendedora,
+          acao: acao || prev.acao || '',
+          comentario: comentario !== undefined ? comentario : (prev.comentario || ''),
+          aceite: aceite || prev.aceite || null,
           em: new Date().toISOString()
         };
         await KV.put(key, JSON.stringify(reg));

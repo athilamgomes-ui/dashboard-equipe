@@ -4342,8 +4342,103 @@ function renderAnaliseSazonal() {
   `;
 }
 
+// ─── ENGAJAMENTO (Feedback v2, 04/08/2026) ──────────────────────────────────
+// Visão só pro Athila: quem aceitou (👍 no início), quem reportou o resultado
+// (no fim) e quem ignorou (período fechou + janela passou sem NENHUMA resposta).
+// Lê `item.feedbacks` (inclui o novo campo `aceite`). Alimenta a aba Análise.
+const _PRAZO_DIAS_FB = {curto: 7, medio: 28, longo: 84};
+const _JANELA_FB_DIAS = 7;
+function _segundaISOWeek(ano, w) {
+  const d = new Date(Date.UTC(ano, 0, 1 + (w - 1) * 7));
+  const dow = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 1 - dow);
+  return d;
+}
+function _statusEngaj(s, fb) {
+  const m = String(s.id || '').match(/^(\d{4})-W(\d+)/);
+  if (!m) return null;
+  const dias = _PRAZO_DIAS_FB[s.prazo || 'curto'] || 7;
+  const deadline = new Date(_segundaISOWeek(+m[1], +m[2]).getTime() + dias * 86400000);
+  const fimJanela = new Date(deadline.getTime() + _JANELA_FB_DIAS * 86400000);
+  const hoje = new Date();
+  const aceitou = !!(fb && fb.aceite);
+  const reportou = !!(fb && fb.acao);
+  let estado;
+  if (reportou) estado = 'reportou';
+  else if (aceitou && hoje < deadline) estado = 'aceite_ativo';   // aceitou, período rolando
+  else if (aceitou) estado = 'aceite_sem_resultado';              // aceitou mas não reportou o fim
+  else if (hoje >= fimJanela) estado = 'ignorou';                 // fechou + janela passou, nada
+  else if (hoje >= deadline) estado = 'aguardando';              // fechou, ainda na janela de cobrança
+  else estado = 'ativo';                                          // período rolando, sem aceite ainda
+  return {estado, aceitou, reportou};
+}
+
+function renderEngajamento() {
+  // Só sugestões aprovadas, rastreáveis e escopo vendedora (respondente claro).
+  const porVend = {};   // 'Vendedora|Loja' -> contadores
+  const porLoja = {};   // 'L1' -> contadores
+  let totalCard = 0;
+  Object.values(SUGESTOES).forEach(sem => (sem.itens || []).forEach(s => {
+    if ((s.status || 'pendente') !== 'aprovada') return;
+    if (s.tipo === 'elogio') return;
+    if (s.escopo !== 'vendedora' || !s.vendedora) return;
+    const fb = (s.feedbacks || []).find(f => f.vendedora === s.vendedora && f.loja === s.loja);
+    const st = _statusEngaj(s, fb);
+    if (!st) return;
+    totalCard++;
+    const kv = s.vendedora + '|' + (s.loja || '');
+    const ov = porVend[kv] || (porVend[kv] = {vend: s.vendedora, loja: s.loja || '', total: 0, aceite: 0, reportou: 0, ignorou: 0, pendente: 0});
+    const ol = porLoja[s.loja] || (porLoja[s.loja] = {total: 0, aceite: 0, reportou: 0, ignorou: 0, pendente: 0});
+    ov.total++; ol.total++;
+    if (st.reportou) { ov.reportou++; ol.reportou++; if (st.aceitou) { ov.aceite++; ol.aceite++; } }
+    else if (st.aceitou) { ov.aceite++; ol.aceite++; }
+    else if (st.estado === 'ignorou') { ov.ignorou++; ol.ignorou++; }
+    else { ov.pendente++; ol.pendente++; }
+  }));
+
+  if (totalCard === 0) {
+    return `<div class="recents" style="margin-top:14px">
+      <h3>🤝 Engajamento com as recomendações</h3>
+      <div style="color:var(--muted);text-align:center;padding:14px 0;font-size:12px">Ainda sem recomendações individuais rastreáveis pra medir engajamento.</div>
+    </div>`;
+  }
+
+  const linhas = Object.values(porVend)
+    .sort((a, b) => (b.ignorou - a.ignorou) || (b.total - a.total) || a.vend.localeCompare(b.vend))
+    .map(o => {
+      const nomeLoja = (LOJAS_BASE[o.loja] && LOJAS_BASE[o.loja].nome) || o.loja || '—';
+      const alerta = o.ignorou > 0 ? 'color:var(--red);font-weight:700' : 'color:var(--muted)';
+      return `<div class="rec-row" style="display:grid;grid-template-columns:1.6fr .7fr .7fr .7fr .7fr;gap:6px;align-items:center">
+        <div class="rec-ttl" style="font-weight:600">${o.vend} <span style="font-size:10px;color:var(--muted);font-weight:400">${nomeLoja}</span></div>
+        <div style="text-align:center;font-size:12px">${o.total}</div>
+        <div style="text-align:center;font-size:12px;color:var(--green)">${o.aceite}</div>
+        <div style="text-align:center;font-size:12px;color:var(--blue)">${o.reportou}</div>
+        <div style="text-align:center;font-size:12px;${alerta}">${o.ignorou || '—'}</div>
+      </div>`;
+    }).join('');
+
+  const somaAceite = Object.values(porLoja).reduce((a, o) => a + o.aceite, 0);
+  const somaReport = Object.values(porLoja).reduce((a, o) => a + o.reportou, 0);
+  const somaIgnor  = Object.values(porLoja).reduce((a, o) => a + o.ignorou, 0);
+
+  return `<div class="recents" style="margin-top:14px">
+    <h3>🤝 Engajamento com as recomendações</h3>
+    <div style="font-size:11px;color:var(--muted);margin:-4px 0 10px">Recomendações individuais aprovadas · 👍 aceitou no início · ✅ reportou o resultado · 🔕 ignorou (fechou sem responder).</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+      <div class="pill">👍 Aceites: <b style="color:var(--green)">${somaAceite}</b></div>
+      <div class="pill">✅ Reportaram: <b style="color:var(--blue)">${somaReport}</b></div>
+      <div class="pill">🔕 Ignoraram: <b style="color:${somaIgnor > 0 ? 'var(--red)' : 'var(--muted)'}">${somaIgnor}</b></div>
+    </div>
+    <div class="rec-row" style="display:grid;grid-template-columns:1.6fr .7fr .7fr .7fr .7fr;gap:6px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);padding-bottom:6px">
+      <div>Vendedora</div><div style="text-align:center">Total</div><div style="text-align:center">👍</div><div style="text-align:center">✅</div><div style="text-align:center">🔕</div>
+    </div>
+    ${linhas}
+  </div>`;
+}
+
 function renderAnalise() {
   const avalMap = loadAvaliacoes();
+  const cardEngaj = renderEngajamento();
 
   // Card de Análise Sazonal sempre aparece no topo (não depende de avaliações)
   const cardSazonal = renderAnaliseSazonal();
@@ -4363,7 +4458,7 @@ function renderAnalise() {
   const totAuto = totAval - totManual;
 
   if (totAval === 0) {
-    return cardSazonal + `<div class="analise-empty">
+    return cardSazonal + cardEngaj + `<div class="analise-empty">
       <h2 style="color:var(--text);margin-bottom:8px">📊 Nenhuma avaliação ainda</h2>
       <p>Vá em <b>💡 Sugestões</b>, aplique algumas ações na semana e marque o resultado.<br>Os gráficos por tipo/loja/vendedora aparecem aqui assim que houver a primeira avaliação (manual ou automática).</p>
     </div>`;
@@ -4390,7 +4485,7 @@ function renderAnalise() {
     </div>`;
   }).join('');
 
-  return cardSazonal + `
+  return cardSazonal + cardEngaj + `
     <div class="sug-hdr" style="background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(59,130,246,.05));border-color:rgba(34,197,94,.3)">
       <div>
         <h2 style="color:var(--green)">📊 Análise de Resultados</h2>

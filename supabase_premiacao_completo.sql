@@ -42,11 +42,17 @@ create table if not exists public.sugestoes_avaliacoes (
 -- ── 4. FEEDBACK DAS VENDEDORAS sobre cada sugestão ──
 create table if not exists public.feedbacks (
   id_sugestao text not null, loja text not null, vendedora text not null,
-  acao text not null,                   -- 'apliquei' | 'tentei' | 'nao_consegui'
+  acao text not null default '',        -- 'apliquei' | 'tentei' | 'nao_consegui' | '' (só aceite)
   comentario text,
+  aceite timestamptz,                   -- Feedback v2: "👍 entendi, vou focar" no início do período
   em timestamptz not null default now(),
   primary key (id_sugestao, loja, vendedora)
 );
+-- Feedback v2 (04/08/2026): coluna do aceite no início + acao passa a aceitar ''
+-- (registro só-de-aceite). Idempotente pra bases já criadas.
+alter table public.feedbacks add column if not exists aceite timestamptz;
+alter table public.feedbacks alter column acao set default '';
+alter table public.feedbacks alter column acao drop not null;
 
 -- ── 5. RETORNO DO DONO pro feedback da vendedora ──
 create table if not exists public.feedback_retornos (

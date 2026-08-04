@@ -3231,13 +3231,32 @@ function getMinhasSugestoesAprovadas() {
 // — mesmo que a semana dela já tenha passado. Vale só de W28/2026 em diante
 // (sugestões antigas não são cobradas — decisão do Athila).
 const FEEDBACK_COBRANCA_DESDE = {ano: 2026, semana: 28};
-const PRAZO_DIAS_FEEDBACK = {curto: 7, medio: 30, longo: 90};
+// Duração do período (Feedback v2, 04/08/2026): curto = a própria semana,
+// medio = 4 semanas, longo = 12 semanas (contadas da 2ª-feira da semana da sugestão).
+const PRAZO_DIAS_FEEDBACK = {curto: 7, medio: 28, longo: 84};
+// Depois que o período fecha, a cobrança do RESULTADO só aparece por essa janela.
+// Passou disso sem resposta → some do app da vendedora pra sempre (vira "não
+// respondeu" só pro Athila, na visão de engajamento do painel).
+const JANELA_COBRANCA_DIAS = 7;
 
 function _segundaDaIsoWeek(ano, semana) {
   const d = new Date(Date.UTC(ano, 0, 1 + (semana - 1) * 7));
   const dow = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 1 - dow);
   return d;
+}
+
+// Timing de uma sugestão a partir do id ('2026-W28-L1-01') + prazo.
+// Retorna o fim do período (deadline), o fim da janela de cobrança e se o
+// período ainda está ATIVO (início: mostra aceite; fim: mostra resultado).
+function _timingSug(s) {
+  const m = String(s.id || '').match(/^(\d{4})-W(\d+)/);
+  const dias = PRAZO_DIAS_FEEDBACK[s.prazo || 'curto'] || 7;
+  if (!m) return {ano: null, w: null, deadline: null, fimJanela: null, ativo: true};
+  const ano = +m[1], w = +m[2];
+  const deadline = new Date(_segundaDaIsoWeek(ano, w).getTime() + dias * 86400000);
+  const fimJanela = new Date(deadline.getTime() + JANELA_COBRANCA_DIAS * 86400000);
+  return {ano, w, deadline, fimJanela, ativo: new Date() < deadline};
 }
 
 function getMinhasPendentesDeFeedback() {
@@ -3255,10 +3274,14 @@ function getMinhasPendentesDeFeedback() {
         || (s.escopo === 'loja' && s.loja === LOJA_KEY)
         || s.escopo === 'geral';
       if (!minha) continue;
-      if (getMeuFeedback(s.id)) continue; // já respondeu
+      const fb = getMeuFeedback(s.id);
+      if (fb && fb.acao) continue; // já reportou o resultado (aceite sozinho não conta)
       const dias = PRAZO_DIAS_FEEDBACK[s.prazo || 'curto'] || 7;
       const deadline = new Date(_segundaDaIsoWeek(ano, w).getTime() + dias * 86400000);
-      if (hoje >= deadline) out.push({s, semKey, deadline});
+      const fimJanela = new Date(deadline.getTime() + JANELA_COBRANCA_DIAS * 86400000);
+      // Cobra o resultado só DENTRO da janela (fim do período → +7 dias).
+      // Depois da janela some pra sempre (não cobra eternamente).
+      if (hoje >= deadline && hoje < fimJanela) out.push({s, semKey, deadline});
     }
   }
   out.sort((a, b) => a.deadline - b.deadline); // mais atrasada primeiro
@@ -3288,7 +3311,12 @@ function getMeuFeedback(idSug) {
 
 async function enviarFeedbackWorker(reg) {
   // Escrita-dupla: Supabase (durável) + Worker (fallback)
-  supaUpsert('feedbacks', {id_sugestao: reg.id_sugestao, loja: reg.loja, vendedora: reg.vendedora, acao: reg.acao, comentario: reg.comentario||'', em: reg.em || new Date().toISOString()}, 'id_sugestao,loja,vendedora');
+  // `aceite` (timestamp) é o reconhecimento do INÍCIO (Feedback v2). Só entra no
+  // payload do Supabase quando existe — assim registros só-de-resultado seguem
+  // funcionando mesmo antes da coluna `aceite` ser criada na tabela.
+  const row = {id_sugestao: reg.id_sugestao, loja: reg.loja, vendedora: reg.vendedora, acao: reg.acao || '', comentario: reg.comentario||'', em: reg.em || new Date().toISOString()};
+  if (reg.aceite) row.aceite = reg.aceite;
+  supaUpsert('feedbacks', row, 'id_sugestao,loja,vendedora');
   try {
     await fetch(`${WORKER_URL}/feedback`, {
       method: 'POST',
@@ -3314,12 +3342,34 @@ function marcarFeedback(idSug, acao) {
     vendedora: currentUser,
     acao,  // 'apliquei' | 'tentei' | 'nao_consegui'
     comentario: idx >= 0 ? all[idx].comentario : '',
+    aceite: idx >= 0 ? all[idx].aceite : undefined, // preserva o aceite do início
     em: new Date().toISOString()
   };
   if (idx >= 0) all[idx] = reg; else all.push(reg);
   localStorage.setItem('feedbacks_vendedoras', JSON.stringify(all));
   enviarFeedbackWorker(reg);
-  rerender();
+  renderContent(); // refaz a aba corrente (antes chamava rerender(), que não existe → UI não atualizava)
+}
+
+// ─── ACEITE NO INÍCIO (Feedback v2, 04/08/2026) ────────────────────────────
+// Quando a recomendação está ATIVA (período corrente, aprovada), a vendedora
+// reconhece que vai focar: grava um timestamp `aceite` no mesmo registro de
+// feedback (não substitui o resultado do fim). Opção "2 no início + 1 no fim".
+function marcarAceite(idSug) {
+  if (sessionStorage.getItem('modo_dono') === '1') {
+    alert('Você está em modo visualização (acesso pelo painel). Pra registrar o aceite, a vendedora precisa entrar pelo link dela.');
+    return;
+  }
+  const all = JSON.parse(localStorage.getItem('feedbacks_vendedoras') || '[]');
+  const idx = all.findIndex(f => f.id_sugestao === idSug && f.vendedora === currentUser && f.loja === LOJA_KEY);
+  const agora = new Date().toISOString();
+  const reg = idx >= 0
+    ? {...all[idx], aceite: all[idx].aceite || agora, em: agora}
+    : {id_sugestao: idSug, loja: LOJA_KEY, vendedora: currentUser, acao: '', comentario: '', aceite: agora, em: agora};
+  if (idx >= 0) all[idx] = reg; else all.push(reg);
+  localStorage.setItem('feedbacks_vendedoras', JSON.stringify(all));
+  enviarFeedbackWorker(reg);
+  renderContent(); // aceite registrado → mostra o selo "✓ vai focar" na hora
 }
 
 let debounceFb = {};
@@ -3607,18 +3657,41 @@ function renderProgresso() {
     const pt = prazoTextos[prazo] || prazoTextos.curto;
     const prazoBanner = `<div style="background:${pt.cor};border-left:3px solid ${pt.bd};border-radius:4px;padding:8px 10px;margin:8px 0;font-size:12px;line-height:1.45">${pt.emoji} ${pt.txt}</div>`;
 
-    return `<div style="background:rgba(0,0,0,.15);border-radius:8px;padding:10px 12px;margin-bottom:10px">
-      <p><b>${s.titulo}</b></p>
-      <p style="margin-top:4px;margin-bottom:6px">${s.descricao}</p>
-      ${prazoBanner}
-      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:6px">💬 Como foi pra você?</div>
+    // Feedback v2: aceite no INÍCIO (período ativo) + resultado no FIM (período encerrado).
+    const timing = _timingSug(s);
+    const aceitou = !!(meuFb && meuFb.aceite);
+    const aceiteData = aceitou ? String(meuFb.aceite).slice(0, 10) : '';
+
+    // ── INÍCIO — enquanto o período está ativo, pede o aceite (não o resultado) ──
+    let aceiteBloco = '';
+    if (timing.ativo) {
+      aceiteBloco = aceitou
+        ? `<div style="margin-top:8px;padding:9px 11px;background:rgba(34,197,94,.12);border-left:3px solid var(--green);border-radius:6px;font-size:12px;color:var(--green);font-weight:600">✓ Você marcou que vai focar nisso${aceiteData ? ` · ${aceiteData}` : ''}</div>
+           <textarea placeholder="Quer comentar? (opcional)" oninput="salvarComentarioFb('${s.id}', this.value)" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 10px;font-size:12px;margin-top:7px;resize:vertical;min-height:36px;font-family:inherit">${meuFb?.comentario || ''}</textarea>`
+        : `<div style="font-size:11px;color:var(--muted);margin-top:8px">Reconhece que vai focar nessa recomendação:</div>
+           <button onclick="marcarAceite('${s.id}')" style="margin-top:6px;width:100%;background:var(--green);color:#fff;border:none;border-radius:6px;padding:9px 10px;font-size:12px;font-weight:700;cursor:pointer">👍 Entendi, vou focar</button>`;
+    } else if (aceitou) {
+      // período fechado: mostra que ela reconheceu lá atrás
+      aceiteBloco = `<div style="margin-top:8px;font-size:11px;color:var(--green)">✓ Você aceitou focar nisso${aceiteData ? ` em ${aceiteData}` : ''}</div>`;
+    }
+
+    // ── FIM — só quando o período encerrou é que pede o resultado ──
+    const resultadoBloco = !timing.ativo ? `
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:10px">💬 Como foi pra você?</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
         <button onclick="marcarFeedback('${s.id}','apliquei')" style="flex:1;min-width:90px;background:${acao==='apliquei'?'var(--green)':'rgba(34,197,94,.15)'};color:${acao==='apliquei'?'#fff':'var(--green)'};border:1px solid var(--green);border-radius:6px;padding:7px 8px;font-size:11px;font-weight:600;cursor:pointer">✓ Apliquei</button>
         <button onclick="marcarFeedback('${s.id}','tentei')" style="flex:1;min-width:90px;background:${acao==='tentei'?'var(--yellow)':'rgba(234,179,8,.15)'};color:${acao==='tentei'?'#000':'var(--yellow)'};border:1px solid var(--yellow);border-radius:6px;padding:7px 8px;font-size:11px;font-weight:600;cursor:pointer">🟡 Tentei mas tá difícil</button>
         <button onclick="marcarFeedback('${s.id}','nao_consegui')" style="flex:1;min-width:90px;background:${acao==='nao_consegui'?'var(--red)':'rgba(239,68,68,.12)'};color:${acao==='nao_consegui'?'#fff':'var(--red)'};border:1px solid var(--red);border-radius:6px;padding:7px 8px;font-size:11px;font-weight:600;cursor:pointer">❌ Não consegui</button>
       </div>
       <textarea placeholder="Conta o que aconteceu (opcional)" oninput="salvarComentarioFb('${s.id}', this.value)" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 10px;font-size:12px;margin-top:7px;resize:vertical;min-height:36px;font-family:inherit">${meuFb?.comentario || ''}</textarea>
-      ${meuFb ? `<div style="font-size:10px;color:var(--green);margin-top:4px">✓ Feedback enviado</div>` : ''}
+      ${acao ? `<div style="font-size:10px;color:var(--green);margin-top:4px">✓ Feedback enviado</div>` : ''}` : '';
+
+    return `<div style="background:rgba(0,0,0,.15);border-radius:8px;padding:10px 12px;margin-bottom:10px">
+      <p><b>${s.titulo}</b></p>
+      <p style="margin-top:4px;margin-bottom:6px">${s.descricao}</p>
+      ${prazoBanner}
+      ${aceiteBloco}
+      ${resultadoBloco}
       ${retornoBanner}
     </div>`;
   }
