@@ -231,7 +231,7 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
   <div class="tab" data-k="L4" onclick="setTab('L4')">L4 · MB Altamira</div>
   <div class="tab" data-k="L5" onclick="setTab('L5')">L5 · MB Santarém</div>
   <div class="tab" data-k="anual" onclick="setTab('anual')">Visão Anual</div>
-  <div class="tab" data-k="sugestoes" onclick="setTab('sugestoes')">💡 Sugestões</div>
+  <div class="tab" data-k="sugestoes" onclick="setTab('sugestoes')">💡 Sugestões e feedbacks</div>
   <div class="tab" data-k="analise" onclick="setTab('analise')">📊 Análise</div>
 </div>
 
@@ -687,6 +687,26 @@ function isCaixa(nome) { return (VENDEDORAS_META[nome]?.badges||[]).includes('ca
 // Metas: atingir_meta, marcas_a, ticket_medio, conversao, vendas_individuais
 
 const SUGESTOES = {
+  'AVAL-2026-07': {
+    semana_label: 'Avaliação de julho + objetivo de agosto',
+    geradas_em: '04/08/2026',
+    itens: [
+      {id:'AVAL-2026-07-L1-Rayra', escopo:'vendedora', loja:'L1', vendedora:'Rayra', tipo:'avaliacao', meta_alvo:'marcas_a', meta_valor:34, titulo:'📋 Avaliação de julho — Rayra', descricao:'Rayra, em julho você vendeu R$49.209, contra R$24.880 em julho do ano passado: crescimento de +98%, o maior do grupo. E com qualidade: margem de 58% e 30,6% de Marcas A, as melhores da loja. Objetivo do período: subir Marcas A de 30,6% para 34%. As Marcas A deixam mais lucro por venda, então aumentar esse percentual melhora seu resultado sem precisar vender mais peças.', prazo:'medio', status:'pendente'},
+      {id:'AVAL-2026-07-L1-Barbara', escopo:'vendedora', loja:'L1', vendedora:'Bárbara', tipo:'avaliacao', meta_alvo:'ticket_medio', titulo:'📋 Avaliação de julho — Bárbara', descricao:'Bárbara, em julho você vendeu R$47.126 em 519 atendimentos, o maior número da loja. Seu ticket médio foi R$91: um bom volume de clientes, mas atender muito só compensa se cada cliente levar mais. Margem 55%, Marcas A 28%. Objetivo do período: subir o ticket médio, oferecendo mais itens e Marcas A por atendimento. Você já traz muita gente pra loja; o ganho agora é aumentar o valor de cada venda.', prazo:'medio', status:'pendente'},
+      {id:'AVAL-2026-07-L1-Sofia', escopo:'vendedora', loja:'L1', vendedora:'Sofia', tipo:'avaliacao', meta_alvo:'marcas_a', meta_valor:28, titulo:'📋 Avaliação de julho — Sofia', descricao:'Sofia, em julho você vendeu R$41.370 em 458 atendimentos, ticket médio R$90. Sua margem (51%) e suas Marcas A (24,6%) foram as mais baixas do trio da L1 — ou seja, dá pra vender com mais lucro. Objetivo do período: subir Marcas A de 24,6% para 28%. Como as Marcas A têm margem melhor, focar nelas aumenta seu lucro vendendo o mesmo tanto.', prazo:'medio', status:'pendente'},
+      {id:'AVAL-2026-07-L3-Naila', escopo:'vendedora', loja:'L3', vendedora:'Naila', tipo:'avaliacao', meta_alvo:'marcas_a', meta_valor:20, titulo:'📋 Avaliação de julho — Naila', descricao:'Naila, você liderou a L3 em julho com R$25.916. Ponto de atenção: suas Marcas A ficaram em 13,5% — o menor percentual de todo o grupo — e sua margem em 40%. Objetivo do período: subir Marcas A de 13,5% para 20%. Itaituba vende muito produto de margem baixa; as Marcas A são o caminho pra loja lucrar mais em cada venda. É o foco principal da L3.', prazo:'medio', status:'pendente'},
+      {id:'AVAL-2026-07-L3-AnaMira', escopo:'vendedora', loja:'L3', vendedora:'Ana Mira', tipo:'avaliacao', meta_alvo:'marcas_a', meta_valor:20, titulo:'📋 Avaliação de julho — Ana Mira', descricao:'Ana Mira, bom mês individual (R$25.712) e o melhor ticket médio da loja (R$96). Como gerente, seu papel vai além do seu número. Objetivo do período: liderar a virada das Marcas A da L3. A loja está entre 13% e 17% e a meta é 20% — puxando você e o time pras Marcas A, a loja melhora a margem, que hoje é a mais baixa do grupo.', prazo:'medio', status:'pendente'},
+      {id:'AVAL-2026-07-L3-Raimunda', escopo:'vendedora', loja:'L3', vendedora:'Raimunda', tipo:'avaliacao', meta_alvo:'vendas_individuais', meta_valor:26000, titulo:'📋 Avaliação de julho — Raimunda', descricao:'Raimunda, em julho você vendeu R$22.910 — praticamente igual ao ano passado (R$22.256, +3%). O ponto é este: a loja inteira cresceu, então ficar no mesmo patamar significa que você não acompanhou esse crescimento. Como vendedora antiga, esperamos que você avance também. Objetivo do período: crescer acima da sua média — mirar R$26.000 — e subir Marcas A de 17% para 20%.', prazo:'medio', status:'pendente'},
+      {id:'AVAL-2026-07-L3-Brunna', escopo:'vendedora', loja:'L3', vendedora:'Brunna', tipo:'avaliacao', meta_alvo:'ticket_medio', titulo:'📋 Avaliação de julho — Brunna', descricao:'Brunna, em julho você atendeu bastante gente (230 atendimentos), o que é positivo. Mas o ticket médio (R$64) e a margem (32%) foram os mais baixos da loja — volume sozinho não traz resultado se cada venda é pequena e de baixo lucro. Objetivo do período: subir o ticket médio, montando combos e oferecendo mais itens e Marcas A por cliente. Você já tem o fluxo; falta aumentar o valor de cada atendimento.', prazo:'medio', status:'pendente'},
+      {id:'AVAL-2026-07-L4-BrunaF', escopo:'vendedora', loja:'L4', vendedora:'Bruna F.', tipo:'avaliacao', meta_alvo:'marcas_a', meta_valor:38, titulo:'📋 Avaliação de julho — Bruna F.', descricao:'Bruna, julho foi excepcional: R$61.331 em 698 atendimentos, com margem de 55% e 34% de Marcas A — o maior percentual de todo o grupo. Você é o padrão de qualidade da rede. Objetivo do período: sustentar os R$60 mil e levar as Marcas A de 34% para 38%, batendo a marca mais alta do grupo. Como você já domina qualidade, o desafio é ser a referência que as outras lojas perseguem.', prazo:'medio', status:'pendente'},
+      {id:'AVAL-2026-07-L4-Josilene', escopo:'vendedora', loja:'L4', vendedora:'Josilene', tipo:'avaliacao', meta_alvo:'marcas_a', meta_valor:32, titulo:'📋 Avaliação de julho — Josilene', descricao:'Josilene, crescimento forte: R$45.289 em julho contra R$28.272 no ano passado, +60%. E com qualidade: margem 58% e Marcas A 29,6%. Objetivo do período: manter o ritmo e subir Marcas A de 29,6% para 32%. Você está a um passo de igualar a Bruna em qualidade.', prazo:'medio', status:'pendente'},
+      {id:'AVAL-2026-07-L4-Debora', escopo:'vendedora', loja:'L4', vendedora:'Débora', tipo:'avaliacao', meta_alvo:'marcas_a', meta_valor:30, titulo:'📋 Avaliação de julho — Débora', descricao:'Débora, mês sólido: R$43.942 e a melhor margem da loja (59%). O que fica atrás são as Marcas A (25,5%, as mais baixas do trio da L4). Objetivo do período: subir Marcas A de 25,5% para 30%, acompanhando as colegas. Isso reforça ainda mais sua margem, que já é a melhor.', prazo:'medio', status:'pendente'},
+      {id:'AVAL-2026-07-L5-Rayssa', escopo:'vendedora', loja:'L5', vendedora:'Rayssa', tipo:'avaliacao', meta_alvo:'marcas_a', meta_valor:25, titulo:'📋 Avaliação de julho — Rayssa', descricao:'Rayssa, você vende bem: R$22.814 com ticket médio de R$100, o maior da loja. Mas sua margem foi a mais apertada do grupo (37%) — sinal de mix caro e desconto. Objetivo do período: melhorar a margem subindo Marcas A de 20,5% para 25%. As Marcas A rendem mais lucro; com o volume que você já faz, focar nelas melhora bastante seu resultado.', prazo:'medio', status:'pendente'},
+      {id:'AVAL-2026-07-L5-Karina', escopo:'vendedora', loja:'L5', vendedora:'Karina', tipo:'avaliacao', meta_alvo:'marcas_a', meta_valor:25, titulo:'📋 Avaliação de julho — Karina', descricao:'Karina, bom mês (R$21.264) com margem saudável (54%). Suas Marcas A (20,4%) têm espaço pra crescer. Objetivo do período: subir Marcas A de 20,4% para 25%. As Marcas A puxam a margem e o prêmio junto.', prazo:'medio', status:'pendente'},
+      {id:'AVAL-2026-07-L5-Rosiene', escopo:'vendedora', loja:'L5', vendedora:'Rosiene', tipo:'avaliacao', meta_alvo:'marcas_a', meta_valor:25, titulo:'📋 Avaliação de julho — Rosiene', descricao:'Rosiene, você é a mais premium da L5: maior ticket médio (R$112) e maior percentual de Marcas A da loja (29,2%). Objetivo do período: como gerente, liderar as Marcas A da L5. A loja está entre 19% e 29% e o time precisa se aproximar dos 25-30% — seu exemplo puxa o resultado da equipe.', prazo:'medio', status:'pendente'},
+      {id:'AVAL-2026-07-L5-Joyce', escopo:'vendedora', loja:'L5', vendedora:'Joyce', tipo:'avaliacao', meta_alvo:'vendas_individuais', meta_valor:20000, titulo:'📋 Avaliação de julho — Joyce', descricao:'Joyce, julho foi mais difícil: R$16.843 contra R$24.188 no ano passado (-30%), e você levou menos itens por atendimento (3,0, o menor da loja). Objetivo do período: recuperar volume aumentando as peças por atendimento — oferecer um item a mais em cada venda. É o caminho mais rápido pra voltar ao seu patamar do ano passado.', prazo:'medio', status:'pendente'},
+    ],
+  },
   '2026-W32': {
     semana_label: 'Semana 03/08 – 08/08',
     geradas_em: '01/08/2026',
@@ -2462,7 +2482,7 @@ const TIPO_LABELS = {
   script_venda:'Script de venda', treinamento:'Treinamento', marca:'Marca/Curva A',
   layout:'Layout/Vitrine', atendimento:'Atendimento', ticket_medio:'Ticket médio',
   meta:'Gestão de meta', comunicacao:'Comunicação', cliente_recorrente:'Cliente recorrente',
-  elogio:'🏆 Elogio/Reconhecimento'
+  elogio:'🏆 Elogio/Reconhecimento', avaliacao:'📋 Avaliação do mês'
 };
 const ALVO_LABELS = {
   atingir_meta:'Atingir meta', marcas_a:'% Marcas A', ticket_medio:'Ticket médio',
@@ -3953,13 +3973,93 @@ function renderResultadoSemanaPassada() {
   </details>`;
 }
 
+// ─── AVALIAÇÕES DO MÊS (Feedback v2, 04/08/2026) ─────────────────────────────
+// Avaliação individual do mês fechado + objetivo do novo período. Vive numa chave
+// própria de SUGESTOES ('AVAL-2026-07', fora da semana corrente) pra NÃO misturar
+// com as sugestões da semana no app (getMinhasSugestoesAprovadas é só da semana).
+// Reusa 100% o fluxo de aprovar/editar/rejeitar (handlers por data-id) e overrides.
+const AVAL_MES_KEY = 'AVAL-2026-07';
+const AVAL_MES_LABEL = 'julho';
+function renderAvaliacoesMes() {
+  const sem = SUGESTOES[AVAL_MES_KEY];
+  if (!sem || !sem.itens || !sem.itens.length) return '';
+  const ovs = loadSugestoesOverrides();
+  const itens = sem.itens.slice().map(s => {
+    const ov = ovs[s.id];
+    return {...s, _status: ov?.status || s.status || 'pendente', _texto: ov?.texto_editado || s.descricao, _prazo: ov?.prazo || s.prazo || 'medio', _statusEm: ov?.em || null};
+  }).sort((a, b) => {
+    const ord = {pendente: 0, aprovada: 1, rejeitada: 2};
+    if (ord[a._status] !== ord[b._status]) return ord[a._status] - ord[b._status];
+    return (a.loja || 'Z').localeCompare(b.loja || 'Z');
+  });
+  const pend = itens.filter(i => i._status === 'pendente').length;
+  const aprov = itens.filter(i => i._status === 'aprovada').length;
+  const cards = itens.map(s => {
+    const isPend = s._status === 'pendente', isAprov = s._status === 'aprovada', isRej = s._status === 'rejeitada';
+    const chips = [
+      s.loja ? `<span class="sug-chip loja" style="color:${LOJAS_BASE[s.loja].cor}">${s.loja}</span>` : '',
+      s.vendedora ? `<span class="sug-chip vend">${s.vendedora}</span>` : '',
+      s.meta_alvo ? `<span class="sug-chip alvo">🎯 ${ALVO_LABELS[s.meta_alvo] || s.meta_alvo}${s.meta_valor != null ? ' → ' + s.meta_valor : ''}</span>` : '',
+    ].filter(Boolean).join('');
+    const badge = isPend
+      ? `<span style="background:rgba(234,179,8,.2);color:var(--yellow);padding:3px 10px;border-radius:5px;font-size:10px;font-weight:700;text-transform:uppercase">🟡 PENDENTE</span>`
+      : isAprov
+      ? `<span style="background:rgba(34,197,94,.2);color:var(--green);padding:3px 10px;border-radius:5px;font-size:10px;font-weight:700;text-transform:uppercase">🟢 APROVADA</span>`
+      : `<span style="background:rgba(148,163,184,.15);color:var(--muted);padding:3px 10px;border-radius:5px;font-size:10px;font-weight:700;text-transform:uppercase">🔴 REJEITADA</span>`;
+    let actions = '';
+    if (isPend) {
+      actions = `
+        <div class="sug-actions" style="gap:6px;margin-top:8px">
+          <button class="sug-btn" style="background:rgba(34,197,94,.2);color:var(--green);border-color:var(--green);font-weight:700" onclick="aprovarComPrazo('${s.id}')">✓ Aprovar</button>
+          <button class="sug-btn" style="background:rgba(234,179,8,.2);color:var(--yellow);border-color:var(--yellow)" onclick="toggleEditor('${s.id}')">✏️ Editar</button>
+          <button class="sug-btn" style="background:rgba(239,68,68,.15);color:var(--red);border-color:var(--red)" onclick="rejeitarSugestao('${s.id}')">❌ Rejeitar</button>
+        </div>
+        <div class="sug-editor" style="display:none;margin-top:8px">
+          <textarea class="sug-comment" style="min-height:120px;width:100%">${s.descricao.replace(/</g, '&lt;')}</textarea>
+          ${_alvoEditavelFrag(s)}
+          <button class="sug-btn" style="background:var(--blue);color:#fff;border:none;margin-top:6px;width:100%" onclick="aprovarComPrazo('${s.id}')">💾 Salvar texto + aprovar</button>
+        </div>`;
+    } else if (isAprov) {
+      actions = `
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">✓ Aprovada${s._statusEm ? ` em ${s._statusEm.slice(0,10)}` : ''} · visível pra ${s.vendedora} no app (aba Meu Progresso)</div>
+        <button class="sug-btn" style="background:transparent;color:var(--muted);border-color:var(--border);margin-top:6px;width:auto;padding:4px 10px;font-size:11px" onclick="voltarSugestaoPendente('${s.id}')">↩️ Voltar pra pendente</button>`;
+    } else {
+      actions = `
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">✗ Rejeitada · NÃO vai pra vendedora</div>
+        <button class="sug-btn" style="background:transparent;color:var(--muted);border-color:var(--border);margin-top:6px;width:auto;padding:4px 10px;font-size:11px" onclick="voltarSugestaoPendente('${s.id}')">↩️ Voltar pra pendente</button>`;
+    }
+    return `<div class="sug-card" data-id="${s.id}" data-status="${s._status}" data-tipo="avaliacao" style="border-left:4px solid ${isPend ? 'var(--yellow)' : isAprov ? 'var(--green)' : 'var(--red)'}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div class="sug-meta">${chips}</div>
+        ${badge}
+      </div>
+      <div class="sug-ttl">${s.titulo}</div>
+      <div class="sug-desc">${s._texto}${s._texto !== s.descricao ? '<div style="color:var(--yellow);font-size:10px;margin-top:6px">✏️ texto editado por você</div>' : ''}</div>
+      ${actions}
+    </div>`;
+  }).join('');
+  return `
+    <div class="sug-hdr" style="background:linear-gradient(135deg,rgba(124,92,252,.10),rgba(59,130,246,.05));border-color:rgba(124,92,252,.3)">
+      <div>
+        <h2 style="color:#a78bfa">📋 Avaliações de ${AVAL_MES_LABEL} + objetivo do período</h2>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Uma por vendedora — resultado do mês + o foco de melhoria. Aprove/edite; só as aprovadas aparecem pra ela no app.</div>
+      </div>
+      <div class="pill">🟡 Pendentes: <b style="color:var(--yellow)">${pend}</b></div>
+      <div class="pill">🟢 Aprovadas: <b style="color:var(--green)">${aprov}</b></div>
+    </div>
+    <div class="sug-grid">${cards}</div>
+    <div style="height:1px;background:var(--border);margin:18px 0"></div>
+  `;
+}
+
 function renderSugestoes() {
+  const avalMes = renderAvaliacoesMes();
   const semKey = getSemanaCorrente();
   const sem = SUGESTOES[semKey];
   const filaPendente = renderFilaAvaliacaoPendente();
   const resultadoAnterior = renderResultadoSemanaPassada();
   if (!sem || !sem.itens || sem.itens.length === 0) {
-    return resultadoAnterior + filaPendente + `<div class="sug-empty">
+    return avalMes + resultadoAnterior + filaPendente + `<div class="sug-empty">
       <h2 style="color:var(--text);margin-bottom:8px">Sem sugestões para essa semana (${semKey})</h2>
       <p>O agente gera novas sugestões todo sábado às 18h, pra semana seguinte.</p>
     </div>`;
@@ -4122,7 +4222,7 @@ function renderSugestoes() {
   const rejeitadas = itens.filter(i => i._status === 'rejeitada').length;
   const aprovadasAval = itens.filter(i => i._status === 'aprovada' && avalMap[i.id]).length;
 
-  return resultadoAnterior + filaPendente + `
+  return avalMes + resultadoAnterior + filaPendente + `
     <div class="sug-hdr">
       <div>
         <h2>💡 Sugestões da ${sem.semana_label}</h2>
