@@ -573,6 +573,24 @@ function modoRender(arqE1, arqE2, arqStores, arqC8, coletadoEm) {
     loja = loja.slice(0, span.start) + bloco + loja.slice(span.end);
   }
 
+  // 4b2. SEMANAS_MES — espelho das janelas do mês corrente (id/label/periodo).
+  // Constante estática que a aba "Meu Progresso" percorre; o ROLLOVER precisa
+  // mantê-la no mês vigente. Sincroniza aqui a cada run pra nunca ficar presa no
+  // mês anterior (bug 04/08/2026: ficou em julho após a virada e faltava a S6).
+  {
+    const semArr = (mesAntes?.L1?.semanas || []).map((s, i) => {
+      const periodo = String(s.periodo || "").replace(/(\d{2}\/\d{2})\s*[–—-]\s*(\d{2}\/\d{2})/, "$1 a $2");
+      const label = /^Semana \d+$/.test(s.label || "") ? s.label : `Semana ${i + 1}`;
+      return `  {id:'${s.id}', label:'${label}', periodo:'${periodo}'},`;
+    });
+    if (semArr.length) {
+      const novo = `const SEMANAS_MES = [\n${semArr.join("\n")}\n];`;
+      const re = /const SEMANAS_MES = \[[\s\S]*?\];/;
+      if (re.test(loja)) { loja = loja.replace(re, novo); log(`SEMANAS_MES sincronizado (${semArr.length} semanas de ${mesKey})`); }
+      else warn("SEMANAS_MES não encontrado no loja.html — não sincronizado");
+    } else warn(`sem semanas em DADOS['${mesKey}'].L1 para sincronizar SEMANAS_MES`);
+  }
+
   // 4c. VENDAS_HIST por loja (espelho de DADOS: semanas/vendas/marcasA_loja + ontem/hoje)
   {
     const span = extractConst(loja, "VENDAS_HIST");
