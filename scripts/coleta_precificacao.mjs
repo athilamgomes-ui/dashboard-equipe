@@ -539,13 +539,45 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
           itens.length = 0; itens.push(...rev);
           if (!itens.length) continue;
         }
+        // ===== Detecção de KIT por LINHA (04/08/2026, regra do usuário) =====
+        // O fornecedor manda o kit "montado" como linhas SEPARADAS na NF (o kit em si não tem linha).
+        // Kit = 1 linha "CAIXA KIT..." + as N linhas adjacentes (antes OU depois) de MESMA quantidade
+        // ("C/ N PROD" dá o N; padrão 3). Também há "cronograma" SEM caixa: run de ≥3 máscaras seguidas
+        // de mesma quantidade. O MESMO produto pode vir em linhas diferentes como AVULSO e como
+        // componente de kit (quantidades diferentes) → a marcação é POR LINHA, nunca por cprod. Os
+        // componentes são agrupados depois num item sintético (bundle); avulsos precificam normal.
+        {
+          const ehCaixa = d => /CAIXA\s*KIT/i.test(d || "");
+          const ehMasc = d => norm(d).includes("MASCARA");
+          let kseq = 0;
+          for (let i = 0; i < itens.length; i++) {           // (1) kits ancorados por CAIXA KIT
+            if (!ehCaixa(itens[i].descricao)) continue;
+            const Q = itens[i].qtd; const m = /C\/\s*(\d+)\s*PROD/i.exec(itens[i].descricao); const N = m ? +m[1] : 3;
+            const cands = [];
+            if (i + N < itens.length) cands.push(Array.from({ length: N }, (_, k) => i + 1 + k));
+            if (i - N >= 0) cands.push(Array.from({ length: N }, (_, k) => i - N + k));
+            const comp = cands.find(idxs => idxs.every(j => itens[j]._kitId == null && itens[j].qtd === Q && !ehCaixa(itens[j].descricao)));
+            if (comp) { const id = kseq++; itens[i]._kitId = id; itens[i]._kitBox = true; for (const j of comp) itens[j]._kitId = id; }
+          }
+          // (2) cronograma: ≥3 máscaras seguidas, mesma qtd, SEM caixa. ⚠️ TRAVA: só procura numa NF que
+          // JÁ tem CAIXA KIT (kseq>0). Sem isso, 3 máscaras individuais seguidas de mesma qtd (comum em
+          // Salon Line etc.) viravam kit falso. NF com cronograma real (Franca) sempre tem caixas junto.
+          if (kseq > 0) for (let i = 0; i < itens.length;) {
+            if (itens[i]._kitId != null || !ehMasc(itens[i].descricao)) { i++; continue; }
+            let j = i;
+            while (j + 1 < itens.length && itens[j + 1]._kitId == null && ehMasc(itens[j + 1].descricao) && itens[j + 1].qtd === itens[i].qtd) j++;
+            if (j - i + 1 >= 3) { const id = kseq++; for (let k = i; k <= j; k++) itens[k]._kitId = id; i = j + 1; } else i++;
+          }
+          if (kseq) log(`  NF ${nfe.Numero}/${loja}: ${kseq} kit(s) detectado(s)`);
+        }
         // DEDUP: a NFe pode trazer o MESMO produto em várias linhas (<det>) — para precificar
         // queremos 1 linha por produto. Agrupa por cprod (fallback ean/descrição), somando qtd e
         // custos; recalcula o custo unitário. (14/07/2026 — NF 538 trazia 1003329 duplicado.)
+        // A chave inclui o papel (_kitId) p/ NÃO fundir linha de kit com a de avulso do mesmo cprod.
         const SOMAR = ["qtd", "valor_bruto", "desconto", "frete", "seguro", "outras", "ipi", "icms_st", "fcp_st", "custo_cheio_total"];
         const dedup = new Map();
         for (const it of itens) {
-          const chave = String(it.cprod || it.ean || it.descricao || "").toUpperCase().trim();
+          const chave = String(it.cprod || it.ean || it.descricao || "").toUpperCase().trim() + "|" + (it._kitId == null ? "avulso" : "kit" + it._kitId + (it._kitBox ? "box" : ""));
           const prev = dedup.get(chave);
           if (!prev) { dedup.set(chave, it); continue; }
           for (const c of SOMAR) prev[c] = Math.round(((prev[c] || 0) + (it[c] || 0)) * 10000) / 10000;
@@ -680,6 +712,47 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       for (const L of Object.keys(lojas)) for (const nf of lojas[L]) for (const it of nf.itens) if (it.st_motivo === "nf") revisar.push(it.ncm);
       log(`XML por item: ${nfList.length} NFes; c/ crédito=${comCredito}, ST sem crédito=${comST}, sem info=${semInfo}; ST só por sinal-NF (revisar NCM)=${revisar.length}; itens convertidos CX→unidade=${convCaixa}`);
     }
+
+    // ===== Agrupa componentes de KIT num item sintético (bundle) — 04/08/2026 =====
+    // Depois da fase ST (cada componente já tem seu st): junta os componentes de cada kit num único
+    // item cujo custo = SOMA dos componentes + a caixa. O kit NÃO tem EAN na NF (o produto-kit tem
+    // código próprio no ERP, que não está nesta nota) → ean vazio; o usuário informa depois p/ o .txt.
+    // A marca do kit é resolvida na fase de preços a seguir (fallback por descrição pega os nomes dos
+    // componentes). ST do kit = ST de qualquer componente. Avulsos seguem intactos.
+    let kitsCriados = 0;
+    for (const L of Object.keys(lojas)) for (const nf of lojas[L]) {
+      const grupos = {}; const resto = [];
+      for (const it of nf.itens) {
+        if (it._kitId == null) { resto.push(it); continue; }
+        (grupos[it._kitId] = grupos[it._kitId] || []).push(it);
+      }
+      const sinteticos = [];
+      for (const membros of Object.values(grupos)) {
+        const comps = membros.filter(m => !m._kitBox);
+        const caixa = membros.find(m => m._kitBox);
+        if (comps.length < 2) { resto.push(...membros.map(m => { delete m._kitId; delete m._kitBox; return m; })); continue; } // sem trio → trata como avulso
+        const Q = comps[0].qtd || 1;
+        const custoTotal = Math.round(membros.reduce((s, m) => s + (m.custo_cheio_total || 0), 0) * 100) / 100;
+        const nomeComp = comps.map(c => c.descricao.replace(/\s+\d.*$/, "").trim());
+        sinteticos.push({
+          cprod: "KIT-" + comps.map(c => c.cprod).join("-"), // único por conjunto de componentes (a caixa 920 se repete entre kits)
+          ean: "", // kit não tem EAN na NF → usuário informa depois (precificacao_eans_manuais / kit)
+          descricao: "KIT: " + comps.map(c => c.descricao).join(" + "),
+          qtd: Q, cfop: comps[0].cfop, marca: comps[0].marca,
+          valor_bruto: 0, desconto: 0, frete: 0, seguro: 0, outras: 0, ipi: 0, icms_st: 0, fcp_st: 0,
+          custo_cheio_total: custoTotal, custo_unit_cheio: Math.round((custoTotal / Q) * 10000) / 10000,
+          cst: null, icms_pct: null, credito_icms_pct: 0,
+          st: comps.some(c => c.st), st_motivo: comps.some(c => c.st) ? "kit" : null,
+          ncm: (comps.find(c => c.ncm) || {}).ncm || null, cest: null,
+          preco_atual: null, cod_erp: null, match_tipo: null, preco_manual: null,
+          kit: true,
+          kit_componentes: comps.map(c => ({ cprod: c.cprod, ean: c.ean, desc: c.descricao, qtd: c.qtd, custo_cheio_total: c.custo_cheio_total })),
+        });
+        kitsCriados++;
+      }
+      nf.itens = [...resto, ...sinteticos];
+    }
+    if (kitsCriados) log(`kits agrupados (bundle): ${kitsCriados}`);
 
     // ===== Preço de venda atual no ERP (Lista de Preços), por LOJA × MARCA =====
     // Consulta o relatório por marca (código do ERP) e casa cada item por EAN (fallback: referência/cprod).
