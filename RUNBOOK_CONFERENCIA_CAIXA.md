@@ -613,3 +613,70 @@ rodada com as repetições passa disso — sem isso o Mac dormia no meio da cole
 **Ordem de diagnóstico quando o painel estiver velho:** `geradoEm` do `conferencia_caixa_raw.json` →
 `/tmp/conf_caixa_alerta.txt` → `/tmp/conf_caixa_err.txt` (últimas linhas dizem se foi sessão, rede,
 perfil ocupado ou build) → `git log --grep="conferência de caixa: atualização"`.
+
+## Coleta automática da InfinitePay (05/08/2026)
+
+`scripts/infinitepay_sessao.mjs` (sessão) + `scripts/coleta_infinitepay.mjs` (coleta) geram os DOIS
+arquivos que a aba de conciliação já lê, sem ninguém baixar nada à mão:
+
+```bash
+node infinitepay_sessao.mjs login L1     # 1x: janela visível, o Athila escaneia o QR
+node infinitepay_sessao.mjs status       # as 3 sessões estão vivas?
+node coleta_infinitepay.mjs L1 2026-08-04
+```
+
+**O acesso web da InfinitePay é por QR Code lido no app — não existe usuário/senha.** Logo não há
+re-login automático possível: quando a sessão cair, alguém escaneia de novo. Profile por loja em
+`~/.claude/infinitepay-profile-L<n>`; NUNCA o `microvix-profile` (disputado por ~20 scripts).
+
+⚠️ A primeira versão do detector de "estou logado?" perguntava "tem campo de senha?" e deu falso
+positivo imediato — a tela de login não tem input nenhum, só o QR. Detector agora é positivo:
+só vale se aparecer saldo/extrato/movimentação na tela. Falso positivo aqui faz o robô "coletar"
+a tela de login e publicar vazio como se fosse o movimento do dia.
+
+**APIs usadas** (descobertas ouvindo a rede; o header `authorization` é capturado da própria
+chamada do app e repetido via APIRequestContext do Playwright, que não passa por CORS):
+
+| Arquivo | Endpoint |
+|---|---|
+| extrato da conta | `cloudwalk-statement-api.../api/statements?limit=100` (cursor `nextPage`) |
+| maquininha | `infinitepay-sales-indexer.../sales-index/v1/sales/search?from_date=&to_date=&pg=true` |
+
+⚠️ **Os filtros de data das duas APIs não são confiáveis.** `/api/statements` ignora
+start_date/final_date (5 grafias testadas devolvem os mesmos 100 registros) e o `sales/search`
+devolveu registro de HOJE numa janela pedida de ONTEM. Todo recorte de data é feito no cliente,
+com fuso `America/Sao_Paulo` (as APIs devolvem UTC — sem converter, tudo depois das 21h cai no
+dia seguinte).
+
+**Validação (05/08/2026, L1, dia 01/08):** cartão R$ 2.979,36 na maquininha × R$ 2.979,36 no ERP —
+bate à vírgula. PIX acusou R$ 333,61 em 2 vendas do ERP sem cobrança correspondente; **hipótese a
+confirmar**: PIX cobrado NA MAQUININHA aparece no `sales/search` com `method=pix`, e esse não entra
+no PIX do extrato da conta. Antes de tratar isso como divergência real no aviso diário, conferir.
+
+### Um login, três empresas (correção de 05/08/2026)
+
+O acesso da InfinitePay tem as três contas dentro do MESMO login — não são três sessões. Um
+profile só (`~/.claude/infinitepay-profile`) e a empresa é trocada antes de cada coleta em
+`https://app.infinitepay.io/select-account` (`selecionarConta`, idempotente).
+
+Mapa em `~/.claude/caixa-contas-infinitepay.json` (fora do repo: tem CNPJ):
+
+| Loja | Handle |
+|---|---|
+| L1 | `$casadabeleza-atm` |
+| L3 | `$missbeleza-itb` |
+| L5 | `$missbeleza-stm` |
+
+Os CNPJs de cada conta ficam só no arquivo local (este repositório é público).
+
+⚠️ **O handle da L3 diz "missbeleza" mas a conta é da loja de Itaituba (Casa da Beleza).** Não
+confiar na marca do handle. O mapa foi confirmado por evidência: coletado 04/08 nas três contas e
+cruzado contra as QUATRO lojas com nome de arquivo neutro (para desarmar a trava do `lojaDoNome`) —
+cada arquivo bate à vírgula com uma loja só e diverge de todas as outras:
+
+| Arquivo | L1 | L3 | L4 | L5 |
+|---|---|---|---|---|
+| `$missbeleza-itb` | −501,20 | **bate 1.763,90** | +557,14 | −414,56 |
+| `$missbeleza-stm` | −86,64 | +414,56 | +971,70 | **bate 2.178,46** |
+
+Esse teste é a forma certa de confirmar mapeamento de conta e vale repetir se abrirem conta nova.

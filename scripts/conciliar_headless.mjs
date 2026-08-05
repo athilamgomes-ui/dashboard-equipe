@@ -183,7 +183,7 @@ export function textoResumo(r) {
 }
 
 // ── CLI ──────────────────────────────────────────────────────────────────────
-function main() {
+async function main() {
   const argv = process.argv.slice(2);
   const opt = (k) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : null; };
   const dir = opt("--dir");
@@ -223,6 +223,7 @@ function main() {
     (porLoja[dono] ||= []).push({ nome, txt: fs.readFileSync(a, "utf8") });
   }
 
+  const salvarNoSupa = argv.includes("--salvar");
   const saida = [];
   for (const loja of Object.keys(porLoja).sort()) {
     const alvo = conciliar(ctx, loja, porLoja[loja]);
@@ -230,6 +231,20 @@ function main() {
     saida.push({ resumo: r, alvo });
     console.log("");
     console.log(textoResumo(r));
+  }
+
+  // Grava o que o robô conciliou no MESMO histórico do painel: quando o aviso
+  // diário apontar divergência, o dia já está lá para abrir e investigar, sem
+  // ninguém refazer upload à mão.
+  if (salvarNoSupa) {
+    const { salvar } = await import("./conferencia_supabase.mjs");
+    console.log("");
+    for (const { alvo, resumo } of saida) {
+      const r = await salvar(alvo, { teste: argv.includes("--teste") });
+      console.log(r.ok
+        ? "  💾 " + resumo.loja + ": guardada no histórico (id " + r.id + ", " + r.kb + " KB cifrados)"
+        : "  ⚠️ " + resumo.loja + ": não guardada — " + r.motivo);
+    }
   }
 
   if (saidaJson) {
