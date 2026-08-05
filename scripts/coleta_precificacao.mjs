@@ -498,8 +498,11 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         // código da marca não há "preço atual ERP" (o filtro do relatório exige o código), mas o
         // preço SUGERIDO sai normal e a tela mostra o badge "⚠️ marca não mapeada". Fornecedor
         // multi-marca ('+', split pendente) também cai aqui. Fica na tela até "✅ Concluída".
-        const marcaPendente = !marcaForn;
-        const marcaCandidatas = marcaPendente ? fornMarcasCandidatas(emit) : []; // multi-marca: resolver por-item na fase de preços
+        const marcaCandidatas = fornMarcasCandidatas(emit); // >0 = fornecedor multi-marca mapeado (resolve por-item na fase de preços)
+        // "pendente" (badge "marca não mapeada") SÓ quando o fornecedor não tem NENHUM mapeamento —
+        // nem marca única (fornBrand) nem multi-marca ('+'). Multi-marca (ex. Franca=Varcare+Nathydras)
+        // NÃO é pendente: a marca é resolvida item a item adiante. (05/08/2026 — banner era falso alarme)
+        const marcaPendente = !marcaForn && !marcaCandidatas.length;
         if (NF_FILTER) {
           if (!NF_FILTER.includes(String(nfe.Numero))) continue; // modo teste: só a(s) NF(s) pedida(s)
         } else {
