@@ -587,3 +587,29 @@ Detalhes que custaram tempo:
 **Validação (05/08/2026):** `infinite_pay_report.csv` (28–29/07) rodado contra as 4 lojas — bate
 exato só na L1 (R$ 4.136,82 nos dois lados, zero sobra dos dois lados); L3/L4/L5 acusam dezenas de
 divergências. Serve como rede extra contra arquivo carregado na loja errada.
+
+## Por que o painel ficou 4 dias parado — e o que impede a repetição (05/08/2026)
+
+Última coleta boa: 01/08 20:49. As rodadas de 02, 03 e 04/08 morreram em cascata e o painel
+mostrou dado de 01/08 até 05/08 sem nenhum aviso. Três falhas somadas:
+
+1. **A causa raiz** — `Failed to fetch` no `fetch` de dentro da página significa que a sessão ASP
+   caiu no meio da rodada. Reancorar o form não resolvia (o form novo ia para a mesma sessão morta),
+   então TODA coleta seguinte falhava igual até bater nas 8 falhas seguidas e abortar. Corrigido:
+   `Failed to fetch` / `net::ERR` agora **refaz a sessão** antes de reancorar o form, separado do
+   caso `Execution context was destroyed`, que continua só precisando do form de novo.
+2. **Uma tentativa por dia.** A rodada das 20:40 era a única chance; se o ERP oscilasse naqueles
+   minutos, custava o dia. Agora o `.sh` tenta a coleta **3 vezes, com 5 min de intervalo** (é
+   barato: a coleta é incremental e a segunda passada aproveita o cache da primeira), e existe a
+   **repescagem das 21:35** (`SO_SE_VELHO=1`), que sai na hora se o dado já for de hoje.
+3. **Falha silenciosa.** A regra "exit 10 = PushNotification" morava no prompt da task agendada —
+   quando a rodada morria sem agente por perto, ninguém ficava sabendo. Agora o próprio `.sh` dispara
+   notificação do macOS e escreve `/tmp/conf_caixa_alerta.txt` em toda saída 10/20; o sucesso apaga
+   o arquivo. O watchdog externo (13:15) também passou a vigiar este pipeline.
+
+Também: `caffeinate -s -w $$` no início do `.sh`. O `com.amgomes.keepawake` cobre até ~21:06 e a
+rodada com as repetições passa disso — sem isso o Mac dormia no meio da coleta.
+
+**Ordem de diagnóstico quando o painel estiver velho:** `geradoEm` do `conferencia_caixa_raw.json` →
+`/tmp/conf_caixa_alerta.txt` → `/tmp/conf_caixa_err.txt` (últimas linhas dizem se foi sessão, rede,
+perfil ocupado ou build) → `git log --grep="conferência de caixa: atualização"`.
