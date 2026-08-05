@@ -1,0 +1,43 @@
+{
+  "_leiame": "Código INTERNO do produto no ERP, por CNPJ do fornecedor -> cprod da NF. Para NFs que devem exportar o .txt por 'Código' (não 'Código de Barras'): produtos novos cujo EAN da nota não bate com o cadastro, e KITS (que não têm EAN na nota). Kits: chave 'KIT-<cprods dos componentes ordenados numericamente>'. Chaves começando com _ são ignoradas.",
+  "por_cnpj": {
+    "56927323000180": {
+      "_fornecedor": "FRANCA PLUS (Nathydras + Varcare) — romaneio pedido 2075 / NF 926, confirmado no ERP 05/08/2026",
+      "107": "26603",
+      "108": "26602",
+      "62": "12195",
+      "168": "12192",
+      "129": "13268",
+      "142": "29962",
+      "141": "13265",
+      "130": "26599",
+      "131": "7222",
+      "133": "29963",
+      "132": "16335",
+      "960": "5110",
+      "953": "5109",
+      "961": "3573",
+      "965": "5107",
+      "955": "4125",
+      "972": "28129",
+      "967": "9616",
+      "956": "5108",
+      "968": "203633",
+      "969": "45008",
+      "970": "13396",
+      "1042": "45512",
+      "1048": "77223",
+      "1080": "26591",
+      "105": "12193",
+      "106": "26608",
+      "1045": "77226",
+      "1081": "12197",
+      "KIT-130-139-142": "60725",
+      "KIT-1043-1044-1045": "45776",
+      "KIT-54-168-169": "26646",
+      "KIT-53-105-157": "30033",
+      "KIT-1046-1047-1048": "42379",
+      "KIT-169-1044-1047": "78147"
+    }
+  }
+}

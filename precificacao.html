@@ -517,40 +517,43 @@ document.getElementById("btnCsv").onclick=()=>{
 };
 
 // Gera o .txt p/ importar no ERP (Estoque > Lista de Preços > "Arquivo para atualização de valores").
-// Formato: "codigo;preco" (vírgula decimal). Só itens com correspondência EXATA por código (match_tipo='ean'),
-// usando o código interno do ERP (cod_erp) → no ERP, marcar "Código de Produto".
+// Formato: "codigo;preco" (vírgula decimal). Se a NF usa código INTERNO do ERP (it.codigo_erp — ex.
+// Franca: produtos novos + kits sem EAN), sai por CÓDIGO e importa marcando "Código". Senão, sai por
+// EAN e importa marcando "Código de Barras". NÃO mistura os dois modos no mesmo arquivo.
 document.getElementById("btnTxtErp").onclick=()=>{
   const arr=DADOS.lojas[lojaAtual]||[]; const nf=arr[nfeSel];
   if(!nf){alert("Selecione uma NF-e.");return;}
-  // A MESMA NF pode trazer o mesmo EAN em mais de uma linha (o fornecedor separa por lote/cProd:
-  // ex. NF 214716 Beauty Color, LPA02169 e LPA02369 = mesmo produto). Uma linha por item geraria
-  // EAN repetido e o ERP rejeita o arquivo inteiro ("produto X encontra-se repetido"). Agrupa por
-  // EAN: preço igual → 1 linha; preços diferentes → fica o MAIOR (nunca vender abaixo da margem)
-  // e avisa quais divergiram, p/ o usuário conferir. (16/07/2026)
-  const porEan=new Map(); let naoassoc=0, erro=0;
+  const usaCod = nf.itens.some(it=>it.codigo_erp);       // a NF exige código interno (Franca etc.)?
+  const chaveDe = it => usaCod ? (it.codigo_erp||null) : (temEan(it)?it.ean:null);
+  // A MESMA NF pode trazer o mesmo identificador em mais de uma linha (lote/cProd, ou kit). Uma linha
+  // por item geraria repetido e o ERP rejeita o arquivo inteiro. Agrupa: preço igual → 1 linha;
+  // diferente → fica o MAIOR (nunca abaixo da margem) e avisa. (16/07/2026; código interno 05/08/2026)
+  const porCod=new Map(); let naoassoc=0, erro=0;
   for(const it of nf.itens){
     const k=itemKey(nf,it); const margem=margemItem(nf,it);
     const r=calc(it,margem); const f=finais(it,k,margem,r);
-    if(!temEan(it)){naoassoc++; continue;}            // só os sem EAN ficam de fora
+    const id=chaveDe(it);
+    if(!id){naoassoc++; continue;}
     if(f.erro||f.preco==null){erro++; continue;}
-    const p=+f.preco.toFixed(2), ant=porEan.get(it.ean);
-    if(!ant){ porEan.set(it.ean,{preco:p, n:1, divergiu:false, desc:it.descricao}); }
+    const p=+f.preco.toFixed(2), ant=porCod.get(id);
+    if(!ant){ porCod.set(id,{preco:p, n:1, divergiu:false, desc:it.descricao}); }
     else { ant.n++; if(Math.abs(ant.preco-p)>=0.005) ant.divergiu=true; ant.preco=Math.max(ant.preco,p); }
   }
-  const dups=[...porEan.entries()].filter(([,v])=>v.n>1);
+  const dups=[...porCod.entries()].filter(([,v])=>v.n>1);
   const diverg=dups.filter(([,v])=>v.divergiu);
-  const linhas=[...porEan.entries()].map(([ean,v])=>`${ean};${v.preco.toFixed(2).replace('.',',')}`);
+  const linhas=[...porCod.entries()].map(([id,v])=>`${id};${v.preco.toFixed(2).replace('.',',')}`);
   const assoc=linhas.length;
-  if(!linhas.length){alert("Nenhum item com EAN para gerar o arquivo.");return;}
+  if(!linhas.length){alert("Nenhum item com "+(usaCod?"código interno":"EAN")+" para gerar o arquivo.");return;}
   const blob=new Blob([linhas.join("\n")+"\n"],{type:"text/plain"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
   a.download=`precos_${lojaAtual}_NF${nf.numero}.txt`; a.click();
-  alert(`Arquivo gerado: ${assoc} produtos (por EAN/código de barras).`+
-        (naoassoc?`\n⚠ ${naoassoc} sem EAN na NF (vermelhos) — cadastrar no ERP à mão.`:` 🎉 Todos com EAN!`)+
+  const marcar = usaCod ? '"Código"' : '"Código de Barras"';
+  alert(`Arquivo gerado: ${assoc} ${usaCod?'itens (por CÓDIGO interno do ERP)':'produtos (por EAN/código de barras)'}.`+
+        (naoassoc?`\n⚠ ${naoassoc} sem ${usaCod?'código interno (ex. embalagem) — confira':'EAN — cadastrar no ERP à mão'}.`:` 🎉 Todos associados!`)+
         (erro?`\n${erro} sem preço.`:``)+
-        (dups.length?`\nℹ ${dups.length} produto(s) vinham repetidos na NF (lotes diferentes) — juntados em 1 linha cada.`:``)+
-        (diverg.length?`\n⚠ Preço diferente entre as linhas repetidas — ficou o MAIOR, confira: ${diverg.map(([e,v])=>`${e} (${v.desc})`).join(" · ")}`:``)+
-        `\n\nNo ERP: Estoque > Relatórios > Lista de Preços > "Ajuste de Preços" > "Arquivo para atualização de valores" > selecione o arquivo, marque "Código de Barras", Validar e Upload. Empresa ${(PARAMS.lojas[lojaAtual]||{}).empresa} · ${(PARAMS.lojas[lojaAtual]||{}).tabela_preco}.`);
+        (dups.length?`\nℹ ${dups.length} item(ns) repetido(s) na NF — juntados em 1 linha cada.`:``)+
+        (diverg.length?`\n⚠ Preço diferente entre linhas repetidas — ficou o MAIOR, confira: ${diverg.map(([e,v])=>`${e} (${v.desc})`).join(" · ")}`:``)+
+        `\n\nNo ERP: Estoque > Relatórios > Lista de Preços > "Ajuste de Preços" > "Arquivo para atualização de valores" > selecione o arquivo, marque ${marcar}, Validar e Upload. Empresa ${(PARAMS.lojas[lojaAtual]||{}).empresa} · ${(PARAMS.lojas[lojaAtual]||{}).tabela_preco}.`);
 };
 
 // Dispara AGORA uma coleta fresca no ERP (NFes + preços) via pedido no Supabase — um processo

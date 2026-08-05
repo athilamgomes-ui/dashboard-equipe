@@ -36,6 +36,10 @@ const PARAMS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard
 const MARCA_IDS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/compras/marca_ids.json", "utf8"));
 // Preços de venda FIXOS por EAN (definidos manualmente pelo usuário) — injetados em item.preco_manual.
 const PRECOS_MANUAIS = (() => { try { return JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_precos_manuais.json", "utf8")).precos || {}; } catch { return {}; } })();
+// Código INTERNO do ERP por CNPJ do fornecedor + cprod (inclui kits, chave "KIT-<cprods ordenados>").
+// Para NF que precisa exportar o .txt por "Código" (não "Código de Barras"): produtos novos cujo EAN
+// da nota não bate com o cadastro, e kits que não têm EAN na nota. Ex.: Franca/Nathydras+Varcare. (05/08/2026)
+const CODIGOS_ERP = (() => { try { return JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_codigos_erp.json", "utf8")); } catch { return {}; } })();
 const ST_PA = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/st_pa_ncm.json", "utf8"));
 const ST_NCM = (ST_PA.ncm_st || []).map(String).sort((a, b) => b.length - a.length); // prefixos mais longos primeiro
 const URL_LISTA_PRECOS = "https://linx.microvix.com.br/gestor_web/produtos/relatorio_lista_precos.asp";
@@ -735,7 +739,8 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         const custoTotal = Math.round(membros.reduce((s, m) => s + (m.custo_cheio_total || 0), 0) * 100) / 100;
         const nomeComp = comps.map(c => c.descricao.replace(/\s+\d.*$/, "").trim());
         sinteticos.push({
-          cprod: "KIT-" + comps.map(c => c.cprod).join("-"), // único por conjunto de componentes (a caixa 920 se repete entre kits)
+          cprod: "KIT-" + comps.map(c => c.cprod).sort((a, b) => (+a || 0) - (+b || 0) || String(a).localeCompare(b)).join("-"), // único e ESTÁVEL (ordena componentes) — chave p/ mapear o código interno do kit
+
           ean: "", // kit não tem EAN na NF → usuário informa depois (precificacao_eans_manuais / kit)
           descricao: "KIT: " + comps.map(c => c.descricao).join(" + "),
           qtd: Q, cfop: comps[0].cfop, marca: comps[0].marca,
@@ -753,6 +758,17 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       nf.itens = [...resto, ...sinteticos];
     }
     if (kitsCriados) log(`kits agrupados (bundle): ${kitsCriados}`);
+
+    // ===== Código INTERNO do ERP p/ o .txt (import por "Código", não "Código de Barras") =====
+    // Quando o fornecedor está em CODIGOS_ERP.por_cnpj, cada item (avulso por cprod; kit pela chave
+    // "KIT-<cprods ordenados>") recebe it.codigo_erp — o .txt sai com esse código no lugar do EAN.
+    let comCodErp = 0;
+    for (const L of Object.keys(lojas)) for (const nf of lojas[L]) {
+      const mapa = (CODIGOS_ERP.por_cnpj || {})[String(nf.cnpj || "").replace(/\D/g, "")];
+      if (!mapa) continue;
+      for (const it of nf.itens) { const c = mapa[String(it.cprod)]; if (c) { it.codigo_erp = String(c); comCodErp++; } }
+    }
+    if (comCodErp) log(`código interno do ERP anexado a ${comCodErp} item(ns)`);
 
     // ===== Preço de venda atual no ERP (Lista de Preços), por LOJA × MARCA =====
     // Consulta o relatório por marca (código do ERP) e casa cada item por EAN (fallback: referência/cprod).
