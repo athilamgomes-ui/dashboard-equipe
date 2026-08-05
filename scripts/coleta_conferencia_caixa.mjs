@@ -737,10 +737,29 @@ try {
           ? await coletarDiaRapido(page, formBase, p.loja.id, isoParaBr(p.dia))
           : await coletarDia(page, p.loja.id, isoParaBr(p.dia));
       } catch (e1) {
-        // "Execution context was destroyed" = a página navegou no meio do evaluate (o ERP
-        // às vezes redireciona sozinho). É transitório: reancora o form e tenta mais uma vez.
-        if (!/Execution context was destroyed|context was destroyed/i.test(String(e1))) throw e1;
-        log(`  retry ${p.k} (contexto destruído)`);
+        const m1 = String(e1);
+        // Duas falhas transitórias diferentes, com curas diferentes:
+        //
+        // 1) "Execution context was destroyed" — a página navegou no meio do evaluate (o
+        //    ERP às vezes redireciona sozinho). Basta reancorar o form.
+        // 2) "Failed to fetch" / net::ERR — o fetch de dentro da página não saiu: a sessão
+        //    ASP caiu no meio da coleta. Reancorar o form NÃO resolve (o form novo também
+        //    vai para uma sessão morta) — tem que refazer a sessão antes.
+        //
+        // O (2) sem tratamento derrubou o pipeline 3 noites seguidas (02, 03 e 04/08/2026):
+        // toda coleta seguinte falhava igual, batia nas "8 falhas seguidas" e abortava a
+        // rodada inteira. O painel ficou parado em 01/08 sem ninguém saber, porque o
+        // watchdog também não olhava para este pipeline.
+        const contextoMorto = /Execution context was destroyed|context was destroyed/i.test(m1);
+        const sessaoMorta = /Failed to fetch|net::ERR|socket hang up|ECONNRESET/i.test(m1);
+        if (!contextoMorto && !sessaoMorta) throw e1;
+
+        if (sessaoMorta) {
+          log(`  retry ${p.k} (sessão caiu: ${m1.split("\n")[0].slice(0, 60)}) — refazendo login`);
+          await garantirSessao(page, { log, tokenOpcional: true });
+        } else {
+          log(`  retry ${p.k} (contexto destruído)`);
+        }
         await page.waitForTimeout(1500);
         formBase = await prepararFormBase(page);
         r = await coletarDiaRapido(page, formBase, p.loja.id, isoParaBr(p.dia));

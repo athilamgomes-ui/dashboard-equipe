@@ -560,3 +560,30 @@ O botão **🔄 Atualizar** existe mesmo com a busca automática, por um motivo 
 cobre: outra pessoa pode carregar arquivo de outro computador. Ele relê o índice do Supabase e busca
 o que faltar. O andamento aparece em `#c-sinc`, na própria barra — antes o aviso morava dentro da
 caixa do histórico, que é reescrita durante a sincronização e apagava o texto.
+
+## Motor fora do navegador: `conciliar_headless.mjs` (05/08/2026)
+
+A seção "Rodar o motor fora do navegador (para depurar)" acima virou script de verdade:
+`scripts/conciliar_headless.mjs`. Carrega o MESMO `conferencia_caixa_app.js` num contexto `vm`
+com stubs de `document`/`PUBLICO`/`sessionStorage`, injeta `D` do `conferencia_caixa_raw.json` e
+chama `processarConteudo()`.
+
+```bash
+node scripts/conciliar_headless.mjs --loja L1 "L1 maquininha 04-08.csv"
+node scripts/conciliar_headless.mjs --dir ~/.claude/caixa-arquivos   # loja pelo NOME do arquivo
+```
+
+⚠️ **Nunca copiar função do app para cá.** Duas cópias divergem e o painel passa a mostrar
+resultado diferente do que o robô mandou no resumo. Se precisar de algo novo, mexa no app.
+
+Detalhes que custaram tempo:
+- `D` é `let` no topo do app → vive no escopo léxico do contexto, **não** como propriedade do
+  global. `ctx.D = ...` não tem efeito; a injeção é `vm.runInContext("D = __D;", ctx)`.
+- `location.search` do stub é `?teste=1` de propósito: `MODO_TESTE` fica ligado e o motor **nunca**
+  grava no Supabase sozinho. Gravar é responsabilidade de quem chama.
+- Só o topo do app toca no DOM (selo, senha da sessão, seletor). Todo o resto está em `iniciar()`,
+  que o headless não chama — por isso os stubs são mínimos.
+
+**Validação (05/08/2026):** `infinite_pay_report.csv` (28–29/07) rodado contra as 4 lojas — bate
+exato só na L1 (R$ 4.136,82 nos dois lados, zero sobra dos dois lados); L3/L4/L5 acusam dezenas de
+divergências. Serve como rede extra contra arquivo carregado na loja errada.
