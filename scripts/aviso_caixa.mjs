@@ -27,7 +27,10 @@ const PAINEL = "https://athilamgomes-ui.github.io/dashboard-equipe/conferencia_c
 const chaveiro = (servico, conta) => {
   try {
     return execFileSync("/usr/bin/security",
-      ["find-generic-password", "-s", servico, "-a", conta, "-w"], { encoding: "utf8" }).trim();
+      ["find-generic-password", "-s", servico, "-a", conta, "-w"],
+      // stderr ignorado: a checagem de "canal configurado?" testa um item que
+      // pode não existir, e o aviso do security poluía o log de toda execução.
+      { encoding: "utf8", stdio: ["pipe", "pipe", "ignore"] }).trim();
   } catch {
     throw new Error("não achei " + conta + " no Keychain (serviço " + servico + ").");
   }
@@ -107,23 +110,55 @@ async function enviarWhatsApp(m) {
 
   const params = m.whatsapp.map(t => ({ type: "text", text: t.replace(/[\n\t]+/g, " ").slice(0, 900) }));
 
-  const r = await fetch("https://graph.facebook.com/v21.0/" + cfg.phoneNumberId + "/messages", {
+  // Mais de um template porque a fila de aprovação da Meta é imprevisível: o
+  // primeiro ficou PENDING por 18h enquanto templates de exemplo da mesma conta
+  // estavam aprovados. Manda pelo primeiro que existir — o que ela liberar
+  // primeiro vira o canal, sem precisar mexer em configuração.
+  const candidatos = [cfg.template || "conferencia_caixa_diaria", ...(cfg.templatesReserva || ["resumo_caixa_lojas"])];
+  let t = "", r = null;
+  for (const nome of candidatos) {
+    r = await fetch("https://graph.facebook.com/v21.0/" + cfg.phoneNumberId + "/messages", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to: cfg.para,
+        type: "template",
+        template: {
+          name: nome,
+          language: { code: cfg.idioma || "pt_BR" },
+          components: [{ type: "body", parameters: params }],
+        },
+      }),
+    });
+    t = await r.text();
+    if (r.ok) return { canal: "whatsapp (" + nome + ")", id: (JSON.parse(t).messages || [{}])[0]?.id || null };
+    if (!/132001|132000|131009/.test(t)) break;      // erro que não é "template não existe": para aqui
+  }
+
+  // Template indisponível (ainda em análise, recusado ou renomeado) não pode
+  // custar o aviso do dia. Se houver janela de atendimento aberta — o Athila
+  // mandou qualquer mensagem para o número nas últimas 24h — dá para mandar
+  // texto livre, que inclusive sai mais completo que o template.
+  // ⚠️ Isto é rede de segurança, não o caminho principal: a janela fecha em 24h
+  // de silêncio, então o template continua sendo o que sustenta a rotina diária.
+  const semTemplate = /132001|132000|131009/.test(t);
+  if (!semTemplate) throw new Error("WhatsApp respondeu " + r.status + ": " + t.slice(0, 300));
+
+  const r2 = await fetch("https://graph.facebook.com/v21.0/" + cfg.phoneNumberId + "/messages", {
     method: "POST",
     headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
     body: JSON.stringify({
-      messaging_product: "whatsapp",
-      to: cfg.para,
-      type: "template",
-      template: {
-        name: cfg.template || "conferencia_caixa_diaria",
-        language: { code: cfg.idioma || "pt_BR" },
-        components: [{ type: "body", parameters: params }],
-      },
+      messaging_product: "whatsapp", to: cfg.para, type: "text",
+      text: { body: montarTexto(m), preview_url: false },
     }),
   });
-  const t = await r.text();
-  if (!r.ok) throw new Error("WhatsApp respondeu " + r.status + ": " + t.slice(0, 300));
-  return { canal: "whatsapp", id: (JSON.parse(t).messages || [{}])[0]?.id || null };
+  const t2 = await r2.text();
+  if (!r2.ok) throw new Error(
+    "template indisponível (" + (JSON.parse(t).error?.message || "").slice(0, 80) + ") e " +
+    "texto livre também falhou (" + r2.status + "): " + t2.slice(0, 200) +
+    " — se o erro for de janela de 24h, mande qualquer mensagem para " + (cfg.numeroTeste || "o número") + " e rode de novo.");
+  return { canal: "whatsapp (texto livre)", id: (JSON.parse(t2).messages || [{}])[0]?.id || null };
 }
 
 // ── Telegram ─────────────────────────────────────────────────────────────────
