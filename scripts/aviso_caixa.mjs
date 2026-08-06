@@ -158,7 +158,12 @@ async function enviarWhatsApp(m) {
     "template indisponível (" + (JSON.parse(t).error?.message || "").slice(0, 80) + ") e " +
     "texto livre também falhou (" + r2.status + "): " + t2.slice(0, 200) +
     " — se o erro for de janela de 24h, mande qualquer mensagem para " + (cfg.numeroTeste || "o número") + " e rode de novo.");
-  return { canal: "whatsapp (texto livre)", id: (JSON.parse(t2).messages || [{}])[0]?.id || null };
+  // ⚠️ ENTREGA NÃO CONFIRMADA. O Cloud API responde "accepted" = entrou na fila;
+  // falha de entrega só aparece por webhook, que não temos. Com texto livre isso
+  // é risco real: fora da janela de 24h a Meta ACEITA e descarta em silêncio —
+  // aconteceu em 06/08/2026 e eu disse ao Athila que a mensagem tinha chegado
+  // quando não tinha. Template aprovado não sofre disso; texto livre sim.
+  return { canal: "whatsapp (texto livre)", id: (JSON.parse(t2).messages || [{}])[0]?.id || null, incerto: true };
 }
 
 // ── Telegram ─────────────────────────────────────────────────────────────────
@@ -217,6 +222,14 @@ if (import.meta.url === "file://" + process.argv[1]) {
   const m = montarLinhas(JSON.parse(fs.readFileSync(arq, "utf8")), dia);
   console.log("── mensagem ──\n" + montarTexto(m) + "\n");
   enviar(m, { canal })
-    .then(r => { console.log("✅ enviado por " + r.canal + (r.id ? " (id " + r.id + ")" : "")); process.exit(0); })
+    .then(r => {
+      if (r.incerto) {
+        console.log("⚠️ enfileirado por " + r.canal + " — ENTREGA NÃO CONFIRMADA (sem template aprovado," +
+                    " só chega se houver janela de 24h aberta)");
+        process.exit(3);
+      }
+      console.log("✅ enviado por " + r.canal + (r.id ? " (id " + r.id + ")" : ""));
+      process.exit(0);
+    })
     .catch(e => { console.error("❌ " + e.message); process.exit(1); });
 }

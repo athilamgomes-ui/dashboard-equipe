@@ -116,7 +116,13 @@ log "avisando..."
 $NODE "$SCRIPTS/aviso_caixa.mjs" "$RES" "$DIA" > /tmp/caixa_diario_aviso.log 2>&1
 AV=$?
 tail -4 /tmp/caixa_diario_aviso.log
-if [ $AV -ne 0 ]; then
+if [ $AV -eq 3 ]; then
+  # Enfileirado sem template aprovado: a Meta aceita e descarta em silêncio se a
+  # janela de 24h estiver fechada. Não é sucesso nem falha — é "não dá para
+  # saber", e dizer "pronto" aqui seria a mesma mentira de 06/08/2026.
+  log "AVISO: resumo enfileirado, mas a entrega NÃO é garantida (sem template aprovado)"
+  avisar_falha "resumo de $DIA foi enfileirado no WhatsApp, mas pode não chegar — template ainda não aprovado"
+elif [ $AV -ne 0 ]; then
   log "ERRO: o resumo NÃO foi enviado"
   avisar_falha "conferência de $DIA rodou, mas o resumo não chegou em você"
   exit 40
