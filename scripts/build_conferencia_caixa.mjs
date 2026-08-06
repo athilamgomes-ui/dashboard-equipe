@@ -628,11 +628,8 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
       <div class="up-linha">
         <label>Loja do arquivo</label>
         <select id="c-loja"></select>
-        <label>Adquirente</label>
-        <select id="c-adq">
-          <option value="infinitepay">InfinitePay</option>
-          <option value="auto">Detectar pelas colunas</option>
-        </select>
+        <span class="hint" style="margin-left:4px">adquirente e separador são detectados pelas colunas
+          — <b>InfinitePay</b> e <b>Stone</b> reconhecidas</span>
       </div>
       <div id="dropzone" class="dropzone">
         <div class="dz-ico">📄</div>
@@ -640,7 +637,8 @@ footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 10px
         <div class="dz-sub">Arquivo <b>.csv</b> da maquininha e/ou o extrato da conta — pode arrastar os dois juntos.<br>
           Carregue quantos dias e lojas quiser: <b>as conferências se somam na tela</b> e o período abaixo escolhe o que aparece.<br>
           <b>Comece o nome do arquivo pela loja</b> (ex.: <code>L5 maquininha 30-07.csv</code>) — o relatório
-          da adquirente não diz de que empresa é, e assim o painel confere sozinho.</div>
+          da adquirente não diz de que empresa é, e assim o painel confere sozinho.<br>
+          Serve o arquivo da <b>InfinitePay</b> e o da <b>Stone</b>, cada um no seu formato.</div>
         <input type="file" id="c-file" accept=".csv,text/csv" multiple hidden>
       </div>
       <div id="c-erro" class="dz-erro"></div>

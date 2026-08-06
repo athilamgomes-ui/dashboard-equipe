@@ -680,3 +680,36 @@ cada arquivo bate à vírgula com uma loja só e diverge de todas as outras:
 | `$missbeleza-stm` | −86,64 | +414,56 | +971,70 | **bate 2.178,46** |
 
 Esse teste é a forma certa de confirmar mapeamento de conta e vale repetir se abrirem conta nova.
+
+## Mais de uma adquirente: Stone além da InfinitePay (06/08/2026)
+
+O Athila subiu `L4 vendas.csv` (Stone) e o painel respondeu "não reconheci o arquivo". Três
+diferenças de formato, todas corrigidas:
+
+| | InfinitePay | Stone |
+|---|---|---|
+| separador | `,` | **`;`** |
+| decimal | `230,50` | **`230,500000`** (6 casas) |
+| forma de pagamento | coluna `Meio - Meio` | coluna **`PRODUTO`** (Credito/Debito/Debito Pre-pago) |
+| líquido / taxa | `Líquido (R$)` / `Taxa Aplicada - Valor(R$)` | `VALOR LIQUIDO` / `DESCONTO UNIFICADO` |
+| identificador | `NSU` | `STONE ID` |
+
+1. **Separador** agora é detectado pela primeira linha (`separadorCSV`), contando fora das aspas.
+   Com o separador errado o arquivo vira UMA coluna, nenhum nome de coluna casa e a mensagem que
+   sai é "não reconheci o arquivo" — enganosa, porque o arquivo está certo.
+2. **`brNum` aceita qualquer número de casas decimais.** A regra antiga exigia 1 ou 2 (`/,\d{1,2}$/`)
+   e mandava `230,500000` para o ramo de milhar: **R$ 23.050.000**. Erro que não levanta exceção —
+   só produz um relatório absurdo. Regra nova: o separador decimal é o último `.` ou `,` seguido só
+   de dígitos; exceção para ponto sozinho com exatamente 3 casas (`1.234` = mil duzentos e trinta e
+   quatro). Conferido contra 11 formatos que aparecem nos arquivos reais.
+3. **Ordem dos apelidos de coluna importa** — quem casa primeiro ganha. `^produto$` tem que vir
+   ANTES de `^meio`, senão na Stone o painel pega `MEIO DE CAPTURA` (POS/maquineta) como forma de
+   pagamento e nenhuma venda entra no filtro de cartão.
+
+Validação: as 81 cobranças da Stone (01–04/08, L4) casaram com 81 documentos do ERP, R$ 5.958,10
+dos dois lados, zero divergência. Os quatro arquivos de InfinitePay continuam com contagem e total
+idênticos aos de antes da mudança.
+
+**Para acrescentar uma adquirente nova**, mexa só em `lerTransacoes` (apelidos de coluna) e
+`detectarTipo`. Se o arquivo tiver `bandeira` + `valor bruto`, já é reconhecido como maquininha
+mesmo sem coluna de "meio".

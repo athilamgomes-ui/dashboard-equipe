@@ -268,8 +268,26 @@ function rBanco(){
 // ══ 5. CONCILIAÇÃO DA MAQUININHA (tudo no navegador — o arquivo não é enviado a lugar nenhum) ══
 
 // CSV com campos entre aspas e vírgula decimal dentro ("118,00") — split simples não serve.
+// Descobre o separador pela PRIMEIRA linha, contando fora das aspas. A InfinitePay exporta
+// com vírgula e a Stone com ponto-e-vírgula; com o separador errado o arquivo inteiro vira
+// uma coluna só, nenhum nome de coluna casa e o painel responde "não reconheci o arquivo" —
+// foi assim que o relatório da Stone da L4 foi recusado.
+function separadorCSV(txt){
+  const fim = txt.indexOf("\n");
+  const cab = fim < 0 ? txt : txt.slice(0, fim);
+  const conta = {};
+  let dentro = false;
+  for (const ch of cab){
+    if (ch === '"'){ dentro = !dentro; continue; }
+    if (!dentro && (ch === "," || ch === ";" || ch === "\t")) conta[ch] = (conta[ch]||0)+1;
+  }
+  const melhor = Object.keys(conta).sort((a,b)=>conta[b]-conta[a])[0];
+  return melhor || ",";
+}
+
 function parseCSV(txt){
   txt = txt.replace(/^﻿/,"");
+  const SEP = separadorCSV(txt);
   const linhas=[]; let campo="", linha=[], dentro=false;
   for (let i=0;i<txt.length;i++){
     const ch=txt[i];
@@ -277,7 +295,7 @@ function parseCSV(txt){
       if (ch === '"'){ if (txt[i+1] === '"'){ campo+='"'; i++; } else dentro=false; }
       else campo+=ch;
     } else if (ch === '"') dentro=true;
-    else if (ch === ","){ linha.push(campo); campo=""; }
+    else if (ch === SEP){ linha.push(campo); campo=""; }
     else if (ch === "\n"){ linha.push(campo); linhas.push(linha); linha=[]; campo=""; }
     else if (ch !== "\r") campo+=ch;
   }
@@ -297,7 +315,20 @@ const brNum = s => {
   let sinal=1;
   if (t.startsWith("-")){ sinal=-1; t=t.slice(1); }
   else if (t.startsWith("+")) t=t.slice(1);
-  const v = /,\d{1,2}$/.test(t) ? parseFloat(t.replace(/\./g,"").replace(",",".")) : parseFloat(t.replace(/,/g,""));
+  // O separador decimal é o ÚLTIMO ponto ou vírgula seguido só de dígitos. A regra antiga
+  // exigia 1 ou 2 casas: a Stone exporta com SEIS ("230,500000") e o valor caía no ramo de
+  // milhar, virando 23.050.000 — erro que não dá erro nenhum, só um relatório absurdo.
+  // Exceção: ponto sozinho com exatamente 3 dígitos depois é milhar ("1.234" = 1234).
+  const ult = Math.max(t.lastIndexOf("."), t.lastIndexOf(","));
+  let v;
+  if (ult >= 0 && /^\d+$/.test(t.slice(ult+1))){
+    const casas = t.length-ult-1;
+    const milhar = t[ult]==="." && casas===3 && !t.includes(",");
+    v = milhar ? parseFloat(t.replace(/[.,]/g,""))
+               : parseFloat(t.slice(0,ult).replace(/[.,]/g,"") + "." + t.slice(ult+1));
+  } else {
+    v = parseFloat(t.replace(/[.,]/g,""));
+  }
   return Number.isFinite(v)? sinal*Math.round(v*100)/100 : 0;
 };
 
@@ -331,7 +362,10 @@ function detectarTipo(linhas){
   if (!linhas.length) return null;
   const a=linhas[0];
   if (acharCol(a,"tipo de transa") && acharCol(a,"detalhe")) return "extrato";
-  if (acharCol(a,"meio - meio","^meio","forma de pagamento","tipo de pagamento")) return "maquininha";
+  // A mesma lista de apelidos usada em lerTransacoes, mais o par bandeira+valor bruto, que
+  // é a assinatura de qualquer relatório de adquirente (a Stone não tem coluna "meio").
+  if (acharCol(a,"meio - meio","^produto$","forma de pagamento","tipo de pagamento","^meio")) return "maquininha";
+  if (acharCol(a,"bandeira") && acharCol(a,"valor bruto")) return "maquininha";
   return null;
 }
 
@@ -365,11 +399,18 @@ function lerExtrato(linhas){
 function lerTransacoes(linhas){
   if (!linhas.length) throw new Error("arquivo vazio ou sem linhas de dados");
   const a=linhas[0];
-  const cData=acharCol(a,"^data e hora","^data"), cValor=acharCol(a,"^valor \\(","^valor$","valor bruto"),
-        cMeio=acharCol(a,"meio - meio","forma","tipo de pagamento","^meio"),
-        cStatus=acharCol(a,"status"), cBand=acharCol(a,"bandeira"),
-        cNsu=acharCol(a,"nsu","identificador"), cNome=acharCol(a,"origem - nome","cliente","portador"),
-        cLiq=acharCol(a,"^l[íi]quido"), cTaxa=acharCol(a,"taxa aplicada - valor"),
+  // ⚠️ Ordem das alternativas importa: quem casa primeiro ganha. "^meio" tem que vir DEPOIS
+  // de "^produto$" porque na Stone a coluna "MEIO DE CAPTURA" é POS/maquineta, não a forma
+  // de pagamento — a forma (Credito/Debito/Debito Pre-pago) está em "PRODUTO". Pegar a
+  // errada faria toda venda cair fora do filtro de cartão.
+  const cData=acharCol(a,"^data e hora","^data da venda","^data"),
+        cValor=acharCol(a,"^valor \\(","^valor bruto","^valor$","valor bruto"),
+        cMeio=acharCol(a,"meio - meio","^produto$","forma","tipo de pagamento","^meio"),
+        cStatus=acharCol(a,"^status","ltimo status","status"), cBand=acharCol(a,"bandeira"),
+        cNsu=acharCol(a,"nsu","identificador","stone id","^documento$"),
+        cNome=acharCol(a,"origem - nome","cliente","portador"),
+        cLiq=acharCol(a,"^l[íi]quido","valor l[íi]quido"),
+        cTaxa=acharCol(a,"taxa aplicada - valor","desconto unificado","desconto de mdr"),
         cParc=acharCol(a,"parcelas"), cTaxaPct=acharCol(a,"taxa aplicada - aplicada");
   if (!cData || !cValor || !cMeio)
     throw new Error("não reconheci as colunas. Preciso de data, valor e forma de pagamento (meio).");
