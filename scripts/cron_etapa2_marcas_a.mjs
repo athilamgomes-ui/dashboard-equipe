@@ -194,21 +194,30 @@ async function main(semanas, totaisLoja) {
   // SOUZA DOS SANTOS'). O consumidor cruza com as vendas da Etapa 1 (match por
   // primeiro nome, insensível a acento) pra calcular o % individual.
   out._indivRS = { L1: {}, L3: {}, L4: {}, L5: {} };
+  const falhas = [];
 
   for (const empresaId of EMPRESAS) {
     const loja = LOJA_POR_EMPRESA[empresaId];
     for (const s of semanas) {
       logErr(`${loja} ${s.id} (${s.di}–${s.df})...`);
-      let res = { total: 0, porVendedor: {} };
-      // Retry simples: tenta 2x antes de desistir
-      for (let attempt = 0; attempt < 2; attempt++) {
+      let res = null;
+      // Retry simples: tenta 3x antes de desistir
+      for (let attempt = 0; attempt < 3; attempt++) {
         try {
           res = await fetchMarcasA(page, empresaId, s.di, s.df);
           break;
         } catch (e) {
           logErr(`  attempt ${attempt+1} erro: ${e.message.slice(0,100)}`);
-          if (attempt === 0) await page.waitForTimeout(2000);
+          if (attempt < 2) await page.waitForTimeout(2000 * (attempt + 1));
         }
+      }
+      // Coleta falhou nas 3 tentativas: OMITIR a célula. NUNCA publicar 0% fabricado —
+      // sem chave, build_premiacao.mjs preserva o valor anterior (linha ~340). Publicar 0
+      // zeraria o bônus de marcas A das vendedoras dessa loja sem ninguém perceber.
+      if (!res) {
+        logErr(`  ✗ ${loja} ${s.id}: coleta FALHOU 3x — célula omitida (valor anterior preservado)`);
+        falhas.push(`${loja} ${s.id}`);
+        continue;
       }
       const total = (totaisLoja[loja] || {})[s.id] || 0;
       const pct = total > 0 ? (res.total / total * 100) : 0;
@@ -219,6 +228,7 @@ async function main(semanas, totaisLoja) {
   }
 
   const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+  if (falhas.length) logErr(`⚠ células omitidas (preservadas do run anterior): ${falhas.join(", ")}`);
   logErr(`OK em ${elapsed}s`);
   process.stdout.write(JSON.stringify(out));
   await ctx.close().catch(() => {});
