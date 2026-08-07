@@ -60,6 +60,25 @@ else
   log "atualizando o ERP..."
   bash "$REPO/atualizar_conferencia_caixa.sh" > /tmp/caixa_diario_erp.log 2>&1
   ERP=$?
+
+  # exit 30 = lock: OUTRA execução do ERP está rodando agora. Isso não é falha —
+  # é justamente alguém buscando o dado que a gente quer. Esperar e tentar de
+  # novo é o certo; abortar joga fora a conferência do dia por um detalhe de
+  # concorrência.
+  #
+  # Aconteceu em 07/08/2026: as tarefas da noite anterior (20:40 e a repescagem
+  # das 21:35) não rodaram porque o Claude estava fechado e dispararam de manhã,
+  # no primeiro lançamento, em cima da nossa das 07:20. As três brigaram pelo
+  # mesmo lock, a nossa perdeu e o Athila ficou sem o resumo.
+  ESPERA=0
+  while [ $ERP -eq 30 ] && [ $ESPERA -lt 20 ]; do
+    ESPERA=$((ESPERA + 1))
+    log "  ERP ocupado por outra execução — aguardando 60s (${ESPERA}/20)"
+    sleep 60
+    bash "$REPO/atualizar_conferencia_caixa.sh" > /tmp/caixa_diario_erp.log 2>&1
+    ERP=$?
+  done
+  [ $ERP -eq 0 ] && [ $ESPERA -gt 0 ] && log "  ERP liberado após ${ESPERA} min de espera"
 fi
 if [ $ERP -ne 0 ]; then
   # Sem ERP do dia, conciliar produziria "cobrança sem venda" para o dia todo —
