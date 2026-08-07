@@ -1068,7 +1068,7 @@ function isDesligada(nome) { return (VENDEDORAS_META[nome]?.status) === 'desliga
 // do cron (formato 'DD/MM/AAAA HH:MM'). O JS só LÊ esse valor pra exibir e
 // calcular "dado velho" — NUNCA sobrescrever com new Date() (bug do timestamp
 // mentiroso: a hora exibida tem que ser a da coleta real, não a do page-load).
-const DADOS_COLETADO_EM = '07/08/2026 12:11';
+const DADOS_COLETADO_EM = '07/08/2026 12:18';
 
 // MOCK DATA — substituir depois pelo carregamento de dados_premiacao.json gerado pelo agente
 // Atualizado pra Jun/2026 S1 em 01/06/2026 (dados parciais 01/06 — segunda; ontem=sáb 30/05)
@@ -1107,27 +1107,27 @@ const DADOS_LOJA = {
     nome_loja: 'Miss Beleza Itaituba',
     meta_mensal: 90000,
     meta_semana: 25000,
-    vendido_semana: 12103,
-    vendido_mes: 13452,
+    vendido_semana: 12170,
+    vendido_mes: 13519,
     posicao_loja: 4, // 1-4
-    ma_pct_loja_sem: 0,
+    ma_pct_loja_sem: 18.8,
     ma_pct_loja_mes: 17,
     semana_atual: 'S2',
     semana_label: 'Semana 03 a 08/08',
     vendedoras: {
-      'Ana Mira': {sem:2554, mes:2995, ma_sem:0, ma_mes:17.7, melhorias:[
+      'Ana Mira': {sem:2554, mes:2995, ma_sem:20.8, ma_mes:17.7, melhorias:[
         'A loja vendeu 39% menos na semana 2 do que na semana 1. Precisamos retomar o ritmo. Olhe os números: o que mudou entre uma semana e outra? Faltou alguma marca importante? Algum dia ficou com pouca gente atendendo?',
         'Como gerente, sua maior ferramenta é a equipe. Conversa rápida individual com cada uma no início da semana: o que ela vai focar? Quanto ela quer vender? Quando cada uma tem uma meta clara, todo mundo bate mais.'
       ]},
-      'Raimunda': {sem:4864, mes:5406, ma_sem:0, ma_mes:16.6, melhorias:[
+      'Raimunda': {sem:4881, mes:5423, ma_sem:18.4, ma_mes:16.5, melhorias:[
         'Manter consistência é o segredo de quem chega no topo. Vendedora que vende todo dia, mesmo que seja pouco, bate mais meta do que quem vende muito num dia e zero no outro. Olhe seu número de hoje - se está em zero, vá em busca de cliente agora.',
         'Suas Marcas A estão em 20%. Pequena mudança que vai te fazer crescer: pra cada cliente novo que entrar, primeira sugestão sua é uma marca A (Truss, Itallian ou Natum). Se ele recusar, aí oferece outras marcas. Mas a primeira tem que ser A.'
       ]},
-      'Brunna':   {sem:2094, mes:2317, ma_sem:0, ma_mes:33.9, melhorias:[
+      'Brunna':   {sem:2094, mes:2317, ma_sem:37.5, ma_mes:33.9, melhorias:[
         'Você está bem em Marcas A (24%) - continue assim. Pra subir ainda mais, foque em combo: ofereça produto pra antes do banho (shampoo + condicionador) e depois do banho (máscara ou finalizador). Esse combo de 3 leva sua porcentagem pra cima.',
         'Você converte bem o que oferece - quando o cliente para com você, fecha. O que falta é volume. Pegue os clientes que estão parados na vitrine ou olhando outras prateleiras - vá até eles, sorria, ofereça uma novidade.'
       ]},
-      'Naila':    {sem:2591, mes:2883, ma_sem:0, ma_mes:2.7, melhorias:[
+      'Naila':    {sem:2641, mes:2933, ma_sem:2.9, ma_mes:2.7, melhorias:[
         'Você está aprendendo ainda - tudo bem. Plano dessa semana, faça assim: 1) escolha 1 marca A pra dominar (sugiro Truss ou Itallian), 2) aprenda 3 frases prontas de venda dessa marca, 3) use essas frases com todo cliente novo que entrar.',
         'Quando for abordar o cliente, não pergunte "posso ajudar?" - a resposta vai ser sempre "só olhando". Em vez disso, vá direto na conversa: "Oi, quer ver essa marca nova que está fazendo sucesso?" - assim você puxa a interação e a venda acontece.'
       ]},
@@ -1415,14 +1415,14 @@ const VENDAS_HIST = {
     semanas: [{id:'S1', meta:4000},{id:'S2', meta:25000},{id:'S3', meta:23651},{id:'S4', meta:20000},{id:'S5', meta:15000}],
     vendas: {
       S1:{Outros:-149,'Ana Mira':441,Raimunda:542,Brunna:223,Naila:292},
-      S2:{'Ana Mira':2554,Raimunda:4864,Brunna:2094,Naila:2591},
+      S2:{'Ana Mira':2554,Raimunda:4881,Brunna:2094,Naila:2641},
       S3:{Raimunda:5222,'Ana Mira':4217,Naila:4953,Brunna:2911},
       S4:{Raimunda:3585,'Ana Mira':5548,Naila:4383,Brunna:3134},
       S5:{Raimunda:5796,'Ana Mira':5842,Naila:6627,Brunna:1828},
     },
-    marcasA_loja: {S1:0,S2:0,S3:22.5,S4:15.5,S5:15.3},
+    marcasA_loja: {S1:0,S2:18.8,S3:22.5,S4:15.5,S5:15.3},
     ontem: {data:'06/08/2026', dia_semana:'quinta', vendas:{'Ana Mira':606,Raimunda:1880,Brunna:1043,Naila:315}},
-    hoje: {data:'07/08/2026', dia_semana:'sexta', vendas:{'Ana Mira':137,Raimunda:185,Brunna:185,Naila:90}},
+    hoje: {data:'07/08/2026', dia_semana:'sexta', vendas:{'Ana Mira':137,Raimunda:202,Brunna:185,Naila:140}},
   },
   L4: {
     semanas: [{id:'S1', meta:6000},{id:'S2', meta:39711},{id:'S3', meta:39000},{id:'S4', meta:35000},{id:'S5', meta:35000}],
