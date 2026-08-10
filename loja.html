@@ -1337,37 +1337,45 @@ const HISTORICO_PREMIOS = {
     // L1 86,9% -> faixa 80 (100) + bonus Marcas A 36,9% = 120.
     // L4 104,8% -> faixa 100 (280) + bonus Marcas A 32,7% = 330.
     // L3 33,7% e L5 69,9% sem pool — L5 parou R$5 abaixo dos R$3.500 da faixa 70. IMUTAVEL.
+    // S2 CONGELADA 10/08/2026 12:30 (fechou sab 08/08). Coleta final 03–08/08 com sabado
+    // completo feita hoje 09:08 (L1 33.532→34.041, L3 18.177→18.222, L5 19.030→19.245).
+    // Meta REAL S2 (Worker /metas-loja + Supabase): L1=40000 L3=25000 L4=39711 L5=25000.
+    // Cliente 8 (R Maura) = R$0. Nenhuma loja chegou a 90%:
+    // L1 85,1% faixa 80 = 100 (MA 29,3% — faltou 0,7pp pro bonus) · L4 83,7% faixa 80 +
+    // bonus Marcas A (39,3%) = 120 · L3 72,9% e L5 77,0% faixa 70 = 80.
+    // "Outros" (L1 R$60, L4 −R$30) conta no total da loja e NAO entra na divisao;
+    // Lucas (caixa, L5) tambem fora. Tanaia sem venda na semana. IMUTAVEL.
     L1: {
-      'Tatiane': {S1:53},
-      'Rayra': {S1:21},
-      'Sofia': {S1:18},
-      'Bárbara': {S1:28},
-      _em_pct: {S1:87},
-      _pool:   {S1:120},  // faixa 80 (100) + bonus Marcas A (36,9%)
+      'Tatiane': {S1:53, S2:29},
+      'Rayra': {S1:21, S2:26},
+      'Sofia': {S1:18, S2:16},
+      'Bárbara': {S1:28, S2:29},
+      _em_pct: {S1:87, S2:85.1},
+      _pool:   {S1:120, S2:100},  // S1: faixa 80 (100) + bonus Marcas A (36,9%) · S2: faixa 80, sem bonus (MA 29,3%)
     },
     L3: {
-      'Ana Mira': {S1:0},
-      'Raimunda': {S1:0},
-      'Brunna': {S1:0},
-      'Naila': {S1:0},
-      _em_pct: {S1:33.7},
-      _pool:   {S1:0},  // 33,7% da meta — abaixo de 70%, sem pool
+      'Ana Mira': {S1:0, S2:15},
+      'Raimunda': {S1:0, S2:28},
+      'Brunna': {S1:0, S2:16},
+      'Naila': {S1:0, S2:21},
+      _em_pct: {S1:33.7, S2:72.9},
+      _pool:   {S1:0, S2:80},  // S1: 33,7% da meta — abaixo de 70%, sem pool · S2: faixa 70 (MA 18,5%)
     },
     L4: {
-      'Tanaia': {S1:0},
-      'Josilene': {S1:123},
-      'Bruna F.': {S1:97},
-      'Débora': {S1:110},
-      _em_pct: {S1:105},
-      _pool:   {S1:330},  // faixa 100 (280) + bonus Marcas A (32,7%)
+      'Tanaia': {S1:0, S2:0},
+      'Josilene': {S1:123, S2:28},
+      'Bruna F.': {S1:97, S2:56},
+      'Débora': {S1:110, S2:36},
+      _em_pct: {S1:105, S2:83.7},
+      _pool:   {S1:330, S2:120},  // S1: faixa 100 (280) + bonus MA (32,7%) · S2: faixa 80 (100) + bonus MA (39,3%)
     },
     L5: {
-      'Rayssa': {S1:0},
-      'Joyce': {S1:0},
-      'Rosiene': {S1:0},
-      'Karina': {S1:0},
-      _em_pct: {S1:69.9},
-      _pool:   {S1:0},  // 69,9% — R$5 abaixo da faixa 70 (R$3.500), sem pool
+      'Rayssa': {S1:0, S2:17},
+      'Joyce': {S1:0, S2:27},
+      'Rosiene': {S1:0, S2:15},
+      'Karina': {S1:0, S2:21},
+      _em_pct: {S1:69.9, S2:77},
+      _pool:   {S1:0, S2:80},  // S1: R$5 abaixo da faixa 70 (R$3.500), sem pool · S2: faixa 70 (MA 21,6%)
     },
   },
 };
