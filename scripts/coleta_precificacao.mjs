@@ -820,6 +820,9 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
     const setPreco = (it, r, tipo) => { it.preco_atual = r.preco; it.cod_erp = r.cod; it.custo_erp = r.custo; it.match_tipo = tipo; };
     const matchEan = (it, ix) => (it.ean && it.ean !== "SEM GTIN" && ix.porEan[it.ean] != null) ? ix.porEan[it.ean] : null;
     const matchRef = (it, ix) => { const k = String(it.cprod || "").toUpperCase().trim(); return (k && ix.refMap[k]) ? ix.refMap[k] : null; };
+    // Match por CÓDIGO INTERNO do ERP: kits (e produtos cujo EAN/ref da nota não bate) não têm EAN nem
+    // referência que case, mas têm codigo_erp (de CODIGOS_ERP). O relatório traz o código em r.cod. (10/08/2026)
+    const matchCod = (it, ix) => { const c = String(it.codigo_erp || "").trim(); return (c && ix.porCod && ix.porCod[c] != null) ? ix.porCod[c] : null; };
     for (const L of Object.keys(lojas)) {
       if (PROC_SKIP_PRECO) break;
       if (!lojas[L].length) continue;
@@ -849,6 +852,7 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         try {
           const { tabela, rows } = await relatorioPrecosErp(page, empresa, tabelaNome, codes, tabelaId);
           const porEan = {}; for (const r of rows) if (r.ean) porEan[r.ean] = r;
+          const porCod = {}; for (const r of rows) if (r.cod) porCod[String(r.cod).trim()] = r; // índice por código interno (p/ kits sem EAN/ref)
           // Índice por REFERÊNCIA (= cprod). SEGURO: só referências ÚNICAS — duas linhas com a mesma
           // referência e preços diferentes = ambíguo → descarta (o relatório mostra só 1 código de barras
           // por produto, às vezes o interno, então o match por EAN às vezes falha e a referência resolve).
@@ -858,19 +862,20 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
             if (refMap[k] === undefined) refMap[k] = r;
             else if (refMap[k] === null || refMap[k].preco !== r.preco) refMap[k] = null;
           }
-          idx[m] = { porEan, refMap, tabela, rows };
+          idx[m] = { porEan, porCod, refMap, tabela, rows };
         } catch (e) { log(`preços ERP ${L}/${m} FALHOU: ${String(e.message || e).split("\n")[0]}`); }
       }
       // 1) itens de marca mapeada: casam na própria marca (EAN → senão referência)
       for (const [m, g] of Object.entries(porMarca)) {
         const ix = idx[m]; if (!ix) continue;
-        let ean = 0, ref = 0;
+        let ean = 0, cod = 0, ref = 0;
         for (const it of g.itens) {
           if (it.preco_atual != null) continue;
           const re = matchEan(it, ix); if (re) { setPreco(it, re, "ean"); ean++; continue; }
+          const rc = matchCod(it, ix); if (rc) { setPreco(it, rc, "cod"); cod++; continue; }
           const rr = matchRef(it, ix); if (rr) { setPreco(it, rr, "ref"); ref++; }
         }
-        log(`preços ERP ${L}/${g.mk} (emp ${empresa}, ${ix.tabela || "?"}, ${ix.rows.length} prod): ${ean} por EAN + ${ref} por referência = ${ean + ref}/${g.itens.length}`);
+        log(`preços ERP ${L}/${g.mk} (emp ${empresa}, ${ix.tabela || "?"}, ${ix.rows.length} prod): ${ean} por EAN + ${cod} por código + ${ref} por referência = ${ean + cod + ref}/${g.itens.length}`);
       }
       // 2) itens multi-marca: a 1ª candidata que casar define a marca real do item (EAN tem prioridade
       //    sobre referência entre TODAS as candidatas, p/ não fixar a marca errada por um ref ambíguo).
@@ -878,12 +883,13 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         let porErp = 0, porDesc = 0;
         for (const { it, cands } of multiItens) {
           if (it.preco_atual != null) continue;
-          // (a) ERP é a fonte da verdade: casa por EAN em qualquer candidata (prioridade), senão por referência
+          // (a) ERP é a fonte da verdade: casa por EAN (prioridade), senão por código interno (kits), senão por referência
           let m = cands.find(c => idx[c] && matchEan(it, idx[c]));
+          if (!m) m = cands.find(c => idx[c] && matchCod(it, idx[c]));
           if (!m) m = cands.find(c => idx[c] && matchRef(it, idx[c]));
           if (m) {
-            const ix = idx[m]; const re = matchEan(it, ix);
-            setPreco(it, re || matchRef(it, ix), re ? "ean" : "ref");
+            const ix = idx[m]; const re = matchEan(it, ix); const rc = re ? null : matchCod(it, ix);
+            setPreco(it, re || rc || matchRef(it, ix), re ? "ean" : (rc ? "cod" : "ref"));
             it.marca = MARCA_CANON[m] || it.marca; it.marca_detectada = true; it.marca_fonte = "erp"; porErp++;
             continue;
           }
