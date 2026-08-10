@@ -40,6 +40,10 @@ const PRECOS_MANUAIS = (() => { try { return JSON.parse(readFileSync("/Users/elk
 // Para NF que precisa exportar o .txt por "Código" (não "Código de Barras"): produtos novos cujo EAN
 // da nota não bate com o cadastro, e kits que não têm EAN na nota. Ex.: Franca/Nathydras+Varcare. (05/08/2026)
 const CODIGOS_ERP = (() => { try { return JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_codigos_erp.json", "utf8")); } catch { return {}; } })();
+// Ajustes manuais por NF p/ alinhar o dashboard ao ROMANEIO (bonificação a manter, embalagem a remover,
+// custo de kit a forçar). Chave "CNPJ:numeroNF". Ver precificacao_ajustes_nf.json. (10/08/2026)
+const AJUSTES_NF = (() => { try { return JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_ajustes_nf.json", "utf8")); } catch { return {}; } })();
+const ajusteNf = (cnpj, numero) => AJUSTES_NF[String(cnpj || "").replace(/\D/g, "") + ":" + String(numero || "")] || null;
 const ST_PA = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/st_pa_ncm.json", "utf8"));
 const ST_NCM = (ST_PA.ncm_st || []).map(String).sort((a, b) => b.length - a.length); // prefixos mais longos primeiro
 const URL_LISTA_PRECOS = "https://linx.microvix.com.br/gestor_web/produtos/relatorio_lista_precos.asp";
@@ -540,9 +544,16 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         // FILTRO POR-ITEM: numa NF mista de compra, tira as linhas de amostra/bonificação/devolução
         // (CFOP excluído) p/ não precificar sachê grátis. (04/08/2026 — Franca NF 926)
         {
+          // Ajuste por NF: linhas de bonificação/amostra que o usuário quer MANTER (ex. Franca NF 931:
+          // Máscara Alho de bonificação precisa aparecer p/ precificar). Marcadas com bonificacao=true.
+          const aj = ajusteNf(emit.Documento, nfe.Numero);
+          const manter = (aj && aj.manter_cfop_excluido) || [];
+          const ehManter = it => manter.some(m => String(m.cprod) === String(it.cprod) && (!m.cfop || String(m.cfop) === String(it.cfop)));
           const antes = itens.length;
-          const rev = itens.filter(it => cfopRevenda(it.cfop));
-          if (rev.length < antes) log(`  NF ${nfe.Numero}/${loja}: ${antes - rev.length} linha(s) de amostra/bonificação removida(s)`);
+          const rev = itens.filter(it => cfopRevenda(it.cfop) || ehManter(it));
+          let mantidas = 0;
+          for (const it of rev) if (!cfopRevenda(it.cfop) && ehManter(it)) { it.bonificacao = true; mantidas++; }
+          if (rev.length < antes) log(`  NF ${nfe.Numero}/${loja}: ${antes - rev.length} linha(s) de amostra/bonificação removida(s)${mantidas ? ` (${mantidas} bonificação MANTIDA por ajuste)` : ""}`);
           itens.length = 0; itens.push(...rev);
           if (!itens.length) continue;
         }
@@ -761,6 +772,33 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       nf.itens = [...resto, ...sinteticos];
     }
     if (kitsCriados) log(`kits agrupados (bundle): ${kitsCriados}`);
+
+    // ===== Ajustes manuais por NF: alinhar ao ROMANEIO (remover embalagem, forçar custo de kit) =====
+    // Complementa manter_cfop_excluido (aplicado no filtro por-item). remover_cprod tira itens que não
+    // são de venda (ex. bobina shrink que o romaneio embute no kit); custo_kit força o custo unitário
+    // do kit/avulso p/ o valor do romaneio. Roda após o bundle (as chaves KIT-... já existem).
+    let ajRemovidos = 0, ajCustos = 0;
+    for (const L of Object.keys(lojas)) for (const nf of lojas[L]) {
+      const aj = ajusteNf(nf.cnpj, nf.numero);
+      if (!aj) continue;
+      if (aj.remover_cprod && aj.remover_cprod.length) {
+        const rem = new Set(aj.remover_cprod.map(String));
+        const antes = nf.itens.length;
+        nf.itens = nf.itens.filter(it => !rem.has(String(it.cprod)));
+        ajRemovidos += antes - nf.itens.length;
+      }
+      if (aj.custo_kit) {
+        for (const it of nf.itens) {
+          const v = aj.custo_kit[String(it.cprod)];
+          if (v != null) {
+            it.custo_unit_cheio = Math.round(Number(v) * 10000) / 10000;
+            it.custo_cheio_total = Math.round(Number(v) * (it.qtd || 1) * 100) / 100;
+            ajCustos++;
+          }
+        }
+      }
+    }
+    if (ajRemovidos || ajCustos) log(`ajustes por NF (romaneio): ${ajRemovidos} item(ns) removido(s), ${ajCustos} custo(s) forçado(s)`);
 
     // ===== Código INTERNO do ERP p/ o .txt (import por "Código", não "Código de Barras") =====
     // Quando o fornecedor está em CODIGOS_ERP.por_cnpj, cada item (avulso por cprod; kit pela chave

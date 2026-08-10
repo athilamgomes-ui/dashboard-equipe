@@ -1,0 +1,14 @@
+{
+  "_leiame": "Ajustes manuais por NF para ALINHAR o dashboard de precificação ao ROMANEIO do fornecedor. Contexto: kits vêm desmembrados no XML; linhas de bonificação/amostra (CFOP 5910/6910 etc.) são removidas por padrão; às vezes a embalagem (ex. bobina shrink) é embutida no preço do kit no romaneio. Chave = 'CNPJ:numeroNF' (CNPJ só dígitos). Aplicado pelo coletor a CADA coleta (idempotente). NÃO toca no ERP.",
+  "_primitivas": {
+    "manter_cfop_excluido": "[{cprod,cfop}] — mantém uma linha de bonificação/amostra que o filtro por-item removeria (marca o item com bonificacao=true).",
+    "remover_cprod": "[cprod] — tira um item do resultado final (ex. embalagem que não é de venda).",
+    "custo_kit": "{cprod_ou_'KIT-...': valorUnit} — força o custo unitário do kit/avulso para o valor do romaneio."
+  },
+  "56927323000180:931": {
+    "_nota": "Franca Plus / L5, ago/2026. (1) Bonificação Máscara Alho 250g (cprod 169, CFOP 6910, 12un a 17,05) precisa constar. (2) Bobina shrink (cprod 1095) é a embalagem do cronograma — o romaneio embute o custo dela no KIT CRONOGRAMA: 40,54 -> 41,36/un. Removemos a bobina avulsa e forçamos o custo do kit (KIT-169-1044-1047 = código ERP 78147) para 41,36.",
+    "manter_cfop_excluido": [ { "cprod": "169", "cfop": "6910" } ],
+    "remover_cprod": [ "1095" ],
+    "custo_kit": { "KIT-169-1044-1047": 41.36 }
+  }
+}
