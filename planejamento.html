@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-27'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-28'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -133,12 +133,20 @@ function deltaTxt(a,b){var n=diasEntre(a,b);return n==null?'':' <span class="mut
 /* ---------- auth ---------- */
 function getNome(){ return localStorage.getItem('pc_nome')||''; }
 function setNome(v){ localStorage.setItem('pc_nome',v||''); DB.email=(v||'equipe'); }
-window.addEventListener('DOMContentLoaded', function(){
-  /* LOGIN DESATIVADO temporariamente — acesso livre. Identidade = nome digitado (sem senha). */
-  DB.email=getNome()||'equipe'; DB.isOwner=true;
-  el('login').classList.add('hide'); el('app').classList.remove('hide');
-  el('who').innerHTML='Você: <input value="'+getNome()+'" placeholder="seu nome" style="width:130px;padding:4px 8px;display:inline-block" onchange="setNome(this.value)"> · <span style="color:var(--warn)">login desativado</span> · <span class="mut" title="versão da página">build '+BUILD+'</span>';
-  carregar();
+window.addEventListener('DOMContentLoaded', async function(){
+  /* LOGIN REATIVADO 11/08/2026 — fechamento do vazamento de escrita anônima.
+     Duas contas: equipe@amgomes.local (lança/edita) e athilamgomes@gmail.com
+     (aprova + limites; é o OWNER_EMAIL). A sessão fica salva no navegador, então
+     a senha é digitada uma vez e vale por semanas. Ver RUNBOOK_PLANEJAMENTO.md. */
+  try{
+    var {data:{session}} = await sb.auth.getSession();
+    if(session && session.user){ start(session.user); }
+    else { el('login').classList.remove('hide'); el('app').classList.add('hide'); }
+  }catch(e){
+    el('login').classList.remove('hide'); el('app').classList.add('hide');
+    el('lg_err').textContent='Não consegui verificar a sessão. Entre com e-mail e senha.';
+  }
+  sb.auth.onAuthStateChange(function(ev){ if(ev==='SIGNED_OUT') location.reload(); });
   checkVersion(); setInterval(checkVersion,300000); window.addEventListener('focus',checkVersion); // auto-update: avisa quando sair versão nova
 });
 function checkVersion(){
@@ -159,7 +167,11 @@ function start(user){
   DB.email=(user.email||'').toLowerCase();
   DB.isOwner=DB.email===OWNER_EMAIL.toLowerCase();
   el('login').classList.add('hide'); el('app').classList.remove('hide');
-  el('who').textContent=DB.email+(DB.isOwner?' · aprovador':'');
+  /* textContent no e-mail (não innerHTML) — o resto vai num span à parte, sem interpolar dado */
+  var w=el('who'); w.textContent=DB.email+(DB.isOwner?' · aprovador':'');
+  var extra=document.createElement('span'); extra.className='mut';
+  extra.innerHTML=' · <a href="#" onclick="sair();return false;">sair</a> · <span title="versão da página">build '+BUILD+'</span>';
+  w.appendChild(extra);
   carregar();
 }
 

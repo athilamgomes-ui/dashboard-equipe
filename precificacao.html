@@ -58,6 +58,20 @@
 </style>
 </head>
 <body>
+<!-- Portão de login (11/08/2026) — fechamento do vazamento anônimo do Supabase.
+     Cobre a tela inteira até haver sessão. Ver RUNBOOK_PLANEJAMENTO.md § Fase 2. -->
+<div id="gate" style="position:fixed;inset:0;z-index:9999;background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="width:100%;max-width:340px;font-family:system-ui,-apple-system,sans-serif">
+    <h2 style="margin:0 0 6px;font-size:20px">💰 Precificação</h2>
+    <p style="margin:0 0 18px;font-size:13px;opacity:.7">Acesso restrito. Entre com sua conta.</p>
+    <input id="gt_email" type="email" autocomplete="username" placeholder="voce@email.com"
+      style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #334155;border-radius:7px;background:#1e293b;color:#e2e8f0;font-size:16px">
+    <input id="gt_pass" type="password" autocomplete="current-password" placeholder="senha"
+      style="width:100%;padding:12px;margin-bottom:14px;border:1px solid #334155;border-radius:7px;background:#1e293b;color:#e2e8f0;font-size:16px">
+    <button id="gt_btn" style="width:100%;padding:13px;border:0;border-radius:7px;background:#2563eb;color:#fff;font-size:16px;font-weight:600;cursor:pointer">Entrar</button>
+    <p id="gt_err" style="color:#f87171;font-size:13px;margin-top:10px;min-height:18px"></p>
+  </div>
+</div>
 <header>
   <h1>💰 Precificação por NF-e</h1>
   <div class="sub">Selecione a nota que entrou → o sistema sugere o preço de venda garantindo a margem líquida. Fase 1: cálculo + aprovação + exportação (sem gravar no ERP).</div>
@@ -628,7 +642,37 @@ document.getElementById("btnAtualizar").onclick=async()=>{
 
 elLoja.onchange=()=>{lojaAtual=elLoja.value; nfeSel=null; syncCreditoToggle(); renderNfes(); renderItens();};
 elMargem.onchange=()=>renderItens();
-carregar();
+
+/* ---------- portão de login (11/08/2026) ----------
+   A página só chama carregar() DEPOIS de ter sessão. Antes disso não faz
+   nenhuma requisição ao Supabase. A sessão fica salva no navegador, então a
+   senha é digitada uma vez e vale por semanas.
+   Contas: equipe@amgomes.local e athilamgomes@gmail.com. */
+function _precAbrir(){
+  const g=document.getElementById("gate"); if(g) g.remove();
+  carregar();
+}
+async function _precEntrar(){
+  const err=document.getElementById("gt_err"), btn=document.getElementById("gt_btn");
+  err.textContent=""; btn.disabled=true; btn.textContent="Entrando…";
+  try{
+    const {error}=await sb.auth.signInWithPassword({
+      email: document.getElementById("gt_email").value.trim(),
+      password: document.getElementById("gt_pass").value
+    });
+    if(error){ err.textContent=error.message; return; }
+    _precAbrir();
+  }catch(e){ err.textContent="Falha ao entrar: "+e;
+  }finally{ btn.disabled=false; btn.textContent="Entrar"; }
+}
+(async()=>{
+  try{
+    const {data:{session}} = await sb.auth.getSession();
+    if(session && session.user){ _precAbrir(); return; }
+  }catch(e){ /* sem sessão válida — cai no formulário */ }
+  document.getElementById("gt_btn").onclick=_precEntrar;
+  document.getElementById("gt_pass").addEventListener("keydown",ev=>{ if(ev.key==="Enter") _precEntrar(); });
+})();
 </script>
 </body>
 </html>
