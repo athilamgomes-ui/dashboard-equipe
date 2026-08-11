@@ -580,7 +580,10 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
           // (2) cronograma: ≥3 máscaras seguidas, mesma qtd, SEM caixa. ⚠️ TRAVA: só procura numa NF que
           // JÁ tem CAIXA KIT (kseq>0). Sem isso, 3 máscaras individuais seguidas de mesma qtd (comum em
           // Salon Line etc.) viravam kit falso. NF com cronograma real (Franca) sempre tem caixas junto.
-          if (kseq > 0) for (let i = 0; i < itens.length;) {
+          // Ajuste por NF: desmembrar_cronograma=true deixa as máscaras do cronograma como AVULSAS — loja
+          // que zerou o kit e vende as máscaras separadas (ex. L3 NF 932). (11/08/2026)
+          const _ajCrono = ajusteNf(emit.Documento, nfe.Numero);
+          if (kseq > 0 && !(_ajCrono && _ajCrono.desmembrar_cronograma)) for (let i = 0; i < itens.length;) {
             if (itens[i]._kitId != null || !ehMasc(itens[i].descricao)) { i++; continue; }
             let j = i;
             while (j + 1 < itens.length && itens[j + 1]._kitId == null && ehMasc(itens[j + 1].descricao) && itens[j + 1].qtd === itens[i].qtd) j++;

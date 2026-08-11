@@ -3,7 +3,14 @@
   "_primitivas": {
     "manter_cfop_excluido": "[{cprod,cfop}] — mantém uma linha de bonificação/amostra que o filtro por-item removeria (marca o item com bonificacao=true).",
     "remover_cprod": "[cprod] — tira um item do resultado final (ex. embalagem que não é de venda).",
-    "custo_kit": "{cprod_ou_'KIT-...': valorUnit} — força o custo unitário do kit/avulso para o valor do romaneio."
+    "custo_kit": "{cprod_ou_'KIT-...': valorUnit} — força o custo unitário do kit/avulso para o valor do romaneio.",
+    "desmembrar_cronograma": "true — NÃO monta o KIT CRONOGRAMA; as 3 máscaras ficam AVULSAS (loja que vende as máscaras separadas)."
+  },
+  "56927323000180:932": {
+    "_nota": "Franca / L3 Itaituba, jul/2026 (Pedido 2082). Kit CRONOGRAMA DESMEMBRADO — as 3 máscaras (169 alho, 1044 therapy S.O.S, 1047 therapy negro, 16un cada) são vendidas individualmente (usuário zerou o kit e subiu +16 em cada no ERP). Bonificação Máscara Alho (169, CFOP 6910, 12un) precisa constar. Bobina shrink (1095) removida. Amostras sachê 15ml (909/1055/1056, CFOP 6911) saem sozinhas pelo filtro.",
+    "desmembrar_cronograma": true,
+    "manter_cfop_excluido": [ { "cprod": "169", "cfop": "6910" } ],
+    "remover_cprod": [ "1095" ]
   },
   "56927323000180:931": {
     "_nota": "Franca Plus / L5, ago/2026. (1) Bonificação Máscara Alho 250g (cprod 169, CFOP 6910, 12un a 17,05) precisa constar. (2) Bobina shrink (cprod 1095) é a embalagem do cronograma — o romaneio embute o custo dela no KIT CRONOGRAMA: 40,54 -> 41,36/un. Removemos a bobina avulsa e forçamos o custo do kit (KIT-169-1044-1047 = código ERP 78147) para 41,36.",
