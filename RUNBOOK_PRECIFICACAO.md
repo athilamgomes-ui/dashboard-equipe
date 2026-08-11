@@ -153,8 +153,10 @@ via localStorage `precificacao_cfg_v1` — faixa vermelha avisa; ver memória
 
 ## Lacunas — CONFIRMAR COM O USUÁRIO (não inventar)
 
-- **Custo fixo % por loja**: só L4 tem valor real (19,1%); L1/L3/L5 usam 20% placeholder nos params.
-  Recalcular por loja (contas fixas ÷ faturamento, centro de custo 3) e revisar 1×/trimestre.
+- **Custo fixo % por loja** — valores REAIS no arquivo desde 11/08/2026 (usuário): L1 22,9% · L3 25,8%
+  · L4 25,7% · L5 **52,6%**. Fonte: contas fixas ÷ faturamento (centro de custo 3). ⚠️ L5 = 52,6% é o
+  DOBRO das outras e o usuário confirmou "certo hoje" — muda com o faturamento; **revisar 1×/trimestre**.
+  L5 alto faz o preço sugerido de Santarém sair ~2x o de Altamira (é esperado, dado o custo fixo).
 - **Seed de ST** (`st_pa_ncm.json`) cobre só o segmento 20 (perfumaria/cosméticos) do Conv. 142 —
   validar/completar com o contador; itens `st_motivo:"nf"` são fila de revisão de NCM.
 - **Franca Plus (multimarca Varcare 249 + Nathydras 885)**: split por linha de produto pendente —
