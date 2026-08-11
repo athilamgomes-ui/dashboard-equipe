@@ -153,10 +153,14 @@ via localStorage `precificacao_cfg_v1` — faixa vermelha avisa; ver memória
 
 ## Lacunas — CONFIRMAR COM O USUÁRIO (não inventar)
 
-- **Custo fixo % por loja** — valores REAIS no arquivo desde 11/08/2026 (usuário): L1 22,9% · L3 25,8%
-  · L4 25,7% · L5 **52,6%**. Fonte: contas fixas ÷ faturamento (centro de custo 3). ⚠️ L5 = 52,6% é o
-  DOBRO das outras e o usuário confirmou "certo hoje" — muda com o faturamento; **revisar 1×/trimestre**.
-  L5 alto faz o preço sugerido de Santarém sair ~2x o de Altamira (é esperado, dado o custo fixo).
+- **Custo fixo % por loja** (11/08/2026): `custo_fixo` = custo fixo real ÷ faturamento **média móvel 3
+  meses**, com **TETO de 0,30**. No arquivo: L1 **0,209** · L3 **0,30** (teto; real 31,0%) · L4 **0,25** ·
+  L5 **0,30** (teto; real 46,9%). Fonte numerador: ERP > Financeiro > Contas a Pagar, Centro de Custo =
+  Custo Fixo (3), mês ref = 1º mês futuro completo (set/2026). Denominador: `fat_2026.json` (mai–jul/2026).
+  Medido após o usuário excluir contas marcadas errado como custo fixo. **L3 e L5 batem no teto de 30%** —
+  acima disso o preço sai do mercado; a diferença (L3 ~R$0,7k/mês, L5 ~R$13,6k/mês) é **buraco estrutural**
+  (resolve com faturamento/custo, não com preço). **Revisar TODO MÊS** com o painel financeiro. Detalhe no
+  `_custo_fixo_doc` do próprio `precificacao_params.json`.
 - **Seed de ST** (`st_pa_ncm.json`) cobre só o segmento 20 (perfumaria/cosméticos) do Conv. 142 —
   validar/completar com o contador; itens `st_motivo:"nf"` são fila de revisão de NCM.
 - **Franca Plus (multimarca Varcare 249 + Nathydras 885)**: split por linha de produto pendente —
