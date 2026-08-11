@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-08-11T17:34:35.611Z",
+  "gerado_em": "2026-08-11T17:50:10.265Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
@@ -1352,15 +1352,16 @@
             "credito_icms_pct": 0,
             "preco_atual": 41.9,
             "cod_erp": "26599",
-            "match_tipo": "cod*",
+            "match_tipo": "cod",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
             "codigo_erp": "26599",
+            "custo_erp": 31.39,
             "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "marca_fonte": "erp"
           },
           {
             "cprod": "1095",
@@ -1738,7 +1739,7 @@
             "cest": null,
             "preco_atual": 114,
             "cod_erp": "60725",
-            "match_tipo": "cod*",
+            "match_tipo": "cod",
             "preco_manual": null,
             "kit": true,
             "kit_componentes": [
@@ -1765,8 +1766,9 @@
               }
             ],
             "codigo_erp": "60725",
+            "custo_erp": 20.39,
             "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "marca_fonte": "erp"
           },
           {
             "cprod": "KIT-1043-1044-1045",
