@@ -1,10 +1,431 @@
 {
-  "gerado_em": "2026-08-12T18:48:46.108Z",
+  "gerado_em": "2026-08-12T18:57:51.287Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
     "L1": [],
     "L3": [
+      {
+        "id": 4855,
+        "chave_nfe": "17260740791797000107550010000420851411745456",
+        "numero": "42085",
+        "serie": "1",
+        "fornecedor": "FOCO DISTRIBUICAO E LOGISTICA LTDA",
+        "cnpj": "40791797000107",
+        "data_emissao": "2026-07-31",
+        "valor": 5590.62,
+        "lancada": true,
+        "natureza": "VENDA NORMAL",
+        "itens": [
+          {
+            "cprod": "0051063",
+            "ean": "7899706203944",
+            "descricao": "LP CURL EXPRESSION TRAT MASC 250GR",
+            "qtd": 2,
+            "cfop": "6102",
+            "marca": "Loreal",
+            "valor_bruto": 363.08,
+            "desconto": 0,
+            "frete": 0,
+            "seguro": 0,
+            "outras": 4.5,
+            "ipi": 0,
+            "icms_st": 0,
+            "fcp_st": 0,
+            "custo_cheio_total": 372.08,
+            "custo_unit_cheio": 186.04,
+            "cst": "200",
+            "icms_pct": 4,
+            "credito_icms_pct": 0,
+            "preco_atual": null,
+            "cod_erp": null,
+            "match_tipo": null,
+            "preco_manual": null,
+            "ncm": "33059000",
+            "cest": "2002100",
+            "st": true,
+            "st_motivo": "ncm"
+          },
+          {
+            "cprod": "0052736",
+            "ean": "3474636975310",
+            "descricao": "LP SE ABS REPAIR GOLDEN MASC 250GR",
+            "qtd": 3,
+            "cfop": "6102",
+            "marca": "Loreal",
+            "valor_bruto": 592.95,
+            "desconto": 0,
+            "frete": 0,
+            "seguro": 0,
+            "outras": 0,
+            "ipi": 0,
+            "icms_st": 0,
+            "fcp_st": 0,
+            "custo_cheio_total": 592.95,
+            "custo_unit_cheio": 197.65,
+            "cst": "200",
+            "icms_pct": 4,
+            "credito_icms_pct": 0,
+            "preco_atual": null,
+            "cod_erp": null,
+            "match_tipo": null,
+            "preco_manual": null,
+            "ncm": "33059000",
+            "cest": "2002000",
+            "st": true,
+            "st_motivo": "ncm"
+          },
+          {
+            "cprod": "0050873",
+            "ean": "7899706189644",
+            "descricao": "LP SE ABS REPAIR OMEGA-9 COND 200ML",
+            "qtd": 3,
+            "cfop": "6102",
+            "marca": "Loreal",
+            "valor_bruto": 387.36,
+            "desconto": 0,
+            "frete": 0,
+            "seguro": 0,
+            "outras": 0,
+            "ipi": 0,
+            "icms_st": 0,
+            "fcp_st": 0,
+            "custo_cheio_total": 387.36,
+            "custo_unit_cheio": 129.12,
+            "cst": "500",
+            "icms_pct": 12,
+            "credito_icms_pct": 0,
+            "preco_atual": null,
+            "cod_erp": null,
+            "match_tipo": null,
+            "preco_manual": null,
+            "ncm": "33059000",
+            "cest": "2002100",
+            "st": true,
+            "st_motivo": "ncm"
+          },
+          {
+            "cprod": "0083275",
+            "ean": "7908785419709",
+            "descricao": "LP SE ABS REPAIR OMEGA-9 SER 10IN1 90ML",
+            "qtd": 3,
+            "cfop": "6102",
+            "marca": "Loreal",
+            "valor_bruto": 524.16,
+            "desconto": 0,
+            "frete": 0,
+            "seguro": 0,
+            "outras": 0,
+            "ipi": 0,
+            "icms_st": 0,
+            "fcp_st": 0,
+            "custo_cheio_total": 524.16,
+            "custo_unit_cheio": 174.72,
+            "cst": "500",
+            "icms_pct": 12,
+            "credito_icms_pct": 0,
+            "preco_atual": null,
+            "cod_erp": null,
+            "match_tipo": null,
+            "preco_manual": null,
+            "ncm": "33059000",
+            "cest": "2002100",
+            "st": true,
+            "st_motivo": "ncm"
+          },
+          {
+            "cprod": "0044881",
+            "ean": "7899706189606",
+            "descricao": "LP SE ABS REPAIR OMEGA-9 SH 300ML",
+            "qtd": 3,
+            "cfop": "6102",
+            "marca": "Loreal",
+            "valor_bruto": 296.97,
+            "desconto": 0,
+            "frete": 0,
+            "seguro": 0,
+            "outras": 0,
+            "ipi": 0,
+            "icms_st": 0,
+            "fcp_st": 0,
+            "custo_cheio_total": 296.97,
+            "custo_unit_cheio": 98.99,
+            "cst": "500",
+            "icms_pct": 12,
+            "credito_icms_pct": 0,
+            "preco_atual": null,
+            "cod_erp": null,
+            "match_tipo": null,
+            "preco_manual": null,
+            "ncm": "33051000",
+            "cest": "2001700",
+            "st": true,
+            "st_motivo": "ncm"
+          },
+          {
+            "cprod": "0060828",
+            "ean": "3474637153489",
+            "descricao": "LP SE MOLECULAR LEAVE IN 100ML",
+            "qtd": 2,
+            "cfop": "6102",
+            "marca": "Loreal",
+            "valor_bruto": 403.36,
+            "desconto": 0,
+            "frete": 0,
+            "seguro": 0,
+            "outras": 0,
+            "ipi": 0,
+            "icms_st": 0,
+            "fcp_st": 0,
+            "custo_cheio_total": 403.36,
+            "custo_unit_cheio": 201.68,
+            "cst": "200",
+            "icms_pct": 4,
+            "credito_icms_pct": 0,
+            "preco_atual": null,
+            "cod_erp": null,
+            "match_tipo": null,
+            "preco_manual": null,
+            "ncm": "33059000",
+            "cest": "2002000",
+            "st": true,
+            "st_motivo": "ncm"
+          },
+          {
+            "cprod": "0071757",
+            "ean": "3474637217884",
+            "descricao": "LP SE MOLECULAR MASC 250GR",
+            "qtd": 2,
+            "cfop": "6102",
+            "marca": "Loreal",
+            "valor_bruto": 377.76,
+            "desconto": 0,
+            "frete": 0,
+            "seguro": 0,
+            "outras": 0,
+            "ipi": 0,
+            "icms_st": 0,
+            "fcp_st": 0,
+            "custo_cheio_total": 377.76,
+            "custo_unit_cheio": 188.88,
+            "cst": "200",
+            "icms_pct": 4,
+            "credito_icms_pct": 0,
+            "preco_atual": null,
+            "cod_erp": null,
+            "match_tipo": null,
+            "preco_manual": null,
+            "ncm": "33059000",
+            "cest": "2002000",
+            "st": true,
+            "st_motivo": "ncm"
+          },
+          {
+            "cprod": "0060879",
+            "ean": "3474637153526",
+            "descricao": "LP SE MOLECULAR SH 300ML",
+            "qtd": 2,
+            "cfop": "6102",
+            "marca": "Loreal",
+            "valor_bruto": 340.74,
+            "desconto": 0,
+            "frete": 0,
+            "seguro": 0,
+            "outras": 0,
+            "ipi": 0,
+            "icms_st": 0,
+            "fcp_st": 0,
+            "custo_cheio_total": 340.74,
+            "custo_unit_cheio": 170.37,
+            "cst": "200",
+            "icms_pct": 4,
+            "credito_icms_pct": 0,
+            "preco_atual": null,
+            "cod_erp": null,
+            "match_tipo": null,
+            "preco_manual": null,
+            "ncm": "33051000",
+            "cest": "2001700",
+            "st": true,
+            "st_motivo": "ncm"
+          },
+          {
+            "cprod": "0052990",
+            "ean": "7899706205337",
+            "descricao": "LP SE NUTRIOIL COND 200ML",
+            "qtd": 3,
+            "cfop": "6102",
+            "marca": "Loreal",
+            "valor_bruto": 387.36,
+            "desconto": 0,
+            "frete": 0,
+            "seguro": 0,
+            "outras": 0,
+            "ipi": 0,
+            "icms_st": 0,
+            "fcp_st": 0,
+            "custo_cheio_total": 387.36,
+            "custo_unit_cheio": 129.12,
+            "cst": "500",
+            "icms_pct": 12,
+            "credito_icms_pct": 0,
+            "preco_atual": null,
+            "cod_erp": null,
+            "match_tipo": null,
+            "preco_manual": null,
+            "ncm": "33059000",
+            "cest": "2002100",
+            "st": true,
+            "st_motivo": "ncm"
+          },
+          {
+            "cprod": "0052973",
+            "ean": "7899706205252",
+            "descricao": "LP SE NUTRIOIL MASC 250GR",
+            "qtd": 3,
+            "cfop": "6102",
+            "marca": "Loreal",
+            "valor_bruto": 465,
+            "desconto": 0,
+            "frete": 0,
+            "seguro": 0,
+            "outras": 0,
+            "ipi": 0,
+            "icms_st": 0,
+            "fcp_st": 0,
+            "custo_cheio_total": 465,
+            "custo_unit_cheio": 155,
+            "cst": "500",
+            "icms_pct": 12,
+            "credito_icms_pct": 0,
+            "preco_atual": null,
+            "cod_erp": null,
+            "match_tipo": null,
+            "preco_manual": null,
+            "ncm": "33059000",
+            "cest": "2002100",
+            "st": true,
+            "st_motivo": "ncm"
+          },
+          {
+            "cprod": "0052957",
+            "ean": "7899706204934",
+            "descricao": "LP SE NUTRIOIL SH 300ML",
+            "qtd": 3,
+            "cfop": "6102",
+            "marca": "Loreal",
+            "valor_bruto": 250.44,
+            "desconto": 0,
+            "frete": 0,
+            "seguro": 0,
+            "outras": 0,
+            "ipi": 0,
+            "icms_st": 0,
+            "fcp_st": 0,
+            "custo_cheio_total": 250.44,
+            "custo_unit_cheio": 83.48,
+            "cst": "500",
+            "icms_pct": 12,
+            "credito_icms_pct": 0,
+            "preco_atual": null,
+            "cod_erp": null,
+            "match_tipo": null,
+            "preco_manual": null,
+            "ncm": "33051000",
+            "cest": "2001700",
+            "st": true,
+            "st_motivo": "ncm"
+          },
+          {
+            "cprod": "0043664",
+            "ean": "7899706189804",
+            "descricao": "LP SE VITAMINO COL RESVER COND 200ML",
+            "qtd": 3,
+            "cfop": "6102",
+            "marca": "Loreal",
+            "valor_bruto": 387.36,
+            "desconto": 0,
+            "frete": 0,
+            "seguro": 0,
+            "outras": 0,
+            "ipi": 0,
+            "icms_st": 0,
+            "fcp_st": 0,
+            "custo_cheio_total": 387.36,
+            "custo_unit_cheio": 129.12,
+            "cst": "500",
+            "icms_pct": 12,
+            "credito_icms_pct": 0,
+            "preco_atual": null,
+            "cod_erp": null,
+            "match_tipo": null,
+            "preco_manual": null,
+            "ncm": "33059000",
+            "cest": "2002100",
+            "st": true,
+            "st_motivo": "ncm"
+          },
+          {
+            "cprod": "0049905",
+            "ean": "7899706189828",
+            "descricao": "LP SE VITAMINO COL RESVER MASC 250GR",
+            "qtd": 3,
+            "cfop": "6102",
+            "marca": "Loreal",
+            "valor_bruto": 512.61,
+            "desconto": 0,
+            "frete": 0,
+            "seguro": 0,
+            "outras": 0,
+            "ipi": 0,
+            "icms_st": 0,
+            "fcp_st": 0,
+            "custo_cheio_total": 512.61,
+            "custo_unit_cheio": 170.87,
+            "cst": "000",
+            "icms_pct": 12,
+            "credito_icms_pct": 0,
+            "preco_atual": null,
+            "cod_erp": null,
+            "match_tipo": null,
+            "preco_manual": null,
+            "ncm": "33059000",
+            "cest": "2002100",
+            "st": true,
+            "st_motivo": "ncm"
+          },
+          {
+            "cprod": "0058432",
+            "ean": "7899706189781",
+            "descricao": "LP SE VITAMINO COL RESVER SH 300ML",
+            "qtd": 3,
+            "cfop": "6102",
+            "marca": "Loreal",
+            "valor_bruto": 296.97,
+            "desconto": 0,
+            "frete": 0,
+            "seguro": 0,
+            "outras": 0,
+            "ipi": 0,
+            "icms_st": 0,
+            "fcp_st": 0,
+            "custo_cheio_total": 296.97,
+            "custo_unit_cheio": 98.99,
+            "cst": "000",
+            "icms_pct": 12,
+            "credito_icms_pct": 0,
+            "preco_atual": null,
+            "cod_erp": null,
+            "match_tipo": null,
+            "preco_manual": null,
+            "ncm": "33051000",
+            "cest": "2001700",
+            "st": true,
+            "st_motivo": "ncm"
+          }
+        ],
+        "uf": "TO"
+      },
       {
         "id": 4820,
         "chave_nfe": "35260756927323000180550010000009321485713299",
@@ -16,6 +437,10 @@
         "valor": 8038.16,
         "lancada": true,
         "natureza": "VENDA DE MERCADORIA ADQUIRIDA OU RECEBIDA DE TERCEIROS",
+        "marca_candidatas": [
+          "Varcare",
+          "Nathydras"
+        ],
         "itens": [
           {
             "cprod": "130",
@@ -23,7 +448,7 @@
             "descricao": "S.O.S. INVERSOR 250ML 107675",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Varcare",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 390.12,
             "desconto": 0,
             "frete": 0,
@@ -39,16 +464,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 41.9,
             "cod_erp": "26599",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "codigo_erp": "26599",
-            "custo_erp": 31.39,
-            "marca_detectada": true,
-            "marca_fonte": "erp"
+            "codigo_erp": "26599"
           },
           {
             "cprod": "169",
@@ -56,7 +478,7 @@
             "descricao": "MÁSCARA ALHO 250G 103189",
             "qtd": 28,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 411.96,
             "desconto": 0,
             "frete": 0,
@@ -77,9 +499,7 @@
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1044",
@@ -87,7 +507,7 @@
             "descricao": "MÁSCARA ALHO THERAPY S.O.S 250G 109112",
             "qtd": 16,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 220.64,
             "desconto": 0,
             "frete": 0,
@@ -108,9 +528,7 @@
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1047",
@@ -118,7 +536,7 @@
             "descricao": "MÁSCARA ALHO THERAPY NEGRO 250G 109082",
             "qtd": 16,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 220.64,
             "desconto": 0,
             "frete": 0,
@@ -139,9 +557,7 @@
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1034",
@@ -149,7 +565,7 @@
             "descricao": "SELANTE ALHO 120ML 108924",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 175.56,
             "desconto": 0,
             "frete": 0,
@@ -170,9 +586,7 @@
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1042",
@@ -180,7 +594,7 @@
             "descricao": "REPARADOR DE PONTAS ALHO 30ML 109136",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 165,
             "desconto": 0,
             "frete": 0,
@@ -202,9 +616,7 @@
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "codigo_erp": "45512",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "codigo_erp": "45512"
           },
           {
             "cprod": "71",
@@ -212,7 +624,7 @@
             "descricao": "HUMECTANT COMPLEX 500G 106043",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Varcare",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 976.2,
             "desconto": 0,
             "frete": 0,
@@ -233,9 +645,7 @@
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "KIT-1046-1047-1048",
@@ -243,7 +653,7 @@
             "descricao": "KIT: SHAMPOO ALHO THERAPY NEGRO 340ML 109075 + CREME DE PENTEAR ALHO THERAPY NEGRO 250ML 109099 + MÁSCARA ALHO THERAPY NEGRO 250G 109082",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 0,
             "desconto": 0,
             "frete": 0,
@@ -289,9 +699,7 @@
                 "custo_cheio_total": 165.24
               }
             ],
-            "codigo_erp": "42379",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "codigo_erp": "42379"
           },
           {
             "cprod": "KIT-54-168-169",
@@ -299,7 +707,7 @@
             "descricao": "KIT: SHAMPOO ALHO 340ML 104278 + CONDICIONADOR ALHO 340ML 104285 + MÁSCARA ALHO 250G 103189",
             "qtd": 24,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 0,
             "desconto": 0,
             "frete": 0,
@@ -345,9 +753,7 @@
                 "custo_cheio_total": 413.28
               }
             ],
-            "codigo_erp": "26646",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "codigo_erp": "26646"
           },
           {
             "cprod": "KIT-191-192-597",
@@ -355,7 +761,7 @@
             "descricao": "KIT: SHAMPOO LISO PERFEITO 250ML 107880 + CONDICIONADOR LISO PERFEITO 250ML 107897 + MÁSCARA LISO PERFEITO 250G 107903",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Varcare",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 0,
             "desconto": 0,
             "frete": 0,
@@ -400,9 +806,7 @@
                 "qtd": 12,
                 "custo_cheio_total": 209.64
               }
-            ],
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            ]
           },
           {
             "cprod": "KIT-830-831-832",
@@ -410,7 +814,7 @@
             "descricao": "KIT: NUTRITION SHAMPOO 250ML 108214 + NUTRITION CONDITIONER 250ML 108221 + NUTRITION MASK 250G 108238",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Varcare",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 0,
             "desconto": 0,
             "frete": 0,
@@ -455,9 +859,7 @@
                 "qtd": 12,
                 "custo_cheio_total": 248.04
               }
-            ],
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            ]
           },
           {
             "cprod": "KIT-130-139-142",
@@ -465,7 +867,7 @@
             "descricao": "KIT: S.O.S. MOISTURE SHAMPOO 250ML 107651 + S.O.S. INVERSOR 250ML 107675 + S.O.S. MOISTURE MÁSCARA 250G 106371",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Varcare",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 0,
             "desconto": 0,
             "frete": 0,
@@ -485,7 +887,7 @@
             "cest": null,
             "preco_atual": 114,
             "cod_erp": "60725",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "kit": true,
             "kit_componentes": [
@@ -511,10 +913,7 @@
                 "custo_cheio_total": 244.68
               }
             ],
-            "codigo_erp": "60725",
-            "custo_erp": 20.39,
-            "marca_detectada": true,
-            "marca_fonte": "erp"
+            "codigo_erp": "60725"
           },
           {
             "cprod": "KIT-1043-1044-1045",
@@ -522,7 +921,7 @@
             "descricao": "KIT: MÁSCARA ALHO THERAPY S.O.S 250G 109112 + LEAVE-IN SELANTE ALHO THERAPY S.O.S 250ML 109129 + SHAMPOO ALHO THERAPY S.O.S 340ML 109105",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 0,
             "desconto": 0,
             "frete": 0,
@@ -568,9 +967,7 @@
                 "custo_cheio_total": 258.12
               }
             ],
-            "codigo_erp": "45776",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "codigo_erp": "45776"
           }
         ],
         "uf": "SP"
@@ -640,13 +1037,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 30.9,
             "cod_erp": "203381",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002200",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 11.36
+            "st_motivo": "ncm"
           },
           {
             "cprod": "994",
@@ -670,13 +1066,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 30.9,
             "cod_erp": "203383",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002200",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 11.36
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1004",
@@ -700,13 +1095,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 30.9,
             "cod_erp": "203378",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002200",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 11.36
+            "st_motivo": "ncm"
           },
           {
             "cprod": "999",
@@ -730,13 +1124,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 31.9,
             "cod_erp": "203379",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002200",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 11.36
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1029",
@@ -760,13 +1153,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 31.9,
             "cod_erp": "203385",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002200",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 11.36
+            "st_motivo": "ncm"
           },
           {
             "cprod": "761",
@@ -790,13 +1182,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 31.9,
             "cod_erp": "203382",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002200",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 11.36
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1101",
@@ -820,13 +1211,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 30.9,
             "cod_erp": "203460",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33030010",
             "cest": "2800100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 11
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1030",
@@ -879,13 +1269,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 30.9,
             "cod_erp": "203380",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 11.36
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1002",
@@ -1848,6 +2237,10 @@
         "valor": 5307.2,
         "lancada": true,
         "natureza": "VENDA DE MERCADORIA ADQUIRIDA OU RECEBIDA DE TERCEIROS",
+        "marca_candidatas": [
+          "Varcare",
+          "Nathydras"
+        ],
         "itens": [
           {
             "cprod": "1042",
@@ -1855,7 +2248,7 @@
             "descricao": "REPARADOR DE PONTAS ALHO 30ML 109136",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 165,
             "desconto": 0,
             "frete": 0,
@@ -1871,16 +2264,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 30.9,
             "cod_erp": "45512",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "codigo_erp": "45512",
-            "custo_erp": 13.75,
-            "marca_detectada": true,
-            "marca_fonte": "erp"
+            "codigo_erp": "45512"
           },
           {
             "cprod": "130",
@@ -1888,7 +2278,7 @@
             "descricao": "S.O.S. INVERSOR 250ML 107675",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Varcare",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 390.12,
             "desconto": 0,
             "frete": 0,
@@ -1904,16 +2294,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 72.9,
             "cod_erp": "26599",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "codigo_erp": "26599",
-            "custo_erp": 25.52,
-            "marca_detectada": true,
-            "marca_fonte": "erp"
+            "codigo_erp": "26599"
           },
           {
             "cprod": "1034",
@@ -1921,7 +2308,7 @@
             "descricao": "SELANTE ALHO 120ML 108924",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 175.56,
             "desconto": 0,
             "frete": 0,
@@ -1937,15 +2324,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 12.9,
             "cod_erp": "26644",
-            "match_tipo": "ref",
+            "match_tipo": "ref*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 14.63,
-            "marca_detectada": true,
-            "marca_fonte": "erp"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "169",
@@ -1953,7 +2337,7 @@
             "descricao": "MÁSCARA ALHO 250G 103189",
             "qtd": 12,
             "cfop": "6910",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 204.6,
             "desconto": 0,
             "frete": 0,
@@ -1975,9 +2359,7 @@
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "KIT-54-168-169",
@@ -1985,7 +2367,7 @@
             "descricao": "KIT: SHAMPOO ALHO 340ML 104278 + CONDICIONADOR ALHO 340ML 104285 + MÁSCARA ALHO 250G 103189",
             "qtd": 24,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 0,
             "desconto": 0,
             "frete": 0,
@@ -2005,7 +2387,7 @@
             "cest": null,
             "preco_atual": 118.9,
             "cod_erp": "26646",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "kit": true,
             "kit_componentes": [
@@ -2031,10 +2413,7 @@
                 "custo_cheio_total": 413.28
               }
             ],
-            "codigo_erp": "26646",
-            "custo_erp": 17.05,
-            "marca_detectada": true,
-            "marca_fonte": "erp"
+            "codigo_erp": "26646"
           },
           {
             "cprod": "KIT-130-139-142",
@@ -2042,7 +2421,7 @@
             "descricao": "KIT: S.O.S. MOISTURE SHAMPOO 250ML 107651 + S.O.S. INVERSOR 250ML 107675 + S.O.S. MOISTURE MÁSCARA 250G 106371",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Varcare",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 0,
             "desconto": 0,
             "frete": 0,
@@ -2062,7 +2441,7 @@
             "cest": null,
             "preco_atual": 159.9,
             "cod_erp": "60725",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "kit": true,
             "kit_componentes": [
@@ -2088,10 +2467,7 @@
                 "custo_cheio_total": 244.68
               }
             ],
-            "codigo_erp": "60725",
-            "custo_erp": 79.26,
-            "marca_detectada": true,
-            "marca_fonte": "erp"
+            "codigo_erp": "60725"
           },
           {
             "cprod": "KIT-1043-1044-1045",
@@ -2099,7 +2475,7 @@
             "descricao": "KIT: MÁSCARA ALHO THERAPY S.O.S 250G 109112 + LEAVE-IN SELANTE ALHO THERAPY S.O.S 250ML 109129 + SHAMPOO ALHO THERAPY S.O.S 340ML 109105",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 0,
             "desconto": 0,
             "frete": 0,
@@ -2119,7 +2495,7 @@
             "cest": null,
             "preco_atual": 108.9,
             "cod_erp": "45776",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "kit": true,
             "kit_componentes": [
@@ -2145,10 +2521,7 @@
                 "custo_cheio_total": 258.12
               }
             ],
-            "codigo_erp": "45776",
-            "custo_erp": 13.79,
-            "marca_detectada": true,
-            "marca_fonte": "erp"
+            "codigo_erp": "45776"
           },
           {
             "cprod": "KIT-1046-1047-1048",
@@ -2156,7 +2529,7 @@
             "descricao": "KIT: SHAMPOO ALHO THERAPY NEGRO 340ML 109075 + CREME DE PENTEAR ALHO THERAPY NEGRO 250ML 109099 + MÁSCARA ALHO THERAPY NEGRO 250G 109082",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 0,
             "desconto": 0,
             "frete": 0,
@@ -2176,7 +2549,7 @@
             "cest": null,
             "preco_atual": 108.9,
             "cod_erp": "42379",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "kit": true,
             "kit_componentes": [
@@ -2202,10 +2575,7 @@
                 "custo_cheio_total": 165.24
               }
             ],
-            "codigo_erp": "42379",
-            "custo_erp": 13.26,
-            "marca_detectada": true,
-            "marca_fonte": "erp"
+            "codigo_erp": "42379"
           },
           {
             "cprod": "KIT-169-1044-1047",
@@ -2213,7 +2583,7 @@
             "descricao": "KIT: MÁSCARA ALHO 250G 103189 + MÁSCARA ALHO THERAPY S.O.S 250G 109112 + MÁSCARA ALHO THERAPY NEGRO 250G 109082",
             "qtd": 16,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
             "valor_bruto": 0,
             "desconto": 0,
             "frete": 0,
@@ -2233,7 +2603,7 @@
             "cest": null,
             "preco_atual": 91.9,
             "cod_erp": "78147",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "kit": true,
             "kit_componentes": [
@@ -2259,10 +2629,7 @@
                 "custo_cheio_total": 220.64
               }
             ],
-            "codigo_erp": "78147",
-            "custo_erp": 13.77,
-            "marca_detectada": true,
-            "marca_fonte": "erp"
+            "codigo_erp": "78147"
           }
         ],
         "uf": "SP"
@@ -2723,13 +3090,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 47.9,
             "cod_erp": "64301",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 22.96
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1013/8",
@@ -2753,13 +3119,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 41.9,
             "cod_erp": "80100",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 20.29
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1013/10",
@@ -2783,13 +3148,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 48.9,
             "cod_erp": "202847",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 23.19
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1013/11",
@@ -2813,13 +3177,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 38.9,
             "cod_erp": "204343",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 18.54
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1017/A1",
@@ -2843,13 +3206,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 204.9,
             "cod_erp": "78626",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 98.76
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1022/12",
@@ -2873,13 +3235,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 34.9,
             "cod_erp": "74797",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049100",
             "cest": "2001300",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 16.8
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1022/13",
@@ -2903,13 +3264,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 34.9,
             "cod_erp": "74795",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049100",
             "cest": "2001300",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 16.8
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/1TS",
@@ -2933,13 +3293,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 25.9,
             "cod_erp": "204344",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 12.15
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/4TS",
@@ -2963,13 +3322,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 25.9,
             "cod_erp": "204345",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 12.15
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/7TS",
@@ -2993,13 +3351,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 25.9,
             "cod_erp": "204349",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 12.15
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/A2",
@@ -3023,13 +3380,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 56.9,
             "cod_erp": "45225",
-            "match_tipo": "ref",
+            "match_tipo": "ref*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/A2.5",
@@ -3053,13 +3409,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 56.9,
             "cod_erp": "202838",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/A4",
@@ -3083,13 +3438,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 56.9,
             "cod_erp": "45227",
-            "match_tipo": "ref",
+            "match_tipo": "ref*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.23
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/A4.5",
@@ -3113,13 +3467,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 56.9,
             "cod_erp": "204350",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/A5",
@@ -3143,13 +3496,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 56.9,
             "cod_erp": "45228",
-            "match_tipo": "ref",
+            "match_tipo": "ref*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1044/16",
@@ -3173,13 +3525,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 29.9,
             "cod_erp": "58572",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33041000",
             "cest": "2000900",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 14.47
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1044/17",
@@ -3203,13 +3554,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 29.9,
             "cod_erp": "58660",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33041000",
             "cest": "2000900",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 14.47
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1044/20",
@@ -3233,13 +3583,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 29.9,
             "cod_erp": "204351",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 14.47
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1044/21",
@@ -3263,13 +3612,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 29.9,
             "cod_erp": "204352",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 14.47
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1044/22",
@@ -3293,13 +3641,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 29.9,
             "cod_erp": "80099",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 14.47
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2021/4",
@@ -3323,13 +3670,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 60.9,
             "cod_erp": "29373",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 29
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2022/2",
@@ -3353,13 +3699,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 78.9,
             "cod_erp": "29375",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 37.72
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2022/3",
@@ -3383,13 +3728,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 78.9,
             "cod_erp": "29376",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 37.72
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2022/4",
@@ -3413,13 +3757,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 85.9,
             "cod_erp": "41292",
-            "match_tipo": "ref",
+            "match_tipo": "ref*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 37.44
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2022/A3",
@@ -3443,13 +3786,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 94.9,
             "cod_erp": "78529",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 45.86
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2022/A4",
@@ -3473,13 +3815,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 94.9,
             "cod_erp": "77213",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 45.86
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2022/A4.5",
@@ -3503,13 +3844,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 94.9,
             "cod_erp": "202852",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 45.86
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2205/A3",
@@ -3533,13 +3873,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 73.9,
             "cod_erp": "53821",
-            "match_tipo": "ref",
+            "match_tipo": "ref*",
             "preco_manual": null,
             "ncm": "33049100",
             "cest": "2001300",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 35.75
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2226",
@@ -3563,13 +3902,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 38.9,
             "cod_erp": "14155",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 18.48
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2226/TS",
@@ -3593,13 +3931,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 23.9,
             "cod_erp": "204354",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 11.57
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2236/B3",
@@ -3623,13 +3960,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 48.9,
             "cod_erp": "78635",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 23.19
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2236/N2",
@@ -3653,13 +3989,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 58.9,
             "cod_erp": "202850",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 29.01
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2236/N3",
@@ -3683,13 +4018,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 60.9,
             "cod_erp": "204355",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 29.01
+            "st_motivo": "ncm"
           },
           {
             "cprod": "3000",
@@ -3713,13 +4047,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 86.9,
             "cod_erp": "49661",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 41.79
+            "st_motivo": "ncm"
           },
           {
             "cprod": "5003/TS",
@@ -3743,13 +4076,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 23.9,
             "cod_erp": "204353",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049910",
             "cest": "2001400",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 11.57
+            "st_motivo": "ncm"
           },
           {
             "cprod": "5020/1",
@@ -3773,13 +4105,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 60.9,
             "cod_erp": "49662",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 29
+            "st_motivo": "ncm"
           },
           {
             "cprod": "5023/TS",
@@ -3803,13 +4134,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 31.9,
             "cod_erp": "204348",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 15.06
+            "st_motivo": "ncm"
           },
           {
             "cprod": "5023/1",
@@ -3833,13 +4163,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 66.9,
             "cod_erp": "58403",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 31.91
+            "st_motivo": "ncm"
           },
           {
             "cprod": "5023/1TS",
@@ -3863,13 +4192,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 31.9,
             "cod_erp": "204347",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 15.06
+            "st_motivo": "ncm"
           },
           {
             "cprod": "5033",
@@ -3893,13 +4221,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 72.9,
             "cod_erp": "204346",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 34.82
+            "st_motivo": "ncm"
           },
           {
             "cprod": "6000/C",
@@ -3923,13 +4250,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 29.9,
             "cod_erp": "74799",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "96162000",
             "cest": "2006200",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 15.56
+            "st_motivo": "ncm"
           }
         ],
         "uf": "SP"
