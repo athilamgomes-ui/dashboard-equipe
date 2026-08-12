@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-30'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-31'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -654,7 +654,7 @@ function renderPedidos(){
     var cLanc=p._dataLanc?fmtData(p._dataLanc)+deltaTxt(p._dataFat,p._dataLanc):'—';
     body+='<tr'+(p.status==='APROVADO'?' class="row-alerta"':'')+'><td class="mut">'+fmtData(p.data_pedido)+'</td><td class="mut">'+cEnv+'</td><td class="mut">'+cFat+'</td><td class="mut">'+cLanc+'</td><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td><td class="num">'+brl(p.valor_total)+(Number(p.entrada)>0?'<br><span class="mut" style="font-size:10px" title="entrada já paga, abatida do contas a pagar">−entr '+brl(p.entrada)+'</span>':'')+'</td>'+
       '<td><span class="pill s-'+p.status+'">'+p.status+'</span>'+(p._noERP?' <span class="mut" style="font-size:10px" title="NF já lançada no ERP — contada na linha do ERP, não recontada aqui">no ERP</span>':'')+'</td>'+mtds+
-      '<td class="right acoes"><button class="btn sec mini" onclick="editar(\''+p.id+'\')">Editar</button>'+(DB.isOwner?' '+statusSelect(p):'')+
+      '<td class="right acoes"><button class="btn sec mini" onclick="editar(\''+p.id+'\')">Editar</button> '+statusSelect(p)+
       (p.status!=='ENTREGUE'?' <button class="btn bad mini" onclick="excluirPedido(\''+p.id+'\')" title="Apagar — pedido lançado errado ou cancelado, não pode ser desfeito">Excluir</button>':'')+'</td></tr>';});
   body+=footerPagar(jan,6,1,1);
   var mh=jan.map(function(m){return '<th class="num">'+nomeMes(m)+'</th>';}).join('');
@@ -664,7 +664,15 @@ function renderPedidos(){
     '<div style="overflow:auto"><table>'+
     '<tr><th>Data</th><th>Enviado em</th><th>Faturado em</th><th>Lançado em</th><th>Marca</th><th>Loja</th><th class="num">Valor</th><th>Status</th>'+mh+'<th class="acoes"></th></tr>'+body+'</table></div></div>';
 }
-function statusSelect(p){return '<select onchange="mudaStatus(\''+p.id+'\',this.value)" style="width:auto;display:inline-block;margin-left:6px">'+STATUS.map(function(s){return '<option '+(p.status===s?'selected':'')+'>'+s+'</option>';}).join('')+'</select>';}
+/* Visível pra todo mundo logado — a equipe é quem de fato marca ENVIADO/FATURADO/ENTREGUE no dia a dia
+   (ver banner "envie ao fornecedor..."). ATHILA (nunca aparece aqui, filtrado antes) e REJEITADO ficam
+   de fora das opções pra quem não é dono — são decisões de APROVAÇÃO, que têm portão próprio (Aprovar/
+   Rejeitar na aba Aprovações, DB.isOwner). 12/08/2026: corrige regressão do religamento do login, que
+   escondeu esse controle da equipe (antes, com login desativado, todo mundo virava "isOwner" por engano). */
+function statusSelect(p){
+  var opts=DB.isOwner?STATUS:STATUS.filter(function(s){return s!=='ATHILA'&&s!=='REJEITADO';});
+  return '<select onchange="mudaStatus(\''+p.id+'\',this.value)" style="width:auto;display:inline-block;margin-left:6px">'+opts.map(function(s){return '<option '+(p.status===s?'selected':'')+'>'+s+'</option>';}).join('')+'</select>';
+}
 function editar(id){EDIT=DB.pedidos.filter(function(p){return p.id===id;})[0];TAB='lancar';render();}
 
 function renderLimites(){
