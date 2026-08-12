@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-08-12T20:33:37.865Z",
+  "gerado_em": "2026-08-12T21:05:11.096Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
@@ -4623,16 +4623,15 @@
             "credito_icms_pct": 0,
             "preco_atual": 87.9,
             "cod_erp": "26599",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
             "codigo_erp": "26599",
-            "custo_erp": 31.39,
             "marca_detectada": true,
-            "marca_fonte": "erp"
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "169",
@@ -4687,15 +4686,14 @@
             "credito_icms_pct": 0,
             "preco_atual": 35.9,
             "cod_erp": "77225",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 11.75,
             "marca_detectada": true,
-            "marca_fonte": "erp"
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "1047",
@@ -4719,15 +4717,14 @@
             "credito_icms_pct": 0,
             "preco_atual": 23.5,
             "cod_erp": "77222",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 11.75,
             "marca_detectada": true,
-            "marca_fonte": "erp"
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "1034",
@@ -4751,15 +4748,14 @@
             "credito_icms_pct": 0,
             "preco_atual": 50.9,
             "cod_erp": "26644",
-            "match_tipo": "ref",
+            "match_tipo": "ref*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 14.63,
             "marca_detectada": true,
-            "marca_fonte": "erp"
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "1042",
@@ -4783,16 +4779,15 @@
             "credito_icms_pct": 0,
             "preco_atual": 33.9,
             "cod_erp": "45512",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
             "codigo_erp": "45512",
-            "custo_erp": 13.75,
             "marca_detectada": true,
-            "marca_fonte": "erp"
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "71",
@@ -4800,7 +4795,7 @@
             "descricao": "HUMECTANT COMPLEX 500G 106043",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "Nathydras",
+            "marca": "Varcare",
             "valor_bruto": 976.2,
             "desconto": 0,
             "frete": 0,
@@ -4816,15 +4811,14 @@
             "credito_icms_pct": 0,
             "preco_atual": 94,
             "cod_erp": "12811",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 81.35,
             "marca_detectada": true,
-            "marca_fonte": "erp"
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "KIT-1046-1047-1048",
@@ -4852,7 +4846,7 @@
             "cest": null,
             "preco_atual": 112.9,
             "cod_erp": "42379",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "kit": true,
             "kit_componentes": [
@@ -4879,9 +4873,8 @@
               }
             ],
             "codigo_erp": "42379",
-            "custo_erp": 2.56,
             "marca_detectada": true,
-            "marca_fonte": "erp"
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "KIT-54-168-169",
@@ -4909,7 +4902,7 @@
             "cest": null,
             "preco_atual": 140.9,
             "cod_erp": "26646",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "kit": true,
             "kit_componentes": [
@@ -4936,9 +4929,8 @@
               }
             ],
             "codigo_erp": "26646",
-            "custo_erp": 22.54,
             "marca_detectada": true,
-            "marca_fonte": "erp"
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "KIT-191-192-597",
@@ -5076,7 +5068,7 @@
             "cest": null,
             "preco_atual": 185.9,
             "cod_erp": "60725",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "kit": true,
             "kit_componentes": [
@@ -5103,9 +5095,8 @@
               }
             ],
             "codigo_erp": "60725",
-            "custo_erp": 20.39,
             "marca_detectada": true,
-            "marca_fonte": "erp"
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "KIT-1043-1044-1045",
@@ -5133,7 +5124,7 @@
             "cest": null,
             "preco_atual": 116.9,
             "cod_erp": "45776",
-            "match_tipo": "cod",
+            "match_tipo": "cod*",
             "preco_manual": null,
             "kit": true,
             "kit_componentes": [
@@ -5160,9 +5151,8 @@
               }
             ],
             "codigo_erp": "45776",
-            "custo_erp": 21.51,
             "marca_detectada": true,
-            "marca_fonte": "erp"
+            "marca_fonte": "descricao"
           }
         ],
         "uf": "SP"
