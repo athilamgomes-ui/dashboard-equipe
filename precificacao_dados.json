@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-08-14T18:50:52.818Z",
+  "gerado_em": "2026-08-14T19:04:50.429Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
@@ -4623,15 +4623,16 @@
             "credito_icms_pct": 0,
             "preco_atual": 87.9,
             "cod_erp": "26599",
-            "match_tipo": "cod*",
+            "match_tipo": "cod",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
             "codigo_erp": "26599",
+            "custo_erp": 31.39,
             "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "marca_fonte": "erp"
           },
           {
             "cprod": "169",
@@ -5068,7 +5069,7 @@
             "cest": null,
             "preco_atual": 191.9,
             "cod_erp": "60725",
-            "match_tipo": "cod*",
+            "match_tipo": "cod",
             "preco_manual": null,
             "kit": true,
             "kit_componentes": [
@@ -5095,8 +5096,9 @@
               }
             ],
             "codigo_erp": "60725",
+            "custo_erp": 20.39,
             "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "marca_fonte": "erp"
           },
           {
             "cprod": "KIT-1043-1044-1045",
@@ -5222,12 +5224,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 30.9,
             "cod_erp": "203381",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002200",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 11.36
           },
           {
             "cprod": "994",
@@ -5251,12 +5254,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 30.9,
             "cod_erp": "203383",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002200",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 11.36
           },
           {
             "cprod": "1004",
@@ -5280,12 +5284,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 30.9,
             "cod_erp": "203378",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002200",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 11.36
           },
           {
             "cprod": "999",
@@ -5309,12 +5314,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 31.9,
             "cod_erp": "203379",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002200",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 11.36
           },
           {
             "cprod": "1029",
@@ -5338,12 +5344,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 31.9,
             "cod_erp": "203385",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002200",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 11.36
           },
           {
             "cprod": "761",
@@ -5367,12 +5374,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 31.9,
             "cod_erp": "203382",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002200",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 11.36
           },
           {
             "cprod": "1101",
@@ -5396,12 +5404,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 30.9,
             "cod_erp": "203460",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33030010",
             "cest": "2800100",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 11
           },
           {
             "cprod": "1030",
@@ -5454,12 +5463,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 30.9,
             "cod_erp": "203380",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 11.36
           },
           {
             "cprod": "1002",
