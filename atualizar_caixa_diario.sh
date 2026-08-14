@@ -26,20 +26,35 @@ SCRIPTS="$REPO/scripts"
 NODE="/opt/homebrew/bin/node"
 ARQ="$HOME/.claude/caixa-arquivos"
 LOCK="/tmp/caixa_diario.lock"
+# ⚠️ LOG NÃO VAI PARA /tmp. O macOS limpa /tmp (e reboot apaga tudo): em
+# 14/08/2026 a rotina falhou e não havia UM log para dizer por quê — só dava
+# para deduzir. Log de rotina diária precisa sobreviver a reboot.
+LOGDIR="$HOME/.claude/logs/caixa"
+mkdir -p "$LOGDIR"
+HOJE_LOG="$LOGDIR/$(date +%Y-%m-%d)"
+find "$LOGDIR" -type f -mtime +30 -delete 2>/dev/null   # guarda 30 dias
 LOJAS="L1 L3 L5"                       # L4 não tem conta InfinitePay
 DIA="${DIA:-$(date -v-1d +%Y-%m-%d)}"
 log(){ echo "[caixa-diario $(date +%H:%M:%S)] $*"; }
 
 avisar_falha(){                        # falha silenciosa é o pior modo de falhar
   /usr/bin/osascript -e "display notification \"${1:0:200}\" with title \"⚠️ Conferência de caixa\" sound name \"Basso\"" 2>/dev/null
-  echo "[caixa-diario] $1" > /tmp/caixa_diario_erro.txt
+  echo "[caixa-diario] $1" > $LOGDIR/ultimo_erro.txt
 }
 
 if ! mkdir "$LOCK" 2>/dev/null; then
   if [ -d "$LOCK" ] && [ "$(find "$LOCK" -maxdepth 0 -mmin +90)" ]; then
     log "lock órfão (>90min) — removendo"; rm -rf "$LOCK"; mkdir "$LOCK"
   else
-    log "já há execução em andamento — abortando"; exit 30
+    # ⚠️ ESTE ERA O ÚNICO CAMINHO DE SAÍDA SEM AVISO NENHUM: sem log em arquivo
+    # (o script morre antes de abrir qualquer um), sem notificação, sem nada.
+    # Um lock preso aqui mata a conferência em silêncio absoluto — foi o
+    # suspeito nº 1 do sumiço de 14/08/2026, e não deu para confirmar
+    # justamente porque não sobrou rastro.
+    IDADE=$(( ($(date +%s) - $(stat -f %m "$LOCK" 2>/dev/null || date +%s)) / 60 ))
+    log "já há execução em andamento (lock de ${IDADE}min) — abortando"
+    avisar_falha "conferência de $DIA não rodou: lock de ${IDADE}min em $LOCK. Se não houver processo rodando, apague o lock."
+    exit 30
   fi
 fi
 trap 'rm -rf "$LOCK"' EXIT
@@ -58,7 +73,7 @@ if [ "${PULA_ERP:-0}" = "1" ]; then
   ERP=0
 else
   log "atualizando o ERP..."
-  bash "$REPO/atualizar_conferencia_caixa.sh" > /tmp/caixa_diario_erp.log 2>&1
+  bash "$REPO/atualizar_conferencia_caixa.sh" > $HOJE_LOG-erp.log 2>&1
   ERP=$?
 
   # exit 30 = lock: OUTRA execução do ERP está rodando agora. Isso não é falha —
@@ -75,7 +90,7 @@ else
     ESPERA=$((ESPERA + 1))
     log "  ERP ocupado por outra execução — aguardando 60s (${ESPERA}/20)"
     sleep 60
-    bash "$REPO/atualizar_conferencia_caixa.sh" > /tmp/caixa_diario_erp.log 2>&1
+    bash "$REPO/atualizar_conferencia_caixa.sh" > $HOJE_LOG-erp.log 2>&1
     ERP=$?
   done
   [ $ERP -eq 0 ] && [ $ESPERA -gt 0 ] && log "  ERP liberado após ${ESPERA} min de espera"
@@ -84,7 +99,7 @@ if [ $ERP -ne 0 ]; then
   # Sem ERP do dia, conciliar produziria "cobrança sem venda" para o dia todo —
   # alarme falso pior que silêncio. Para aqui.
   log "ERRO: pipeline do ERP saiu com $ERP — abortando (não dá para conciliar contra dado velho)"
-  tail -5 /tmp/caixa_diario_erp.log
+  tail -5 $HOJE_LOG-erp.log
   avisar_falha "ERP não atualizou (exit $ERP) — conferência de $DIA não rodou"
   exit 10
 fi
@@ -98,9 +113,9 @@ rm -f "$ARQ"/*.csv                     # só o dia corrente na pasta: sobra de
 FALHAS=""
 for L in $LOJAS; do
   log "coletando InfinitePay $L..."
-  if ! $NODE "$SCRIPTS/coleta_infinitepay.mjs" "$L" "$DIA" >> /tmp/caixa_diario_ip.log 2>&1; then
+  if ! $NODE "$SCRIPTS/coleta_infinitepay.mjs" "$L" "$DIA" >> $HOJE_LOG-infinitepay.log 2>&1; then
     FALHAS="$FALHAS $L"
-    log "  FALHA na $L (ver /tmp/caixa_diario_ip.log)"
+    log "  FALHA na $L (ver $HOJE_LOG-infinitepay.log)"
   fi
 done
 if [ -n "$FALHAS" ]; then
@@ -115,13 +130,13 @@ fi
 
 # ── 3+4) conciliação + histórico cifrado ─────────────────────────────────────
 log "conciliando..."
-RES="/tmp/caixa_diario_resumos.json"
-if ! $NODE "$SCRIPTS/conciliar_headless.mjs" --dir "$ARQ" --salvar --json "$RES" > /tmp/caixa_diario_conc.log 2>&1; then
-  log "ERRO na conciliação"; tail -8 /tmp/caixa_diario_conc.log
+RES="$HOJE_LOG-resumos.json"
+if ! $NODE "$SCRIPTS/conciliar_headless.mjs" --dir "$ARQ" --salvar --json "$RES" > $HOJE_LOG-conciliacao.log 2>&1; then
+  log "ERRO na conciliação"; tail -8 $HOJE_LOG-conciliacao.log
   avisar_falha "conciliação de $DIA falhou"
   exit 20
 fi
-cat /tmp/caixa_diario_conc.log
+cat $HOJE_LOG-conciliacao.log
 
 # ── 5) aviso ─────────────────────────────────────────────────────────────────
 log "avisando..."
@@ -132,9 +147,9 @@ log "avisando..."
 # ainda não aprovado e mesmo assim o pipeline se declarou bem-sucedido.
 # Justamente o modo de falha que esta rotina existe para não ter: ninguém
 # avisado e ninguém sabendo disso.
-$NODE "$SCRIPTS/aviso_caixa.mjs" "$RES" "$DIA" > /tmp/caixa_diario_aviso.log 2>&1
+$NODE "$SCRIPTS/aviso_caixa.mjs" "$RES" "$DIA" > $HOJE_LOG-aviso.log 2>&1
 AV=$?
-tail -4 /tmp/caixa_diario_aviso.log
+tail -4 $HOJE_LOG-aviso.log
 if [ $AV -eq 3 ]; then
   # Enfileirado sem template aprovado: a Meta aceita e descarta em silêncio se a
   # janela de 24h estiver fechada. Não é sucesso nem falha — é "não dá para
