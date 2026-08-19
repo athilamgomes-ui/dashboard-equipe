@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-35'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-36'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -675,16 +675,15 @@ function statusSelect(p){
 }
 function editar(id){EDIT=DB.pedidos.filter(function(p){return p.id===id;})[0];TAB='lancar';render();}
 
-/* Teto de compra SAUDÁVEL por loja (R$/mês) — recalculado 12/08/2026 INDIVIDUALMENTE por loja
-   (correção: a versão anterior reusava um número de outra sessão, sem essa conta). Fórmula, por loja:
-   faturamento médio do ano (Jan-Jul/26, 7 meses fechados) × CMV% (100%−margem bruta real da loja)
-   × 0,85 (compra 85% do que vende, pra reduzir aos poucos o excedente de ~R$1,65M de estoque parado,
-   sem parar de repor prateleira). L1 117.366×46%×0,85=45.890 · L3 61.980×52%×0,85=27.396 (margem da L3
-   é instável no ERP — usei a média do grupo 48% como aproximação) · L4 112.050×46%×0,85=43.812 · L5
-   75.901×49%×0,85=31.612. ALTAMIRA = L1+L4 combinados (mesma regra do resto do app: pedido único ÷2)
-   = 45.890+43.812=89.702. ⚠️ Não é constante eterna — revisar quando o faturamento mudar de patamar ou
-   o excedente normalizar. Ver memória "diagnostico-financeiro-grupo" e RUNBOOK_PLANEJAMENTO.md. */
-var TETO_SAUDAVEL={ALTAMIRA:89702, ITAITUBA:27396, SANTAREM:31612};
+/* Teto de compra SAUDÁVEL por loja (R$/mês) — recalculado 19/08/2026 (2ª correção: a versão anterior
+   usava CMV%×faturamento, um proxy teórico só de mercadoria; o usuário pediu a MÉDIA REAL do que a
+   loja paga por mês, coletada direto do ERP). Fórmula: total PAGO (saída real de caixa, financeiro >
+   faturas pagas — inclui mercadoria+custo fixo+empréstimo+impostos, tudo) de Jan-Jul/2026 (7 meses
+   fechados) ÷ 7. L1 670.265÷7=95.752 · L4 680.192÷7=97.170 · L3 396.616÷7=56.659 · L5 558.939÷7=79.848.
+   ALTAMIRA = L1+L4 combinados (mesma regra do resto do app: pedido único ÷2) = 95.752+97.170=192.922.
+   ⚠️ Não é constante eterna — revisar quando o faturamento mudar de patamar; refazer com Jan-Dez assim
+   que o ano fechar. Ver memória "diagnostico-financeiro-grupo" e RUNBOOK_PLANEJAMENTO.md. */
+var TETO_SAUDAVEL={ALTAMIRA:192922, ITAITUBA:56659, SANTAREM:79848};
 /* Sugestão de limite = teto saudável − contas a pagar já comprometido no ERP naquele mês exato
    (disciplina de caixa, decisão do usuário 12/08/2026 — sem piso sazonal: em mês muito comprometido
    a sugestão pode chegar a R$0, de propósito). Sem dado de ERP pro mês (fora da janela coletada de
@@ -695,7 +694,7 @@ function renderLimites(){
   var lim={};DB.limites.forEach(function(l){lim[l.loja+'|'+l.mes]=l.valor;});
   var html='<div class="card"><h2>Limite de compra por loja e mês</h2>'+
     '<p class="mut" style="margin-top:-8px">Defina o teto de cada mês (edite e tecle Enter/Tab), ou use o cálculo automático: <button class="btn sec mini" onclick="sugerirLimitesTodos()">🧮 Preencher sugestão automática</button></p>'+
-    '<p class="mut" style="margin:-4px 0 12px;font-size:11.5px">Sugestão = <b>teto saudável da loja</b> (ALTAMIRA '+brl(TETO_SAUDAVEL.ALTAMIRA)+' · ITAITUBA '+brl(TETO_SAUDAVEL.ITAITUBA)+' · SANTAREM '+brl(TETO_SAUDAVEL.SANTAREM)+' — faturamento médio do ano × CMV% da loja × 0,85, ver memória) <b>− contas a pagar já comprometido no mês</b>'+(DB.contasERP&&DB.contasERP.em?' (ERP atualizado '+DB.contasERP.em+')':'')+'. Mês muito comprometido pode sugerir R$0 de propósito — é pra segurar a compra até o caixa desafogar.</p>';
+    '<p class="mut" style="margin:-4px 0 12px;font-size:11.5px">Sugestão = <b>teto saudável da loja</b> (ALTAMIRA '+brl(TETO_SAUDAVEL.ALTAMIRA)+' · ITAITUBA '+brl(TETO_SAUDAVEL.ITAITUBA)+' · SANTAREM '+brl(TETO_SAUDAVEL.SANTAREM)+' — média real do que a loja paga por mês, Jan-Jul/26, ver memória) <b>− contas a pagar já comprometido no mês</b>'+(DB.contasERP&&DB.contasERP.em?' (ERP atualizado '+DB.contasERP.em+')':'')+'. Mês muito comprometido pode sugerir R$0 de propósito — é pra segurar a compra até o caixa desafogar.</p>';
   lojasVisiveis().forEach(function(lo){html+='<div class="lojahead">'+lo.nome+'</div><div style="overflow:auto"><table><tr>';
     DB.meses.forEach(function(m){html+='<th class="num">'+nomeMes(m)+'</th>';});html+='</tr><tr>';
     DB.meses.forEach(function(m){var v=lim[lo.id+'|'+m]||''; var sug=sugestaoLimite(lo.id,m);
