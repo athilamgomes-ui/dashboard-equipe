@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-36'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-37'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -191,6 +191,7 @@ async function carregar(){
   DB.pedidos=(pr.data||[]).map(function(p){ if(typeof p.distribuicao==='string'){try{p.distribuicao=JSON.parse(p.distribuicao);}catch(e){p.distribuicao={};}} return p; });
   DB.limites=lr.data||[];
   await recomputarPendentes();   // rolling do prazo dos pedidos ATHILA a partir de hoje
+  await garantirPrioridades();   // pedidos ATHILA sem prioridade ainda recebem sequencial (1ª carga)
   DB.meses=mesesHorizonte();
   DB.otb=computeOTB(DB.pedidos,DB.limites);
   DB.realizado=null; DB.realizadoEm=''; DB.nfesEm='';
@@ -527,7 +528,10 @@ async function salvar(){
   toast('Salvando…');
   var err, pid=EDIT?EDIT.id:null;
   if(EDIT){ ({error:err}=await sb.from('pedidos').update(row).eq('id',EDIT.id)); if(!err)logAcao('editar_pedido',marca+' / '+row.loja); }
-  else { row.status='ATHILA'; row.lancado_por=DB.email; var ins=await sb.from('pedidos').insert([row]).select('id').maybeSingle(); err=ins.error; pid=ins.data&&ins.data.id; if(!err){logAcao('lancar_pedido',marca+' / '+row.loja+' R$ '+valor); notificarAprovador(row);} }
+  else { row.status='ATHILA'; row.lancado_por=DB.email;
+    var athAtual=DB.pedidos.filter(function(p){return p.status==='ATHILA';}); // novo pedido entra no FIM da fila de prioridade — nunca renumera os outros
+    row.prioridade=athAtual.reduce(function(m,p){return (p.prioridade||0)>m?p.prioridade:m;},0)+1;
+    var ins=await sb.from('pedidos').insert([row]).select('id').maybeSingle(); err=ins.error; pid=ins.data&&ins.data.id; if(!err){logAcao('lancar_pedido',marca+' / '+row.loja+' R$ '+valor); notificarAprovador(row);} }
   if(err){toast('Erro: '+err.message);return;}
   if(pid){ try{ await sb.from('pedidos').update({entrada:ent}).eq('id',pid); }catch(e){} } // best-effort: grava a entrada (ignora se a coluna ainda não existe)
   var destino=(EDIT&&EDIT.status==='ATHILA')?'aprovar':'pedidos';
@@ -535,7 +539,9 @@ async function salvar(){
 }
 
 function renderAprovar(){
-  var ps=pendentes().filter(function(p){return (FILTRO_LOJA==='TODAS'||p.loja===FILTRO_LOJA)&&passaMarca(p);}).sort(function(a,b){return ordData(a).localeCompare(ordData(b));});
+  var ps=pendentes().filter(function(p){return (FILTRO_LOJA==='TODAS'||p.loja===FILTRO_LOJA)&&passaMarca(p);}).sort(function(a,b){
+    var pa=a.prioridade==null?Infinity:a.prioridade, pb=b.prioridade==null?Infinity:b.prioridade;
+    if(pa!==pb)return pa-pb; return ordData(a).localeCompare(ordData(b)); });
   if(!ps.length){el('main').innerHTML='<div class="card">Nenhum pedido aguardando aprovação. 🎉</div>';return;}
   var jan=janela6();
   function celv(v){return v?Math.round(v).toLocaleString('pt-BR'):'';}
@@ -547,18 +553,47 @@ function renderAprovar(){
   var pendRow='<tr class="totalrow"><td colspan="3" class="right mut">Aguardando aprovação ('+ps.length+') — ainda NÃO comprometido</td><td class="num mut">'+brl(pendJan)+'</td><td></td>'+pendTds+'<td colspan="2"></td></tr>';
   var totalRow=pendRow+footerPagar(jan,3,1,2);
   el('main').innerHTML='<div class="card"><h2>Aguardando aprovação ('+ps.length+')</h2>'+
-    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">A linha cinza soma o que está aguardando aprovação (ainda NÃO compromete o caixa). O bloco destacado é o <b>total comprometido</b> = pedidos em trânsito (enviado + faturado) + contas a pagar já no ERP — o MESMO total da aba Pedidos. ⏱️ Os meses dos pedidos ainda não enviados (pendentes/aprovados) são contados a partir de HOJE e recalculados a cada abertura; quando a equipe marca <b>ENVIADO</b>, são recalculados pela data do envio + forma de pagamento e congelam. 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
+    '<p class="mut" style="margin:-8px 0 12px;font-weight:600">Ordenado por <b>prioridade</b> (nº na frente da marca — 1 = mais urgente pra aprovar). Use ▲▼ pra reordenar; pedido novo entra sempre no fim da fila. A linha cinza soma o que está aguardando aprovação (ainda NÃO compromete o caixa). O bloco destacado é o <b>total comprometido</b> = pedidos em trânsito (enviado + faturado) + contas a pagar já no ERP — o MESMO total da aba Pedidos. ⏱️ Os meses dos pedidos ainda não enviados (pendentes/aprovados) são contados a partir de HOJE e recalculados a cada abertura; quando a equipe marca <b>ENVIADO</b>, são recalculados pela data do envio + forma de pagamento e congelam. 💡 Filtre a loja <b>Altamira</b> para ver separado em L1 e L4.</p>'+
     '<div style="overflow:auto"><table>'+
     '<tr><th>Data</th><th>Marca</th><th>Loja</th><th class="num">Valor</th><th>Prazo</th>'+mh+'<th>Lançado por</th><th class="acoes"></th></tr>'+
-    ps.map(function(p){var d=p.distribuicao||{};var mt=jan.map(function(m){return '<td class="num mut">'+celv(Number(d[m])||0)+'</td>';}).join('');
-      return '<tr><td class="mut">'+fmtData(p.data_pedido)+'</td><td><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td>'+
+    ps.map(function(p,i){var d=p.distribuicao||{};var mt=jan.map(function(m){return '<td class="num mut">'+celv(Number(d[m])||0)+'</td>';}).join('');
+      var subir=i>0?'<button class="btn sec mini" onclick="moverPrioridade(\''+p.id+'\',\''+ps[i-1].id+'\')" title="Subir prioridade">▲</button>':'<span class="btn mini" style="visibility:hidden">▲</span>';
+      var descer=i<ps.length-1?'<button class="btn sec mini" onclick="moverPrioridade(\''+p.id+'\',\''+ps[i+1].id+'\')" title="Descer prioridade">▼</button>':'<span class="btn mini" style="visibility:hidden">▼</span>';
+      return '<tr><td class="mut">'+fmtData(p.data_pedido)+'</td><td><span class="mut" style="font-size:10px;margin-right:4px">#'+(i+1)+'</span><b>'+p.marca+'</b></td><td>'+lojaNome(p.loja)+'</td>'+
       '<td class="num">'+brl(p.valor_total)+'</td><td class="mut">'+(p.prazo||'-')+'</td>'+mt+
       '<td class="mut">'+String(p.lancado_por||'').split('@')[0]+'</td>'+
-      '<td class="right acoes"><button class="btn ok mini" onclick="aprovar(\''+p.id+'\')">Aprovar</button> '+
+      '<td class="right acoes">'+subir+' '+descer+' '+
+      '<button class="btn ok mini" onclick="aprovar(\''+p.id+'\')">Aprovar</button> '+
       '<button class="btn sec mini" onclick="editar(\''+p.id+'\')">Alterar</button>'+
       (DB.isOwner?' <button class="btn bad mini" onclick="rejeitar(\''+p.id+'\')">Rejeitar</button>':'')+
       ' <button class="btn bad mini" onclick="excluirPedido(\''+p.id+'\')" title="Apagar — pedido lançado errado, não pode ser desfeito">Excluir</button>'+'</td></tr>';}).join('')+
     totalRow+'</table></div></div>';
+}
+/* Troca a prioridade entre 2 pedidos ATHILA adjacentes na lista visível (▲/▼). Como só troca o
+   valor dos 2 (não renumera todo mundo), funciona mesmo com filtro de loja/marca aplicado. */
+async function moverPrioridade(idA,idB){
+  var a=DB.pedidos.filter(function(x){return x.id===idA;})[0], b=DB.pedidos.filter(function(x){return x.id===idB;})[0];
+  if(!a||!b)return;
+  var pa=a.prioridade, pb=b.prioridade;
+  a.prioridade=pb; b.prioridade=pa;
+  try{ await Promise.all([
+    sb.from('pedidos').update({prioridade:pb}).eq('id',idA),
+    sb.from('pedidos').update({prioridade:pa}).eq('id',idB)
+  ]); }catch(e){}
+  render();
+}
+/* Pedidos ATHILA sem prioridade ainda (coluna nova, ou pedido antigo) recebem sequencial na ordem
+   atual (data do pedido) na 1ª carga — best-effort, não quebra se a coluna ainda não existir. */
+async function garantirPrioridades(){
+  var ath=DB.pedidos.filter(function(p){return p.status==='ATHILA';});
+  if(!ath.length)return;
+  var semPrior=ath.filter(function(p){return p.prioridade==null;});
+  if(!semPrior.length)return;
+  semPrior.sort(function(a,b){return ordData(a).localeCompare(ordData(b));});
+  var maxAtual=ath.reduce(function(m,p){return (p.prioridade!=null&&p.prioridade>m)?p.prioridade:m;},0);
+  var ups=[];
+  semPrior.forEach(function(p,i){var v=maxAtual+i+1; p.prioridade=v; ups.push(sb.from('pedidos').update({prioridade:v}).eq('id',p.id));});
+  try{ await Promise.all(ups); }catch(e){}
 }
 async function mudaStatus(id,novo,acao){
   var p=DB.pedidos.filter(function(x){return x.id===id;})[0];
@@ -675,43 +710,27 @@ function statusSelect(p){
 }
 function editar(id){EDIT=DB.pedidos.filter(function(p){return p.id===id;})[0];TAB='lancar';render();}
 
-/* Teto de compra SAUDÁVEL por loja (R$/mês) — recalculado 19/08/2026 (2ª correção: a versão anterior
-   usava CMV%×faturamento, um proxy teórico só de mercadoria; o usuário pediu a MÉDIA REAL do que a
-   loja paga por mês, coletada direto do ERP). Fórmula: total PAGO (saída real de caixa, financeiro >
-   faturas pagas — inclui mercadoria+custo fixo+empréstimo+impostos, tudo) de Jan-Jul/2026 (7 meses
-   fechados) ÷ 7. L1 670.265÷7=95.752 · L4 680.192÷7=97.170 · L3 396.616÷7=56.659 · L5 558.939÷7=79.848.
-   ALTAMIRA = L1+L4 combinados (mesma regra do resto do app: pedido único ÷2) = 95.752+97.170=192.922.
-   ⚠️ Não é constante eterna — revisar quando o faturamento mudar de patamar; refazer com Jan-Dez assim
-   que o ano fechar. Ver memória "diagnostico-financeiro-grupo" e RUNBOOK_PLANEJAMENTO.md. */
-var TETO_SAUDAVEL={ALTAMIRA:192922, ITAITUBA:56659, SANTAREM:79848};
-/* Sugestão de limite = teto saudável − contas a pagar já comprometido no ERP naquele mês exato
-   (disciplina de caixa, decisão do usuário 12/08/2026 — sem piso sazonal: em mês muito comprometido
-   a sugestão pode chegar a R$0, de propósito). Sem dado de ERP pro mês (fora da janela coletada de
-   5 meses), assume comprometido=0 → usa o teto cheio. */
-function contasERPLojaMes(loja,mes){var c=DB.contasERP&&DB.contasERP.dados; return (c&&c[loja]&&c[loja][mes])||0;}
-function sugestaoLimite(loja,mes){var teto=TETO_SAUDAVEL[loja]||0; return Math.max(0, Math.round(teto-contasERPLojaMes(loja,mes)));}
+/* Limite = teto que o USUÁRIO define manualmente por loja/mês (decisão de negócio dele, não
+   calculado — histórico de tentativas de calcular automático em [[diagnostico-financeiro-grupo]]
+   e RUNBOOK_PLANEJAMENTO.md; usuário corrigiu 19/08/2026: quer o número que ELE combina, e o
+   "quanto ainda posso comprar" tem que vir do que já está COMPROMETIDO EM PEDIDOS (aprovado/enviado/
+   faturado), não do contas a pagar do ERP — que é outra coisa (agenda de pagamento, não orçamento de
+   compra). Isso já existe: `computeOTB()`/`DB.otb[loja][mes]` = {limite,comprometido,disponivel} usa
+   exatamente STATUS_COMPROMETE (ENVIADO+FATURADO+ENTREGUE). Só faltava aparecer AQUI na aba Limites,
+   não só na aba OTB. */
 function renderLimites(){
   var lim={};DB.limites.forEach(function(l){lim[l.loja+'|'+l.mes]=l.valor;});
   var html='<div class="card"><h2>Limite de compra por loja e mês</h2>'+
-    '<p class="mut" style="margin-top:-8px">Defina o teto de cada mês (edite e tecle Enter/Tab), ou use o cálculo automático: <button class="btn sec mini" onclick="sugerirLimitesTodos()">🧮 Preencher sugestão automática</button></p>'+
-    '<p class="mut" style="margin:-4px 0 12px;font-size:11.5px">Sugestão = <b>teto saudável da loja</b> (ALTAMIRA '+brl(TETO_SAUDAVEL.ALTAMIRA)+' · ITAITUBA '+brl(TETO_SAUDAVEL.ITAITUBA)+' · SANTAREM '+brl(TETO_SAUDAVEL.SANTAREM)+' — média real do que a loja paga por mês, Jan-Jul/26, ver memória) <b>− contas a pagar já comprometido no mês</b>'+(DB.contasERP&&DB.contasERP.em?' (ERP atualizado '+DB.contasERP.em+')':'')+'. Mês muito comprometido pode sugerir R$0 de propósito — é pra segurar a compra até o caixa desafogar.</p>';
+    '<p class="mut" style="margin-top:-8px">Defina o teto de cada mês (edite e tecle Enter/Tab). Embaixo de cada célula: <b>compr</b> = já comprometido em pedidos ENVIADO+FATURADO+ENTREGUE daquele mês · <b>disp</b> = limite − comprometido (quanto ainda cabe em pedido novo).</p>';
   lojasVisiveis().forEach(function(lo){html+='<div class="lojahead">'+lo.nome+'</div><div style="overflow:auto"><table><tr>';
     DB.meses.forEach(function(m){html+='<th class="num">'+nomeMes(m)+'</th>';});html+='</tr><tr>';
-    DB.meses.forEach(function(m){var v=lim[lo.id+'|'+m]||''; var sug=sugestaoLimite(lo.id,m);
+    DB.meses.forEach(function(m){var v=lim[lo.id+'|'+m]||''; var c=(DB.otb[lo.id]||{})[m]||{comprometido:0,disponivel:0};
       html+='<td><div style="display:flex;align-items:center;gap:3px"><span class="mut" style="font-size:11px">R$</span>'+
         '<input type="text" inputmode="numeric" value="'+(v?Math.round(v).toLocaleString('pt-BR'):'')+'" style="width:96px" onchange="setLim(\''+lo.id+'\',\''+m+'\',this.value,this)"></div>'+
-        '<div class="mut" style="font-size:10px;margin-top:2px">sug '+brl(sug)+'</div></td>';});
+        '<div class="mut" style="font-size:10px;margin-top:2px">compr '+brl(c.comprometido)+'</div>'+
+        '<div style="font-size:11px;font-weight:700;margin-top:1px" class="'+(c.disponivel<0?'neg':'pos')+'">disp '+brl(c.disponivel)+'</div></td>';});
     html+='</tr></table></div>';});
   el('main').innerHTML=html+'</div>';
-}
-async function sugerirLimitesTodos(){
-  var alvo=[]; LOJAS.forEach(function(lo){DB.meses.forEach(function(m){alvo.push({loja:lo.id,mes:m,valor:sugestaoLimite(lo.id,m)});});});
-  if(!confirm('Preencher/atualizar '+alvo.length+' célula(s) de limite (3 lojas × '+DB.meses.length+' meses) com a sugestão automática (teto saudável − contas a pagar do mês)?\n\nIsso SOBRESCREVE qualquer valor manual já salvo nessas células.'))return;
-  toast('Calculando…');
-  var rows=alvo.map(function(a){return {loja:a.loja,mes:a.mes,valor:a.valor,atualizado_por:DB.email,data:new Date().toISOString()};});
-  var {error}=await sb.from('limites').upsert(rows,{onConflict:'loja,mes'});
-  if(error){toast('Erro: '+error.message);return;}
-  toast('Limites sugeridos aplicados.'); carregar();
 }
 async function setLim(loja,mes,v,inp){
   var valor=Number(String(v||'').replace(/\D/g,''))||0; // input mostra "102.000" (dinheiro) — tira tudo que não é dígito antes de salvar
