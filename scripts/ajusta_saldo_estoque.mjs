@@ -58,31 +58,66 @@ const gravarLog = () => fs.writeFileSync(P_LOG, JSON.stringify(registro, null, 1
 
 const numBR = s => { const v = parseFloat(String(s ?? "").replace(/\./g, "").replace(",", ".")); return isNaN(v) ? null : v; };
 
-async function trocarEmpresa(page, E) {
-  await page.goto(URL_HOME, { waitUntil: "domcontentloaded", timeout: 30000 });
-  const ok = await page.evaluate(E => {
-    const s = document.getElementById("topbar_sel_empresa_portal_usuario");
-    if (!s || !window.jQuery) return false;
-    window.jQuery(s).val(String(E)); window.jQuery(s).trigger("change");
-    return true;
-  }, E).catch(() => false);
-  if (!ok) throw new Error("select de empresa não encontrado");
-  await page.waitForTimeout(4500);
+async function trocarEmpresa(page, E, codTeste) {
+  // ⚠️ trigger('change') RECARREGA a home; confirmar a troca só pela própria tela de ajuste,
+  // numa navegação separada, e insistir — 4,5s fixos não bastam (a L4 abortou assim em 19/08).
+  for (let tent = 1; tent <= 4; tent++) {
+    await page.goto(URL_HOME, { waitUntil: "domcontentloaded", timeout: 30000 });
+    await page.waitForTimeout(1200);
+    const ok = await page.evaluate(E => {
+      const s = document.getElementById("topbar_sel_empresa_portal_usuario");
+      if (!s || !window.jQuery) return false;
+      window.jQuery(s).val(String(E)); window.jQuery(s).trigger("change");
+      return true;
+    }, E).catch(() => false);
+    if (!ok) throw new Error("select de empresa não encontrado");
+    await page.waitForTimeout(5000);
+    const t = await lerAjuste(page, codTeste);
+    if (String(t.empresa) === String(E)) return t;
+    log(`  troca p/ empresa ${E} não pegou (ERP diz ${t.empresa}) — tentativa ${tent}/4`);
+    await page.waitForTimeout(3000);
+  }
+  return { empresa: null };
 }
 
 /** Lê a tela de ajuste: saldo atual + a empresa que o ERP considera logada. */
 async function lerAjuste(page, cod) {
   await page.goto(`${URL_AJUSTE}?produto=${encodeURIComponent(cod)}`, { waitUntil: "domcontentloaded", timeout: 30000 });
-  return await page.evaluate(() => {
-    const v = n => { const e = document.querySelector(`[name=${n}]`); return e ? e.value : null; };
-    return {
-      novo_saldo: v("novo_saldo"),
-      empresa: v("hdn_bloqueio_loja_logada"),
-      cliente: v("hdn_bloqueio_empresa_cliente_logado"),
-      wms: v("controla_localizacao_wms"),
-      titulo: (document.body.innerText || "").slice(0, 120),
-    };
-  });
+  // ⚠️ page.evaluate / waitForSelector caem num contexto onde o form não existe; os campos só
+  // aparecem varrendo page.frames(), e só ~2s depois do domcontentloaded. Diagnosticado em
+  // 19/08/2026 — sem esta espera + varredura, a leitura volta null e o script aborta.
+  for (let tent = 0; tent < 12; tent++) {
+    await page.waitForTimeout(700);
+    for (const f of page.frames()) {
+      const r = await f.evaluate(() => {
+        const g = n => { const e = document.querySelector(`[name=${n}]`); return e ? e.value : null; };
+        if (!document.querySelector("[name=novo_saldo]")) return null;
+        return {
+          novo_saldo: g("novo_saldo"), velho_saldo: g("velho_saldo"),
+          empresa: g("hdn_bloqueio_loja_logada"), cliente: g("hdn_bloqueio_empresa_cliente_logado"),
+          deposito: g("deposito"), nome: g("nome_produto"),
+        };
+      }).catch(() => null);
+      if (r) return r;
+    }
+  }
+  return { novo_saldo: null, empresa: null };
+}
+
+async function _naoUsado(page) {
+  for (const f of page.frames()) {
+    const r = await f.evaluate(() => {
+      const g = n => { const e = document.querySelector(`[name=${n}]`); return e ? e.value : null; };
+      if (!document.querySelector("[name=novo_saldo]")) return null;
+      return {
+        novo_saldo: g("novo_saldo"), velho_saldo: g("velho_saldo"),
+        empresa: g("hdn_bloqueio_loja_logada"), cliente: g("hdn_bloqueio_empresa_cliente_logado"),
+        deposito: g("deposito"), nome: g("nome_produto"),
+      };
+    }).catch(() => null);
+    if (r) return r;
+  }
+  return { novo_saldo: null, empresa: null };
 }
 
 async function escrever(ctx, page, item, atual, emp) {
@@ -116,10 +151,8 @@ try {
     const emp = LOJA_TO_EMP[lj];
     const itens = plano.filter(p => p.loja === lj);
     log(`── ${lj} (empresa ${emp}) · ${itens.length} produtos${DRY ? " · DRY-RUN" : ""}`);
-    await trocarEmpresa(page, emp);
-
     // trava de segurança: o ERP tem que concordar sobre em qual empresa estamos
-    const teste = await lerAjuste(page, itens[0].cod);
+    const teste = await trocarEmpresa(page, emp, itens[0].cod);
     if (String(teste.empresa) !== String(emp)) {
       log(`ABORTADO: a tela de ajuste diz empresa=${teste.empresa}, esperado ${emp}. Nenhuma escrita feita.`);
       process.exitCode = 1; break;
@@ -133,7 +166,7 @@ try {
         const tela = await lerAjuste(page, item.cod);
         atual = numBR(tela.novo_saldo);
         if (atual == null) { log(`  ${item.cod}: saldo não lido — PULADO`); pulado++; continue; }
-        if (String(tela.empresa) !== String(emp)) { log(`  ${item.cod}: empresa mudou (${tela.empresa}) — PULADO`); pulado++; continue; }
+        if (tela.empresa != null && String(tela.empresa) !== String(emp)) { log(`  ${item.cod}: ERP mudou de empresa (${tela.empresa}) — PULADO`); pulado++; continue; }
         if (atual === Number(item.novo_saldo)) { log(`  ${item.cod}: já está em ${atual} — PULADO`); pulado++; continue; }
         if (DRY) { log(`  [dry] ${lj} ${item.cod} ${String(item.desc).slice(0, 28)}: ${atual} → ${item.novo_saldo}`); ok++; continue; }
 

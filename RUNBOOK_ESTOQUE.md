@@ -113,8 +113,35 @@ suspeitos são agrupados por loja e a empresa é trocada uma vez por loja.
 (cron `10 22 * * *`) chamando o `.sh`. ⚠️ launchd **nunca** chama o script direto: `~/Desktop` é
 pasta protegida por TCC e o job falharia em silêncio.
 
+## Ajustes de saldo (escrita em produção)
+
+`scripts/ajusta_saldo_estoque.mjs` executa zeramentos **autorizados**, a partir de
+`dados_estoque/plano_ajuste.json`, uma loja por vez (`--loja L1`), com `--dry-run` disponível.
+Grava log **append-only** em `dados_estoque/ajustes_saldo.json` (loja, código, descrição, saldo
+anterior, saldo confirmado, data, motivo, grupo) — é a prova do que foi feito, e o build lê esse
+arquivo para marcar no painel quem **voltou a ficar negativo depois do zeramento**.
+
+Três armadilhas resolvidas em 19/08/2026, todas do mesmo endpoint:
+1. **Os campos do form não existem no `page.evaluate`.** `ajuste_qtde.asp` monta o form ~2 s depois
+   do domcontentloaded e só aparece varrendo `page.frames()`. `waitForSelector` no page também
+   falha. Sem a varredura + espera, toda leitura volta `null`.
+2. **Trocar de empresa não é instantâneo.** `trigger('change')` recarrega a home; 4,5 s fixos não
+   bastavam e a L4 abortou. Agora insiste até 4 vezes e **confirma pela própria tela de ajuste**
+   (`hdn_bloqueio_loja_logada`) antes da primeira escrita da loja.
+3. **A trava de empresa é obrigatória.** Sem ela, o lote da L4 teria sido gravado na L1.
+
 ## Registro de execuções
 
 | Data | Resultado |
 |---|---|
-| 19/08/2026 | primeira execução completa — ver seção abaixo |
+| 19/08/2026 | primeira execução completa do painel (L1 77,1% · L3 93,5% · L4 77,7% · L5 95,5% fecham) |
+| 19/08/2026 | **85 zeramentos autorizados** em L1 e L4: 29 lixas Santa Clara antigas (22.121 un) + 56 saldos negativos (87 un). 0 erros. Grupo "produtos que não existem" NÃO executado — critério não reproduzível (ver abaixo) |
+
+### Pendente: grupo "produtos que não existem"
+
+Critério combinado: marca com balanço de contagem em 2026 · produto não contado · sem entrada desde
+01/01/2023. Aplicado ao pé da letra dá **4.089 SKUs / 23.357 un**, contra os 418 / 1.878 medidos em
+19/08 — porque uma marca com **um** SKU contado de raspão (balanço GERAL) qualifica a marca inteira.
+Exigindo cobertura mínima da marca: 50% → 305 SKUs · 70% → 81 · 80% → 50 · 90% → 21. Nenhum corte
+reproduz 418. Como o critério já tem falso positivo confirmado (2 de 4 conferidos na prateleira
+existiam), o corte precisa ser escolhido pelo Athila antes de qualquer escrita.
