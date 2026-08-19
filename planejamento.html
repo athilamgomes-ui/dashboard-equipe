@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-38'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-39'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -226,7 +226,18 @@ function parseContasERP(blob, atualizado){
     out.L1[k]=e1[i]||0; out.L4[k]=e4[i]||0;
     out.ALTAMIRA[k]=(e1[i]||0)+(e4[i]||0); out.ITAITUBA[k]=e3[i]||0; out.SANTAREM[k]=e5[i]||0;});
   var em=blob.geradoEm||(atualizado?String(atualizado).slice(0,10).split('-').reverse().join('/'):'');
-  return {dados:out, em:em};
+  return {dados:out, em:em, atualizadoISO:atualizado||''};
+}
+/* Dias desde a última gravação do contas_pagar_erp — usado pra alertar na tela se o coletor
+   headless parou de gravar (achado 19/08/2026: ficou 8 dias travado por permissão, sem ninguém
+   perceber — nunca mais confiar cegamente que "rodou hoje de manhã"). */
+function diasContasERP(){
+  if(!DB.contasERP||!DB.contasERP.atualizadoISO)return null;
+  var dt=new Date(DB.contasERP.atualizadoISO);
+  if(isNaN(dt))return null;
+  var hoje=new Date(); hoje.setHours(0,0,0,0);
+  var d0=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate());
+  return Math.round((hoje-d0)/86400000);
 }
 function contasERPmes(m){
   var c=DB.contasERP&&DB.contasERP.dados; if(!c)return 0;
@@ -736,8 +747,11 @@ function comprometidoLojaMes(loja,mes){
 function contasERPLojaMes(loja,mes){var c=DB.contasERP&&DB.contasERP.dados; return (c&&c[loja]&&c[loja][mes])||0;}
 function renderLimites(){
   var lim={};DB.limites.forEach(function(l){lim[l.loja+'|'+l.mes]=l.valor;});
-  var html='<div class="card"><h2>Limite de compra por loja e mês</h2>'+
-    '<p class="mut" style="margin-top:-8px">Defina o teto de cada mês (edite e tecle Enter/Tab). Embaixo de cada célula: <b>compr</b> = pedidos em trânsito (enviado+faturado) + contas a pagar já no ERP naquele mês — a MESMA conta do total comprometido das abas Pedidos/Aprovações · <b>disp</b> = limite − comprometido (quanto ainda cabe em pedido novo).</p>';
+  var diasERP=diasContasERP();
+  var alertaERP=(diasERP===null)?'<div class="alerta-box" style="border-left-color:var(--crit);background:#fef2f2;color:#991b1b">🚨 <b>Contas a pagar do ERP indisponível</b> — o "comprometido"/"disponível" abaixo NÃO inclui as faturas do ERP (só pedidos em trânsito). Não confie nesses números pra decidir compra até isso normalizar.</div>'
+    :(diasERP>1?'<div class="alerta-box" style="border-left-color:var(--crit);background:#fef2f2;color:#991b1b">🚨 <b>Contas a pagar do ERP desatualizado há '+diasERP+' dias</b> (última coleta: '+(DB.contasERP.em||'?')+'). O coletor headless pode ter parado (já aconteceu — 8 dias travado por permissão em 11/08). Avise antes de confiar no "disponível" abaixo.</div>':'');
+  var html='<div class="card"><h2>Limite de compra por loja e mês</h2>'+alertaERP+
+    '<p class="mut" style="margin-top:-8px">Defina o teto de cada mês (edite e tecle Enter/Tab). Embaixo de cada célula: <b>compr</b> = pedidos em trânsito (enviado+faturado) + contas a pagar já no ERP naquele mês — a MESMA conta do total comprometido das abas Pedidos/Aprovações · <b>disp</b> = limite − comprometido (quanto ainda cabe em pedido novo).'+(DB.contasERP&&DB.contasERP.em?' <span class="mut">(ERP atualizado '+DB.contasERP.em+')</span>':'')+'</p>';
   lojasVisiveis().forEach(function(lo){html+='<div class="lojahead">'+lo.nome+'</div><div style="overflow:auto"><table><tr>';
     DB.meses.forEach(function(m){html+='<th class="num">'+nomeMes(m)+'</th>';});html+='</tr><tr>';
     DB.meses.forEach(function(m){var v=lim[lo.id+'|'+m]||'';
