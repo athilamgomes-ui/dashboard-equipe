@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-32'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-33'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -675,14 +675,40 @@ function statusSelect(p){
 }
 function editar(id){EDIT=DB.pedidos.filter(function(p){return p.id===id;})[0];TAB='lancar';render();}
 
+/* Teto de compra SAUDÁVEL por loja (R$/mês) — diagnóstico financeiro de 11/08/2026: giro de estoque
+   + faturamento médio, calibrado pra reduzir o excedente de ~R$1,65M de estoque parado SEM liquidação
+   nem juros ("comprar abaixo do giro por ~9 meses"). ALTAMIRA = L1(49k)+L4(53k) combinados (mesma
+   regra do resto do app: pedido único ÷2). ⚠️ Não é constante eterna — é o teto vigente enquanto o
+   excedente não baixar; revisar quando o inventário normalizar. Ver memória "diagnostico-financeiro-
+   -grupo" (Alavanca principal) e RUNBOOK_PLANEJAMENTO.md. */
+var TETO_SAUDAVEL={ALTAMIRA:102000, ITAITUBA:30000, SANTAREM:28000};
+/* Sugestão de limite = teto saudável − contas a pagar já comprometido no ERP naquele mês exato
+   (disciplina de caixa, decisão do usuário 12/08/2026 — sem piso sazonal: em mês muito comprometido
+   a sugestão pode chegar a R$0, de propósito). Sem dado de ERP pro mês (fora da janela coletada de
+   5 meses), assume comprometido=0 → usa o teto cheio. */
+function contasERPLojaMes(loja,mes){var c=DB.contasERP&&DB.contasERP.dados; return (c&&c[loja]&&c[loja][mes])||0;}
+function sugestaoLimite(loja,mes){var teto=TETO_SAUDAVEL[loja]||0; return Math.max(0, Math.round(teto-contasERPLojaMes(loja,mes)));}
 function renderLimites(){
   var lim={};DB.limites.forEach(function(l){lim[l.loja+'|'+l.mes]=l.valor;});
-  var html='<div class="card"><h2>Limite de compra por loja e mês</h2><p class="mut" style="margin-top:-8px">Defina o teto de cada mês. Edite e tecle Enter.</p>';
+  var html='<div class="card"><h2>Limite de compra por loja e mês</h2>'+
+    '<p class="mut" style="margin-top:-8px">Defina o teto de cada mês (edite e tecle Enter/Tab), ou use o cálculo automático: <button class="btn sec mini" onclick="sugerirLimitesTodos()">🧮 Preencher sugestão automática</button></p>'+
+    '<p class="mut" style="margin:-4px 0 12px;font-size:11.5px">Sugestão = <b>teto saudável da loja</b> (ALTAMIRA '+brl(TETO_SAUDAVEL.ALTAMIRA)+' · ITAITUBA '+brl(TETO_SAUDAVEL.ITAITUBA)+' · SANTAREM '+brl(TETO_SAUDAVEL.SANTAREM)+' — giro de estoque, ver memória) <b>− contas a pagar já comprometido no mês</b>'+(DB.contasERP&&DB.contasERP.em?' (ERP atualizado '+DB.contasERP.em+')':'')+'. Mês muito comprometido pode sugerir R$0 de propósito — é pra segurar a compra até o caixa desafogar.</p>';
   lojasVisiveis().forEach(function(lo){html+='<div class="lojahead">'+lo.nome+'</div><div style="overflow:auto"><table><tr>';
     DB.meses.forEach(function(m){html+='<th class="num">'+nomeMes(m)+'</th>';});html+='</tr><tr>';
-    DB.meses.forEach(function(m){var v=lim[lo.id+'|'+m]||'';html+='<td><input type="number" step="100" value="'+v+'" style="width:108px" onchange="setLim(\''+lo.id+'\',\''+m+'\',this.value,this)"></td>';});
+    DB.meses.forEach(function(m){var v=lim[lo.id+'|'+m]||''; var sug=sugestaoLimite(lo.id,m);
+      html+='<td><input type="number" step="100" value="'+v+'" style="width:108px" onchange="setLim(\''+lo.id+'\',\''+m+'\',this.value,this)">'+
+        '<div class="mut" style="font-size:10px;margin-top:2px">sug '+brl(sug)+'</div></td>';});
     html+='</tr></table></div>';});
   el('main').innerHTML=html+'</div>';
+}
+async function sugerirLimitesTodos(){
+  var alvo=[]; LOJAS.forEach(function(lo){DB.meses.forEach(function(m){alvo.push({loja:lo.id,mes:m,valor:sugestaoLimite(lo.id,m)});});});
+  if(!confirm('Preencher/atualizar '+alvo.length+' célula(s) de limite (3 lojas × '+DB.meses.length+' meses) com a sugestão automática (teto saudável − contas a pagar do mês)?\n\nIsso SOBRESCREVE qualquer valor manual já salvo nessas células.'))return;
+  toast('Calculando…');
+  var rows=alvo.map(function(a){return {loja:a.loja,mes:a.mes,valor:a.valor,atualizado_por:DB.email,data:new Date().toISOString()};});
+  var {error}=await sb.from('limites').upsert(rows,{onConflict:'loja,mes'});
+  if(error){toast('Erro: '+error.message);return;}
+  toast('Limites sugeridos aplicados.'); carregar();
 }
 async function setLim(loja,mes,v,inp){
   if(inp)inp.style.borderColor='var(--accent)';
