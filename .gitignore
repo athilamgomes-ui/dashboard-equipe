@@ -10,3 +10,7 @@ precificacao_lancadas.json
 # Conferência de caixa: dado cru fica LOCAL (valores e nomes de operador; repo é público)
 conferencia_caixa_raw.json
 scripts/_tmp_*.mjs
+
+# Estoque: dado cru e caches ficam LOCAIS (custo, preço e valor de estoque; o repo é público)
+dados_estoque/
+scripts/_debug_*.mjs

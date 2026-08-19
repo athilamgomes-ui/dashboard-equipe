@@ -41,7 +41,10 @@ const pad = n => String(n).padStart(2, "0");
 function janela() {
   const h = new Date();
   const ini = new Date(h.getFullYear(), h.getMonth() - 1, 1);
-  const fimM = new Date(h.getFullYear(), h.getMonth() + 4, 0); // dia 0 do mês+4 = último dia de mês+3
+  // até o fim de dezembro do ano corrente (nunca menos que mês+4), pra alcançar o Q4 inteiro.
+  const fimPadrao = new Date(h.getFullYear(), h.getMonth() + 5, 0); // último dia de (mês+4)
+  const fimAno = new Date(h.getFullYear(), 11, 31);                 // 31/12
+  const fimM = fimAno > fimPadrao ? fimAno : fimPadrao;
   const f = d => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
   return { ini: f(ini), fim: f(fimM) };
 }

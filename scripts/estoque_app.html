@@ -1,0 +1,40 @@
+<div class="wrap">
+<h1>Estoque <span>A.M. Gomes</span></h1>
+<div class="sub">reconciliação de balanço · cobertura · negativos · devolvidos · preço × custo · fator de conversão</div>
+<div class="selo"><span class="pulse"></span> Coleta do ERP: <b id="selo-data">—</b></div>
+
+<div id="lock" class="lock">
+  <div style="font-size:30px">🔒</div>
+  <h2>Painel de Estoque</h2>
+  <p>Grupo A.M. Gomes · mostra custo, preço e valor de estoque.<br>Digite a senha para visualizar.</p>
+  <form onsubmit="return tentarSenha(event)">
+    <input id="senha" type="password" placeholder="senha" autocomplete="current-password" autofocus/>
+    <button type="submit">Entrar</button>
+    <div id="lockerr" class="err"></div>
+  </form>
+</div>
+
+<div id="app" style="display:none">
+  <div class="kpis" id="kpis"></div>
+  <div class="tabs">
+    <div class="tab on" data-p="rec">🔍 Reconciliação</div>
+    <div class="tab" data-p="cob">📋 Cobertura de balanço</div>
+    <div class="tab" data-p="neg">➖ Saldo negativo</div>
+    <div class="tab" data-p="dev">🧯 Devolvidos (dep. 2)</div>
+    <div class="tab" data-p="pre">💸 Preço × custo</div>
+    <div class="tab" data-p="fat">📦 Fator de conversão</div>
+  </div>
+  <div class="filtros">
+    <label>Loja</label><select id="f-loja"><option value="">Todas</option></select>
+    <label>Busca</label><input id="f-q" placeholder="produto, marca ou código"/>
+    <span id="f-extra"></span>
+  </div>
+  <div class="pane on" id="p-rec"></div>
+  <div class="pane" id="p-cob"></div>
+  <div class="pane" id="p-neg"></div>
+  <div class="pane" id="p-dev"></div>
+  <div class="pane" id="p-pre"></div>
+  <div class="pane" id="p-fat"></div>
+  <footer>Grupo A.M. Gomes · dados do ERP Microvix · gerado por <b>build_estoque.mjs</b> em <span id="genDate">—</span></footer>
+</div>
+</div>
