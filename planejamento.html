@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-33'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-34'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -696,7 +696,8 @@ function renderLimites(){
   lojasVisiveis().forEach(function(lo){html+='<div class="lojahead">'+lo.nome+'</div><div style="overflow:auto"><table><tr>';
     DB.meses.forEach(function(m){html+='<th class="num">'+nomeMes(m)+'</th>';});html+='</tr><tr>';
     DB.meses.forEach(function(m){var v=lim[lo.id+'|'+m]||''; var sug=sugestaoLimite(lo.id,m);
-      html+='<td><input type="number" step="100" value="'+v+'" style="width:108px" onchange="setLim(\''+lo.id+'\',\''+m+'\',this.value,this)">'+
+      html+='<td><div style="display:flex;align-items:center;gap:3px"><span class="mut" style="font-size:11px">R$</span>'+
+        '<input type="text" inputmode="numeric" value="'+(v?Math.round(v).toLocaleString('pt-BR'):'')+'" style="width:96px" onchange="setLim(\''+lo.id+'\',\''+m+'\',this.value,this)"></div>'+
         '<div class="mut" style="font-size:10px;margin-top:2px">sug '+brl(sug)+'</div></td>';});
     html+='</tr></table></div>';});
   el('main').innerHTML=html+'</div>';
@@ -711,12 +712,13 @@ async function sugerirLimitesTodos(){
   toast('Limites sugeridos aplicados.'); carregar();
 }
 async function setLim(loja,mes,v,inp){
-  if(inp)inp.style.borderColor='var(--accent)';
-  var {error}=await sb.from('limites').upsert([{loja:loja,mes:mes,valor:Number(v)||0,atualizado_por:DB.email,data:new Date().toISOString()}],{onConflict:'loja,mes'});
+  var valor=Number(String(v||'').replace(/\D/g,''))||0; // input mostra "102.000" (dinheiro) — tira tudo que não é dígito antes de salvar
+  if(inp){inp.style.borderColor='var(--accent)'; inp.value=valor?valor.toLocaleString('pt-BR'):'';}
+  var {error}=await sb.from('limites').upsert([{loja:loja,mes:mes,valor:valor,atualizado_por:DB.email,data:new Date().toISOString()}],{onConflict:'loja,mes'});
   if(error){if(inp)inp.style.borderColor='var(--crit)';toast('Erro: '+error.message);return;}
   if(inp)inp.style.borderColor='';toast('Limite salvo: '+nomeMes(mes));
   var i=DB.limites.findIndex(function(l){return l.loja===loja&&l.mes===mes;});
-  if(i>=0)DB.limites[i].valor=Number(v)||0; else DB.limites.push({loja:loja,mes:mes,valor:Number(v)||0});
+  if(i>=0)DB.limites[i].valor=valor; else DB.limites.push({loja:loja,mes:mes,valor:valor});
   DB.otb=computeOTB(DB.pedidos,DB.limites);
 }
 </script>
