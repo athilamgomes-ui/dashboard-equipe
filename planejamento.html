@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-37'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-38'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -718,17 +718,35 @@ function editar(id){EDIT=DB.pedidos.filter(function(p){return p.id===id;})[0];TA
    compra). Isso já existe: `computeOTB()`/`DB.otb[loja][mes]` = {limite,comprometido,disponivel} usa
    exatamente STATUS_COMPROMETE (ENVIADO+FATURADO+ENTREGUE). Só faltava aparecer AQUI na aba Limites,
    não só na aba OTB. */
+/* Comprometido TOTAL por loja/mês = MESMA conta do rodapé de Pedidos/Aprovações (footerPagar):
+   pedidos em trânsito (ENVIADO+FATURADO, sem duplicar o que já tem NF no ERP) + contas a pagar já
+   no ERP por vencimento. Antes o "compr" da aba Limites usava só DB.otb (pedidos ENVIADO+FATURADO+
+   ENTREGUE, SEM o ERP) — dava um número menor e inconsistente com o total que aparece em Aprovações/
+   Pedidos. Corrigido 19/08/2026: uma ÚNICA fonte de verdade pro "comprometido", usada em TODA a tela. */
+function comprometidoLojaMes(loja,mes){
+  var v=0;
+  DB.pedidos.forEach(function(p){
+    if(STATUS_A_PAGAR.indexOf(p.status)<0)return;
+    if(p._noERP)return; // já contado na linha do ERP, não duplica
+    if(p.loja!==loja)return;
+    v+=Number((p.distribuicao||{})[mes])||0;
+  });
+  return Math.round(v*100)/100;
+}
+function contasERPLojaMes(loja,mes){var c=DB.contasERP&&DB.contasERP.dados; return (c&&c[loja]&&c[loja][mes])||0;}
 function renderLimites(){
   var lim={};DB.limites.forEach(function(l){lim[l.loja+'|'+l.mes]=l.valor;});
   var html='<div class="card"><h2>Limite de compra por loja e mês</h2>'+
-    '<p class="mut" style="margin-top:-8px">Defina o teto de cada mês (edite e tecle Enter/Tab). Embaixo de cada célula: <b>compr</b> = já comprometido em pedidos ENVIADO+FATURADO+ENTREGUE daquele mês · <b>disp</b> = limite − comprometido (quanto ainda cabe em pedido novo).</p>';
+    '<p class="mut" style="margin-top:-8px">Defina o teto de cada mês (edite e tecle Enter/Tab). Embaixo de cada célula: <b>compr</b> = pedidos em trânsito (enviado+faturado) + contas a pagar já no ERP naquele mês — a MESMA conta do total comprometido das abas Pedidos/Aprovações · <b>disp</b> = limite − comprometido (quanto ainda cabe em pedido novo).</p>';
   lojasVisiveis().forEach(function(lo){html+='<div class="lojahead">'+lo.nome+'</div><div style="overflow:auto"><table><tr>';
     DB.meses.forEach(function(m){html+='<th class="num">'+nomeMes(m)+'</th>';});html+='</tr><tr>';
-    DB.meses.forEach(function(m){var v=lim[lo.id+'|'+m]||''; var c=(DB.otb[lo.id]||{})[m]||{comprometido:0,disponivel:0};
+    DB.meses.forEach(function(m){var v=lim[lo.id+'|'+m]||'';
+      var compr=comprometidoLojaMes(lo.id,m)+contasERPLojaMes(lo.id,m);
+      var limiteAtual=Number(v)||0, disp=Math.round((limiteAtual-compr)*100)/100;
       html+='<td><div style="display:flex;align-items:center;gap:3px"><span class="mut" style="font-size:11px">R$</span>'+
         '<input type="text" inputmode="numeric" value="'+(v?Math.round(v).toLocaleString('pt-BR'):'')+'" style="width:96px" onchange="setLim(\''+lo.id+'\',\''+m+'\',this.value,this)"></div>'+
-        '<div class="mut" style="font-size:10px;margin-top:2px">compr '+brl(c.comprometido)+'</div>'+
-        '<div style="font-size:11px;font-weight:700;margin-top:1px" class="'+(c.disponivel<0?'neg':'pos')+'">disp '+brl(c.disponivel)+'</div></td>';});
+        '<div class="mut" style="font-size:10px;margin-top:2px">compr '+brl(compr)+'</div>'+
+        '<div style="font-size:11px;font-weight:700;margin-top:1px" class="'+(disp<0?'neg':'pos')+'">disp '+brl(disp)+'</div></td>';});
     html+='</tr></table></div>';});
   el('main').innerHTML=html+'</div>';
 }
