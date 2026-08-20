@@ -248,6 +248,39 @@ lote), mostra uma prévia com o que reconheceu e só grava depois da confirmaç�
 separar loja); Itaituba e Santarém saem separadas. Decisão do Athila em 20/08: vale para **todo**
 fornecedor de Altamira, não só a Alta Mídia.
 
+## Fator de conversão: o recurso está DESLIGADO no portal (20/08/2026)
+
+Lido direto da API do ERP — `GET Suprimentos/ObterParametrosEPermissoes` na base
+`suprimentoswebapi-prod` (mesmo `authorization` capturado para o balanço):
+
+| Parâmetro | Valor | O que significa |
+|---|---|---|
+| **`UtilizaFatorConversaoFornecedor`** | **false** | **não existe fator cadastrado para nenhum produto** |
+| `ComprasUnidadeEspecial` | true | o recurso de unidade especial está habilitado |
+| `ControleLoteProduto` | true | o controle de lote está habilitado no portal (falta o cadastro por produto e o preenchimento na entrada) |
+
+Isso fecha três pontas soltas de uma vez:
+1. a coluna **"Fat. Conv. Utilizado" nunca aparece** na cópia da NF porque é condicional a esse parâmetro;
+2. `EntradaNfe/ListarProdutosParaAjusteFatorConversao` e `AjustarFatorConversaoProdutoFornecedor`
+   existem no código da tela mas dão **404** — a rota só é servida com o recurso ligado;
+3. o bloco 6 antigo, que acusava "fator ausente" olhando a NF, estava **construído sobre um sinal que
+   não pode existir** — e por isso acusava até produto que é comprado e vendido como pacote.
+
+**Bloco 6 reescrito.** Sem fator para ler, o sinal passa a ser **preço ÷ custo**: na mesma unidade a
+razão é markup de varejo (1 a 6); quando explode, o custo é da unidade e o preço é do pacote; quando
+inverte, é o contrário. Quem compra e vende como pacote fica de fora. Mostra também o **código irmão**
+(mesmo descritivo sem o marcador de pacote) — a solução que a loja já usa: um código para o pacote,
+outro para a unidade. Resultado: 231 produtos, contra 73 falsos-positivos do critério antigo.
+
+**Bloco 5 ajustado.** Preço ≥ R$ 1.000 com razão alta continua sendo **erro de digitação de verdade**
+(confirmado: PIRANHA PLASTICA com preço de R$ 215.978 e última venda real de R$ 1,00). O resto, quando
+o descritivo promete pacote, é classificado como **"pacote × unidade, não é preço"** — 183 casos que
+antes apareciam como preço errado.
+
+⚠️ **O endereço da tela nova de produtos é `gestor_web/suprimentos/index.html#/listagem-produtos`**
+e ela usa a MESMA API do balanço. `CatalogoProdutos/ObterDetalhesProduto` (POST `{codigoProduto}`)
+devolve o produto; a listagem só expõe 7 colunas e nenhuma é unidade ou fator.
+
 ## Registro de execuções
 
 | Data | Resultado |

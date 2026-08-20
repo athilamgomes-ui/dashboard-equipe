@@ -637,8 +637,9 @@ function renderDev(){
 
 // ── 5. preço × custo ──
 const TIPO_PRECO = {
-  preco_absurdo:["p-alerta","preço absurdo"], abaixo_custo:["p-alerta","preço ≤ custo"],
-  razao_alta:["p-pacote","razão alta"], sem_custo:["p-ruido","sem custo médio"]
+  preco_absurdo:["p-alerta","preço digitado errado"], abaixo_custo:["p-alerta","vende abaixo do custo"],
+  razao_alta:["p-pacote","razão alta"], pacote_unidade:["p-divisao2","pacote × unidade, não é preço"],
+  sem_custo:["p-ruido","sem custo médio"]
 };
 let fTipo = "";
 function setTipo(t){ fTipo=t; renderPre(); }
@@ -675,21 +676,35 @@ function renderPre(){
     "<b>O painel só sinaliza: quem aplica preço no ERP é você</b>, pelo fluxo do dashboard de precificação.");
 }
 
-// ── 6. fator de conversão ──
+// ── 6. pacote entrando como unidade ──
 function renderFat(){
   const arr = base(D.fator);
   const linhas = arr.map(f=>
-    '<tr><td>'+pillLoja(f.loja)+'</td><td class="num">'+f.cod+'</td><td class="d">'+esc(f.desc)+'<div class="hint">'+esc(f.marca)+'</div></td>'+
+    '<tr><td>'+pillLoja(f.loja)+'</td><td class="num">'+f.cod+'</td><td class="d">'+esc(f.desc)+
+      '<div class="hint">'+pillCurva(f.curva)+' '+esc(f.marca)+'</div></td>'+
     '<td><span class="pill p-pacote">'+esc(f.termo)+(f.n?" = "+f.n+" un.":"")+'</span></td>'+
-    '<td>'+esc(f.und)+'</td><td class="neg">'+esc(f.fat)+'</td><td class="num">'+esc(f.qtd)+'</td>'+
-    '<td>'+esc(f.doc)+'</td><td>'+dBR(f.data)+'</td><td class="num">'+(f.sal!=null?nq(f.sal):"—")+'</td></tr>');
-  document.getElementById("p-fat").innerHTML = box("Fator de conversão ausente",
-    arr.length.toLocaleString("pt-BR")+" produtos · janela de notas "+(D.janelaNotas?dBR(D.janelaNotas.ini)+" a "+dBR(D.janelaNotas.fim):"—"),
-    tabela([{t:"Loja"},{t:"Cód",n:1},{t:"Produto"},{t:"Descritivo promete"},{t:"Und."},{t:"Fat. conv. usado"},{t:"Qtd. na NF",n:1},{t:"Nota"},{t:"Lançada em"},{t:"Saldo hoje",n:1}], linhas),
-    "O descritivo diz <b>C/12, C/144, DZ ou PCT</b>, mas a NF entrou com <b>Fat. Conv. Utilizado = “-”</b>, ou seja: "+
-    "<b>não há fator cadastrado</b>. Entra 1 caixa e o ERP dá entrada de 1 unidade — o saldo nasce errado e a venda tira errado. "+
-    "⚠️ O fator fica no cadastro do produto e é <b>por empresa</b>: o mesmo código pode estar certo numa loja e errado na outra, "+
-    "por isso a loja aparece na primeira coluna. A prova é a própria nota listada.");
+    '<td class="num">'+nf2(f.custo)+'</td><td class="num">'+nf2(f.preco)+'</td>'+
+    '<td class="num neg">'+f.razao.toLocaleString("pt-BR")+'×</td>'+
+    '<td class="num">'+nq(f.sal)+'</td>'+
+    '<td><span class="pill p-alerta">'+esc(f.situacao)+'</span></td>'+
+    '<td class="d hint">'+(f.irmao? 'existe o código '+f.irmao.cod+' ("'+esc(f.irmao.d).slice(0,32)+'") com saldo '+nq(f.irmao.sal) : 'não achei código irmão para a outra unidade')+'</td></tr>');
+  document.getElementById("p-fat").innerHTML =
+    '<div class="aviso"><b>O ERP está com o fator de conversão DESLIGADO.</b> Conferido direto na API '+
+    'do Microvix: <code>UtilizaFatorConversaoFornecedor = false</code>. Isso quer dizer que <b>não existe '+
+    'fator cadastrado para nenhum produto</b> — e é por isso que a coluna “Fat. Conv. Utilizado” nunca '+
+    'aparece na cópia da NF. Enquanto ficar assim, chega uma caixa com 144 lixas e o ERP dá entrada de '+
+    '<b>1</b>. O saldo nasce errado e a venda tira errado. Ligar isso é uma configuração de parâmetro, '+
+    'não é mexer em produto a produto.</div>'+
+    box("Produtos onde o pacote e a unidade estão se misturando",
+      arr.length.toLocaleString("pt-BR")+" produtos · ordenados pelo dinheiro em jogo",
+      tabela([{t:"Loja"},{t:"Cód",n:1},{t:"Produto"},{t:"Descritivo promete"},{t:"Custo (o que pagamos)",n:1},{t:"Preço de venda",n:1},{t:"Preço ÷ custo",n:1},{t:"Saldo",n:1},{t:"O que está errado"},{t:"Código irmão"}], linhas),
+      "Como o fator não existe, não dá para olhar a nota — mas dá para olhar <b>preço e custo</b>: quando os "+
+      "dois estão na mesma unidade, a razão é um markup normal de varejo (entre 1 e 6). Quando ela "+
+      "<b>explode</b>, o custo é da unidade e o preço é do pacote; quando ela <b>inverte</b> (preço menor que "+
+      "o custo), é o contrário. Produto que a loja compra E vende como pacote fica de fora desta lista — "+
+      "é o caso do PAPEL D.TNT C/100, que estava sendo acusado errado antes. "+
+      "<b>Código irmão</b> mostra a solução que a loja já usa hoje: um código para o pacote e outro para a "+
+      "unidade, com o mesmo descritivo.");
 }
 
 const RENDER = { rec:renderRec, cob:renderCob, neg:renderNeg, val:renderVal, dev:renderDev, pre:renderPre, fat:renderFat };

@@ -376,8 +376,13 @@ for (const L of LOJAS) {
     if (!cus || cus <= 0) tipo = "sem_custo";
     else {
       razao = pre / cus;
-      if (razao >= RAZAO_ALTA) tipo = pre >= PRECO_ABSURDO ? "preco_absurdo" : "razao_alta";
-      else if (razao <= 1) tipo = "abaixo_custo";
+      // preço em reais absurdo é erro de digitação de verdade (confirmado: PIRANHA a R$215.978
+      // com última venda real de R$1,00). O resto, se o descritivo promete pacote, é quase sempre
+      // unidade de medida diferente — não preço errado.
+      const promete = !!fatorDoNome(p.d);
+      if (pre >= PRECO_ABSURDO && razao >= RAZAO_ALTA) tipo = "preco_absurdo";
+      else if (razao >= RAZAO_ALTA) tipo = promete ? "pacote_unidade" : "razao_alta";
+      else if (razao <= 1) tipo = promete ? "pacote_unidade" : "abaixo_custo";
     }
     if (!tipo) continue;
     const conf = custos.produtos?.[`${L.key}|${cod}`] || null;
@@ -395,37 +400,58 @@ for (const L of LOJAS) {
 // ordem por gravidade prática: preço absurdo em reais primeiro (é erro de digitação visível no
 // caixa), depois quem vende abaixo do custo (perde dinheiro em cada venda), depois razão alta,
 // e por último os sem custo médio (é falta de dado, não erro de preço).
-const ORDEM = { preco_absurdo: 0, abaixo_custo: 1, razao_alta: 2, sem_custo: 3 };
+const ORDEM = { preco_absurdo: 0, abaixo_custo: 1, razao_alta: 2, pacote_unidade: 3, sem_custo: 4 };
 precos.sort((a, b) => ORDEM[a.tipo] - ORDEM[b.tipo] ||
   (a.tipo === "preco_absurdo" ? b.preco - a.preco :
    a.tipo === "abaixo_custo" ? b.exposicao - a.exposicao :
    a.tipo === "razao_alta" ? (b.razao || 0) - (a.razao || 0) : b.exposicao - a.exposicao));
 const precosTop = precos.slice(0, TOP_PRECOS);
 
-// ══════════════════════════ BLOCO 6 — FATOR DE CONVERSÃO ═══════════════════
-// a cópia da NF mostra "Fat. Conv. Utilizado" = "-" quando não há fator cadastrado NAQUELA empresa
+// ══════════════════════════ BLOCO 6 — PACOTE ENTRANDO COMO UNIDADE ════════
+// ⚠️ Verificado em 20/08/2026 na API do ERP (Suprimentos/ObterParametrosEPermissoes):
+//    UtilizaFatorConversaoFornecedor = FALSE.
+// Ou seja: o recurso de fator de conversão está DESLIGADO no portal, então NÃO EXISTE fator
+// cadastrado para nenhum produto — e é por isso que a coluna "Fat. Conv. Utilizado" nunca
+// aparece na cópia da NF. Enquanto estiver assim, todo produto comprado em pacote e vendido
+// na unidade entra errado: chega 1 caixa de 144 e o ERP dá entrada de 1.
+//
+// Como o fator não existe, o sinal por NOTA não serve. O que serve é comparar preço e custo:
+// se os dois estão na MESMA unidade, a razão é um markup de varejo normal; se estão em
+// unidades diferentes, ela explode ou inverte.
+const MARKUP_MAX = 6;          // acima disso, preço e custo não estão na mesma unidade
 const fator = [];
-const vistos = new Set();
-for (const nf of Object.values(notas.nf || {})) {
-  for (const it of (nf.itens || [])) {
-    const f = fatorDoNome(it.desc);
-    if (!f) continue;
-    // it.fat === null → a cópia nem tinha a coluna (ela é condicional): sem evidência, não acusa.
-    if (it.fat == null) continue;
-    const semFator = it.fat === "" || it.fat === "-" || it.fat === "0" || Number(String(it.fat).replace(",", ".")) === 1;
-    if (!semFator) continue;
-    const k = `${nf.loja}|${it.cod}`;
-    if (vistos.has(k)) continue;
-    vistos.add(k);
-    const p = snap.lojas[nf.loja]?.prods?.[it.cod];
+for (const L of LOJAS) {
+  const S = snap.lojas[L.key];
+  // índice de "irmãos": produtos cuja descrição é a mesma tirando o marcador de pacote.
+  // É a solução que a loja usa hoje — um código para o pacote e outro para a unidade.
+  const chaveBase = d => String(d || "").toUpperCase()
+    .replace(/\bC\/\s*\d{1,4}\b|\bPCT\b|\bCX\b|\bD[ÚU]?Z(IA)?\b|\bDZ\b|\bUN\b|\bUNIDADE\b/g, " ")
+    .replace(/[^A-Z0-9]+/g, " ").trim();
+  const irmaos = {};
+  for (const [cod, p] of Object.entries(S.prods)) {
+    const k = chaveBase(p.d);
+    if (k) (irmaos[k] = irmaos[k] || []).push({ cod, d: p.d, sal: p.sal });
+  }
+  for (const [cod, p] of Object.entries(S.prods)) {
+    const f = fatorDoNome(p.d);
+    if (!f) continue;                                   // descritivo não promete pacote
+    if (p.sal === 0 && !ultimaContagem[L.key][cod]) continue;
+    const cus = p.cus, pre = p.pre;
+    if (!cus || !pre || cus <= 0 || pre <= 0) continue;  // sem os dois números não dá para julgar
+    const razao = pre / cus;
+    let situacao = null;
+    if (razao > MARKUP_MAX) situacao = "custo da unidade × preço do pacote";
+    else if (razao <= 1) situacao = "custo do pacote × preço da unidade";
+    else continue;                                      // markup normal = compra e vende igual, tudo certo
+    const par = (irmaos[chaveBase(p.d)] || []).filter(x => x.cod !== cod);
     fator.push({
-      loja: nf.loja, cod: it.cod, desc: it.desc, und: it.und || "—", fat: it.fat || "-",
-      n: f.n, termo: f.termo, doc: nf.doc, data: nf.data, qtd: it.qtd,
-      sal: p?.sal ?? null, marca: snap.lojas[nf.loja]?.marca?.[it.cod] || "—",
+      loja: L.key, cod, desc: p.d, marca: S.marca[cod] || "—", curva: curvaDe(L.key, S.marca[cod]),
+      n: f.n, termo: f.termo, custo: cus, preco: pre, razao: +razao.toFixed(razao < 1 ? 4 : 1),
+      sal: p.sal, situacao, irmao: par.length ? par[0] : null,
     });
   }
 }
-fator.sort((a, b) => (b.n || 0) - (a.n || 0));
+fator.sort((a, b) => Math.abs(b.sal || 0) * (b.custo || 0) - Math.abs(a.sal || 0) * (a.custo || 0));
 
 // ══════════════════════════ KPIs e montagem ════════════════════════════════
 const kpis = {};
@@ -450,6 +476,8 @@ const DADOS = {
     quando: a.quando.slice(0, 10), de: a.saldo_anterior, para: a.saldo_confirmado })),
   precosPorTipo: precos.reduce((a, p) => (a[p.tipo] = (a[p.tipo] || 0) + 1, a), {}),
   janelaNotas: notas.janela || null,
+  // fatos do ERP que explicam blocos inteiros (lidos da API em 20/08/2026)
+  parametrosERP: { fatorConversaoFornecedor: false, controleLote: true, comprasUnidadeEspecial: true },
   totalPrecos: precos.length,
   janelasFaltando: [...faltando],
 };
