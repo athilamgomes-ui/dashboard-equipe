@@ -83,21 +83,25 @@ if [ "$PRECISA_FULL" = "1" ]; then
   fi
 fi
 
-# ── 2.7) Top 10 marcas por loja (unidades vendidas no ANO) ──
-# Coleta YTD via relatório de saldo (Playwright headless). Se falhar, o build PRESERVA o quadro anterior.
-TM_OK=0
-for t in 1 2; do
-  if node coleta_top_marcas.mjs > /tmp/topmarcas_out.json.tmp 2>/tmp/topmarcas_err.txt && [ -s /tmp/topmarcas_out.json.tmp ]; then
-    mv /tmp/topmarcas_out.json.tmp /tmp/topmarcas_out.json; TM_OK=1; break
+# ── Gate de hora: as coletas pesadas (marcas 3-métricas + margem descontaminada) rodam só ≥17h ──
+HH=$(date +%H); HORA=$((10#$HH))
+
+# ── 2.7) Top 10 marcas por loja com 3 MÉTRICAS (unidades/R$/margem), YTD ──
+# Coleta pesada (analítico por produto agrupado por marca, ~2min/loja) → SÓ no run da tarde (≥17h).
+# Preserva a exclusão das lixas Santa Clara (nível produto). Build PRESERVA o quadro se faltar.
+if [ "$HORA" -ge 17 ] || [ "${MARGEM_LIMPA:-0}" = "1" ]; then
+  if node coleta_marca_metricas.mjs > /tmp/marca_metricas.json.tmp 2>/tmp/marca_metricas_err.txt && [ -s /tmp/marca_metricas.json.tmp ]; then
+    mv /tmp/marca_metricas.json.tmp /tmp/marca_metricas.json; log "top marcas (3 métricas) OK"
+  else
+    rm -f /tmp/marca_metricas.json.tmp; log "AVISO: top marcas falhou — build PRESERVA quadro anterior."
   fi
-  rm -f /tmp/topmarcas_out.json.tmp; log "coleta top marcas tentativa $t falhou — retry em $((t*30))s"; sleep $((t*30))
-done
-[ "$TM_OK" = "1" ] && log "top marcas (ano) OK" || log "AVISO: top marcas falhou — build PRESERVA quadro anterior."
+else
+  log "top marcas (3 métricas) pulado (run da manhã; roda só ≥17h)."
+fi
 
 # ── 2.8) Margem descontaminada (custo de hoje, produtos de custo inválido excluídos) ──
 # Coleta por produto POR LOJA (~1min/loja) — pesada, então SÓ no run da tarde (≥17h). Se falhar
-# ou pular, o build PRESERVA o card anterior. Gate por hora (HH) e permite forçar com MARGEM_LIMPA=1.
-HH=$(date +%H); HORA=$((10#$HH))
+# ou pular, o build PRESERVA o card anterior. Gate por hora (HORA, calculado acima); força com MARGEM_LIMPA=1.
 if [ "$HORA" -ge 17 ] || [ "${MARGEM_LIMPA:-0}" = "1" ]; then
   if node coleta_margem_limpa.mjs > /tmp/margem_limpa.json.tmp 2>/tmp/margem_limpa_err.txt && [ -s /tmp/margem_limpa.json.tmp ]; then
     mv /tmp/margem_limpa.json.tmp /tmp/margem_limpa.json; log "margem descontaminada OK"

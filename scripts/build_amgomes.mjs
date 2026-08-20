@@ -329,55 +329,26 @@ ${linhasLoja("L5")}
   html = html.slice(0, iIni) + novoVend + html.slice(iFim);
 }
 
-// ── 7) Top 10 Marcas por LOJA, por unidades vendidas no ano (lê /tmp/topmarcas_out.json) ──
+// ── 7) Top 10 Marcas por LOJA com 3 métricas (un/R$/margem) — lê /tmp/marca_metricas.json ──
 {
-  const iIni = html.indexOf("<!-- TOPMARCAS_INICIO -->");
-  const iFim = html.indexOf("<!-- TOPMARCAS_FIM -->");
-  let tm = null;
-  try { tm = JSON.parse(fs.readFileSync("/tmp/topmarcas_out.json", "utf8")); } catch { /* ausente */ }
-  const temDados = tm && ["L1", "L3", "L4", "L5"].some(L => tm[L] && Object.keys(tm[L]).length);
+  const mIni = "/* MARCAMETRICAS_INICIO */", mFim = "/* MARCAMETRICAS_FIM */";
+  const iIni = html.indexOf(mIni), iFim = html.indexOf(mFim);
+  let mm = null;
+  try { mm = JSON.parse(fs.readFileSync("/tmp/marca_metricas.json", "utf8")); } catch { /* ausente */ }
+  const temDados = mm && ["L1", "L3", "L4", "L5"].some(L => mm[L] && Object.keys(mm[L]).length);
   if (iIni < 0 || iFim < 0) {
-    log("aviso: marcadores TOPMARCAS ausentes — quadro não atualizado.");
+    log("aviso: marcadores MARCAMETRICAS ausentes — Top 10 marcas não atualizado.");
   } else if (!temDados) {
-    log("aviso: topmarcas_out.json indisponível — Top 10 marcas por loja PRESERVADO (não atualizado).");
+    log("aviso: marca_metricas.json indisponível — Top 10 marcas PRESERVADO (não atualizado).");
   } else {
-    const titleCase = s => String(s).toLowerCase().replace(/(^|[\s.\-\/&])(\p{L})/gu, (_, a, b) => a + b.toUpperCase());
-    const MED = ["🥇", "🥈", "🥉"];
-    const COR = ["#f59e0b", "#94a3b8", "#cd7f32"];
-    const cardLoja = m => {
-      const arr = Object.entries(tm[m.loja] || {})
-        .map(([marca, un]) => ({ marca, un })).sort((a, b) => b.un - a.un).slice(0, 10);
-      const rows = arr.map((b, i) => {
-        const cor = COR[i] || "var(--muted)";
-        const rk = MED[i] || `${i + 1}º`;
-        return `          <tr>
-            <td style="padding:4px 4px;width:24px;color:${cor};font-weight:800;">${rk}</td>
-            <td style="padding:4px 4px;font-weight:600;">${titleCase(b.marca)}</td>
-            <td style="padding:4px 4px;text-align:right;color:var(--text2);font-weight:700;">${fmtMil(Math.round(b.un))}</td>
-          </tr>`;
-      }).join("\n");
-      return `    <div class="card" style="padding:14px;">
-      <div class="card-title" style="margin-bottom:10px;"><span>🏷️</span> ${m.vendTitle}</div>
-      <table style="width:100%;border-collapse:collapse;font-size:11px;">
-        <thead><tr style="border-bottom:1px solid var(--border);">
-          <th style="text-align:left;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">#</th>
-          <th style="text-align:left;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;text-transform:uppercase;">Marca</th>
-          <th style="text-align:right;padding:3px 4px;color:var(--muted);font-size:10px;font-weight:600;">Itens</th>
-        </tr></thead>
-        <tbody>
-${rows}
-        </tbody>
-      </table>
-    </div>`;
-    };
-    const cards = ranking.map(cardLoja).join("\n\n");
-    html = html.slice(0, iIni) +
-      `<!-- TOPMARCAS_INICIO --> <!-- ordem = ranking dos KPIs (gerado por build_amgomes.mjs) -->\n  <div class="grid4">\n${cards}\n  </div>\n  ` +
-      html.slice(iFim);
-    const p = tm.periodo || {};
-    if (p.ini && p.fim)
-      html = html.replace(/(<span id="topMarcasPeriodo"[^>]*>)[^<]*(<\/span>)/, `$1${p.ini} a ${p.fim}$2`);
-    log(`Top 10 marcas/loja atualizado (ranking ${ranking.map(m => m.loja).join(",")}).`);
+    const ordem = ranking.map(m => m.loja);
+    const titulo = {}; ranking.forEach(m => { titulo[m.loja] = m.vendTitle; });
+    const dataObj = { geradoEm: mm.geradoEm || "", periodo: mm.periodo || {}, ordem, titulo };
+    for (const L of ["L1", "L3", "L4", "L5"]) dataObj[L] = mm[L] || {};
+    html = html.slice(0, iIni + mIni.length) + ` const marcaMetricasData = ${JSON.stringify(dataObj)}; ` + html.slice(iFim);
+    const p = mm.periodo || {};
+    if (p.ini && p.fim) html = html.replace(/(<span id="topMarcasPeriodo"[^>]*>)[^<]*(<\/span>)/, `$1${p.ini} a ${p.fim}$2`);
+    log(`Top 10 marcas (3 métricas) atualizado (ranking ${ordem.join(",")}).`);
   }
 }
 
