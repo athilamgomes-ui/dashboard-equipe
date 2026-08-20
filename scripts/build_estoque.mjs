@@ -67,6 +67,24 @@ const jan = ler("janelas.json");
 const dep2 = ler("deposito2.json", false) || { lojas: {} };
 const notas = ler("notas.json", false) || { notas: [], canceladas: [], nf: {} };
 const custos = ler("custos.json", false) || { produtos: {} };
+// Histórico de movimento dos que não fechavam: mostra o que mexeu no saldo SEM nota.
+const movs = ler("movimentos.json", false) || { produtos: {} };
+
+// ── curva S/A/B/C por marca ────────────────────────────────────────────────
+// Fonte única: o arquivo do dashboard de COMPRAS (editado à mão pelo Athila). Marca fora da
+// lista = curva C. Assim as duas telas nunca discordam sobre o que é curva A.
+const P_CURVA = "/Users/elkgomes/Desktop/claude/compras/curva_marcas.json";
+let curvaPorLoja = {};
+try {
+  const cv = JSON.parse(fs.readFileSync(P_CURVA, "utf8"));
+  for (const L of LOJAS) {
+    const m = {};
+    for (const letra of ["S", "A", "B"])
+      for (const marca of (cv[L.key]?.[letra] || [])) m[String(marca).toUpperCase().trim()] = letra;
+    curvaPorLoja[L.key] = m;
+  }
+} catch (e) { log(`AVISO: curva_marcas.json do compras não lida (${e.message}) — tudo vira curva C`); }
+const curvaDe = (loja, marca) => (curvaPorLoja[loja] || {})[String(marca || "").toUpperCase().trim()] || "C";
 // log append-only dos ajustes de saldo executados — é a PROVA do que foi zerado.
 // Sem ele, zerar um negativo apagaria a própria evidência que a estratégia quer medir.
 const ajustes = ler("ajustes_saldo.json", false) || { ajustes: [] };
@@ -185,6 +203,7 @@ for (const L of LOJAS) {
     semDoc += Math.abs(dif);
     itensRecon.push({
       loja: L.key, cod, desc: p.d, ref: p.r, marca: S.marca[cod] || "—",
+      curva: curvaDe(L.key, S.marca[cod]),
       bal_data: c.data, bal_nome: c.nome, bal_id: c.bal,
       contado: c.contado, ent, canc: canc.q, canc_docs: canc.docs.slice(0, 3), ven,
       sal: p.sal, tra: p.tra, esperado: +esperado.toFixed(2), dif: +dif.toFixed(2),
@@ -239,9 +258,28 @@ for (const it of itensRecon) {
   // 5) ruído de contagem
   if (a <= RUIDO) { it.classe = "ruido"; it.detalhe = `diferença de ${it.dif} un.`; continue; }
 
-  // 6) o resto — é o buraco que interessa
+  // 6) o histórico de movimento explica? (ajuste de saldo manual não tem nota, mas TEM data)
+  const mv = movs.produtos[`${it.loja}|${it.cod}`];
+  if (mv) {
+    it.investigado = true;
+    it.movimentos = mv.resumo;
+    const sn = mv.sem_nota;
+    if (sn && sn.qtd > 0 && Math.abs(Math.abs(it.dif) - sn.qtd) <= Math.max(1, a * 0.15)) {
+      it.classe = "ajuste_mao";
+      it.detalhe = `${sn.n}x alguém mexeu no saldo sem nota (${Math.round(sn.qtd)} un, a última em ${sn.ultima})`;
+      continue;
+    }
+    if (sn && sn.qtd > 0) {
+      it.classe = "ajuste_mao_parcial";
+      it.detalhe = `${sn.n}x mexeram no saldo sem nota (${Math.round(sn.qtd)} un, última em ${sn.ultima}) — explica parte da diferença de ${Math.abs(it.dif)}`;
+      continue;
+    }
+  }
+
+  // 7) o resto — é o buraco que interessa
   it.classe = "semdoc";
-  it.detalhe = it.canc ? `${it.canc} un. em nota cancelada já descontadas` : "";
+  it.detalhe = it.canc ? `${it.canc} un. em nota cancelada já descontadas`
+             : (mv ? "histórico de movimento não mostrou nada fora das notas" : "ainda não investigado");
 }
 itensRecon.sort((a, b) => Math.abs(b.dif) - Math.abs(a.dif));
 
@@ -274,7 +312,7 @@ for (const L of LOJAS) {
   for (const [marca, m] of Object.entries(porMarca)) {
     if (m.skus < 3) continue;                     // marca com 1–2 SKUs não diz nada
     const ub = ultimoBalMarca[`${L.key}|${marca}`] || null;
-    cobertura.push({ loja: L.key, marca, skus: m.skus, contados: m.contados,
+    cobertura.push({ loja: L.key, marca, curva: curvaDe(L.key, marca), skus: m.skus, contados: m.contados,
       pct: +(100 * m.contados / m.skus).toFixed(0), un: Math.round(m.un), valor: Math.round(m.valor),
       bal_data: ub ? ub.data : null, bal_nome: ub ? ub.nome : null, feito: !!ub });
   }
@@ -294,7 +332,7 @@ for (const L of LOJAS) {
     if (c && c.data < histNeg[k].desde && histNeg[k].fonte !== "balanço") histNeg[k] = { desde: c.data, fonte: "balanço" };
     const z = zerado[k];
     negativos.push({
-      loja: L.key, cod, desc: p.d, marca: S.marca[cod] || "—", sal: p.sal,
+      loja: L.key, cod, desc: p.d, marca: S.marca[cod] || "—", curva: curvaDe(L.key, S.marca[cod]), sal: p.sal,
       custo: p.cus, preco: p.pre, desde: histNeg[k].desde, fonte: histNeg[k].fonte,
       dias: diasEntre(histNeg[k].desde, isoHoje),
       // reincidente = foi zerado e VOLTOU a ficar negativo: é a prova de que o produto existe

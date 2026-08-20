@@ -13,6 +13,7 @@ async function abrir(pass){
   document.getElementById('lock').style.display='none';
   document.getElementById('app').style.display='block';
   await carregarContagem();
+  await carregarVencidos();
   iniciar();
   try{ sessionStorage.setItem('estoque_ok', pass); }catch(e){}
 }
@@ -43,9 +44,13 @@ const CLASSES = {
   divisao2:["p-divisao2","metade da nota foi para a outra loja"],
   pacote:["p-pacote","erro de pacote × unidade"],
   ruido:["p-ruido","diferença de contagem (até 3 un.)"],
-  deposito2:["p-deposito2","foi para Devolvidos"]
+  deposito2:["p-deposito2","foi para Devolvidos"],
+  ajuste_mao:["p-pacote","alguém mexeu no saldo sem nota"],
+  ajuste_mao_parcial:["p-semdoc","mexeram no saldo — explica só parte"]
 };
-const JUSTIFICADO = { espelhado:1, divisao2:1, pacote:1, ruido:1, deposito2:1 };
+// Três situações, não duas: explicado por inteiro, explicado em parte, e o que ninguém sabe.
+const JUSTIFICADO = { espelhado:1, divisao2:1, pacote:1, ruido:1, deposito2:1, ajuste_mao:1 };
+const PARCIAL = { ajuste_mao_parcial:1 };
 const tabela = (cols, linhas) =>
   '<div class="scroll"><table><thead><tr>'+cols.map(c=>'<th'+(c.n?' class="num"':'')+'>'+c.t+'</th>').join('')+'</tr></thead><tbody>'+
   (linhas.length?linhas.join(''):'<tr><td colspan="'+cols.length+'"><div class="vazio">nada aqui — ou o filtro não casou</div></td></tr>')+
@@ -65,7 +70,7 @@ function filtraQ(arr){
   if(!q) return arr;
   return arr.filter(x => (x.desc||"").toLowerCase().includes(q) || (x.marca||"").toLowerCase().includes(q) || String(x.cod||"").includes(q));
 }
-const base = arr => filtraQ(filtraLoja(arr));
+const base = arr => { let r = filtraQ(filtraLoja(arr)); return fCurva ? r.filter(x=>x.curva===fCurva) : r; };
 
 // ── barra de lojas ──
 const AGUARDA_CONFERENCIA = { L3:true, L5:true };
@@ -125,32 +130,49 @@ function renderKpis(){
 
 // ── 1. reconciliação ──
 let fClasse = "";
+let fCurva = "";     // "" | S | A | B | C
+function setCurva(v){ fCurva = (fCurva===v? "" : v); pintar(); }
+const CURVA_COR = { S:"#a855f7", A:"#f59e0b", B:"#3b82f6", C:"#64748b" };
+const pillCurva = c => '<span class="pill" style="background:'+CURVA_COR[c]+'22;color:'+CURVA_COR[c]+';font-weight:800">'+c+'</span>';
+function barraCurva(arr){
+  const cont={S:0,A:0,B:0,C:0};
+  for(const x of arr) if(cont[x.curva]!==undefined) cont[x.curva]++;
+  return '<div style="margin-bottom:10px">Curva: '+["S","A","B","C"].map(c=>
+    '<span class="pill" style="cursor:pointer;background:'+CURVA_COR[c]+(fCurva&&fCurva!==c?'22':'')+';color:'+(fCurva===c?'#fff':CURVA_COR[c])+
+    ';font-weight:800;margin-right:5px" onclick="setCurva(\''+c+'\')">'+c+' · '+cont[c]+'</span>').join('')+
+    (fCurva?'<span class="pill p-ruido" style="cursor:pointer" onclick="setCurva(\''+fCurva+'\')">limpar</span>':'')+'</div>';
+}
 let fJust = "sem";     // "sem" = sem justificativa (abre aqui) · "com" · "" = tudo
 function setJust(v){ fJust=v; fClasse=""; renderRec(); }
 function renderRec(){
   const daLoja = filtraLoja(D.recon);
-  const semJust = daLoja.filter(x=>!JUSTIFICADO[x.classe]);
+  const semJust = daLoja.filter(x=>!JUSTIFICADO[x.classe] && !PARCIAL[x.classe]);
+  const parcial = daLoja.filter(x=>PARCIAL[x.classe]);
   const comJust = daLoja.filter(x=>JUSTIFICADO[x.classe]);
   let arr = base(D.recon);
-  if(fJust==='sem') arr = arr.filter(x=>!JUSTIFICADO[x.classe]);
+  if(fJust==='sem') arr = arr.filter(x=>!JUSTIFICADO[x.classe] && !PARCIAL[x.classe]);
+  if(fJust==='parte') arr = arr.filter(x=>PARCIAL[x.classe]);
   if(fJust==='com') arr = arr.filter(x=>JUSTIFICADO[x.classe]);
   if(fClasse) arr = arr.filter(x=>x.classe===fClasse);
 
-  const unSem = Math.round(semJust.reduce((a,b)=>a+Math.abs(b.dif),0));
-  const unCom = Math.round(comJust.reduce((a,b)=>a+Math.abs(b.dif),0));
-  const rsSem = Math.round(semJust.reduce((a,b)=>a+Math.abs(b.dif)*(b.custo||0),0));
+  const un = l => Math.round(l.reduce((a,b)=>a+Math.abs(b.dif),0));
+  const rs = l => Math.round(l.reduce((a,b)=>a+Math.abs(b.dif)*(b.custo||0),0));
+  const unSem = un(semJust), unCom = un(comJust), unPar = un(parcial);
+  const rsSem = rs(semJust), rsPar = rs(parcial);
   const subabas =
     '<div class="subtabs">'+
       '<div class="subtab'+(fJust==='sem'?' on':'')+'" onclick="setJust(\'sem\')">'+
         '<b>Sem explicação</b><small>'+semJust.length+' produtos · '+unSem.toLocaleString("pt-BR")+' un · '+nf(rsSem)+'</small></div>'+
+      '<div class="subtab'+(fJust==='parte'?' on':'')+'" onclick="setJust(\'parte\')">'+
+        '<b>Explicado em parte</b><small>'+parcial.length+' produtos · '+unPar.toLocaleString("pt-BR")+' un · '+nf(rsPar)+'</small></div>'+
       '<div class="subtab'+(fJust==='com'?' on':'')+'" onclick="setJust(\'com\')">'+
-        '<b>Com explicação</b><small>'+comJust.length+' produtos · '+unCom.toLocaleString("pt-BR")+' un</small></div>'+
+        '<b>Explicado por inteiro</b><small>'+comJust.length+' produtos · '+unCom.toLocaleString("pt-BR")+' un</small></div>'+
       '<div class="subtab'+(fJust===''?' on':'')+'" onclick="setJust(\'\')">'+
         '<b>Tudo</b><small>'+daLoja.length+' produtos</small></div>'+
     '</div>';
 
   // dentro da sub-aba, um chip por motivo (o modelo da conciliação da maquininha)
-  const univ = fJust==='sem'? semJust : fJust==='com'? comJust : daLoja;
+  const univ = fJust==='sem'? semJust : fJust==='parte'? parcial : fJust==='com'? comJust : daLoja;
   const cont = {}; for(const it of univ) cont[it.classe]=(cont[it.classe]||0)+1;
   const chips = Object.keys(CLASSES).filter(k=>cont[k]).map(k=>
     '<span class="pill '+CLASSES[k][0]+'" style="cursor:pointer;opacity:'+(fClasse&&fClasse!==k?.45:1)+'" onclick="setClasse(\''+k+'\')">'+
@@ -161,19 +183,22 @@ function renderRec(){
     const c = CLASSES[it.classe]||["p-ruido",it.classe||"—"];
     const rs = Math.abs(it.dif)*(it.custo||0);
     return '<tr><td>'+pillLoja(it.loja)+'</td><td class="num">'+it.cod+'</td><td class="d">'+esc(it.desc)+
-      '<div class="hint">'+esc(it.marca)+' · contado em '+dBR(it.bal_data)+' no balanço “'+esc(it.bal_nome)+'”</div></td>'+
+      '<div class="hint">'+pillCurva(it.curva)+' '+esc(it.marca)+' · contado em '+dBR(it.bal_data)+' no balanço “'+esc(it.bal_nome)+'”</div></td>'+
       '<td class="num">'+nq(it.contado)+'</td><td class="num">'+nq(it.ent)+(it.canc?'<span class="neg"> −'+nq(it.canc)+'</span>':'')+'</td>'+
       '<td class="num">'+nq(it.ven)+'</td><td class="num">'+nq(it.esperado)+'</td>'+
       '<td class="num">'+nq(it.sal)+(it.tra?'<span class="hint"> +'+nq(it.tra)+' trâns.</span>':'')+'</td>'+
       '<td class="num '+cls(it.dif)+'">'+(it.dif>0?"+":"")+nq(it.dif)+'</td>'+
       '<td class="num">'+(rs?nf(rs):'<span class="hint">—</span>')+'</td>'+
       '<td><span class="pill '+c[0]+'">'+c[1]+'</span></td>'+
-      '<td class="d hint">'+esc(it.detalhe||"")+'</td></tr>';
+      '<td class="d hint">'+esc(it.detalhe||"")+
+        (it.movimentos? '<div style="margin-top:4px">'+Object.entries(it.movimentos).map(([k,v])=>
+          '<span class="pill p-ruido" style="margin:1px 3px 1px 0">'+esc(k)+' '+Math.round(v.qtd)+' un</span>').join('')+'</div>' : '')+
+      '</td></tr>';
   });
   const cols=[{t:"Loja"},{t:"Cód",n:1},{t:"Produto"},{t:"Contado no balanço",n:1},{t:"Entrou depois",n:1},{t:"Vendeu depois",n:1},{t:"Deveria ter",n:1},{t:"Tem hoje",n:1},{t:"Diferença",n:1},{t:"Quanto isso custou",n:1},{t:"Para onde foi"},{t:"Detalhe"}];
-  document.getElementById("p-rec").innerHTML = subabas +
+  document.getElementById("p-rec").innerHTML = subabas + barraCurva(univ) +
     '<div style="margin-bottom:12px">'+chips+'</div>'+
-    box(fJust==='sem'?"Sumiu e ninguém sabe para onde":fJust==='com'?"Diferenças que já têm explicação":"Todos os produtos que não fecham",
+    box(fJust==='sem'?"Sumiu e ninguém sabe para onde":fJust==='parte'?"Mexeram no saldo, mas a conta ainda não fecha":fJust==='com'?"Diferenças que já têm explicação":"Todos os produtos que não fecham",
       arr.length.toLocaleString("pt-BR")+" produtos"+(arr.length>4000?" (exibindo 4.000)":""),
       tabela(cols, linhas),
       "A conta de cada linha: <b>o que foi contado no balanço + o que entrou por nota − o que foi vendido = o que deveria ter hoje</b>. "+
@@ -374,6 +399,207 @@ function renderNeg(){
     "registrado em <code>dados_estoque/ajustes_saldo.json</code>, com saldo de antes e de depois.");
 }
 
+
+// ═══════════ VALIDADE — a vencer e já vencidos ═══════════
+// O ERP não tem controle de lote em uso, então a planilha da loja é a fonte real. O importador
+// é tolerante com o cabeçalho porque cada loja monta a planilha de um jeito.
+let VENCIDOS = [];
+let vencErro = null;
+let previaCSV = null;
+
+const SINONIMOS = {
+  cod:        ["codigo","código","cod","cód","sku","referencia","referência","ref"],
+  descricao:  ["descricao","descrição","produto","item","nome","descrição do produto"],
+  marca:      ["marca","fornecedor","fabricante"],
+  quantidade: ["quantidade","qtd","qtde","qt","saldo","unidades"],
+  validade:   ["validade","vencimento","data de validade","data validade","venc","dt validade","vence em"],
+  lote:       ["lote","batch"]
+};
+const norm = t => String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+
+async function carregarVencidos(){
+  try{
+    const r = await fetch(SB_URL+"/rest/v1/estoque_vencidos?baixado_em=is.null&select=*&order=validade", {headers:SB_H});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    VENCIDOS = await r.json(); vencErro=null;
+  }catch(e){ vencErro=e.message; VENCIDOS=[]; }
+}
+
+// CSV com ; ou , — respeita aspas
+function parseCSV(txt){
+  txt = txt.replace(/^\uFEFF/,"");
+  const sep = (txt.split("\n")[0].match(/;/g)||[]).length >= (txt.split("\n")[0].match(/,/g)||[]).length ? ";" : ",";
+  const linhas=[]; let campo="", linha=[], aspas=false;
+  for(let i=0;i<txt.length;i++){
+    const c=txt[i];
+    if(aspas){ if(c==='"'){ if(txt[i+1]==='"'){campo+='"';i++;} else aspas=false; } else campo+=c; }
+    else if(c==='"') aspas=true;
+    else if(c===sep){ linha.push(campo); campo=""; }
+    else if(c==="\n"){ linha.push(campo); linhas.push(linha); linha=[]; campo=""; }
+    else if(c!=="\r") campo+=c;
+  }
+  if(campo||linha.length){ linha.push(campo); linhas.push(linha); }
+  return linhas.filter(l=>l.some(x=>String(x).trim()!==""));
+}
+
+function mapearColunas(cab){
+  const m={};
+  cab.forEach((h,i)=>{
+    const n=norm(h);
+    for(const [campo,syn] of Object.entries(SINONIMOS))
+      if(m[campo]===undefined && syn.some(x=>n===x || n.startsWith(x))) m[campo]=i;
+  });
+  return m;
+}
+function dataBR(v){
+  const t=String(v||"").trim();
+  let m=t.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(m){ const a=m[3].length===2?"20"+m[3]:m[3]; return a+"-"+m[2].padStart(2,"0")+"-"+m[1].padStart(2,"0"); }
+  m=t.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m) return m[0];
+  m=t.match(/^(\d{1,2})[\/\-](\d{4})$/);            // só mês/ano: assume fim do mês
+  if(m){ const ult=new Date(Number(m[2]), Number(m[1]), 0).getDate(); return m[2]+"-"+m[1].padStart(2,"0")+"-"+String(ult); }
+  return null;
+}
+const numPT = v => { const n=parseFloat(String(v||"").replace(/\./g,"").replace(",",".")); return isNaN(n)?null:n; };
+
+function aoEscolherArquivo(input){
+  const f = input.files && input.files[0];
+  if(!f) return;
+  if(!/\.csv$/i.test(f.name)){
+    alert("Só consigo ler .csv. No Excel: Arquivo > Salvar como > CSV, e envie esse arquivo.");
+    input.value=""; return;
+  }
+  const fr = new FileReader();
+  fr.onload = () => {
+    const linhas = parseCSV(String(fr.result));
+    if(linhas.length<2){ alert("A planilha parece vazia."); return; }
+    const map = mapearColunas(linhas[0]);
+    previaCSV = { arquivo:f.name, cab:linhas[0], corpo:linhas.slice(1), map };
+    renderVal();
+  };
+  fr.readAsText(f, "utf-8");
+}
+
+async function confirmarImportacao(){
+  if(!previaCSV) return;
+  const { map, corpo, arquivo } = previaCSV;
+  if(map.descricao===undefined){ alert("Não achei a coluna de produto/descrição. Renomeie o cabeçalho para 'Produto' ou 'Descrição'."); return; }
+  const lj = lojaSel || prompt("De qual loja é esta planilha? (L1, L3, L4 ou L5)","L1");
+  if(!lj) return;
+  const quem = quemConfere();
+  const linhas = corpo.map(l=>({
+    loja: lj,
+    cod: map.cod!==undefined ? String(l[map.cod]||"").trim() : null,
+    descricao: String(l[map.descricao]||"").trim(),
+    marca: map.marca!==undefined ? String(l[map.marca]||"").trim() : null,
+    quantidade: map.quantidade!==undefined ? numPT(l[map.quantidade]) : null,
+    validade: map.validade!==undefined ? dataBR(l[map.validade]) : null,
+    lote: map.lote!==undefined ? String(l[map.lote]||"").trim() : null,
+    origem: "planilha", importado_por: quem, arquivo,
+  })).filter(x=>x.descricao);
+  if(!linhas.length){ alert("Nenhuma linha com produto foi encontrada."); return; }
+  if(!confirm(linhas.length+" linha(s) serão importadas para a loja "+lj+". Confirmar?")) return;
+  try{
+    for(let i=0;i<linhas.length;i+=200){
+      const r = await fetch(SB_URL+"/rest/v1/estoque_vencidos",{method:"POST",headers:SB_H,body:JSON.stringify(linhas.slice(i,i+200))});
+      if(!r.ok) throw new Error("HTTP "+r.status);
+    }
+    previaCSV=null; await carregarVencidos(); renderVal();
+    alert(linhas.length+" linha(s) importadas.");
+  }catch(e){ alert("Falha ao importar: "+e.message); }
+}
+
+const FAIXAS = [
+  {k:"vencido", t:"Já vencido",       min:-99999, max:0},
+  {k:"m1", t:"Vence em 1 mês",  min:0,  max:1},
+  {k:"m2", t:"2 meses",         min:1,  max:2},
+  {k:"m3", t:"3 meses",         min:2,  max:3},
+  {k:"m4", t:"4 meses",         min:3,  max:4},
+  {k:"m5", t:"5 meses",         min:4,  max:5},
+  {k:"m6", t:"6 meses — avisar a marca", min:5, max:6},
+  {k:"m12",t:"7 a 12 meses",    min:6,  max:12},
+];
+function mesesAte(iso, hoje){
+  if(!iso) return null;
+  const a=new Date(iso), b=new Date(hoje);
+  return (a.getFullYear()-b.getFullYear())*12 + (a.getMonth()-b.getMonth()) + (a.getDate()>=b.getDate()?0:-1);
+}
+let fFaixa = "";
+function setFaixa(k){ fFaixa = (fFaixa===k? "" : k); renderVal(); }
+
+function renderVal(){
+  const hoje = D.geradoEm2;
+  let base_ = VENCIDOS.filter(v=>!lojaSel || v.loja===lojaSel);
+  const q=(inpQ.value||"").trim().toLowerCase();
+  if(q) base_ = base_.filter(v=>(v.descricao||"").toLowerCase().includes(q)||(v.marca||"").toLowerCase().includes(q)||String(v.cod||"").includes(q));
+  for(const v of base_) v._m = mesesAte(v.validade, hoje);
+
+  const cont={}; for(const f of FAIXAS) cont[f.k]=base_.filter(v=>v._m!==null && v._m>=f.min && v._m<f.max).length;
+  const semData = base_.filter(v=>v._m===null).length;
+  const chips = FAIXAS.map(f=>{
+    const cor = f.k==="vencido"?"p-alerta":f.k==="m6"?"p-pacote":f.k==="m12"?"p-ruido":"p-semdoc";
+    return '<span class="pill '+cor+'" style="cursor:pointer;opacity:'+(fFaixa&&fFaixa!==f.k?.45:1)+'" onclick="setFaixa(\''+f.k+'\')">'+f.t+' · '+cont[f.k]+'</span>';
+  }).join(' ') + (semData?' <span class="pill p-ruido">sem data na planilha · '+semData+'</span>':'');
+
+  let arr = base_;
+  if(fFaixa){ const f=FAIXAS.find(x=>x.k===fFaixa); arr = arr.filter(v=>v._m!==null && v._m>=f.min && v._m<f.max); }
+  arr = arr.slice().sort((a,b)=>(a.validade||"9999")<(b.validade||"9999")?-1:1);
+
+  const linhas = arr.slice(0,3000).map(v=>
+    '<tr><td>'+pillLoja(v.loja)+'</td><td class="num">'+esc(v.cod||"—")+'</td>'+
+    '<td class="d">'+esc(v.descricao)+(v.marca?'<div class="hint">'+esc(v.marca)+'</div>':'')+'</td>'+
+    '<td class="num">'+(v.quantidade!=null?nq(v.quantidade):"—")+'</td>'+
+    '<td>'+(v.validade?dBR(v.validade):'<span class="hint">sem data</span>')+'</td>'+
+    '<td class="num '+(v._m===null?"":v._m<0?"neg":v._m<=6?"":"zero")+'">'+(v._m===null?"—":v._m<0?"vencido":v._m+" meses")+'</td>'+
+    '<td class="hint">'+esc(v.arquivo||v.origem)+'</td></tr>');
+
+  const importador =
+    '<div class="lote">'+
+      '<div><b>Planilha de validade da loja</b><div class="hint">O ERP ainda não controla lote, então a planilha que a loja já faz é a fonte. '+
+      'No Excel: <b>Arquivo &gt; Salvar como &gt; CSV</b>, e envie o CSV aqui.</div></div>'+
+      '<div class="lote-b"><label class="btn urg" style="cursor:pointer">Enviar planilha (CSV)'+
+      '<input type="file" accept=".csv,text/csv" style="display:none" onchange="aoEscolherArquivo(this)"></label></div>'+
+    '</div>';
+
+  let previa = "";
+  if(previaCSV){
+    const m=previaCSV.map;
+    const achou = Object.entries({cod:"código",descricao:"produto",marca:"marca",quantidade:"quantidade",validade:"validade",lote:"lote"})
+      .map(([k,rot])=> m[k]!==undefined
+        ? '<span class="pill p-ok">'+rot+' → “'+esc(previaCSV.cab[m[k]])+'”</span>'
+        : '<span class="pill p-semdoc">'+rot+' não encontrada</span>').join(' ');
+    const amostra = previaCSV.corpo.slice(0,3).map(l=>'<tr>'+l.slice(0,8).map(c=>'<td>'+esc(String(c).slice(0,26))+'</td>').join('')+'</tr>').join('');
+    previa = box("Confira antes de importar: "+esc(previaCSV.arquivo),
+      previaCSV.corpo.length+" linhas",
+      '<div style="padding:13px 17px">'+achou+'</div>'+
+      '<div class="scroll"><table><thead><tr>'+previaCSV.cab.slice(0,8).map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+amostra+'</tbody></table></div>'+
+      '<div style="padding:13px 17px;display:flex;gap:9px">'+
+        '<button class="btn urg" onclick="confirmarImportacao()">Importar para '+(lojaSel||"a loja que eu escolher")+'</button>'+
+        '<button class="btn" onclick="previaCSV=null;renderVal()">Cancelar</button></div>',
+      "Eu adivinho as colunas pelo nome do cabeçalho. Se alguma aparecer como <b>não encontrada</b>, "+
+      "renomeie a coluna na planilha e envie de novo — <b>produto</b> é obrigatória, o resto é opcional. "+
+      "Data aceita 31/12/2026, 31-12-26 ou só 12/2026 (nesse caso conta como o último dia do mês).");
+  }
+
+  const aviso = vencErro
+    ? '<div class="aviso">Não consegui falar com o Supabase (<b>'+esc(vencErro)+'</b>). Rode <code>scripts/estoque_supabase.sql</code>.</div>'
+    : "";
+
+  document.getElementById("p-val").innerHTML = aviso + importador + previa +
+    '<div style="margin-bottom:12px">'+chips+'</div>'+
+    box(fFaixa==="vencido"?"Produtos já vencidos":"Produtos a vencer",
+      arr.length.toLocaleString("pt-BR")+" produtos"+(VENCIDOS.length?"":" — nenhuma planilha importada ainda"),
+      tabela([{t:"Loja"},{t:"Cód",n:1},{t:"Produto"},{t:"Quantidade",n:1},{t:"Vence em"},{t:"Falta"},{t:"Origem"}], linhas),
+      "A regra da casa é avisar a marca com <b>seis meses</b> de antecedência — é a faixa "+
+      "<b>“6 meses — avisar a marca”</b> que dispara a ação; 7 a 12 meses é visão de ano. "+
+      "<b>Relatório para o fornecedor:</b> Altamira sai junta (Casa da Beleza + Miss Beleza no mesmo "+
+      "relatório, por marca, sem separar loja) porque é assim que o fornecedor recebe e é assim que o "+
+      "pedido é feito; Itaituba e Santarém saem separadas. "+
+      "Enquanto o controle de lote do ERP não estiver ligado, tudo aqui vem da planilha da loja — e "+
+      "mesmo depois de ligar, a mercadoria que já está na prateleira continua vindo daqui, porque o "+
+      "lote só passa a existir na entrada de NF-e a partir do dia em que for ativado.");
+}
+
 // ── 4. devolvidos ──
 function renderDev(){
   const arr = base(D.vencidos);
@@ -466,7 +692,7 @@ function renderFat(){
     "por isso a loja aparece na primeira coluna. A prova é a própria nota listada.");
 }
 
-const RENDER = { rec:renderRec, cob:renderCob, neg:renderNeg, dev:renderDev, pre:renderPre, fat:renderFat };
+const RENDER = { rec:renderRec, cob:renderCob, neg:renderNeg, val:renderVal, dev:renderDev, pre:renderPre, fat:renderFat };
 function pintar(){ RENDER[aba](); ligarInputs(); }
 
 function iniciar(){

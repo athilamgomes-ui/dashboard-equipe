@@ -206,6 +206,48 @@ diferente** — e é o mesmo problema do bloco 6. Enquanto o painel não ler o *
 produto e por empresa**, os dois blocos continuam misturando pacote com unidade. Ler esse fator é o
 próximo passo que conserta os dois de uma vez.
 
+## Investigação do que não fecha (item 2 do feedback de 20/08)
+
+`scripts/coleta_estoque_movimento.mjs` puxa o **Histórico de Movimento do Produto** só para quem a
+reconciliação marcou como "sumiu sem explicação", na janela do balanço até hoje. Esse relatório
+mostra TODA movimentação — inclusive as que não têm nota. O build lê `dados_estoque/movimentos.json`
+e reclassifica:
+
+| Situação | Classe |
+|---|---|
+| ajuste sem nota ≈ a diferença inteira | `ajuste_mao` → "alguém mexeu no saldo sem nota" (explicado) |
+| ajuste sem nota explica parte | `ajuste_mao_parcial` → sub-aba "explicado em parte" |
+| nada fora das notas | `semdoc` → sobrou mesmo |
+
+**Efeito medido (20/08):** o "sem explicação" do grupo caiu de **262 produtos** para **19 (R$ 1.280)**;
+242 eram ajuste manual de saldo. Em L1: de 142 para **6 produtos, R$ 44**. Ou seja, quase todo o
+"sumiço" era gente mexendo no saldo à mão — e agora aparece com data e quantidade.
+
+⚠️ O passo roda **entre dois builds** no pipeline (o investigador precisa da lista que só existe
+depois do primeiro build) e é o último a usar o ERP — por isso o lock do Microvix só é liberado
+depois dele. Custo: ~4 s por produto, teto `MAX_MOV` (250), cache de 7 dias.
+
+⚠️ A coluna de data do Histórico de Movimento se chama **"Emissão"**, não "Data". Procurar por
+/data/ devolve -1 e o parser lê ZERO linhas em silêncio — foi o que manteve a coluna de custo real
+vazia por um dia inteiro.
+
+## Curva S/A/B/C
+
+Vem do arquivo do dashboard de COMPRAS (`compras/curva_marcas.json`), fonte única para as duas
+telas. Marca fora das listas S/A/B = curva C. Filtro por curva vale para todos os blocos.
+
+## Validade (item 3)
+
+Aba **📅 Validade** com faixas mensais (já vencido · 1 a 6 meses · 7 a 12) e importador de planilha.
+**Só lê CSV** (mesmo padrão da Conferência de Caixa; no Excel, Salvar como > CSV). O importador
+adivinha as colunas pelo cabeçalho (sinônimos para código, produto, marca, quantidade, validade,
+lote), mostra uma prévia com o que reconheceu e só grava depois da confirmação. Aceita data em
+`31/12/2026`, `31-12-26` e `12/2026` (nesse caso, último dia do mês). Grava em `estoque_vencidos`.
+
+**Regra do relatório para o fornecedor:** Altamira sai junta (L1+L4 num relatório, por marca, sem
+separar loja); Itaituba e Santarém saem separadas. Decisão do Athila em 20/08: vale para **todo**
+fornecedor de Altamira, não só a Alta Mídia.
+
 ## Registro de execuções
 
 | Data | Resultado |

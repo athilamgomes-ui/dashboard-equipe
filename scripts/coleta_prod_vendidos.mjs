@@ -174,7 +174,7 @@ async function extrair(page) {
         const custoEpLine = br(cells[6]) * qtd;     // Custo Época (unit) × qtd  → base da margem do ERP
         const cmvLine = br(cells[7]);               // CMV Total (já total)
         const prTabLine = br(cells[8]) * qtd;       // Pr.Tabela (unit) × qtd
-        if (!prod[cod]) prod[cod] = { cod, desc: cells[1], ref: cells[2], un: cells[3], qtd: 0, custoEpoca: 0, cmv: 0, fat: 0, prTabela: 0, custoUnitLast: cells[6] };
+        if (!prod[cod]) prod[cod] = { cod, desc: cells[1], ref: cells[2], un: cells[3], marca: grupoAtual || "", qtd: 0, custoEpoca: 0, cmv: 0, fat: 0, prTabela: 0, custoUnitLast: cells[6] };
         prod[cod].qtd += qtd;
         prod[cod].custoEpoca += custoEpLine;
         prod[cod].cmv += cmvLine;
@@ -217,7 +217,7 @@ async function main() {
 
   if (SINT === "N") {
     out.rows = raw.prodArr.map(p => ({
-      cod: p.cod, desc: p.desc, ref: p.ref, un: p.un,
+      cod: p.cod, desc: p.desc, ref: p.ref, un: p.un, marca: p.marca || "",
       qtd: p.qtd,
       custoEpoca: Math.round(p.custoEpoca * 100) / 100,
       cmv: Math.round(p.cmv * 100) / 100,

@@ -88,7 +88,15 @@ fi
 node coleta_estoque_custos.mjs > /tmp/estoque_custos.out 2>/tmp/estoque_custos.err
 log "custos rc=$? (não fatal)"
 
-# libera o perfil do ERP antes do build — daqui pra frente é tudo local
+# ── 4.5) Build preliminar + investigação do que não fecha ──
+# O investigador precisa da LISTA de "sem explicação", que só existe depois do build. Então:
+# build → investiga (Histórico de Movimento dos piores) → build de novo, agora com a justificativa.
+# Não é fatal: se falhar, o painel mostra "ainda não investigado" em vez de mentir.
+node build_estoque.mjs 2>/tmp/estoque_build0.err || log "AVISO: build preliminar falhou — segue sem investigação"
+node coleta_estoque_movimento.mjs > /tmp/estoque_mov.out 2>/tmp/estoque_mov.err
+log "investigação de movimento rc=$? (não fatal)"
+
+# libera o perfil do ERP — daqui pra frente é tudo local
 kill "$TOUCH_PID" 2>/dev/null; TOUCH_PID=""
 rmdir "$LOCK_ERP" 2>/dev/null; log "perfil do Microvix liberado."
 

@@ -44,3 +44,28 @@ drop policy if exists estoque_contagem_all on estoque_contagem;
 drop policy if exists estoque_trigger_all  on estoque_trigger;
 create policy estoque_contagem_all on estoque_contagem for all using (true) with check (true);
 create policy estoque_trigger_all  on estoque_trigger  for all using (true) with check (true);
+
+-- ── validade: o que a loja controla hoje em planilha ───────────────────────
+-- Enquanto o controle de lote do ERP não estiver em uso (e mesmo depois, para o estoque que
+-- já está na prateleira), a planilha da loja é a fonte real de validade.
+create table if not exists estoque_vencidos (
+  id           bigserial primary key,
+  loja         text not null,
+  cod          text,
+  descricao    text not null,
+  marca        text,
+  quantidade   numeric,
+  validade     date,                                -- null = a planilha não trouxe data
+  fornecedor   text,
+  origem       text not null default 'planilha',    -- planilha | erp
+  lote         text,
+  importado_em timestamptz not null default now(),
+  importado_por text,
+  arquivo      text,
+  baixado_em   timestamptz,                         -- preenchido quando sai a nota de baixa
+  observacao   text
+);
+create index if not exists estoque_vencidos_loja on estoque_vencidos (loja, validade);
+alter table estoque_vencidos enable row level security;
+drop policy if exists estoque_vencidos_all on estoque_vencidos;
+create policy estoque_vencidos_all on estoque_vencidos for all using (true) with check (true);
