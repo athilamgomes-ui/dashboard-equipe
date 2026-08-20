@@ -72,22 +72,6 @@ async function gerar(page) {
     // deixa marcas/coleção grudados no multiselect; sem limpar, o relatório conta só ~19 marcas.
     // Para cada multiselect de filtro: se tem opção value="" (Todos), seleciona só ela;
     // senão desmarca tudo (none = todos). Depois dispara change pro widget/ASP registrar.
-    // A raiz do filtro é o id_visao: o relatório abre com uma visão salva (22 Marcas 30%A / 23 20%B)
-    // pré-selecionada, e o "Gerar Relatório" (SubmitVisao) aplica os filtros dela no SERVIDOR.
-    // Zerar o id_visao (opção vazia) faz o relatório rodar a config MANUAL (todas as marcas).
-    const v = document.getElementById("Form1_id_visao");
-    if (v) {
-      if (![...v.options].some(o => o.value === "")) { const o = document.createElement("option"); o.value = ""; o.text = "(nenhuma)"; v.insertBefore(o, v.firstChild); }
-      v.value = ""; v.dispatchEvent(new Event("change"));
-    }
-    // reforço: limpa multiselects herdados no DOM
-    const resetSelect = (name) => {
-      const s = document.querySelector(`select[name="${name}"]`); if (!s) return;
-      const temTodos = [...s.options].some(o => o.value === "");
-      [...s.options].forEach(o => { o.selected = temTodos ? (o.value === "") : false; });
-      s.dispatchEvent(new Event("change"));
-    };
-    ["marcas", "colecoes", "linhas", "classificacao", "setores", "series", "cfops", "vendedores", "tabelasPreco", "produtos", "clientefornecedor"].forEach(resetSelect);
 
     [...document.querySelectorAll('input[id^="empresas_"]')].forEach(cb => cb.checked = false);
     const el = document.getElementById("empresas_" + emp); if (el) el.checked = true;
@@ -108,12 +92,26 @@ async function gerar(page) {
   ]);
   await page.waitForTimeout(2000);
 
-  // bug empresa-1: desmarca duplicatas, remarca só a desejada
+  // Pós-SubmitVisao: (a) bug empresa-1 — desmarca duplicatas, remarca só a desejada;
+  // (b) LIMPA o filtro de marca/coleção que a VISÃO reaplicou (a raiz do "só 19 marcas").
+  //     O SubmitVisao recarrega os filtros salvos da visão; aqui, no form já preparado,
+  //     zeramos marcas/coleção (Todos) ANTES do OK — que é quem submete o relatório final.
   await page.evaluate((emp) => {
     document.querySelectorAll('input[id="empresas_1"]').forEach(cb => cb.checked = false);
     document.querySelectorAll('input[value="1"][type="checkbox"]').forEach(cb => cb.checked = false);
     document.querySelectorAll(`input[id="empresas_${emp}"]`).forEach(cb => cb.checked = true);
     document.querySelectorAll(`input[value="${emp}"][type="checkbox"]`).forEach(cb => cb.checked = true);
+    // reset marca/coleção → Todos (opção value="")
+    const resetSelect = (name) => {
+      const s = document.querySelector(`select[name="${name}"]`); if (!s) return;
+      const temTodos = [...s.options].some(o => o.value === "");
+      [...s.options].forEach(o => { o.selected = temTodos ? (o.value === "") : false; });
+      s.dispatchEvent(new Event("change"));
+      try { if (window.jQuery) window.jQuery(s).multiselect("refresh"); } catch (_) {}
+      // desmarca também os checkboxes do widget jQuery (mirror) que referenciem esse select
+      document.querySelectorAll(`input[type=checkbox][name^="multiselect_${name}"], input[type=checkbox][name^="${name}"]`).forEach(cb => { if (cb.value !== "") cb.checked = false; });
+    };
+    ["marcas", "colecoes"].forEach(resetSelect);
   }, EMP);
 
   // etapa 2: OK (gera de fato) — dispara NAVEGAÇÃO (POST → página de resultados)
@@ -150,7 +148,8 @@ async function extrair(page) {
     const rows = [...document.querySelectorAll("table tr")];
     const prod = {};      // agregado por código (analítico)
     const grupos = [];    // subtotais por grupo (sintético)
-    const dbg = { totalTr: rows.length, lenHist: {}, skipped12notNum: [], matched: 0 };
+    const bodyTxt = (document.body.innerText || "");
+    const dbg = { totalTr: rows.length, lenHist: {}, skipped12notNum: [], matched: 0, marcaHdr: (bodyTxt.match(/Marca:[^\n]*/) || [""])[0].slice(0, 120), setorHdr: (bodyTxt.match(/Setor:[^\n]*/) || [""])[0].slice(0, 60) };
     let totais = null;
     let grupoAtual = null;
     for (const tr of rows) {

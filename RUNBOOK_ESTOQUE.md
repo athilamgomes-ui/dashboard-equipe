@@ -130,6 +130,50 @@ Três armadilhas resolvidas em 19/08/2026, todas do mesmo endpoint:
    (`hdn_bloqueio_loja_logada`) antes da primeira escrita da loja.
 3. **A trava de empresa é obrigatória.** Sem ela, o lote da L4 teria sido gravado na L1.
 
+## Contagem conferida na tela (item 1 do feedback de 19/08)
+
+O painel deixou de só diagnosticar. No bloco de saldo negativo cada produto tem um campo
+**"contagem real"**; o valor é salvo no Supabase (`estoque_contagem`) e sobrevive ao recarregamento.
+**Gerar lote** marca as contagens como prontas (nada é escrito no ERP nesse momento) e pergunta se o
+lote é urgente. Dois ritmos, como o Athila escolheu:
+
+| Ritmo | Como dispara | Quem executa |
+|---|---|---|
+| Urgente | botão **⚡ Aplicar agora** → grava em `estoque_trigger` | `watch_estoque_trigger.mjs` (launchd `com.amgomes.estoquetrigger`, KeepAlive) → `aplica_contagem_estoque.mjs --urgentes` |
+| Semanal | nada na tela | `node scripts/aplica_contagem_estoque.mjs` (lote inteiro que está `na_fila`) |
+
+A escrita mora em **`estoque_ajuste_core.mjs`**, compartilhada com `ajusta_saldo_estoque.mjs`: as
+travas de empresa e a leitura do form por `frames()` não podem divergir entre os dois caminhos, e
+o log append-only é o mesmo `dados_estoque/ajustes_saldo.json`.
+
+⚠️ **Pré-requisito:** rodar `scripts/estoque_supabase.sql` uma vez no SQL Editor do Supabase
+(projeto `valhewbvjwdkkvuejrxa`). Sem isso a tela mostra o aviso vermelho e não salva nada.
+⚠️ As tabelas usam a chave `anon` com RLS liberado — mesmo padrão da precificação, e mesma
+ressalva de [[supabase-projetos-e-limite]]: quem tiver a chave lê e escreve nelas.
+
+## Seletor de loja (item 2)
+
+O padrão de abertura é **uma loja** (L1), persistido em `localStorage`; "Todas" continua existindo
+mas não é o padrão. Todos os blocos respeitam o filtro. L3 e L5 mostram aviso de que aguardam
+conferência física da gerente e **não devem ser zeradas** antes da contagem.
+
+## Validade / vencimento (item 3) — levantamento de 20/08/2026
+
+**O dado não existe em lugar nenhum do ERP hoje.** Confirmado por varredura:
+- `relatorio_compra_venda_saldo_empresa.asp` (a fonte do painel): **nenhuma** coluna ou filtro de
+  lote/validade;
+- `produtos/relatorio_produtos.asp` ("Produtos Cadastrados", Suprimentos > Estoque > Relatórios):
+  24 filtros, **nenhum** de validade ou lote — não dá nem para contar quantos produtos têm
+  "Meses de Validade" preenchido;
+- `produtos/relatorio_lotes.asp` ("Relatório de Consulta de Lotes"): a tela existe e aceita
+  empresa/depósito/período, mas não devolveu nenhuma linha.
+
+**Consequência para o card automático:** ligar o controle de lote (Empresa > Parâmetros Globais >
+Acesso Restrito > Estoque) não traz validade retroativa. O lote é preenchido ao **finalizar a entrada
+da NF-e**, então só a mercadoria que entrar DEPOIS de ligar passa a ter validade. Para o estoque que
+já está na prateleira — que é justamente o que vence primeiro — **o Excel da loja é a única fonte**,
+provavelmente por um ano. Ou seja, o upload (3.2b) não é paliativo: é o caminho principal no começo.
+
 ## Registro de execuções
 
 | Data | Resultado |
