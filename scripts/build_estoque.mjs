@@ -84,9 +84,17 @@ const histDep = fs.existsSync(P_HD) ? JSON.parse(fs.readFileSync(P_HD, "utf8")) 
 if (!snap.lojas || Object.keys(snap.lojas).length !== 4) morre(`snapshot tem ${Object.keys(snap.lojas || {}).length} lojas (esperado 4)`);
 const geradoEm = snap.gerado_em;
 // idade real do dado de CADA loja (a coleta pode cobrir só algumas)
+// null = a loja veio de um snapshot anterior sem carimbo; o painel diz "data desconhecida"
+// em vez de fingir que o dado é de agora.
 const coletaLoja = {};
-for (const L of LOJAS) coletaLoja[L.key] = snap.lojas[L.key]?.coletado_em || snap.gerado_em;
-const isoHoje = geradoEm.slice(0, 10);
+for (const L of LOJAS) coletaLoja[L.key] = snap.lojas[L.key]?.coletado_em || null;
+// ⚠️ gerado_em é UTC. Cortar slice(0,10) dele dá a data ERRADA depois das 21h locais — foi assim
+// que uma coleta de 19/08 23:41 apareceu no painel como 20/08 (família do "timestamp mentiroso").
+// A data também é a chave das janelas, que o coletor grava em data LOCAL: divergir aqui faria o
+// build procurar janela que não existe e o sanity reprovar.
+const dataLocal = iso => { const z = new Date(iso); return new Date(z.getTime() - z.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+const horaLocal = iso => new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+const isoHoje = dataLocal(geradoEm);
 const dBR = s => s ? `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(0, 4)}` : "—";
 const diasEntre = (a, b) => Math.round((new Date(b) - new Date(a)) / 86400000);
 
@@ -379,9 +387,9 @@ for (const L of LOJAS)
     if (b.ajuste) excluidos.push({ loja: L.key, id: b.id, data: b.data, nome: b.nome, itens: (bal.itens[String(b.id)] || []).length });
 
 const DADOS = {
-  geradoEm, geradoEmBR: `${dBR(isoHoje)} às ${new Date(geradoEm).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`,
+  geradoEm, geradoEmBR: `${dBR(isoHoje)} às ${horaLocal(geradoEm)}`,
   diasBalanco: DIAS_BALANCO, corteBalanco: corteISO,
-  lojas: LOJAS, kpis, coletaLoja,
+  lojas: LOJAS, kpis, coletaLoja, geradoEm2: isoHoje,
   recon: itensRecon, cobertura, negativos, vencidos, precos: precosTop, fator, excluidos,
   zeramentos: Object.values(zerado).map(a => ({ loja: a.loja, cod: a.cod, desc: a.desc, grupo: a.grupo,
     quando: a.quando.slice(0, 10), de: a.saldo_anterior, para: a.saldo_confirmado })),

@@ -12,6 +12,7 @@ async function abrir(pass){
   D = JSON.parse(await decifrar(pass));
   document.getElementById('lock').style.display='none';
   document.getElementById('app').style.display='block';
+  await carregarContagem();
   iniciar();
   try{ sessionStorage.setItem('estoque_ok', pass); }catch(e){}
 }
@@ -48,15 +49,49 @@ const box = (titulo, hint, corpo, nota) =>
   (nota?'<div class="nota">'+nota+'</div>':'')+'</div>';
 
 let aba = "rec";
-const selLoja = document.getElementById("f-loja");
+// loja selecionada — o Athila pediu UMA loja por vez, não o consolidado (cada loja é uma
+// situação: L1 e L4 já foram corrigidas, L3 e L5 esperam conferência física das gerentes).
+let lojaSel = (()=>{ try{ return localStorage.getItem('estoque_loja') ?? 'L1'; }catch(e){ return 'L1'; } })();
 const inpQ = document.getElementById("f-q");
-const filtraLoja = arr => { const l=selLoja.value; return l? arr.filter(x=>x.loja===l) : arr; };
+const filtraLoja = arr => lojaSel ? arr.filter(x=>x.loja===lojaSel) : arr;
 function filtraQ(arr){
   const q=(inpQ.value||"").trim().toLowerCase();
   if(!q) return arr;
   return arr.filter(x => (x.desc||"").toLowerCase().includes(q) || (x.marca||"").toLowerCase().includes(q) || String(x.cod||"").includes(q));
 }
 const base = arr => filtraQ(filtraLoja(arr));
+
+// ── barra de lojas ──
+const AGUARDA_CONFERENCIA = { L3:true, L5:true };
+function renderLojaBar(){
+  const b=document.getElementById("lojabar");
+  const opc=[{key:"",nome:"Todas as lojas",cidade:"consolidado",cor:"#64748b"}].concat(D.lojas);
+  b.innerHTML = opc.map(l=>{
+    const k=D.kpis[l.key];
+    const sub = l.key ? (k? k.pct+"% fecham" : "") : "visão geral";
+    return '<div class="lojabtn'+(lojaSel===l.key?' on':'')+'" style="--lc:'+l.cor+'" data-l="'+l.key+'">'+
+      (l.key||"Todas")+' <small>'+esc(l.key? l.cidade+" · "+sub : sub)+'</small></div>';
+  }).join('');
+  for(const el of b.querySelectorAll(".lojabtn")) el.onclick = () => {
+    lojaSel = el.dataset.l;
+    try{ localStorage.setItem('estoque_loja', lojaSel); }catch(e){}
+    renderLojaBar(); renderKpis(); renderAviso(); pintar();
+  };
+}
+function renderAviso(){
+  const a=document.getElementById("aviso-loja");
+  if(lojaSel && AGUARDA_CONFERENCIA[lojaSel]){
+    const n=D.negativos.filter(x=>x.loja===lojaSel);
+    a.style.display="block";
+    a.innerHTML='⚠️ <b>'+lojaSel+' aguarda conferência física da gerente.</b> São '+n.length+
+      ' produtos com saldo negativo ('+Math.round(n.reduce((s,x)=>s+x.sal,0))+' un) e eles <b>não devem ser zerados</b> antes da contagem — '+
+      'zerar apaga a evidência de onde está o problema. Em L3, mais da metade do negativo é lixa da Santa Clara.';
+  } else if(!lojaSel){
+    a.style.display="block";
+    a.innerHTML='Você está vendo as <b>quatro lojas somadas</b>. Cada loja é uma situação diferente — '+
+      'L1 e L4 já passaram pelo zeramento de 19/08, L3 e L5 ainda não foram tocadas. Para agir, escolha uma loja.';
+  } else a.style.display="none";
+}
 
 // ── KPIs ──
 function renderKpis(){
@@ -65,15 +100,19 @@ function renderKpis(){
     const k=D.kpis[L.key]||{};
     const pct = k.pct==null? "—" : k.pct+"%";
     const c = k.pct==null? "#94a3b8" : k.pct>=90? "#4ade80" : k.pct>=70? "#fbbf24" : "#f87171";
-    return '<div class="kpi" style="--kc:'+L.cor+';--kv:'+c+'">'+
+    return '<div class="kpi'+(lojaSel&&lojaSel!==L.key?' dim':'')+'" style="--kc:'+L.cor+';--kv:'+c+';cursor:pointer" onclick="selecionarLoja(\''+L.key+'\')">'+
       '<div class="lbl">'+L.key+' · '+esc(L.cidade)+'</div>'+
       '<div class="val">'+pct+'</div>'+
       '<div class="sub">'+(k.fecham||0).toLocaleString("pt-BR")+' de '+(k.comBalanco||0).toLocaleString("pt-BR")+' produtos fecham · '+
       (k.unidades||0).toLocaleString("pt-BR")+' un. sem documento</div>'+
       '<div class="bar"><i style="width:'+(k.pct||0)+'%;background:'+c+'"></i></div>'+
       '<div class="sub" style="margin-top:7px">'+(k.skus||0).toLocaleString("pt-BR")+' SKUs com saldo · '+nf(k.valor)+' a custo médio'+
-        (D.coletaLoja&&D.coletaLoja[L.key]&&D.coletaLoja[L.key].slice(0,10)!==D.geradoEm.slice(0,10)?
-          '<br><span style="color:#fbbf24">dado de '+dBR(D.coletaLoja[L.key].slice(0,10))+'</span>':'')+'</div>'+
+        (function(){
+          const c=(D.coletaLoja||{})[L.key];
+          if(c==null) return '<br><span style="color:#fbbf24">coleta em data desconhecida</span>';
+          const z=new Date(c), dl=new Date(z.getTime()-z.getTimezoneOffset()*60000).toISOString().slice(0,10);
+          return dl!==D.geradoEm2 ? '<br><span style="color:#fbbf24">dado de '+dBR(dl)+'</span>' : '';
+        })()+'</div>'+
     '</div>';
   }).join('');
 }
@@ -111,6 +150,11 @@ function renderRec(){
       "(desde "+dBR(D.corteBalanco)+"); balanços de <b>AJUSTE</b> são injeção de saldo, não contagem, e ficam fora.");
 }
 function setClasse(k){ fClasse=k; renderRec(); }
+function selecionarLoja(k){
+  lojaSel = k;
+  try{ localStorage.setItem('estoque_loja', k); }catch(e){}
+  renderLojaBar(); renderKpis(); renderAviso(); pintar();
+}
 
 // ── 2. cobertura ──
 function renderCob(){
@@ -130,6 +174,125 @@ function renderCob(){
     "reconciliação fecha, <b>não vale recontar</b>.");
 }
 
+
+// ═══════════ CONTAGEM CONFERIDA — o painel deixa de só diagnosticar ═══════════
+// A pessoa digita a quantidade REAL contada, o valor fica salvo no Supabase (sobrevive ao
+// recarregamento) e vira lote de ajuste. Nenhuma quantidade é inferida pelo sistema.
+const SB_URL = "https://valhewbvjwdkkvuejrxa.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4";
+const SB_H = { apikey: SB_KEY, Authorization: "Bearer "+SB_KEY, "Content-Type": "application/json" };
+let CONTAGEM = {};
+let sbErro = null;
+
+function quemConfere(){
+  let n = null;
+  try{ n = localStorage.getItem('estoque_quem'); }catch(e){}
+  if(!n){
+    n = prompt("Seu nome (fica registrado em cada contagem):","");
+    if(n){ try{ localStorage.setItem('estoque_quem', n); }catch(e){} }
+  }
+  return n || "";
+}
+
+async function carregarContagem(){
+  try{
+    const r = await fetch(SB_URL+"/rest/v1/estoque_contagem?status=in.(conferido,na_fila)&select=*", {headers:SB_H});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    CONTAGEM = {}; sbErro = null;
+    for(const row of await r.json()) CONTAGEM[row.loja+"|"+row.cod] = row;
+  }catch(e){ sbErro = e.message; CONTAGEM = {}; }
+}
+
+async function salvarContagem(loja, cod, desc, saldoSistema, qtd, origem){
+  const k = loja+"|"+cod, existente = CONTAGEM[k];
+  const corpo = { loja, cod:String(cod), descricao:desc, origem, saldo_sistema:saldoSistema,
+                  qtd_real:qtd, conferido_por:quemConfere(), conferido_em:new Date().toISOString(), status:'conferido' };
+  try{
+    const url = existente ? SB_URL+"/rest/v1/estoque_contagem?id=eq."+existente.id : SB_URL+"/rest/v1/estoque_contagem";
+    const r = await fetch(url, {method: existente?"PATCH":"POST", headers:{...SB_H, Prefer:"return=representation"}, body:JSON.stringify(corpo)});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const j = await r.json();
+    CONTAGEM[k] = Array.isArray(j)? j[0] : j;
+    return true;
+  }catch(e){ alert("Não consegui salvar a contagem ("+e.message+"). O valor NÃO foi guardado."); return false; }
+}
+
+async function apagarContagem(loja, cod){
+  const k=loja+"|"+cod, row=CONTAGEM[k];
+  if(!row) return;
+  try{ await fetch(SB_URL+"/rest/v1/estoque_contagem?id=eq."+row.id,{method:"DELETE",headers:SB_H}); delete CONTAGEM[k]; }catch(e){}
+}
+
+function inputContagem(loja, cod, desc, saldo, origem){
+  const row = CONTAGEM[loja+"|"+cod];
+  const val = row ? row.qtd_real : "";
+  const naFila = row && row.status==='na_fila';
+  return '<input class="cont" type="number" step="1" value="'+val+'"'+(naFila?' disabled':'')+
+    ' data-loja="'+loja+'" data-cod="'+cod+'" data-origem="'+origem+'" data-saldo="'+saldo+'"'+
+    ' data-desc="'+esc(desc).replace(/"/g,'&quot;')+'" placeholder="contar"/>'+
+    (naFila?'<span class="pill p-ok" style="margin-left:6px">na fila</span>':
+      row?'<span class="pill p-ok" style="margin-left:6px">salvo</span>':'');
+}
+
+function ligarInputs(){
+  for(const el of document.querySelectorAll("input.cont")){
+    el.onchange = async () => {
+      const v = el.value.trim();
+      if(v===""){ await apagarContagem(el.dataset.loja, el.dataset.cod); pintar(); return; }
+      const n = Number(v);
+      if(!isFinite(n) || n<0){ alert("Quantidade inválida."); el.value=""; return; }
+      el.disabled = true;
+      await salvarContagem(el.dataset.loja, el.dataset.cod, el.dataset.desc, Number(el.dataset.saldo), n, el.dataset.origem);
+      el.disabled = false;
+      pintar();
+    };
+  }
+}
+
+function barraLote(){
+  if(sbErro) return '<div class="aviso">Não consegui falar com o Supabase (<b>'+esc(sbErro)+'</b>). '+
+    'As contagens NÃO estão sendo salvas. Se a tabela ainda não existe, rode <code>scripts/estoque_supabase.sql</code>.</div>';
+  const todos = Object.values(CONTAGEM).filter(r=>!lojaSel || r.loja===lojaSel);
+  const conf = todos.filter(r=>r.status==='conferido');
+  const fila = todos.filter(r=>r.status==='na_fila');
+  return '<div class="lote">'+
+    '<div><b>'+conf.length+'</b> conferido(s) aguardando lote · <b>'+fila.length+'</b> na fila de aplicação</div>'+
+    '<div class="lote-b">'+
+      '<button class="btn" onclick="gerarLote()"'+(conf.length?'':' disabled')+'>Gerar lote de ajustes ('+conf.length+')</button>'+
+      '<button class="btn urg" onclick="aplicarAgora()"'+(fila.length?'':' disabled')+'>⚡ Aplicar agora</button>'+
+    '</div>'+
+    '<div class="hint" style="flex-basis:100%">Gerar lote só marca as contagens como prontas — nada é escrito no ERP nesse momento. '+
+    'O <b>⚡ Aplicar agora</b> manda as urgentes para o ERP em poucos minutos; o restante entra no lote semanal '+
+    '(<code>node aplica_contagem_estoque.mjs</code>). Cada escrita grava saldo de antes e depois no log do projeto.</div>'+
+  '</div>';
+}
+
+async function gerarLote(){
+  const alvo = Object.values(CONTAGEM).filter(r=>r.status==='conferido' && (!lojaSel || r.loja===lojaSel));
+  if(!alvo.length) return;
+  const urg = confirm(alvo.length+" produto(s) vao para a fila de ajuste.\n\nOK = marcar como URGENTE (aplica pelo botao)\nCancelar = deixar para o lote semanal");
+  for(const r of alvo){
+    try{
+      await fetch(SB_URL+"/rest/v1/estoque_contagem?id=eq."+r.id,{method:"PATCH",headers:SB_H,
+        body:JSON.stringify({status:'na_fila', urgente:urg, enfileirado_em:new Date().toISOString()})});
+    }catch(e){ alert("Falha ao enfileirar "+r.cod+": "+e.message); }
+  }
+  await carregarContagem(); pintar();
+  alert(alvo.length+" produto(s) na fila"+(urg?" como URGENTE. Clique em Aplicar agora.":". Serao aplicados no lote semanal."));
+}
+
+async function aplicarAgora(){
+  const fila = Object.values(CONTAGEM).filter(r=>r.status==='na_fila' && r.urgente);
+  if(!fila.length){ alert("Nao ha contagens marcadas como urgentes na fila."); return; }
+  if(!confirm(fila.length+" produto(s) urgentes serao ESCRITOS NO ERP.\n\nIsso altera o saldo de verdade. Confirmar?")) return;
+  try{
+    const r = await fetch(SB_URL+"/rest/v1/estoque_trigger?id=eq.1",{method:"PATCH",headers:SB_H,
+      body:JSON.stringify({solicitado_em:new Date().toISOString(), solicitado_por:quemConfere()})});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    alert("Pedido enviado. A aplicacao roda nos proximos minutos; recarregue a pagina depois para ver o resultado.");
+  }catch(e){ alert("Nao consegui enviar o pedido ("+e.message+")."); }
+}
+
 // ── 3. negativos ──
 function renderNeg(){
   const arr = base(D.negativos);
@@ -138,10 +301,11 @@ function renderNeg(){
     '<tr><td>'+pillLoja(n.loja)+'</td><td class="num">'+n.cod+'</td><td class="d">'+esc(n.desc)+'<div class="hint">'+esc(n.marca)+'</div></td>'+
     '<td class="num neg">'+nq(n.sal)+'</td><td class="num">'+nf(n.custo*Math.abs(n.sal))+'</td>'+
     '<td>'+dBR(n.desde)+' <span class="hint">('+n.fonte+')</span></td><td class="num">'+n.dias+'</td>'+
-    '<td>'+(n.reincidente?'<span class="pill p-alerta">voltou depois do zeramento de '+dBR(n.zerado_em)+'</span>':'<span class="hint">—</span>')+'</td></tr>');
+    '<td>'+(n.reincidente?'<span class="pill p-alerta">voltou depois do zeramento de '+dBR(n.zerado_em)+'</span>':'<span class="hint">—</span>')+'</td>'+
+    '<td>'+inputContagem(n.loja,n.cod,n.desc,n.sal,'negativos')+'</td></tr>');
   const un = arr.reduce((a,b)=>a+Math.abs(b.sal),0);
-  document.getElementById("p-neg").innerHTML = box("Saldo negativo", arr.length.toLocaleString("pt-BR")+" produtos · "+Math.round(un).toLocaleString("pt-BR")+" unidades negativas"+(reinc?" · "+reinc+" reincidentes":""),
-    tabela([{t:"Loja"},{t:"Cód",n:1},{t:"Produto"},{t:"Saldo",n:1},{t:"Exposição",n:1},{t:"Negativo desde"},{t:"Dias",n:1},{t:"Reincidência"}], linhas),
+  document.getElementById("p-neg").innerHTML = barraLote() + box("Saldo negativo", arr.length.toLocaleString("pt-BR")+" produtos · "+Math.round(un).toLocaleString("pt-BR")+" unidades negativas"+(reinc?" · "+reinc+" reincidentes":""),
+    tabela([{t:"Loja"},{t:"Cód",n:1},{t:"Produto"},{t:"Saldo",n:1},{t:"Exposição",n:1},{t:"Negativo desde"},{t:"Dias",n:1},{t:"Reincidência"},{t:"Contagem real"}], linhas),
     "Saldo negativo é venda sem entrada correspondente — e é o que <b>explode o custo médio</b> quando a próxima nota entra "+
     "(média ponderada dividida por denominador quase zero). <b>“Negativo desde”</b>: o ERP não guarda essa data, então o pipeline "+
     "registra a primeira execução em que viu o produto negativo — por isso muitos aparecem como <b>1º registro</b> hoje e a antiguidade "+
@@ -245,19 +409,18 @@ function renderFat(){
 }
 
 const RENDER = { rec:renderRec, cob:renderCob, neg:renderNeg, dev:renderDev, pre:renderPre, fat:renderFat };
-function pintar(){ RENDER[aba](); }
+function pintar(){ RENDER[aba](); ligarInputs(); }
 
 function iniciar(){
   document.getElementById("genDate").textContent = D.geradoEmBR;
-  selLoja.innerHTML = '<option value="">Todas</option>'+D.lojas.map(l=>'<option value="'+l.key+'">'+l.key+' · '+esc(l.cidade)+'</option>').join('');
-  renderKpis();
+  if(lojaSel && !D.lojas.some(l=>l.key===lojaSel)) lojaSel='L1';
+  renderLojaBar(); renderAviso(); renderKpis();
   for(const t of document.querySelectorAll(".tab")) t.onclick = () => {
     document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===t));
     aba = t.dataset.p;
     document.querySelectorAll(".pane").forEach(p=>p.classList.toggle("on",p.id==="p-"+aba));
     pintar();
   };
-  selLoja.onchange = pintar;
   let deb; inpQ.oninput = () => { clearTimeout(deb); deb=setTimeout(pintar,220); };
   pintar();
 }

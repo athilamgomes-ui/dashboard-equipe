@@ -68,6 +68,27 @@ async function gerar(page) {
   await page.evaluate(({ emp, di, df, sint, agrup, custo }) => {
     const setRadio = (name, val) => { const r = [...document.querySelectorAll(`input[name="${name}"]`)].find(x => x.value === val); if (r) { r.checked = true; r.dispatchEvent(new Event("click")); } };
     const setChk = (name, on) => { document.querySelectorAll(`input[name="${name}"]`).forEach(c => c.checked = on); };
+    // ⚠️ RESET DE FILTROS HERDADOS DO PERFIL PERSISTENTE — o cron_etapa2 (visão 22 Marcas A)
+    // deixa marcas/coleção grudados no multiselect; sem limpar, o relatório conta só ~19 marcas.
+    // Para cada multiselect de filtro: se tem opção value="" (Todos), seleciona só ela;
+    // senão desmarca tudo (none = todos). Depois dispara change pro widget/ASP registrar.
+    // A raiz do filtro é o id_visao: o relatório abre com uma visão salva (22 Marcas 30%A / 23 20%B)
+    // pré-selecionada, e o "Gerar Relatório" (SubmitVisao) aplica os filtros dela no SERVIDOR.
+    // Zerar o id_visao (opção vazia) faz o relatório rodar a config MANUAL (todas as marcas).
+    const v = document.getElementById("Form1_id_visao");
+    if (v) {
+      if (![...v.options].some(o => o.value === "")) { const o = document.createElement("option"); o.value = ""; o.text = "(nenhuma)"; v.insertBefore(o, v.firstChild); }
+      v.value = ""; v.dispatchEvent(new Event("change"));
+    }
+    // reforço: limpa multiselects herdados no DOM
+    const resetSelect = (name) => {
+      const s = document.querySelector(`select[name="${name}"]`); if (!s) return;
+      const temTodos = [...s.options].some(o => o.value === "");
+      [...s.options].forEach(o => { o.selected = temTodos ? (o.value === "") : false; });
+      s.dispatchEvent(new Event("change"));
+    };
+    ["marcas", "colecoes", "linhas", "classificacao", "setores", "series", "cfops", "vendedores", "tabelasPreco", "produtos", "clientefornecedor"].forEach(resetSelect);
+
     [...document.querySelectorAll('input[id^="empresas_"]')].forEach(cb => cb.checked = false);
     const el = document.getElementById("empresas_" + emp); if (el) el.checked = true;
     document.getElementById("f_data1").value = di;
@@ -105,14 +126,22 @@ async function gerar(page) {
   ]);
   await page.waitForTimeout(2500);  // deixa o resultado assentar antes de poll (evita context destroyed)
 
-  // aguarda linha "Totais" — poll blindado contra navegação transitória
-  let ok = false;
-  for (let i = 0; i < 40; i++) {
+  // O relatório do Microvix faz STREAMING (linhas chegam aos poucos; o Totais só no fim).
+  // Espera a linha "Totais" aparecer E a contagem de linhas estabilizar. Até 180s.
+  let ok = false, lastN = -1, stable = 0;
+  for (let i = 0; i < 180; i++) {
     await page.waitForTimeout(1000);
-    ok = await page.evaluate(() => [...document.querySelectorAll("table tr")].some(r => [...r.querySelectorAll("td")].some(c => c.textContent.trim() === "Totais"))).catch(() => false);
-    if (ok) break;
+    const st = await page.evaluate(() => {
+      const trs = document.querySelectorAll("table tr");
+      const hasTot = [...trs].some(r => [...r.querySelectorAll("td")].some(c => c.textContent.trim() === "Totais"));
+      return { n: trs.length, hasTot };
+    }).catch(() => ({ n: -1, hasTot: false }));
+    if (st.hasTot) { // achou Totais: confirma estabilidade da tabela (fim do streaming)
+      if (st.n === lastN) { if (++stable >= 2) { ok = true; break; } } else stable = 0;
+      lastN = st.n;
+    }
   }
-  if (!ok) throw new Error("linha Totais não apareceu em 40s");
+  if (!ok) throw new Error("linha Totais não estabilizou em 180s");
 }
 
 async function extrair(page) {
@@ -121,10 +150,13 @@ async function extrair(page) {
     const rows = [...document.querySelectorAll("table tr")];
     const prod = {};      // agregado por código (analítico)
     const grupos = [];    // subtotais por grupo (sintético)
+    const dbg = { totalTr: rows.length, lenHist: {}, skipped12notNum: [], matched: 0 };
     let totais = null;
     let grupoAtual = null;
     for (const tr of rows) {
       const cells = [...tr.querySelectorAll("td")].map(c => norm(c.textContent));
+      dbg.lenHist[cells.length] = (dbg.lenHist[cells.length] || 0) + 1;
+      if (cells.length >= 12 && !/^\d+$/.test(cells[0]) && !cells.includes("Totais") && dbg.skipped12notNum.length < 12) dbg.skipped12notNum.push(cells.slice(0, 12));
       // header de grupo (1 célula): "Marca: X", "Vendedor - Y", "Setor: Z"...
       if (cells.length === 1) {
         const m = cells[0].match(/(?:Marca|Setor|Linha|Cole[cç][aã]o|Fornecedor|Classifica[cç][aã]o)\s*[:\-]\s*(.+)/i);
@@ -141,20 +173,27 @@ async function extrair(page) {
         continue;
       }
       // linha de produto analítico: 12 células, [0] numérico
+      // ⚠️ COLUNAS DE PREÇO SÃO UNITÁRIAS (Custo Época[6], Pr.Tabela[8], Pr.Venda Líq[9]);
+      //    só CMV Total[7] já vem multiplicado. Faturamento/custo da LINHA = unitário × qtd[5].
       if (cells.length >= 12 && /^\d+$/.test(cells[0])) {
         const cod = cells[0];
-        const q = { qtd: cells[5], custoUnit: cells[6], cmv: cells[7], prTabela: cells[8], fat: cells[9], markup: cells[10], margem: cells[11] };
-        if (!prod[cod]) prod[cod] = { cod, desc: cells[1], ref: cells[2], un: cells[3], qtd: 0, cmv: 0, fat: 0, prTabela: 0, custoUnitLast: q.custoUnit };
-        // agrega em número (BR)
         const br = t => { const v = parseFloat(String(t ?? "0").replace(/\./g, "").replace(",", ".").replace(/[^\d.\-]/g, "")); return isNaN(v) ? 0 : v; };
-        prod[cod].qtd += br(q.qtd);
-        prod[cod].cmv += br(q.cmv);
-        prod[cod].fat += br(q.fat);
-        prod[cod].prTabela += br(q.prTabela);
-        prod[cod].custoUnitLast = q.custoUnit;
+        const qtd = br(cells[5]);
+        const fatLine = br(cells[9]) * qtd;         // Pr.Venda Líq (unit) × qtd
+        const custoEpLine = br(cells[6]) * qtd;     // Custo Época (unit) × qtd  → base da margem do ERP
+        const cmvLine = br(cells[7]);               // CMV Total (já total)
+        const prTabLine = br(cells[8]) * qtd;       // Pr.Tabela (unit) × qtd
+        if (!prod[cod]) prod[cod] = { cod, desc: cells[1], ref: cells[2], un: cells[3], qtd: 0, custoEpoca: 0, cmv: 0, fat: 0, prTabela: 0, custoUnitLast: cells[6] };
+        prod[cod].qtd += qtd;
+        prod[cod].custoEpoca += custoEpLine;
+        prod[cod].cmv += cmvLine;
+        prod[cod].fat += fatLine;
+        prod[cod].prTabela += prTabLine;
+        prod[cod].custoUnitLast = cells[6];
+        dbg.matched++;
       }
     }
-    return { prodArr: Object.values(prod), grupos, totais };
+    return { prodArr: Object.values(prod), grupos, totais, dbg };
   });
 }
 
@@ -183,16 +222,22 @@ async function main() {
     prTabela: parseBR(t[6]), faturamento: parseBR(t[7]), markup: parseBR(t[8]), margem: parseBR(t[9]),
   };
 
-  const out = { emp: EMP, loja: EMP_TO_LOJA[EMP], di: DI, df: DF, sintetico: SINT, agrup: AGRUP, custo: CUSTO, totais };
+  const out = { emp: EMP, loja: EMP_TO_LOJA[EMP], di: DI, df: DF, sintetico: SINT, agrup: AGRUP, custo: CUSTO, totais, _dbg: raw.dbg };
 
   if (SINT === "N") {
     out.rows = raw.prodArr.map(p => ({
       cod: p.cod, desc: p.desc, ref: p.ref, un: p.un,
-      qtd: p.qtd, cmv: Math.round(p.cmv * 100) / 100, faturamento: Math.round(p.fat * 100) / 100,
+      qtd: p.qtd,
+      custoEpoca: Math.round(p.custoEpoca * 100) / 100,
+      cmv: Math.round(p.cmv * 100) / 100,
+      faturamento: Math.round(p.fat * 100) / 100,
+      prTabela: Math.round(p.prTabela * 100) / 100,
       custoUnit: parseBR(p.custoUnitLast),
-      margem: p.fat > 0 ? Math.round((p.fat - p.cmv) / p.fat * 1000) / 10 : 0,
+      // margem pela Custo Época (mesma base que o ERP usa no Totais)
+      margem: p.fat > 0 ? Math.round((p.fat - p.custoEpoca) / p.fat * 1000) / 10 : 0,
     }));
-    log(`analítico: ${out.rows.length} produtos · fat R$${totais.faturamento.toFixed(2)} · margem ${totais.margem}%`);
+    const somaFat = out.rows.reduce((s, r) => s + r.faturamento, 0);
+    log(`analítico: ${out.rows.length} produtos · somaFat R$${somaFat.toFixed(2)} vs totais R$${totais.faturamento.toFixed(2)} · margem ${totais.margem}%`);
   } else {
     out.grupos = raw.grupos.map(g => ({ grupo: g.grupo, cells: g.cells }));
     log(`sintético: ${out.grupos.length} grupos · fat R$${totais.faturamento.toFixed(2)}`);
