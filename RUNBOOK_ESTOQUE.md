@@ -281,6 +281,42 @@ antes apareciam como preço errado.
 e ela usa a MESMA API do balanço. `CatalogoProdutos/ObterDetalhesProduto` (POST `{codigoProduto}`)
 devolve o produto; a listagem só expõe 7 colunas e nenhuma é unidade ou fator.
 
+## Parâmetros do ERP — o que está ligado e o que falta (levantado 20/08/2026)
+
+Lidos da API (`Suprimentos/ObterParametrosEPermissoes` + `ObterDadosIniciaisParaListagem`):
+**212 parâmetros booleanos, 82 ligados e 130 desligados.** Lista completa em `/tmp/params_erp.json`
+(recuperável a qualquer momento pela mesma chamada). O que importa para estoque:
+
+**Controle de lote: já está TODO ligado no portal.**
+`ControleLoteProduto` ✅ · `ControleLoteDatas` ✅ · `ProdutosControlaLote` ✅ ·
+`ExigeLoteOrcamentoVenda` ✅ · `BloqueiaControleLoteProduto` ❌ (nada bloqueando).
+Falta só o cadastro por produto e o preenchimento na entrada da NF-e.
+
+**Ligar primeiro (risco baixo, ganho direto):**
+| Parâmetro | Hoje | O que muda |
+|---|---|---|
+| `LogMovimentacoes` | desligado | passa a registrar **quem** mexeu no saldo. Hoje a reconciliação descobre "mexeram sem nota" mas não sabe quem — 242 produtos nessa situação |
+| `ValidarNcm` · `ValidarGtin` · `ValidarCest` | desligados | trava entrada com NCM/GTIN/CEST errado. Já mordeu duas vezes ([[precificacao-nfe]] e compras) |
+
+**Ligar com plano (mudam o dia a dia):**
+| Parâmetro | Hoje | O que muda | Cuidado |
+|---|---|---|---|
+| `UtilizaFatorConversaoFornecedor` | desligado | cria o fator por produto×fornecedor; a coluna "Fat. Conv. Utilizado" passa a existir na NF | **muda a quantidade que entra** nas próximas notas. Cadastrar o fator antes, e conferir os códigos-irmãos de pacote/unidade que a loja criou como remendo |
+| `UtilizaUnidadeTributavel` | desligado | usa a unidade tributável do XML (`uTrib`/`qTrib`) — é onde a NF-e **já traz** a conversão (1 CX = 144 UN) | é o caminho mais automático dos dois; confirmar com a Linx se dispensa cadastrar fator produto a produto |
+| `BloqueiaProdutoSemSaldoEstoque` · `BloquearVendasComEstoqueNegativoDeposito` | desligados | impede vender o que não tem saldo — é o que deixa o negativo nascer | **só depois de acertar os saldos**, senão trava caixa. Vale piloto numa loja |
+| `UtilizaMarkupMinimo` / `MarkupMinimoPorLinha` | desligados | impede preço abaixo de um markup mínimo | ajuda no bloco "vende abaixo do custo", mas hoje boa parte desses casos é pacote×unidade, não preço |
+
+**Avaliar depois:** `UtilizaConferenciaEtapasBalancos` (contagem em duas etapas, ajudaria a cobertura
+de balanço) · `UtilizaWsAjusteSaldo` (webservice oficial de ajuste — hoje o painel escreve via POST
+no ASP) · `UtilizaCurvaPorEmpresa` (curva calculada pelo ERP; hoje é um JSON à mão) ·
+`UtilizaDepositoPreferencial` · `Inventario`.
+
+**Não ligar sem o contador:** `UtilizaControleFIFO` (troca o custo médio por FIFO — muda CMV e balanço).
+**Não precisa:** `UtilizaRotinaPrecificacao` (a casa já tem o dashboard de precificação próprio).
+
+⚠️ Estas leituras vêm do **nome** do parâmetro somado ao comportamento observado, não de documentação
+da Linx. Os quatro do grupo "com plano" mudam operação — confirmar com o suporte antes de virar a chave.
+
 ## Registro de execuções
 
 | Data | Resultado |

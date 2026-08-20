@@ -45,19 +45,26 @@ function coletaLoja(emp) {
   return JSON.parse(readFileSync(arq, "utf8"));
 }
 
+const CUSTO_MIN = 0.10;   // custo unit época abaixo disso = cadastro zerado (infla a margem)
+
 function agregaPorMarca(rows) {
   const M = {};
   for (const r of rows) {
     const marca = (r.marca || "").trim();
     if (!marca || /GERAL/i.test(marca)) continue;
     if (marca.toLowerCase() === EXCLUI_LIXA_MARCA && LIXA.test(r.desc)) continue;  // lixa Santa Clara
-    const a = M[marca] || (M[marca] = { un: 0, rs: 0, custo: 0 });
-    a.un += r.qtd; a.rs += r.faturamento; a.custo += r.custoEpoca;
+    const a = M[marca] || (M[marca] = { un: 0, rs: 0, fatClean: 0, custoClean: 0, nExcl: 0 });
+    a.un += r.qtd; a.rs += r.faturamento;   // unidades e R$ = TUDO
+    // Margem LIMPA: ignora linha de custo inválido (época) — near-zero (infla) OU custo>preço (estouro
+    // por saldo negativo). Assim a margem por marca não é distorcida pelos artefatos de estoque.
+    const custoInvalido = (r.custoUnit > 0 && r.custoUnit < CUSTO_MIN) || (r.custoEpoca > r.faturamento);
+    if (!custoInvalido && r.faturamento > 0) { a.fatClean += r.faturamento; a.custoClean += r.custoEpoca; }
+    else a.nExcl++;
   }
   const out = {};
   for (const [marca, a] of Object.entries(M)) {
     if (a.rs <= 0 && a.un <= 0) continue;
-    out[marca] = { un: Math.round(a.un), rs: Math.round(a.rs), mg: a.rs > 0 ? Math.round((a.rs - a.custo) / a.rs * 1000) / 10 : 0 };
+    out[marca] = { un: Math.round(a.un), rs: Math.round(a.rs), mg: a.fatClean > 0 ? Math.round((a.fatClean - a.custoClean) / a.fatClean * 1000) / 10 : 0 };
   }
   return out;
 }

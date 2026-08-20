@@ -725,7 +725,7 @@ renderMargemLimpa();
     rs: { label: '💰 Faturamento', col: 'R$', fmt: v => 'R$' + Math.round(v).toLocaleString('pt-BR'),
           hint: 'Marcas que mais trazem DINHEIRO no ano (venda líquida). É o ranking que mostra o peso real no caixa.' },
     mg: { label: '📈 Margem', col: 'Margem', fmt: v => v.toFixed(1).replace('.', ',') + '%',
-          hint: 'Marcas mais LUCRATIVAS (margem sobre custo da época), entre as com faturamento anual ≥ R$2.000. Margem negativa = custo de estoque estourado.' },
+          hint: 'Marcas mais LUCRATIVAS — margem limpa (custo da época, ignorando produtos de custo inválido/estoque estourado), entre as com faturamento anual ≥ R$2.000.' },
   };
   const titleCase = s => String(s).toLowerCase().replace(/(^|[\s.\-\/&])(\p{L})/gu, (_, a, b) => a + b.toUpperCase());
   const MED = ['🥇','🥈','🥉'], COR = ['#f59e0b','#94a3b8','#cd7f32'];
