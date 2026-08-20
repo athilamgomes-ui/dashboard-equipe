@@ -317,6 +317,35 @@ no ASP) · `UtilizaCurvaPorEmpresa` (curva calculada pelo ERP; hoje é um JSON �
 ⚠️ Estas leituras vêm do **nome** do parâmetro somado ao comportamento observado, não de documentação
 da Linx. Os quatro do grupo "com plano" mudam operação — confirmar com o suporte antes de virar a chave.
 
+## Unidade tributável: medido, e NÃO resolve (20/08/2026)
+
+`scripts/analisa_unidade_tributavel.mjs` baixa o XML de NF-e recentes e compara `qCom`/`uCom`
+(quantidade comercial) com `qTrib`/`uTrib` (tributável). Quando `qTrib > qCom`, o XML já traz o
+fator de conversão pronto.
+
+**Resultado: 0 de 395 itens, em 40 notas de 19 fornecedores. `qCom == qTrib` em todos.**
+Ligar `UtilizaUnidadeTributavel` não converteria nada aqui — nenhum fornecedor preenche.
+(Ressalva: a amostra é de notas pendentes dos últimos 180 dias; a **Talge** não caiu nela, e a
+precificação registra a Talge como fornecedor que traz o fator — ver `marcas_por_caixa` em
+`precificacao_params.json`. Fora ela, o XML não ajuda.)
+
+⚠️ Além de não resolver, `UtilizaUnidadeTributavel` seria **perigoso** para esta operação: é uma
+chave geral, aplicada a toda nota, sem exceção por produto. No produto que a loja compra E vende
+como pacote (12 pacotes de 100), ele transformaria o saldo em 1.200. O caminho correto é o
+`UtilizaFatorConversaoFornecedor`, que é cadastrado **produto a produto por fornecedor** e por isso
+deixa de fora quem vende o pacote inteiro.
+
+## Pares pacote/unidade a limpar antes de ligar o fator
+
+Dos 231 produtos do bloco Pacote × unidade, **33 têm código irmão**. Separando:
+- **21 são tamanhos de pacote diferentes** (C/50 × C/25, C/144 × C/20) — produtos legítimos, não mexer;
+- **12 são candidatos a duplicata** (mesma descrição, sem tamanho distinto);
+- desses 12, **10 têm o irmão com saldo zero** (código morto, inofensivo).
+
+Sobram **2 pares com saldo nos dois códigos**, que precisam de decisão antes de ligar o fator:
+`L1 18389 × 18388` (KIT C/ 5 PINCEIS, custos 100,85 e 67,76) e `L3 55398 × 62627`
+(CAIXA DE 12 GRADES). O trabalho de limpeza é bem menor do que parecia.
+
 ## Registro de execuções
 
 | Data | Resultado |
