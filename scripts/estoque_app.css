@@ -87,3 +87,13 @@ input.cont{width:88px;background:#0f172a;border:1px solid #475569;color:#f1f5f9;
   padding:5px 8px;font-size:13px;font-family:inherit;text-align:right}
 input.cont:focus{outline:none;border-color:#38bdf8}
 input.cont:disabled{opacity:.55}
+
+/* sub-abas (modelo da conciliação da maquininha): separa o que tem explicação do que não tem */
+.subtabs{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:13px}
+.subtab{flex:1;min-width:190px;background:#1e293b;border:1px solid #334155;border-radius:11px;
+  padding:11px 15px;cursor:pointer;display:flex;flex-direction:column;gap:3px}
+.subtab b{font-size:14px;color:#94a3b8}
+.subtab small{font-size:11.5px;color:#64748b}
+.subtab.on{background:#0c4a6e;border-color:#0284c7}
+.subtab.on b{color:#f1f5f9}.subtab.on small{color:#bae6fd}
+.subtab:hover b{color:#e2e8f0}

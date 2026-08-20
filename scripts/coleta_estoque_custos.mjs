@@ -100,7 +100,11 @@ async function movimento(page, cod) {
       if (/m[ée]dio/.test(t) && /unit/.test(t) && tr.cells && tr.cells.length >= 5) { hdr = [...tr.cells].map(c => (c.textContent || "").trim()); nh = tr.cells.length; break; }
     }
     if (!hdr) return { erro: "cabeçalho do movimento não encontrado", txt: (document.body.innerText || "").slice(0, 400) };
-    const iData = hdr.findIndex(h => /data/i.test(h));
+    // ⚠️ a coluna de data se chama "Emissão", não "Data" — procurar por /data/ devolvia -1 e
+    // NENHUMA linha era parseada (o cache saía com movimentos:0 e custo real vazio no painel).
+    const iData = hdr.findIndex(h => /emiss|data/i.test(h));
+    const iLote = hdr.findIndex(h => /^lote/i.test(h));
+    const iQtd = hdr.findIndex(h => /^qtd/i.test(h));
     const iMedio = hdr.findIndex(h => /m[ée]dio.*hist/i.test(h)) >= 0 ? hdr.findIndex(h => /m[ée]dio.*hist/i.test(h)) : hdr.findIndex(h => /m[ée]dio/i.test(h));
     const iVUnit = hdr.findIndex(h => /valor\s*unit/i.test(h));
     const iCfop = hdr.findIndex(h => /cfop/i.test(h));
@@ -110,9 +114,13 @@ async function movimento(page, cod) {
       const g = i => i >= 0 ? (c[i].textContent || "").trim() : "";
       const d = g(iData);
       if (!/^\d{2}\/\d{2}\/\d{2,4}$/.test(d)) continue;
-      linhas.push({ data: d, medio: g(iMedio), vunit: g(iVUnit), cfop: g(iCfop) });
+      linhas.push({ data: d, medio: g(iMedio), vunit: g(iVUnit), cfop: g(iCfop), lote: g(iLote), qtd: g(iQtd) });
     }
-    return { hdr, linhas };
+    // diagnóstico: distribuição de nº de células e amostra crua
+    const dist={}; const amostra=[];
+    for(const tr of trs){ const n=tr.cells?tr.cells.length:0; dist[n]=(dist[n]||0)+1;
+      if(n>=8 && amostra.length<4) amostra.push([...tr.cells].map(c=>(c.textContent||"").trim().slice(0,18))); }
+    return { hdr, nh, linhas, dist, amostra };
   });
 }
 
@@ -145,8 +153,10 @@ try {
         const ult = r.linhas[r.linhas.length - 1];
         const vendas = r.linhas.filter(l => /^5[0-9]{3}$/.test(l.cfop || ""));
         const ultVenda = vendas[vendas.length - 1];
+        const comLote = r.linhas.filter(l => l.lote && l.lote !== "-").length;
         cache.produtos[`${loja}|${a.cod}`] = {
           data: isoHoje,
+          movimentos_com_lote: comLote,
           custo_medio: ult ? numBR(ult.medio) : null,
           ultima_venda: ultVenda ? numBR(ultVenda.vunit) : null,
           ultima_venda_data: ultVenda ? ultVenda.data : null,

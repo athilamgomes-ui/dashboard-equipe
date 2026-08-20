@@ -246,6 +246,20 @@ for (const it of itensRecon) {
 itensRecon.sort((a, b) => Math.abs(b.dif) - Math.abs(a.dif));
 
 // ══════════════════════════ BLOCO 2 — COBERTURA ════════════════════════════
+// data do último balanço de contagem por (loja, marca) — o Athila pediu a data e poder
+// filtrar "já foi feito / não foi feito" em vez de rolar a lista até o fim.
+const ultimoBalMarca = {};
+for (const L of LOJAS) {
+  const lista = (bal.listas[String(L.emp)] || []).filter(b => b.finalizado && !b.ajuste)
+    .sort((a, b) => a.data < b.data ? -1 : 1);
+  const S0 = snap.lojas[L.key];
+  for (const b of lista)
+    for (const it of (bal.itens[String(b.id)] || [])) {
+      const m = S0.marca[it.cod];
+      if (m) ultimoBalMarca[`${L.key}|${m}`] = { data: b.data, nome: b.nome, id: b.id };
+    }
+}
+
 const cobertura = [];
 for (const L of LOJAS) {
   const S = snap.lojas[L.key];
@@ -259,7 +273,10 @@ for (const L of LOJAS) {
   }
   for (const [marca, m] of Object.entries(porMarca)) {
     if (m.skus < 3) continue;                     // marca com 1–2 SKUs não diz nada
-    cobertura.push({ loja: L.key, marca, skus: m.skus, contados: m.contados, pct: +(100 * m.contados / m.skus).toFixed(0), un: Math.round(m.un), valor: Math.round(m.valor) });
+    const ub = ultimoBalMarca[`${L.key}|${marca}`] || null;
+    cobertura.push({ loja: L.key, marca, skus: m.skus, contados: m.contados,
+      pct: +(100 * m.contados / m.skus).toFixed(0), un: Math.round(m.un), valor: Math.round(m.valor),
+      bal_data: ub ? ub.data : null, bal_nome: ub ? ub.nome : null, feito: !!ub });
   }
 }
 cobertura.sort((a, b) => a.pct - b.pct || b.valor - a.valor);

@@ -35,11 +35,17 @@ const cor = k => (D.lojas.find(l=>l.key===k)||{}).cor||"#64748b";
 const nomeLoja = k => { const l=D.lojas.find(x=>x.key===k); return l? l.nome+" "+l.cidade : k; };
 const pillLoja = k => '<span class="pill p-lj" style="background:'+cor(k)+'22;color:'+cor(k)+'">'+k+'</span>';
 const cls = v => Math.abs(v)<.001?"zero":(v<0?"neg":"pos");
+// Os nomes têm que ser entendidos por quem cuida do estoque, sem legenda: "sem documento" não
+// dizia nada. Cada classe responde "para onde foi essa unidade?" em português de prateleira.
 const CLASSES = {
-  semdoc:["p-semdoc","sem documento"], espelhado:["p-espelhado","espelhado L1↔L4"],
-  divisao2:["p-divisao2","divisão ÷2"], pacote:["p-pacote","pacote × unidade"],
-  ruido:["p-ruido","ruído ±3"], deposito2:["p-deposito2","foi p/ depósito 2"]
+  semdoc:["p-semdoc","sumiu sem explicação"],
+  espelhado:["p-espelhado","foi para a outra loja"],
+  divisao2:["p-divisao2","metade da nota foi para a outra loja"],
+  pacote:["p-pacote","erro de pacote × unidade"],
+  ruido:["p-ruido","diferença de contagem (até 3 un.)"],
+  deposito2:["p-deposito2","foi para Devolvidos"]
 };
+const JUSTIFICADO = { espelhado:1, divisao2:1, pacote:1, ruido:1, deposito2:1 };
 const tabela = (cols, linhas) =>
   '<div class="scroll"><table><thead><tr>'+cols.map(c=>'<th'+(c.n?' class="num"':'')+'>'+c.t+'</th>').join('')+'</tr></thead><tbody>'+
   (linhas.length?linhas.join(''):'<tr><td colspan="'+cols.length+'"><div class="vazio">nada aqui — ou o filtro não casou</div></td></tr>')+
@@ -106,7 +112,7 @@ function renderKpis(){
       '<div class="sub">'+(k.fecham||0).toLocaleString("pt-BR")+' de '+(k.comBalanco||0).toLocaleString("pt-BR")+' produtos fecham · '+
       (k.unidades||0).toLocaleString("pt-BR")+' un. sem documento</div>'+
       '<div class="bar"><i style="width:'+(k.pct||0)+'%;background:'+c+'"></i></div>'+
-      '<div class="sub" style="margin-top:7px">'+(k.skus||0).toLocaleString("pt-BR")+' SKUs com saldo · '+nf(k.valor)+' a custo médio'+
+      '<div class="sub" style="margin-top:7px">'+(k.skus||0).toLocaleString("pt-BR")+' produtos na prateleira · '+nf(k.valor)+' foi o que a loja pagou por eles'+
         (function(){
           const c=(D.coletaLoja||{})[L.key];
           if(c==null) return '<br><span style="color:#fbbf24">coleta em data desconhecida</span>';
@@ -119,37 +125,65 @@ function renderKpis(){
 
 // ── 1. reconciliação ──
 let fClasse = "";
+let fJust = "sem";     // "sem" = sem justificativa (abre aqui) · "com" · "" = tudo
+function setJust(v){ fJust=v; fClasse=""; renderRec(); }
 function renderRec(){
+  const daLoja = filtraLoja(D.recon);
+  const semJust = daLoja.filter(x=>!JUSTIFICADO[x.classe]);
+  const comJust = daLoja.filter(x=>JUSTIFICADO[x.classe]);
   let arr = base(D.recon);
+  if(fJust==='sem') arr = arr.filter(x=>!JUSTIFICADO[x.classe]);
+  if(fJust==='com') arr = arr.filter(x=>JUSTIFICADO[x.classe]);
   if(fClasse) arr = arr.filter(x=>x.classe===fClasse);
-  const cont = {}; for(const it of filtraLoja(D.recon)) cont[it.classe]=(cont[it.classe]||0)+1;
-  const chips = Object.keys(CLASSES).map(k=>
+
+  const unSem = Math.round(semJust.reduce((a,b)=>a+Math.abs(b.dif),0));
+  const unCom = Math.round(comJust.reduce((a,b)=>a+Math.abs(b.dif),0));
+  const rsSem = Math.round(semJust.reduce((a,b)=>a+Math.abs(b.dif)*(b.custo||0),0));
+  const subabas =
+    '<div class="subtabs">'+
+      '<div class="subtab'+(fJust==='sem'?' on':'')+'" onclick="setJust(\'sem\')">'+
+        '<b>Sem explicação</b><small>'+semJust.length+' produtos · '+unSem.toLocaleString("pt-BR")+' un · '+nf(rsSem)+'</small></div>'+
+      '<div class="subtab'+(fJust==='com'?' on':'')+'" onclick="setJust(\'com\')">'+
+        '<b>Com explicação</b><small>'+comJust.length+' produtos · '+unCom.toLocaleString("pt-BR")+' un</small></div>'+
+      '<div class="subtab'+(fJust===''?' on':'')+'" onclick="setJust(\'\')">'+
+        '<b>Tudo</b><small>'+daLoja.length+' produtos</small></div>'+
+    '</div>';
+
+  // dentro da sub-aba, um chip por motivo (o modelo da conciliação da maquininha)
+  const univ = fJust==='sem'? semJust : fJust==='com'? comJust : daLoja;
+  const cont = {}; for(const it of univ) cont[it.classe]=(cont[it.classe]||0)+1;
+  const chips = Object.keys(CLASSES).filter(k=>cont[k]).map(k=>
     '<span class="pill '+CLASSES[k][0]+'" style="cursor:pointer;opacity:'+(fClasse&&fClasse!==k?.45:1)+'" onclick="setClasse(\''+k+'\')">'+
-    CLASSES[k][1]+' '+(cont[k]||0)+'</span>').join(' ')+
-    ' <span class="pill p-ruido" style="cursor:pointer" onclick="setClasse(\'\')">todas</span>';
+    CLASSES[k][1]+' · '+cont[k]+'</span>').join(' ') +
+    (fClasse?' <span class="pill p-ruido" style="cursor:pointer" onclick="setClasse(\'\')">limpar</span>':'');
+
   const linhas = arr.slice(0,4000).map(it=>{
     const c = CLASSES[it.classe]||["p-ruido",it.classe||"—"];
+    const rs = Math.abs(it.dif)*(it.custo||0);
     return '<tr><td>'+pillLoja(it.loja)+'</td><td class="num">'+it.cod+'</td><td class="d">'+esc(it.desc)+
-      '<div class="hint">'+esc(it.marca)+' · balanço '+dBR(it.bal_data)+' “'+esc(it.bal_nome)+'”</div></td>'+
+      '<div class="hint">'+esc(it.marca)+' · contado em '+dBR(it.bal_data)+' no balanço “'+esc(it.bal_nome)+'”</div></td>'+
       '<td class="num">'+nq(it.contado)+'</td><td class="num">'+nq(it.ent)+(it.canc?'<span class="neg"> −'+nq(it.canc)+'</span>':'')+'</td>'+
       '<td class="num">'+nq(it.ven)+'</td><td class="num">'+nq(it.esperado)+'</td>'+
       '<td class="num">'+nq(it.sal)+(it.tra?'<span class="hint"> +'+nq(it.tra)+' trâns.</span>':'')+'</td>'+
       '<td class="num '+cls(it.dif)+'">'+(it.dif>0?"+":"")+nq(it.dif)+'</td>'+
+      '<td class="num">'+(rs?nf(rs):'<span class="hint">—</span>')+'</td>'+
       '<td><span class="pill '+c[0]+'">'+c[1]+'</span></td>'+
       '<td class="d hint">'+esc(it.detalhe||"")+'</td></tr>';
   });
-  const cols=[{t:"Loja"},{t:"Cód",n:1},{t:"Produto"},{t:"Contado",n:1},{t:"Entradas",n:1},{t:"Vendas",n:1},{t:"Esperado",n:1},{t:"Saldo hoje",n:1},{t:"Diferença",n:1},{t:"Classificação"},{t:"Detalhe"}];
-  document.getElementById("p-rec").innerHTML =
+  const cols=[{t:"Loja"},{t:"Cód",n:1},{t:"Produto"},{t:"Contado no balanço",n:1},{t:"Entrou depois",n:1},{t:"Vendeu depois",n:1},{t:"Deveria ter",n:1},{t:"Tem hoje",n:1},{t:"Diferença",n:1},{t:"Quanto isso custou",n:1},{t:"Para onde foi"},{t:"Detalhe"}];
+  document.getElementById("p-rec").innerHTML = subabas +
     '<div style="margin-bottom:12px">'+chips+'</div>'+
-    box("Produtos que não fecham", arr.length.toLocaleString("pt-BR")+" de "+filtraLoja(D.recon).length.toLocaleString("pt-BR")+" divergências"+(arr.length>4000?" (exibindo 4.000)":""),
+    box(fJust==='sem'?"Sumiu e ninguém sabe para onde":fJust==='com'?"Diferenças que já têm explicação":"Todos os produtos que não fecham",
+      arr.length.toLocaleString("pt-BR")+" produtos"+(arr.length>4000?" (exibindo 4.000)":""),
       tabela(cols, linhas),
-      "<b>esperado = contado no balanço + entradas − notas canceladas − vendas</b>, na janela que vai da data do balanço até a coleta. "+
-      "<b>diferença = (saldo de hoje + estoque em trânsito) − esperado</b>: é a quantidade exata que se moveu <b>sem documento</b>. "+
-      "Notas canceladas entram na conta porque o relatório conta a entrada da nota cancelada <i>e</i> a da relançada — sem isso, "+
-      "nota relançada aparece como sumiço. Só entram balanços de <b>contagem</b> finalizados dos últimos "+D.diasBalanco+" dias "+
-      "(desde "+dBR(D.corteBalanco)+"); balanços de <b>AJUSTE</b> são injeção de saldo, não contagem, e ficam fora.");
+      "A conta de cada linha: <b>o que foi contado no balanço + o que entrou por nota − o que foi vendido = o que deveria ter hoje</b>. "+
+      "A <b>diferença</b> é o que sobrou ou faltou em relação a isso, e <b>quanto isso custou</b> é essa diferença multiplicada pelo custo de compra. "+
+      "Nota cancelada já entra descontada — sem isso, nota relançada apareceria como sumiço. "+
+      "Só entram balanços de contagem dos últimos "+D.diasBalanco+" dias (desde "+dBR(D.corteBalanco)+"); "+
+      "balanços de AJUSTE são injeção de saldo, não contagem, e ficam de fora.");
 }
 function setClasse(k){ fClasse=k; renderRec(); }
+
 function selecionarLoja(k){
   lojaSel = k;
   try{ localStorage.setItem('estoque_loja', k); }catch(e){}
@@ -157,23 +191,47 @@ function selecionarLoja(k){
 }
 
 // ── 2. cobertura ──
+let fCob = "";   // "" | feito | naofeito
+function setCob(v){ fCob=v; renderCob(); }
 function renderCob(){
-  const arr = filtraQ(filtraLoja(D.cobertura));
+  let arr = filtraQ(filtraLoja(D.cobertura));
+  if(fCob==='feito') arr = arr.filter(c=>c.feito);
+  if(fCob==='naofeito') arr = arr.filter(c=>!c.feito);
+  const todas = filtraLoja(D.cobertura);
+  const nFeito = todas.filter(c=>c.feito).length, nNao = todas.length-nFeito;
+  const chips =
+    '<span class="pill p-ok" style="cursor:pointer;opacity:'+(fCob&&fCob!=='feito'?.45:1)+'" onclick="setCob(\'feito\')">balanço já feito · '+nFeito+'</span> '+
+    '<span class="pill p-semdoc" style="cursor:pointer;opacity:'+(fCob&&fCob!=='naofeito'?.45:1)+'" onclick="setCob(\'naofeito\')">nunca contada · '+nNao+'</span> '+
+    '<span class="pill p-ruido" style="cursor:pointer" onclick="setCob(\'\')">todas</span>';
+  // ordem: primeiro o que JÁ foi feito, do balanço mais antigo para o mais novo (é o que vence
+  // primeiro); depois as marcas nunca contadas, pelas de maior dinheiro parado.
+  arr = arr.slice().sort((a,b)=>{
+    if(a.feito!==b.feito) return a.feito? -1 : 1;
+    if(a.feito) return (a.bal_data||"") < (b.bal_data||"") ? -1 : 1;
+    return b.valor-a.valor;
+  });
+  const hoje = D.geradoEm2;
   const linhas = arr.map(c=>{
     const cr = c.pct>=90?"#4ade80":c.pct>=50?"#fbbf24":"#f87171";
+    const dias = c.bal_data ? Math.round((new Date(hoje)-new Date(c.bal_data))/86400000) : null;
     return '<tr><td>'+pillLoja(c.loja)+'</td><td class="d">'+esc(c.marca)+'</td>'+
+      '<td>'+(c.bal_data? dBR(c.bal_data)+' <span class="hint">('+dias+' dias · '+esc(c.bal_nome||'')+')</span>'
+                        : '<span class="pill p-semdoc">nunca contada</span>')+'</td>'+
       '<td class="num">'+c.skus+'</td><td class="num">'+c.contados+'</td>'+
       '<td class="num" style="color:'+cr+';font-weight:700">'+c.pct+'%</td>'+
       '<td class="num">'+c.un.toLocaleString("pt-BR")+'</td><td class="num">'+nf(c.valor)+'</td>'+
-      '<td style="width:130px"><div class="bar"><i style="width:'+c.pct+'%;background:'+cr+'"></i></div></td></tr>';
+      '<td style="width:120px"><div class="bar"><i style="width:'+c.pct+'%;background:'+cr+'"></i></div></td></tr>';
   });
-  document.getElementById("p-cob").innerHTML = box("Cobertura de balanço por marca", "da pior para a melhor · marcas com ao menos 3 SKUs",
-    tabela([{t:"Loja"},{t:"Marca"},{t:"SKUs com saldo",n:1},{t:"Já contados",n:1},{t:"Cobertura",n:1},{t:"Unidades",n:1},{t:"Valor a custo",n:1},{t:""}], linhas),
-    "Compara os SKUs que têm saldo positivo hoje com os que já apareceram em <b>algum</b> balanço de contagem (qualquer data). "+
-    "Cobertura baixa = o balanço com o nome da marca não cobriu a marca inteira — é onde recontar rende. Onde a cobertura é alta e a "+
-    "reconciliação fecha, <b>não vale recontar</b>.");
+  document.getElementById("p-cob").innerHTML =
+    '<div style="margin-bottom:12px">'+chips+'</div>'+
+    box("O quanto cada marca já foi contada", arr.length+" marcas · use a busca acima para filtrar por marca",
+    tabela([{t:"Loja"},{t:"Marca"},{t:"Último balanço"},{t:"Produtos na prateleira",n:1},{t:"Já contados",n:1},{t:"Quanto da marca foi contado",n:1},{t:"Unidades",n:1},{t:"Quanto custou esse estoque",n:1},{t:""}], linhas),
+    "Compara os produtos que têm saldo hoje com os que já apareceram em <b>algum balanço de contagem</b>. "+
+    "<b>Quanto da marca foi contado</b> em 40% quer dizer que 6 de cada 10 produtos da marca nunca foram para a contagem — "+
+    "é onde recontar rende. Onde a marca está alta e a reconciliação fecha, <b>não vale recontar</b>. "+
+    "<b>Quanto custou esse estoque</b> é o que a loja pagou pela mercadoria que está na prateleira hoje (saldo × custo de compra), "+
+    "não o quanto ela vale vendida.");
 }
-
 
 // ═══════════ CONTAGEM CONFERIDA — o painel deixa de só diagnosticar ═══════════
 // A pessoa digita a quantidade REAL contada, o valor fica salvo no Supabase (sobrevive ao
@@ -305,7 +363,7 @@ function renderNeg(){
     '<td>'+inputContagem(n.loja,n.cod,n.desc,n.sal,'negativos')+'</td></tr>');
   const un = arr.reduce((a,b)=>a+Math.abs(b.sal),0);
   document.getElementById("p-neg").innerHTML = barraLote() + box("Saldo negativo", arr.length.toLocaleString("pt-BR")+" produtos · "+Math.round(un).toLocaleString("pt-BR")+" unidades negativas"+(reinc?" · "+reinc+" reincidentes":""),
-    tabela([{t:"Loja"},{t:"Cód",n:1},{t:"Produto"},{t:"Saldo",n:1},{t:"Exposição",n:1},{t:"Negativo desde"},{t:"Dias",n:1},{t:"Reincidência"},{t:"Contagem real"}], linhas),
+    tabela([{t:"Loja"},{t:"Cód",n:1},{t:"Produto"},{t:"Saldo",n:1},{t:"Dinheiro parado (saldo × custo)",n:1},{t:"Negativo desde"},{t:"Dias",n:1},{t:"Reincidência"},{t:"Contagem real"}], linhas),
     "Saldo negativo é venda sem entrada correspondente — e é o que <b>explode o custo médio</b> quando a próxima nota entra "+
     "(média ponderada dividida por denominador quase zero). <b>“Negativo desde”</b>: o ERP não guarda essa data, então o pipeline "+
     "registra a primeira execução em que viu o produto negativo — por isso muitos aparecem como <b>1º registro</b> hoje e a antiguidade "+
@@ -343,8 +401,8 @@ function renderDev(){
   }
   document.getElementById("p-dev").innerHTML =
     '<div style="margin-bottom:12px">'+top+'</div>'+
-    box("Depósito 2 — Devolvidos (com defeito)", arr.length.toLocaleString("pt-BR")+" produtos · "+nf(tot)+" a custo médio",
-    tabela([{t:"Loja"},{t:"Cód",n:1},{t:"Produto"},{t:"Saldo",n:1},{t:"Valor a custo",n:1},{t:"No depósito desde"},{t:"Dias parados",n:1}], linhas),
+    box("Depósito 2 — Devolvidos (com defeito)", arr.length.toLocaleString("pt-BR")+" produtos · "+nf(tot)+" — é o que a loja pagou por essa mercadoria parada",
+    tabela([{t:"Loja"},{t:"Cód",n:1},{t:"Produto"},{t:"Saldo",n:1},{t:"Quanto custou esse estoque",n:1},{t:"No depósito desde"},{t:"Dias parados",n:1}], linhas),
     "Saldo parado no depósito <b>2 · Devolvidos (com defeito)</b>, esperando nota de baixa. Enquanto a nota não sai, esse valor "+
     "continua contando como estoque. Os depósitos cadastrados são <b>Estoque [1]</b>, <b>Devolvidos (com defeito) [2]</b>, "+
     "<b>CD [3]</b> e <b>Cultura Cacheada [4]</b> — a reconciliação usa só o depósito 1, e um produto que aparece aqui e some de lá "+
@@ -379,7 +437,7 @@ function renderPre(){
     '<div style="margin-bottom:12px">'+chips+'</div>'+
     box("Preço de venda × custo médio",
     arr.length.toLocaleString("pt-BR")+" exibidos de "+(D.totalPrecos||0).toLocaleString("pt-BR")+" sinalizados",
-    tabela([{t:"Loja"},{t:"Cód",n:1},{t:"Produto"},{t:"Custo médio",n:1},{t:"Preço de tabela",n:1},{t:"Razão",n:1},{t:"Saldo",n:1},{t:"Exposição",n:1},{t:"Custo real (histórico)",n:1},{t:"Última venda",n:1},{t:"Sinal"}], linhas),
+    tabela([{t:"Loja"},{t:"Cód",n:1},{t:"Produto"},{t:"Custo (o que pagamos)",n:1},{t:"Preço de venda",n:1},{t:"Preço ÷ custo",n:1},{t:"Saldo",n:1},{t:"Dinheiro parado (saldo × custo)",n:1},{t:"Custo real (histórico)",n:1},{t:"Preço da última venda",n:1},{t:"Sinal"}], linhas),
     "<b>Onde a razão é absurda, o preço está errado — não o custo.</b> A ordem é por gravidade prática: "+
     "primeiro <b>preço absurdo</b> (acima de R$ 1.000 num varejo de beleza é quase sempre erro de digitação), "+
     "depois <b>preço ≤ custo</b> (perde dinheiro em cada venda), depois razão alta, e por último os que estão "+

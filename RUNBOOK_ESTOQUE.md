@@ -174,6 +174,38 @@ da NF-e**, então só a mercadoria que entrar DEPOIS de ligar passa a ter valida
 já está na prateleira — que é justamente o que vence primeiro — **o Excel da loja é a única fonte**,
 provavelmente por um ano. Ou seja, o upload (3.2b) não é paliativo: é o caminho principal no começo.
 
+## O que "Preço de Tabela Unit." é de verdade (verificado 20/08/2026)
+
+O Athila levantou que "preço de tabela seria o preço que veio na nota / o custo do cadastro".
+**Não é: é o preço de VENDA.** Conferido em produtos normais da Marco Boni, onde o número se
+explica sozinho:
+
+| Produto | Custo Médio Unit. | Preço de Tabela Unit. | Venda real (Histórico de Movimento) |
+|---|---|---|---|
+| 22 PENTE PROF 1276 | 5,13 | 9,90 | **12,90** |
+| 31 TOUCA METAL CABELO | 5,72 | 8,90 | — |
+| 33 BOB VELCRO EXTRA GRANDE | 18,16 | 44,90 | — |
+
+Um pente não custa R$ 9,90 para ser vendido a R$ 5,13. E o "Custo Médio Unit." do relatório de
+saldo **é o mesmo número** do "Médio (Histórico) Unit." do Histórico de Movimento (5,13 nos dois),
+ou seja, o custo do painel já é o custo real — a coluna de confirmação serve para ver a evolução e
+o preço realmente praticado, não para corrigir o custo.
+
+**Mas o Athila está certo em dizer que o bloco está errado — pelo motivo seguinte que ele mesmo deu:
+pacote × unidade.** Custo e preço vêm em unidades de medida DIFERENTES quando o fator de conversão
+falta:
+
+| Produto | Custo | Preço | O que está acontecendo |
+|---|---|---|---|
+| 156 LIXA PRETA ESP **UN** | 6,96 | 0,25 | custo do PACOTE contra preço da UNIDADE → aparece como "vende abaixo do custo" |
+| 6498 LIXA MEDIA PRETA **C/144 PCT** | 0,03 | 36,01 | custo da UNIDADE contra preço do PACOTE → aparece como "razão 1.200×" |
+| 23080 PAPEL D.TNT C/100 | 8,65 | 17,90 | coerente: compra e vende o pacote — **não precisa de fator**, e o bloco 6 acusava errado |
+
+Ou seja: **a maior parte do bloco "preço × custo" não é preço errado, é unidade de medida
+diferente** — e é o mesmo problema do bloco 6. Enquanto o painel não ler o **fator de conversão por
+produto e por empresa**, os dois blocos continuam misturando pacote com unidade. Ler esse fator é o
+próximo passo que conserta os dois de uma vez.
+
 ## Registro de execuções
 
 | Data | Resultado |

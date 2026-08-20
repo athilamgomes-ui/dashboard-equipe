@@ -68,10 +68,14 @@ async function gerar(page) {
   await page.evaluate(({ emp, di, df, sint, agrup, custo }) => {
     const setRadio = (name, val) => { const r = [...document.querySelectorAll(`input[name="${name}"]`)].find(x => x.value === val); if (r) { r.checked = true; r.dispatchEvent(new Event("click")); } };
     const setChk = (name, on) => { document.querySelectorAll(`input[name="${name}"]`).forEach(c => c.checked = on); };
-    // ⚠️ RESET DE FILTROS HERDADOS DO PERFIL PERSISTENTE — o cron_etapa2 (visão 22 Marcas A)
-    // deixa marcas/coleção grudados no multiselect; sem limpar, o relatório conta só ~19 marcas.
-    // Para cada multiselect de filtro: se tem opção value="" (Todos), seleciona só ela;
-    // senão desmarca tudo (none = todos). Depois dispara change pro widget/ASP registrar.
+    // ⚠️ ZERAR A VISÃO: o relatório abre com uma visão salva (22 Marcas-30%A / 23 20%B) que aplica
+    // um filtro de MARCA no SERVIDOR (contava só ~19 marcas; o DOM fica limpo mas o servidor filtra).
+    // Sem visão = TODAS as marcas. Nesse caminho o gerador é o botão "Prosseguir >" (não o "OK").
+    const vis = document.getElementById("Form1_id_visao");
+    if (vis) {
+      if (![...vis.options].some(o => o.value === "")) { const o = document.createElement("option"); o.value = ""; o.text = "(nenhuma)"; vis.insertBefore(o, vis.firstChild); }
+      vis.value = ""; vis.dispatchEvent(new Event("change"));
+    }
 
     [...document.querySelectorAll('input[id^="empresas_"]')].forEach(cb => cb.checked = false);
     const el = document.getElementById("empresas_" + emp); if (el) el.checked = true;
@@ -92,33 +96,21 @@ async function gerar(page) {
   ]);
   await page.waitForTimeout(2000);
 
-  // Pós-SubmitVisao: (a) bug empresa-1 — desmarca duplicatas, remarca só a desejada;
-  // (b) LIMPA o filtro de marca/coleção que a VISÃO reaplicou (a raiz do "só 19 marcas").
-  //     O SubmitVisao recarrega os filtros salvos da visão; aqui, no form já preparado,
-  //     zeramos marcas/coleção (Todos) ANTES do OK — que é quem submete o relatório final.
+  // Pós-SubmitVisao: bug empresa-1 — desmarca duplicatas, remarca só a desejada.
   await page.evaluate((emp) => {
     document.querySelectorAll('input[id="empresas_1"]').forEach(cb => cb.checked = false);
     document.querySelectorAll('input[value="1"][type="checkbox"]').forEach(cb => cb.checked = false);
     document.querySelectorAll(`input[id="empresas_${emp}"]`).forEach(cb => cb.checked = true);
     document.querySelectorAll(`input[value="${emp}"][type="checkbox"]`).forEach(cb => cb.checked = true);
-    // reset marca/coleção → Todos (opção value="")
-    const resetSelect = (name) => {
-      const s = document.querySelector(`select[name="${name}"]`); if (!s) return;
-      const temTodos = [...s.options].some(o => o.value === "");
-      [...s.options].forEach(o => { o.selected = temTodos ? (o.value === "") : false; });
-      s.dispatchEvent(new Event("change"));
-      try { if (window.jQuery) window.jQuery(s).multiselect("refresh"); } catch (_) {}
-      // desmarca também os checkboxes do widget jQuery (mirror) que referenciem esse select
-      document.querySelectorAll(`input[type=checkbox][name^="multiselect_${name}"], input[type=checkbox][name^="${name}"]`).forEach(cb => { if (cb.value !== "") cb.checked = false; });
-    };
-    ["marcas", "colecoes"].forEach(resetSelect);
   }, EMP);
 
-  // etapa 2: OK (gera de fato) — dispara NAVEGAÇÃO (POST → página de resultados)
+  // etapa 2: PROSSEGUIR (gera de fato no caminho sem-visão) — dispara NAVEGAÇÃO. Fallback OK.
   await Promise.all([
     page.waitForNavigation({ waitUntil: "domcontentloaded", timeout: 60000 }).catch(() => {}),
     page.evaluate(() => {
-      const b = [...document.querySelectorAll("button, input[type=button], input[type=submit], a")].find(el => (el.textContent || "").trim() === "OK" || el.value === "OK");
+      const cand = [...document.querySelectorAll("button, input[type=button], input[type=submit], a")];
+      let b = cand.find(el => /Prosseguir/i.test((el.textContent || el.value || "")));
+      if (!b) b = cand.find(el => (el.textContent || "").trim() === "OK" || el.value === "OK");
       if (b) b.click();
     }),
   ]);
@@ -238,8 +230,18 @@ async function main() {
     const somaFat = out.rows.reduce((s, r) => s + r.faturamento, 0);
     log(`analítico: ${out.rows.length} produtos · somaFat R$${somaFat.toFixed(2)} vs totais R$${totais.faturamento.toFixed(2)} · margem ${totais.margem}%`);
   } else {
-    out.grupos = raw.grupos.map(g => ({ grupo: g.grupo, cells: g.cells }));
-    log(`sintético: ${out.grupos.length} grupos · fat R$${totais.faturamento.toFixed(2)}`);
+    // subtotal por grupo (9 cells): [2]qtd [3]custo [4]cmv [5]prTabela [6]faturamento [7]markup [8]margem
+    out.marcas = raw.grupos.map(g => {
+      const c = g.cells;
+      const fat = parseBR(c[6]), cmv = parseBR(c[4]), custo = parseBR(c[3]);
+      return {
+        marca: g.grupo, qtd: parseBR(c[2]), custo, cmv,
+        faturamento: fat,
+        margem: fat > 0 ? Math.round((fat - custo) / fat * 1000) / 10 : 0,
+      };
+    }).filter(m => m.faturamento !== 0 || m.qtd !== 0).sort((a, b) => b.faturamento - a.faturamento);
+    const somaFat = out.marcas.reduce((s, m) => s + m.faturamento, 0);
+    log(`sintético: ${out.marcas.length} marcas · somaFat R$${somaFat.toFixed(2)} vs totais R$${totais.faturamento.toFixed(2)}`);
   }
   process.stdout.write(JSON.stringify(out));
   process.exit(0);
