@@ -381,6 +381,25 @@ ${rows}
   }
 }
 
+// ─── MARGEM DESCONTAMINADA (custo de hoje, produtos de custo inválido excluídos) ───
+// Fonte: /tmp/margem_limpa.json (coleta_margem_limpa.mjs, só no run das 18:30). PRESERVA se ausente.
+{
+  const mIni = "/* MARGEMLIMPA_INICIO */", mFim = "/* MARGEMLIMPA_FIM */";
+  const iIni = html.indexOf(mIni), iFim = html.indexOf(mFim);
+  let ml = null;
+  try { ml = JSON.parse(fs.readFileSync("/tmp/margem_limpa.json", "utf8")); } catch { /* ausente */ }
+  const temDados = ml && ["L1", "L3", "L4", "L5"].some(L => ml[L] && typeof ml[L].margemLimpa === "number");
+  if (iIni < 0 || iFim < 0) {
+    log("aviso: marcadores MARGEMLIMPA ausentes — card não atualizado.");
+  } else if (!temDados) {
+    log("aviso: margem_limpa.json indisponível — margem descontaminada PRESERVADA (não atualizada).");
+  } else {
+    html = html.slice(0, iIni + mIni.length) + ` const margemLimpaData = ${JSON.stringify(ml)}; ` + html.slice(iFim);
+    const lojas = ["L1", "L3", "L4", "L5"].filter(L => ml[L]);
+    log(`Margem descontaminada atualizada (${lojas.map(L => `${L} ${ml[L].margemRaw}→${ml[L].margemLimpa}%`).join(" · ")}).`);
+  }
+}
+
 fs.writeFileSync(HTML, html);
 log(`OK — dashboard regenerado (${mesLabel}/${aaaa}, ${dd}/${mm} ${hh}:${mi}).`);
 process.exit(0);

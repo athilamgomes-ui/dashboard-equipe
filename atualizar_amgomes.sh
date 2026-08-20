@@ -94,6 +94,20 @@ for t in 1 2; do
 done
 [ "$TM_OK" = "1" ] && log "top marcas (ano) OK" || log "AVISO: top marcas falhou — build PRESERVA quadro anterior."
 
+# ── 2.8) Margem descontaminada (custo de hoje, produtos de custo inválido excluídos) ──
+# Coleta por produto POR LOJA (~1min/loja) — pesada, então SÓ no run da tarde (≥17h). Se falhar
+# ou pular, o build PRESERVA o card anterior. Gate por hora (HH) e permite forçar com MARGEM_LIMPA=1.
+HH=$(date +%H); HORA=$((10#$HH))
+if [ "$HORA" -ge 17 ] || [ "${MARGEM_LIMPA:-0}" = "1" ]; then
+  if node coleta_margem_limpa.mjs > /tmp/margem_limpa.json.tmp 2>/tmp/margem_limpa_err.txt && [ -s /tmp/margem_limpa.json.tmp ]; then
+    mv /tmp/margem_limpa.json.tmp /tmp/margem_limpa.json; log "margem descontaminada OK"
+  else
+    rm -f /tmp/margem_limpa.json.tmp; log "AVISO: margem descontaminada falhou — build PRESERVA card anterior."
+  fi
+else
+  log "margem descontaminada pulada (run da manhã; roda só ≥17h)."
+fi
+
 # ── 3) Build (render determinístico de todos os blocos) ──
 cp "$HTML" /tmp/amgomes_pre_build.html
 if ! node build_amgomes.mjs /tmp/lojas_out.json /tmp/vend_out.json; then
