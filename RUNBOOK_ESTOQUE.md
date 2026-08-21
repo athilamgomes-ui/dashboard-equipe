@@ -346,6 +346,41 @@ Sobram **2 pares com saldo nos dois códigos**, que precisam de decisão antes d
 `L1 18389 × 18388` (KIT C/ 5 PINCEIS, custos 100,85 e 67,76) e `L3 55398 × 62627`
 (CAIXA DE 12 GRADES). O trabalho de limpeza é bem menor do que parecia.
 
+## Os `Validar*` validam o CADASTRO, não a nota de entrada (20/08/2026)
+
+Pesquisado na documentação da Linx e **confirmado na própria tela**. Ficam em
+**Empresa > Parâmetros Globais > Obrigações Fiscais > Classificação dos produtos** (a tela
+`param_obrigacoes_fiscais.asp`) — **não** ficam sob Acesso Restrito. Os três estão desligados:
+
+| Campo | Rótulo na tela | Hoje |
+|---|---|---|
+| `validarGtin` | "Ativar validação de GTIN" | desligado |
+| `validarNcm` | "Ativar validação de NCM" | desligado |
+| `validarCest` | "Ativar validação de CEST" | desligado |
+| `cest_obrigatorio` | "Habilitar obrigatoriedade do código CEST" | desligado |
+
+O texto do próprio ERP: *"Ativar a apresentação de **alertas** em **cadastros** e rotinas de
+**emissões** de nota fiscal"*. Ou seja:
+- é **alerta, não bloqueio**;
+- age quando alguém **cadastra/altera** o produto e quando o portal **emite** NF-e de saída;
+- **não age na entrada de nota** — os NCM/CEST que vêm no XML e não existem no sistema são
+  **cadastrados automaticamente**.
+
+O ganho real é evitar a **rejeição 778 da SEFAZ** ("NCM inexistente") na hora de emitir a nota de
+venda. O risco de travar a entrada de mercadoria, que eu havia levantado, **não existe**.
+Em `param_estoque.asp`, `ncm_obrigatorio` ("NCM obrigatório para cadastro") **já está ligado**.
+
+⚠️ `LogMovimentacoes` **não está** em nenhuma dessas duas telas — deve estar sob
+**Acesso Restrito**, que pede uma segunda senha ("Área de Usuário") e não foi aberto.
+
+## Ficha do produto (`scripts/ficha_produto.mjs`)
+
+Responde, para qualquer código: última compra **com o número da NF e o fornecedor**, última venda,
+quantos movimentos, desde quando, e saldo em cada loja. É a ferramenta para decidir sobre duplicata
+sem chutar. ⚠️ O Histórico de Movimento devolve os **mesmos números nas 4 lojas** — ele é do
+**grupo**, não da empresa da sessão (por isso o script consulta uma loja só). E a janela começa em
+01/01/2023, então "mais antigo" significa *primeiro movimento visto desde 2023*, não data de cadastro.
+
 ## Registro de execuções
 
 | Data | Resultado |

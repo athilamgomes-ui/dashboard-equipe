@@ -23,7 +23,12 @@ const D_DIR = path.join(DIR, "..", "dados_estoque");
 const PROFILE_DIR = path.join(homedir(), ".claude", "microvix-profile");
 const URL_MOV = "https://linx.microvix.com.br/gestor_web/produtos/relatorio_movimento_produto.asp";
 const URL_HOME = "https://linx.microvix.com.br/v4/home/index.asp";
-const LOJAS = { L1: 1, L3: 3, L4: 4, L5: 10 };
+// ⚠️ medido em 20/08/2026: o Histórico de Movimento devolve os MESMOS números nas 4 lojas —
+// ele é do GRUPO, não da empresa da sessão. Por isso o padrão é consultar UMA loja só (4x mais
+// rápido). LOJAS_FICHA=L1,L4 força mais de uma, se um dia isso mudar.
+const TODAS = { L1: 1, L3: 3, L4: 4, L5: 10 };
+const LOJAS = Object.fromEntries(Object.entries(TODAS).filter(([k]) =>
+  (process.env.LOJAS_FICHA || "L1").split(",").includes(k)));
 const DESDE = process.env.DESDE || "01/01/2023";
 const codigos = process.argv.slice(2).filter(a => /^\d+$/.test(a));
 if (!codigos.length) { console.error("uso: node ficha_produto.mjs <cod> [cod...]"); process.exit(1); }
@@ -92,6 +97,7 @@ for (const [lj, E] of Object.entries(LOJAS)) {
       ultimaCompra: compras.length ? { data: compras[compras.length - 1].data, doc: compras[compras.length - 1].doc, forn: compras[compras.length - 1].quem, qtd: compras[compras.length - 1].qtd, un: compras[compras.length - 1].un, custo: compras[compras.length - 1].vunit } : null,
       totalComprado: compras.reduce((a, b) => a + num(b.qtd), 0),
       saldoHoje: snap?.lojas?.[lj]?.prods?.[cod]?.sal ?? null,
+      saldoTodasLojas: snap ? Object.fromEntries(Object.keys(TODAS).map(x => [x, snap.lojas?.[x]?.prods?.[cod]?.sal ?? null])) : null,
       desc: snap?.lojas?.[lj]?.prods?.[cod]?.d ?? null,
     };
   }
@@ -103,7 +109,7 @@ for (const cod of codigos) {
   const qq = Object.values(p)[0];
   log(`\n=== ${cod} — ${qq.desc || "?"} ===`);
   for (const [lj, v] of Object.entries(p)) {
-    log(`  ${lj}: saldo hoje ${v.saldoHoje} · ${v.movimentos} movimentos (${v.primeiro} → ${v.ultimo})`);
+    log(`  saldo por loja: ${JSON.stringify(v.saldoTodasLojas)} · ${v.movimentos} movimentos (${v.primeiro} → ${v.ultimo})`);
     log(`      comprou ${Math.round(v.totalComprado)} · vendeu ${Math.round(v.totalVendido)}`);
     if (v.ultimaCompra) log(`      última COMPRA: ${v.ultimaCompra.data} NF ${v.ultimaCompra.doc} · ${v.ultimaCompra.qtd} ${v.ultimaCompra.un} a ${v.ultimaCompra.custo} · ${v.ultimaCompra.forn.slice(0, 34)}`);
     if (v.ultimaVenda) log(`      última VENDA:  ${v.ultimaVenda.data} · ${v.ultimaVenda.qtd} ${v.ultimaVenda.un} a ${v.ultimaVenda.preco}`);
