@@ -44,6 +44,9 @@ const CODIGOS_ERP = (() => { try { return JSON.parse(readFileSync("/Users/elkgom
 // custo de kit a forçar). Chave "CNPJ:numeroNF". Ver precificacao_ajustes_nf.json. (10/08/2026)
 const AJUSTES_NF = (() => { try { return JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_ajustes_nf.json", "utf8")); } catch { return {}; } })();
 const ajusteNf = (cnpj, numero) => AJUSTES_NF[String(cnpj || "").replace(/\D/g, "") + ":" + String(numero || "")] || null;
+// Último preço de venda REAL por EAN (Histórico de Movimento). Só EXIBIÇÃO (campo preco_ultima_venda) —
+// NÃO é preço fixo/trava, NÃO entra no cálculo nem na detecção. Referência p/ cadastro com duplicados. (21/08/2026)
+const ULTIMA_VENDA = (() => { try { return JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_ultima_venda.json", "utf8")).precos || {}; } catch { return {}; } })();
 const ST_PA = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/st_pa_ncm.json", "utf8"));
 const ST_NCM = (ST_PA.ncm_st || []).map(String).sort((a, b) => b.length - a.length); // prefixos mais longos primeiro
 const URL_LISTA_PRECOS = "https://linx.microvix.com.br/gestor_web/produtos/relatorio_lista_precos.asp";
@@ -931,6 +934,16 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       }
       if (preservados) log(`preços preservados de coleta anterior (falha transitória do relatório): ${preservados}`);
     } catch {}
+
+    // ===== Último preço de venda REAL (exibição, por EAN) — NÃO é trava =====
+    let comUltVenda = 0;
+    if (Object.keys(ULTIMA_VENDA).length) {
+      for (const L of Object.keys(lojas)) for (const nf of lojas[L]) for (const it of nf.itens) {
+        const uv = ULTIMA_VENDA[String(it.ean || "")];
+        if (uv && uv.preco != null) { it.preco_ultima_venda = uv.preco; it.preco_ultima_venda_data = uv.data || null; comUltVenda++; }
+      }
+      if (comUltVenda) log(`último preço de venda (exibição) anexado a ${comUltVenda} item(ns)`);
+    }
 
     // ===== DETECÇÃO: a NF já foi precificada no ERP? (2 sinais, OR) =====
     // A ÚNICA forma de mudar preço em lote é importando o .txt no ERP (Ajuste de Preço por Lote) —
