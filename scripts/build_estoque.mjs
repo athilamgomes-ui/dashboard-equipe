@@ -264,14 +264,35 @@ for (const it of itensRecon) {
     it.investigado = true;
     it.movimentos = mv.resumo;
     const sn = mv.sem_nota;
+    // o motivo digitado no ajuste vem do próprio histórico — quando existe, ele É a explicação
+    const motivos = sn && sn.motivos ? Object.entries(sn.motivos).sort((x, y) => Math.abs(y[1]) - Math.abs(x[1])) : [];
+    const textoMotivo = motivos.length ? motivos.map(([m, q]) => `“${m}” (${Math.round(q)} un)`).join(" · ") : null;
+    // divisão de NF entre L1 e L4: o ajuste na loja destino casa com a metade de uma nota
+    // lançada na loja irmã. É o processo real de Altamira, feito por ajuste de saldo.
+    const irma = it.loja === "L1" ? "L4" : it.loja === "L4" ? "L1" : null;
+    if (irma && sn && sn.qtd > 0) {
+      const notasIrma = entradaNota[`${irma}|${it.cod}`] || [];
+      const casou = notasIrma.find(n => n.q > 0 && Math.abs(Math.floor(n.q / 2) - Math.abs(sn.qtd)) <= Math.max(1, sn.qtd * 0.15));
+      if (casou) {
+        it.classe = "divisao2";
+        it.detalhe = `divisão da NF ${casou.doc} lançada na ${irma} (${casou.q} un em ${dBR(casou.data)}) — metade veio para cá por ajuste de saldo` +
+          (textoMotivo ? ` · motivo: ${textoMotivo}` : "");
+        continue;
+      }
+    }
     if (sn && sn.qtd > 0 && Math.abs(Math.abs(it.dif) - sn.qtd) <= Math.max(1, a * 0.15)) {
       it.classe = "ajuste_mao";
-      it.detalhe = `${sn.n}x alguém mexeu no saldo sem nota (${Math.round(sn.qtd)} un, a última em ${sn.ultima})`;
+      it.detalhe = textoMotivo
+        ? `${sn.n}x ajuste de saldo, motivo: ${textoMotivo} — último em ${sn.ultima}`
+        : `${sn.n}x alguém mexeu no saldo sem escrever o motivo (${Math.round(sn.qtd)} un, o último em ${sn.ultima})`;
       continue;
     }
     if (sn && sn.qtd > 0) {
       it.classe = "ajuste_mao_parcial";
-      it.detalhe = `${sn.n}x mexeram no saldo sem nota (${Math.round(sn.qtd)} un, última em ${sn.ultima}) — explica parte da diferença de ${Math.abs(it.dif)}`;
+      it.detalhe = (textoMotivo
+        ? `${sn.n}x ajuste de saldo, motivo: ${textoMotivo}`
+        : `${sn.n}x mexeram no saldo sem escrever o motivo (${Math.round(sn.qtd)} un, último em ${sn.ultima})`)
+        + ` — explica parte da diferença de ${Math.abs(it.dif)}`;
       continue;
     }
   }

@@ -45,7 +45,9 @@ cache.produtos = cache.produtos || {};
 
 // alvos = o que a reconciliação marcou como "sumiu sem explicação", os de maior dinheiro primeiro
 const alvos = dados.recon
-  .filter(x => x.classe === "semdoc")
+  // inclui os já classificados por ajuste manual: eles precisam ser revisitados para capturar o
+  // MOTIVO digitado, que só passou a ser lido em 20/08/2026.
+  .filter(x => x.classe === "semdoc" || x.classe === "ajuste_mao" || x.classe === "ajuste_mao_parcial")
   .filter(x => {
     const c = cache.produtos[`${x.loja}|${x.cod}`];
     return !(c && c.data && (new Date(isoHoje) - new Date(c.data)) / 86400000 < TTL_DIAS);
@@ -104,9 +106,18 @@ async function movimento(page, cod, desde) {
   });
 }
 
+// ⚠️ O MOTIVO digitado no ajuste de saldo aparece na coluna "Cliente/Fornec." do histórico,
+// colado num sufixo fixo ("Arquivo de referência : 0 - ajuste conforme processamento").
+// Confirmado em 20/08/2026 lendo um ajuste feito pelo próprio painel.
+function motivoDoAjuste(quem) {
+  const t = String(quem || "").replace(/Arquivo de refer[êe]ncia\s*:.*$/is, "").replace(/\s+/g, " ").trim();
+  return t && t.length > 2 ? t : null;
+}
+
 // classifica cada movimento em linguagem de prateleira
+const cfopDe = l => (l.cfop || "").replace(/\D/g, "");
 function classificar(l) {
-  const cfop = (l.cfop || "").replace(/\D/g, "");
+  const cfop = cfopDe(l);
   const quem = (l.quem || "").toUpperCase();
   const doc = (l.doc || "").toUpperCase();
   if (!cfop) return "mexeram no saldo sem nota";
@@ -143,6 +154,13 @@ try {
           const q = numBR(l.qtd) || 0;
           resumo[k] = resumo[k] || { qtd: 0, n: 0, ultima: null };
           resumo[k].qtd += q; resumo[k].n++; resumo[k].ultima = l.data;
+          if (!cfopDe(l)) {
+            const mot = motivoDoAjuste(l.quem);
+            if (mot) {
+              resumo[k].motivos = resumo[k].motivos || {};
+              resumo[k].motivos[mot] = (resumo[k].motivos[mot] || 0) + q;
+            }
+          }
         }
         cache.produtos[`${loja}|${a.cod}`] = {
           data: isoHoje, desde: a.bal_data, movimentos: r.linhas.length, resumo,
