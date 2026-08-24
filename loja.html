@@ -2516,6 +2516,26 @@ async function init() {
     return;
   }
 
+  // RENDER DA TELA DE LOGIN IMEDIATO — antes de qualquer chamada de rede.
+  // Bug relatado pela Tatiane (24/08/2026): a lista "Toque no seu nome" ficava
+  // VAZIA porque o init() fazia 4 fetches sequenciais (metas-loja, metas_semanais,
+  // feedback-retornos, quizzes) ANTES do primeiro render. Worker/Supabase lento no
+  // celular = tela de login em branco = "app não funciona". Os dados de rede só são
+  // necessários DEPOIS do login (em enterApp) — então desenhamos o login já.
+  document.getElementById('login-nomeloja').textContent = loja.nome;
+  document.documentElement.style.setProperty('--theme-color', loja.cor);
+  {
+    const brand = window.__BRAND__ || (LOJA_KEY === 'L1' ? 'casa-beleza' : 'miss-beleza');
+    const logoImg = document.getElementById('login-logo-img');
+    if (logoImg) {
+      logoImg.src = 'icons/' + brand + '-512.png';
+      logoImg.style.background = brand === 'casa-beleza' ? '#fdd835' : '#ffffff';
+    }
+  }
+  renderVendList();
+  document.getElementById('pin-input').addEventListener('input', onPinChange);
+  document.getElementById('btn-entrar').addEventListener('click', tryLogin);
+
   // Aplica ajustes de meta que o painel mandou pro Worker. Sem isso o app
   // mostra só os defaults hardcoded de VENDAS_HIST/DADOS_LOJA, e ajustes que
   // o Athila fez no painel ficam invisíveis pras vendedoras (localStorage é
