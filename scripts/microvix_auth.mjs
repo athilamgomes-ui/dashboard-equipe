@@ -148,22 +148,30 @@ export async function garantirSessao(page, { log = () => {}, tokenOpcional = fal
     if (token) break;
     await page.waitForTimeout(500);
   }
+  let soSessao = false;
   if (!token) {
     if (tokenOpcional) {
+      // ERP migrou auth ~30/07/2026: api_token_lma NUNCA mais existe. Seguimos só
+      // com a sessão ASP — mas NÃO podemos pular a validação abaixo. Bug 24/08/2026:
+      // o `return null` que ficava aqui tornava o teste de sessão + re-login forçado
+      // código morto em TODOS os coletores, e qualquer sessão gestor_web velha
+      // quebrava a coleta em cascata até alguém logar por fora ("Sessão expirada"
+      // com v4/home dizendo OK). Ver [[microvix_migracao_auth_jwt_2026_07]].
       log("api_token_lma indisponível — seguindo em modo SÓ-SESSÃO (tokenOpcional). ERP migrou auth ~30/07/2026; raspagem ASP funciona só com a sessão.");
-      return null;
+      soSessao = true;
+    } else {
+      const e = new Error("api_token_lma indisponível após login");
+      e.code = "NAV_FAIL";
+      throw e;
     }
-    const e = new Error("api_token_lma indisponível após login");
-    e.code = "NAV_FAIL";
-    throw e;
   }
 
-  // Validação real: chamada-teste à API. Microvix às vezes mantém token em
-  // localStorage mas o session cookie server-side já expirou — neste caso o
-  // endpoint retorna 200 + HTML "Sessão expirada" em vez de JSON.
+  // Validação real: chamada-teste à API. v4/home pode dizer OK enquanto a sessão
+  // do gestor_web já morreu — neste caso o endpoint retorna 200 + HTML
+  // "Sessão expirada" em vez de JSON.
   const sessaoOk = await page.evaluate(async () => {
     try {
-      const t = localStorage.getItem("api_token_lma");
+      const t = localStorage.getItem("api_token_lma") || "";
       const r = await fetch(
         "/gestor_web/faturamento/relatorios/performance_por_vendedor/performance_por_vendedor_service.asp",
         {
@@ -207,10 +215,17 @@ export async function garantirSessao(page, { log = () => {}, tokenOpcional = fal
       await page.waitForTimeout(500);
     }
     if (!token) {
-      const e = new Error("api_token_lma indisponível após re-login forçado");
-      e.code = "NAV_FAIL";
-      throw e;
+      if (!tokenOpcional) {
+        const e = new Error("api_token_lma indisponível após re-login forçado");
+        e.code = "NAV_FAIL";
+        throw e;
+      }
+      soSessao = true;
     }
+  }
+  if (soSessao && !token) {
+    log("sessão gestor_web OK em modo SÓ-SESSÃO (sem api_token_lma).");
+    return null;
   }
   log(`token OK (${token.length} chars)`);
   return token;
