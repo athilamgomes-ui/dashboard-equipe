@@ -42,6 +42,48 @@ avisar_falha(){                        # falha silenciosa é o pior modo de falh
   echo "[caixa-diario] $1" > $LOGDIR/ultimo_erro.txt
 }
 
+# ── SE SOLTA DE QUEM CHAMOU ───────────────────────────────────────────────────
+# Quem dispara esta rotina é o agente de uma tarefa agendada, numa ÚNICA chamada de
+# Bash que fica esperando o fim. Em 25/08/2026 essa chamada levou SIGTERM aos 29 min,
+# no meio da 2ª tentativa da coleta do ERP — e como o WhatsApp é a ÚLTIMA etapa, o
+# Athila simplesmente não recebeu a conferência. Sem erro, sem aviso: o pipeline não
+# falhou, foi morto.
+# Agora o processo se solta: quem chama volta na hora e a rotina segue até o fim,
+# mesmo que o terminal, o agente ou a sessão morram no caminho.
+if [ "${CAIXA_ANEXADO:-0}" != "1" ]; then
+  # Caminho ABSOLUTO e via bash: "$0" vem relativo quando alguém roda de dentro da
+  # pasta ("bash atualizar_caixa_diario.sh"), e o nohup procura isso no PATH, não no
+  # diretório atual — o filho morria na hora com "No such file or directory".
+  CAIXA_ANEXADO=1 DIA="$DIA" nohup /bin/bash "$REPO/atualizar_caixa_diario.sh" "$@" \
+    >> "$HOJE_LOG-pipeline.log" 2>&1 &
+  DESANEXADO=$!
+  disown "$DESANEXADO" 2>/dev/null || true
+  echo "[caixa-diario] rodando destacado (pid $DESANEXADO) · dia $DIA"
+  echo "[caixa-diario] log:    $HOJE_LOG-pipeline.log"
+  echo "[caixa-diario] status: $LOGDIR/ultimo_status.txt (escrito no fim)"
+  exit 0
+fi
+
+# Estado final em arquivo: como o chamador não espera mais o fim, é por aqui que ele
+# (e o watchdog) descobrem o que aconteceu.
+# ⚠️ "ok" tem que ser AFIRMADO, nunca deduzido do código de saída. Ao levar SIGTERM o
+# bash roda o trap de EXIT com $? = 0, então uma rodada morta no meio se registrava como
+# "ok" — a mesma mentira por omissão que esta rotina existe para não contar. Só a última
+# linha do script marca CONCLUIU=1.
+CONCLUIU=0
+trap 'exit 143' TERM
+trap 'exit 130' INT
+registrar_status(){
+  local code=$?
+  local situacao
+  if [ "$CONCLUIU" = "1" ] && [ $code -eq 0 ]; then situacao="ok"
+  elif [ $code -eq 143 ] || [ $code -eq 130 ]; then situacao="interrompido (morto no meio)"
+  else situacao="falhou"
+  fi
+  printf '%s|%s|%s|%s\n' "$(date +%Y-%m-%dT%H:%M:%S)" "$DIA" "$code" "$situacao" \
+    > "$LOGDIR/ultimo_status.txt"
+}
+
 if ! mkdir "$LOCK" 2>/dev/null; then
   if [ -d "$LOCK" ] && [ "$(find "$LOCK" -maxdepth 0 -mmin +90)" ]; then
     log "lock órfão (>90min) — removendo"; rm -rf "$LOCK"; mkdir "$LOCK"
@@ -57,7 +99,7 @@ if ! mkdir "$LOCK" 2>/dev/null; then
     exit 30
   fi
 fi
-trap 'rm -rf "$LOCK"' EXIT
+trap 'registrar_status; rm -rf "$LOCK"' EXIT
 
 log "conferência do dia $DIA"
 
@@ -162,5 +204,6 @@ elif [ $AV -ne 0 ]; then
   exit 40
 fi
 
+CONCLUIU=1
 log "pronto."
 exit 0

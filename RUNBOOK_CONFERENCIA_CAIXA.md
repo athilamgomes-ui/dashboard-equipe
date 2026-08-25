@@ -713,3 +713,43 @@ idênticos aos de antes da mudança.
 **Para acrescentar uma adquirente nova**, mexa só em `lerTransacoes` (apelidos de coluna) e
 `detectarTipo`. Se o arquivo tiver `bandeira` + `valor bruto`, já é reconhecido como maquininha
 mesmo sem coluna de "meio".
+
+## A conferência diária não chegou: o pipeline foi MORTO, não falhou (25/08/2026)
+
+O Athila não recebeu o WhatsApp da conferência. O log do dia tinha só a etapa do ERP:
+
+```
+08:10:12 coletando conferência de caixa das 4 lojas...
+08:15:30 coleta falhou (tentativa 1/3): FALHOU: 5/16 coletas com erro (>30%)
+08:15:30 aguardando 5min antes de tentar de novo...
+...: 18532 Terminated: 15   /usr/bin/caffeinate -s -w $$
+```
+
+`Terminated: 15` = SIGTERM. A rotina é disparada pelo agente de uma tarefa agendada, numa **única
+chamada de Bash que espera o fim**; aos ~29 minutos essa chamada foi morta, no meio da segunda
+tentativa (que estava limpa, 10/16 sem erro). Como o **WhatsApp é a última etapa**, nada saiu — e
+não houve erro para alguém ver, porque o pipeline não falhou: foi interrompido.
+
+Ironia útil de registrar: foi a **repetição de 3 tentativas** acrescentada em 06/08 para proteger o
+pipeline que o empurrou para além do tempo que o chamador tolera. Retentativa longa e chamador com
+limite de tempo são incompatíveis se o processo não se soltar.
+
+**Conserto — `atualizar_caixa_diario.sh` se desanexa sozinho:** na primeira linha útil ele
+re-executa a si mesmo com `nohup` (caminho ABSOLUTO — `"$0"` vem relativo quando se roda de dentro
+da pasta e o `nohup` procura no PATH, o filho morria com *No such file or directory*), imprime pid,
+log e status, e sai 0 na hora. Quem chama volta imediatamente; a rotina segue até o fim mesmo que o
+agente, o terminal ou a sessão morram.
+
+**Estado final em arquivo:** `~/.claude/logs/caixa/ultimo_status.txt` →
+`2026-08-25T08:49:07|2026-08-24|0|ok`. É por aí que o chamador (e o watchdog) descobrem o
+resultado, já que ninguém mais espera o processo.
+
+⚠️ **`ok` é AFIRMADO, nunca deduzido do código de saída.** Ao receber SIGTERM o bash roda o trap de
+`EXIT` com `$? = 0`: a primeira versão registrou "ok" para uma rodada que eu tinha matado no meio —
+a mesma mentira por omissão que esta rotina existe para não contar. Só a última linha do script
+marca `CONCLUIU=1`; `trap 'exit 143' TERM` e `trap 'exit 130' INT` fazem a interrupção aparecer como
+`interrompido (morto no meio)`.
+
+Detalhe de teste: `pkill -f atualizar_caixa_diario.sh` **não** encerra a rotina na hora — o bash
+adia o trap enquanto espera um filho em primeiro plano, e o filho (`atualizar_conferencia_caixa.sh`)
+pode estar no `sleep 300` do próprio retry. Para encerrar de verdade, mate a árvore.
