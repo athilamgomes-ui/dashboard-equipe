@@ -297,7 +297,12 @@ for (const it of itensRecon) {
       // ⚠️ Sem entrada NENHUMA nesta loja + ajuste falando de nota + a irmã tem nota do produto:
       // é divisão. Foi o Athila quem apontou (25/08/2026) que TODO "explicado em parte" da L1 era
       // isso — a regra anterior exigia a metade exata e perdia os casos com vários ajustes.
-      if (falaDeNota && maisRecente && it.ent === 0) {
+      // ⚠️ Athila, 25/08/2026: a nota normalmente aparece em UMA loja só. Quando aparece nas
+      // DUAS, foram dois pedidos iguais — um para cada loja — e NÃO é divisão. Por isso, além de
+      // não ter entrada na janela, esta loja não pode ter nota própria do produto em nenhum
+      // momento da janela de notas.
+      const notasMinhas = entradaNota[`${it.loja}|${it.cod}`] || [];
+      if (falaDeNota && maisRecente && it.ent === 0 && notasMinhas.length === 0) {
         it.classe = "divisao2";
         it.detalhe = `provável divisão da NF ${maisRecente.doc} lançada na ${irma} (${maisRecente.q} un em ${dBR(maisRecente.data)}) — ` +
           `esta loja não teve entrada própria e o ajuste diz “${motivos[0][0]}”`;

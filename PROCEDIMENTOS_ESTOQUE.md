@@ -73,6 +73,10 @@ L5 = Miss Beleza Santarém.**
 
 Escreva nas **duas pontas** — na loja que perde e na loja que ganha, com o mesmo texto.
 
+> ⚠️ **Isso vale só quando a nota veio no nome de uma loja e foi dividida.** Se as duas lojas
+> fizeram **pedidos separados** e cada uma recebeu a sua nota, não há divisão nenhuma — cada loja
+> lança a sua entrada normalmente e ninguém escreve `DIVISAO NF`.
+
 > Com esse texto, o painel de estoque reconhece sozinho que aquilo foi divisão de nota e mostra o
 > número. Sem ele, aparece como mercadoria sumida e alguém vai ter que investigar.
 
