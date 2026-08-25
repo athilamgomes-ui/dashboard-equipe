@@ -140,9 +140,9 @@
           <thead><tr>
             <th class="l">Produto</th><th class="l">Marca</th><th>Qtd</th>
             <th>Custo unit. (cheio)</th><th>Margem %</th><th>Preço sugerido</th>
-            <th>Markup</th><th>Marg. líq.</th><th>Preço atual ERP</th>
+            <th>Markup</th><th>Marg. líq.</th><th>Preço atual ERP</th><th>Preço mercado</th>
           </tr></thead>
-          <tbody id="tbody"><tr><td colspan="9" class="empty">Selecione uma NF-e ao lado.</td></tr></tbody>
+          <tbody id="tbody"><tr><td colspan="10" class="empty">Selecione uma NF-e ao lado.</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -458,6 +458,7 @@ function renderItens(){
       <td class="mono">${f.markup?f.markup.toFixed(2)+'×':'—'}</td>
       <td class="mono" style="color:var(--ok)">${pct(f.margemReal)}</td>
       <td class="mono" title="${pa!=null?'Preço atual no ERP':'sem preço no ERP'}">${pa!=null?brl(pa):'<span class="muted">—</span>'}${delta!=null?` <span class="muted" style="font-size:11px">(${delta>=0?'+':''}${brl(delta)})</span>`:''}${(()=>{const cu=it.custo_unit_cheio||0;const fat=it.unidades_por_caixa;if(!fat||pa==null||cu<=0)return '';return pa>cu*Math.sqrt(fat)*1.3?` <span class="pill" style="background:#fee2e2;color:#b91c1c;font-size:10px" title="O preço sugerido agora é por UNIDADE, mas este preço atual do ERP parece ser da CAIXA (${fat} un). Confira antes de comparar/aplicar.">⚠️ atual parece ser da caixa</span>`:'';})()}${it.preco_ultima_venda!=null?`<div class="muted" style="font-size:11px" title="Último preço REALMENTE vendido no Histórico de Movimento — referência, NÃO é preço fixo/trava">últ. venda ${brl(it.preco_ultima_venda)}${it.preco_ultima_venda_data?` · ${it.preco_ultima_venda_data}`:''}</div>`:''}</td>
+      <td class="mono" title="Preço de mercado pesquisado (mediana / preço mais constante na internet) + frete p/ interior do PA — é o TETO competitivo real. Referência, não é trava.">${(()=>{const m=it.preco_mercado;const tot=(m&&m.total!=null)?m.total:null;if(tot==null)return '<span class="muted">—</span>';let out=brl(tot);if(f.preco!=null){out+= f.preco<=tot?` <span class="pill" style="background:#dcfce7;color:#166534;font-size:10px" title="preço sugerido está dentro do mercado+frete">✓ competitivo</span>`:` <span class="pill" style="background:#fef9c3;color:#854d0e;font-size:10px" title="preço sugerido acima do mercado+frete">+${(((f.preco/tot)-1)*100).toFixed(0)}%</span>`;}const sub=[];if(m.mercado!=null)sub.push(`mercado ${brl(m.mercado)}${m.frete?` + frete ${brl(m.frete)}`:''}`);if(m.n)sub.push(`${m.n} fontes`);if(m.faixa)sub.push(`faixa ${m.faixa}`);if(m.data)sub.push(m.data);if(sub.length)out+=`<div class="muted" style="font-size:11px">${sub.join(' · ')}</div>`;return out;})()}</td>
     </tr>`;
   }).join("");
   document.getElementById("tbody").innerHTML=rows;

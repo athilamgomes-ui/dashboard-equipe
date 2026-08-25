@@ -47,6 +47,9 @@ const ajusteNf = (cnpj, numero) => AJUSTES_NF[String(cnpj || "").replace(/\D/g, 
 // Último preço de venda REAL por EAN (Histórico de Movimento). Só EXIBIÇÃO (campo preco_ultima_venda) —
 // NÃO é preço fixo/trava, NÃO entra no cálculo nem na detecção. Referência p/ cadastro com duplicados. (21/08/2026)
 const ULTIMA_VENDA = (() => { try { return JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_ultima_venda.json", "utf8")).precos || {}; } catch { return {}; } })();
+// Preço de MERCADO (pesquisa na internet: mediana/preço mais constante) + FRETE p/ interior PA, por EAN.
+// Só EXIBIÇÃO (campo preco_mercado) — NÃO é trava, NÃO entra no cálculo. É o teto competitivo real. (25/08/2026)
+const PRECO_MERCADO = (() => { try { return JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_preco_mercado.json", "utf8")).precos || {}; } catch { return {}; } })();
 const ST_PA = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/st_pa_ncm.json", "utf8"));
 const ST_NCM = (ST_PA.ncm_st || []).map(String).sort((a, b) => b.length - a.length); // prefixos mais longos primeiro
 const URL_LISTA_PRECOS = "https://linx.microvix.com.br/gestor_web/produtos/relatorio_lista_precos.asp";
@@ -943,6 +946,22 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         if (uv && uv.preco != null) { it.preco_ultima_venda = uv.preco; it.preco_ultima_venda_data = uv.data || null; comUltVenda++; }
       }
       if (comUltVenda) log(`último preço de venda (exibição) anexado a ${comUltVenda} item(ns)`);
+    }
+
+    // ===== Preço de MERCADO + frete (exibição, por EAN) — NÃO é trava =====
+    let comMercado = 0;
+    if (Object.keys(PRECO_MERCADO).length) {
+      for (const L of Object.keys(lojas)) for (const nf of lojas[L]) for (const it of nf.itens) {
+        const m = PRECO_MERCADO[String(it.ean || "")];
+        if (m && (m.total != null || m.mercado != null)) {
+          const mercado = m.mercado != null ? m.mercado : null;
+          const frete = m.frete != null ? m.frete : 0;
+          const total = m.total != null ? m.total : (mercado != null ? Math.round((mercado + frete) * 100) / 100 : null);
+          it.preco_mercado = { mercado, frete, total, n: m.n || null, faixa: m.faixa || null, data: m.data || null, obs: m.obs || null };
+          comMercado++;
+        }
+      }
+      if (comMercado) log(`preço de mercado (exibição) anexado a ${comMercado} item(ns)`);
     }
 
     // ===== DETECÇÃO: a NF já foi precificada no ERP? (2 sinais, OR) =====
