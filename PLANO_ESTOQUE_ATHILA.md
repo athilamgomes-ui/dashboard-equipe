@@ -12,7 +12,7 @@ decisões de dono. O documento da equipe é o `PROCEDIMENTOS_ESTOQUE.md`.*
 |---|---|---|
 | Reconciliação | L1 75% · L3 94% · **L4 77%** · **L5 95%** fecham | 95% nas quatro |
 | Rastro do movimento | 41 produtos sumidos sem explicação nenhuma | zero sem explicação |
-| Pacote × unidade | fator de conversão **desligado** no ERP | ligado, ~200 produtos cadastrados |
+| Pacote × unidade | **quem lança a nota não sabe conferir o fator** — 231 produtos errados, R$ 45,9 mil | fator conferido na entrada, saldo nascendo certo |
 | Validade | não existe no ERP; controle em Excel, atrasado | aviso automático com 6 meses |
 | Negativos | L1 e L4 limpas · **L3 com 296** · L5 resolvida | zero fora do dia a dia |
 | Vigilância | painel diário + watchdog por idade | mantido |
@@ -52,33 +52,39 @@ saldo **é** o custo real histórico — não havia custo escondido.
 
 ## 2 · O que falta — em ordem de dinheiro
 
-### 2.1 Pacote × unidade · **o maior de todos**
+### 2.1 Pacote × unidade · **o maior de todos** — e é treino, não parâmetro
 
-**Situação:** o parâmetro `UtilizaFatorConversaoFornecedor` está **desligado** no ERP. Não existe
-fator cadastrado para nenhum produto. Chega uma caixa com 144 lixas, a nota diz "1 CX", o sistema dá
-entrada de 1. **231 produtos** estão nessa situação, com R$ 45.905 de estoque envolvido.
+**Correção de 25/08/2026 (sua).** Eu havia proposto ligar `UtilizaFatorConversaoFornecedor`.
+**Não é necessário e seria trabalho duplicado:** o ERP já permite informar o fator **no cadastro do
+produto** e **na hora da entrada da nota**. A ferramenta existe. O que está errado é a **forma como
+a entrada está sendo feita** — quem lança não sabe determinar o fator certo.
 
-**Onde queremos chegar:** o fator cadastrado nos produtos comprados em pacote e vendidos na unidade,
-para o saldo nascer certo sem ninguém ajustar nada.
+O que aquele parâmetro acrescentaria é só uma **tabela persistente por fornecedor**, para não
+redigitar o fator a cada nota. É conveniência, não solução — e traria risco de conversão dobrada
+enquanto os pares de código duplicado existirem. **Fica fora do plano por enquanto.**
 
-**O caminho, nesta ordem:**
+**Situação medida:** 231 produtos com preço e custo em unidades diferentes, R$ 45.905 de estoque
+envolvido. Piores casos: `CX ALGODAO CARD HID NATHY 50G` (custo R$ 184,80 contra preço R$ 0,03),
+`CLIPS PLAST. POTE C/250` (R$ 20,09 contra R$ 0,50), `ESCOVA CARACOL DISPLAY C/16` (R$ 169,13
+contra R$ 1,49).
 
-1. **Limpar os pares de código duplicado primeiro.** São 33 pares; 21 são tamanhos de pacote
-   diferentes (legítimos, não mexer) e 12 são duplicata. Destes, 10 têm o irmão zerado e podem ser
-   desativados direto; **2 precisam de decisão** (`L1 18389 × 18388` KIT C/5 PINCEIS e
-   `L3 55398 × 62627` CAIXA DE 12 GRADES — zerar o de menor saldo e desativar).
-   *Por que antes:* se ligar o fator com os pares no ar, o remendo antigo e o mecanismo novo se
-   somam e o saldo dobra.
-2. **Teste em branco.** Ligar `UtilizaFatorConversaoFornecedor` **sem cadastrar fator nenhum**,
-   lançar uma nota qualquer e conferir que o saldo entrou igual ao de sempre. Isso prova que o
-   parâmetro sozinho não muda nada — é a única coisa que ainda é suposição minha.
-3. **Teste em um produto.** Cadastrar o fator no **FRASCO SPRAY 75ML C/48 (L1, código 46938)** —
-   escolhido porque o irmão está zerado, risco nenhum — e lançar a próxima nota dele.
-4. **Cadastrar os demais**, começando pelas lixas Santa Clara, que são a maior bagunça.
+**Onde queremos chegar:** quem dá entrada sabe conferir o fator, e o saldo nasce certo sem ninguém
+ajustar depois.
 
-⚠️ **Não seguir pelo `UtilizaUnidadeTributavel`.** Medi 40 notas de 19 fornecedores: **0 de 395
-itens** trazem a conversão no XML. Além de não resolver, ele é uma chave geral que converteria
-também o pacote que a loja compra e vende inteiro — transformaria 12 pacotes em 1.200 unidades.
+**O caminho:**
+
+1. **Treinar quem lança nota** — está no documento da equipe, item 8, com as três conferências:
+   contar a embalagem, fazer a conta da nota (`valor total do item ÷ unidades vendáveis = custo
+   unitário`, que tem que ser menor que o preço de venda) e conferir o saldo depois de lançar.
+   ⚠️ A conferência 2 é a que não deixa errar, e ninguém está fazendo hoje.
+2. **Corrigir o passivo pela lista do painel** — a aba *Pacote × unidade* já lista os 231 em ordem
+   de dinheiro, com o código irmão ao lado.
+3. **Limpar os pares de código duplicado** (33 pares; 21 são tamanhos diferentes e legítimos, 10 têm
+   o irmão zerado, **2 precisam da sua decisão**: `L1 18389 × 18388` e `L3 55398 × 62627`).
+4. Só depois, **se** a redigitação a cada nota incomodar, reavaliar o parâmetro por fornecedor.
+
+**Custo disso:** zero em parâmetro, zero em risco de caixa. É treino e correção de cadastro — pela
+sua regra do imediato, é para começar agora.
 
 ### 2.2 Balanço em Altamira
 
@@ -150,11 +156,11 @@ Levantei os 212 parâmetros booleanos do portal: 82 ligados, 130 desligados.
 
 *O `ncm_obrigatorio` já está ligado.*
 
-### Ligar com plano
+### Fora do plano por enquanto
 
-| Parâmetro | O que muda | Cuidado |
-|---|---|---|
-| `UtilizaFatorConversaoFornecedor` | cria o fator por produto × fornecedor | muda a quantidade que entra nas próximas notas — seguir os 4 passos do item 2.1 |
+| Parâmetro | Por quê |
+|---|---|
+| `UtilizaFatorConversaoFornecedor` | **desnecessário**: o fator já pode ser informado no cadastro e na entrada da nota. O parâmetro só guardaria a tabela por fornecedor, poupando redigitação — e traria risco de conversão dobrada enquanto os pares de código duplicado existirem. Reavaliar depois que o passivo estiver limpo (item 2.1) |
 
 ### Não ligar
 
@@ -192,7 +198,61 @@ padronizado, o painel para de adivinhar e passa a ler. E os 91 casos que ainda f
 "explicado em parte" na L1 — que você identificou corretamente como divisões recentes — deixam de
 existir, porque o motivo vai dizer o que é.
 
-**O que o item 3 muda no negócio:** envio entre cidades vira venda, então entra no faturamento da
+### Venda entre lojas — o que existe hoje e o que falta
+
+Fui ver no ERP. **Já existem 2 dos 4 clientes de loja**, e um deles não está sendo excluído:
+
+| Cliente | É a loja | Faturado em 2026 | Excluído dos painéis? |
+|---|---|---|---|
+| `8 - R MAURA DE FREITAS LTDA` | **L3** Itaituba | R$ 18.513 · 4 vendas | ✅ sim |
+| `1635 - MISSBELEZA SANTAREM LTDA` | **L5** Santarém | R$ 2.161 · 1 venda | ❌ **não — está contando como venda real** |
+| — | L1 Casa Altamira | — | não existe |
+| — | L4 Miss Altamira | — | não existe |
+
+As 4 vendas do cliente 8 saem **da L5**: é o fluxo Santarém → Itaituba que você citou. O modelo já
+funciona, só está incompleto.
+
+**O que fazer:**
+1. **Cadastrar cliente para L1 e L4**, no mesmo padrão (a pessoa jurídica de cada loja).
+2. **Eu amplio a exclusão** para os 4 clientes, em vez de só o código 8 — hoje o 1635 passa batido.
+3. Manter a regra: quem envia fatura **para o cliente da loja que recebe**. O cliente identifica o
+   destino; a loja que emite identifica a origem.
+
+### O problema do preço de custo (sua objeção, e ela procede)
+
+Eu sugeri faturar a preço de custo. Você apontou dois furos, e os dois são reais: **para saber o
+custo é preciso puxar da nota**, o que só funciona nas notas cheias; e **aplicar desconto na venda
+polui a análise de desconto** da loja.
+
+Três saídas, em ordem de preferência:
+
+1. **NF de transferência (CFOP 5152) em vez de venda.** Resolve tudo de uma vez: não gera receita,
+   não tem preço nem desconto, não entra em ticket nem em comissão, e a mercadoria anda documentada.
+   ⚠️ **Só é possível se as lojas forem do mesmo titular** (mesma raiz de CNPJ / mesmos sócios).
+   **É pergunta para o contador, e é a primeira a fazer** — se a resposta for sim, as outras duas
+   saídas ficam desnecessárias.
+2. **Tabela de preço específica para venda entre lojas.** O Microvix trabalha com tabelas de preço;
+   uma tabela amarrada aos clientes-loja faria a venda sair no valor certo **sem ninguém digitar
+   desconto**. Precisa ser verificado no ERP antes de prometer — não confirmei que dá para amarrar
+   tabela a cliente.
+3. **Faturar pelo preço normal e excluir da análise.** É o que já acontece hoje com o cliente 8. Não
+   exige nada novo, mas infla o CMV da loja que recebe (ela "compra" pelo preço de venda da outra).
+
+**Minha recomendação:** faça a pergunta 1 ao contador antes de mexer em qualquer coisa. Ela pode
+tornar todo o resto desnecessário.
+
+### Vendedoras — não pode contar, e o painel tem que dizer o porquê
+
+Regra sua de 25/08: **venda entre lojas não conta como faturamento de vendedora**. A premiação já
+exclui o cliente 8 na fonte, então nesse ponto já está certo — mas passa a valer para os 4 clientes,
+não só um.
+
+No **painel de vendas**, você pediu que o valor possa aparecer, desde que fique explícito. Hoje ele
+é **subtraído em silêncio**: o total sai líquido e ninguém vê que houve transferência. O ajuste é
+mostrar uma linha própria — *"deste total, R$ X foi transferência entre lojas"* — em vez de apenas
+sumir com o valor. Meia hora de trabalho, não encosta no caixa.
+
+**O que o item 3 muda no negócio:****O que o item 3 muda no negócio:** envio entre cidades vira venda, então entra no faturamento da
 loja que envia e no CMV dela. Isso muda o número de vendas por loja e a margem de cada uma. É
 decisão sua e do contador — vale avisar quem acompanha meta de loja, porque o efeito aparece no
 resultado do mês.
@@ -203,14 +263,17 @@ resultado do mês.
 
 | # | Ação | Quem | Esforço |
 |---|---|---|---|
+| 0 | **Perguntar ao contador se cabe NF de transferência entre as lojas** — pode tornar metade do resto desnecessário | você | 1 ligação |
 | 1 | Rodar o SQL do Supabase | você | 5 min |
 | 2 | Enviar o documento de procedimentos para a equipe | você / Ana Lídia | 1 dia |
 | 3 | Ligar `LogMovimentacoes` e os três `Validar*` | você | 15 min |
 | 4 | Balanço por marca em L1 e L4, no modelo da L5 | equipe | 2 a 3 semanas |
 | 5 | Conferência física da L3 e aplicação pelo painel | gerente L3 | 1 semana |
 | 6 | Limpar os pares de código duplicado | eu + sua decisão nos 2 | 1 dia |
-| 7 | Teste em branco e teste em um produto do fator de conversão | você + eu | 1 dia |
-| 8 | Cadastrar o fator nos ~200 produtos | equipe | 2 semanas |
+| 7 | **Treinar quem lança nota nas 3 conferências do fator** (item 8 do doc da equipe) | você / Ana Lídia | 1 tarde |
+| 8 | Corrigir os 231 produtos de pacote × unidade pela lista do painel | equipe | 2 semanas |
 | 9 | Importar a planilha de validade e criar o hábito mensal | equipe | contínuo |
+| 10 | Cadastrar cliente de venda entre lojas para L1 e L4 | você | 20 min |
+| 11 | Eu amplio a exclusão para os 4 clientes e mostro a linha de transferência no painel de vendas | eu | 30 min |
 
 Os itens 1 a 3 destravam tudo o que vem depois e somam menos de meia hora.

@@ -177,20 +177,67 @@ Como fazer:
 
 ---
 
-## 8 · Produto que vem em caixa ou pacote
+## 8 · Produto que vem em caixa ou pacote — o fator de conversão
 
-É a maior fonte de erro de saldo hoje.
+**É a maior fonte de erro de saldo hoje, e o erro está na hora de dar entrada.**
 
-**O problema:** chega uma caixa com 48 frascos, a nota diz "1 CX", e o sistema dá entrada de **1**.
-Aí a loja vende 48 unidades e o saldo vira −47.
+### O que é o fator de conversão
 
-**O que fazer quando você perceber isso:**
-1. **Não corrija sozinho no ajuste.** Anote o código e o número da nota.
-2. **Avise o Athila ou a Ana Lídia** — o acerto é no cadastro do produto, não no saldo.
-3. Enquanto não estiver acertado, **conte esse produto com atenção redobrada** nas contagens.
+> **O fator é quantas unidades VOCÊ VENDE dentro de uma unidade que VOCÊ COMPRA.**
 
-**Se o produto for vendido em caixa fechada** (a loja compra a caixa e vende a caixa), está certo
-como está — avise também, para não ser "corrigido" por engano.
+Chega uma caixa com 48 frascos e a loja vende frasco por frasco → **o fator é 48**.
+Chega um pacote com 100 lixas e a loja vende lixa por lixa → **o fator é 100**.
+Chega uma caixa com 12 e a loja vende a caixa fechada → **o fator é 1** (não converte nada).
+
+O sistema já permite informar isso **no cadastro do produto** e **na hora da entrada da nota**.
+Não falta ferramenta. O que falta é informar o número certo.
+
+### Como saber se o fator está certo — as três conferências
+
+Faça as três. Se as três baterem, está certo. Se uma não bater, pare e chame a gerência.
+
+**1 · Confira na embalagem.** Abra e conte: quantas unidades **que você vai vender** vêm dentro?
+Não é o que está escrito no papel, é o que dá para vender separado. Se a caixa tem 4 pacotes de 12
+e você vende a lixa avulsa, o fator é **48**, não 4.
+
+**2 · Confira pela nota — é a conta que não deixa errar.**
+
+```
+valor total daquele item na nota ÷ número de unidades vendáveis = custo de UMA unidade
+```
+
+Esse custo tem que **fazer sentido**: precisa ser **menor que o preço de venda** da unidade, e
+próximo do que aquele item sempre custou.
+
+- Item de R$ 167,40 na nota, caixa com 60 discos → 167,40 ÷ 60 = **R$ 2,79 por disco**. O disco é
+  vendido a R$ 8,90. Faz sentido. ✅
+- Se a conta der **R$ 167,40 por disco** e o disco é vendido a R$ 8,90, o fator está errado. ❌
+
+**3 · Confira o saldo depois de lançar.** Terminou a entrada, abra o produto e olhe o saldo.
+**Ele tem que ter aumentado exatamente o número de unidades que você pode vender.** Chegou 1 caixa
+de 48 e o saldo subiu 1? O fator não foi aplicado. Chegou 1 caixa de 48 e subiu 48? Certo.
+
+### Sinais de que o fator está errado
+
+- O custo unitário ficou **maior que o preço de venda**.
+- O saldo subiu **1** quando chegou uma caixa cheia.
+- O produto **ficou negativo poucos dias depois da entrada**, vendendo normal.
+- A mesma marca tem produtos com custo esquisito só em alguns itens.
+
+### O que fazer quando encontrar errado
+
+1. **Não conserte no ajuste de saldo.** Ajustar o saldo esconde o erro e ele volta na próxima nota.
+2. Anote **o código do produto e o número da nota**.
+3. **Avise o Athila ou a Ana Lídia** — o acerto é no cadastro do produto e/ou na entrada.
+4. Se a nota ainda não foi finalizada, **corrija o fator ali mesmo, na entrada**, e refaça a
+   conferência 2 e 3 antes de finalizar.
+
+### Cuidado com o código duplicado
+
+Se você não conseguiu acertar o fator, **não crie um segundo código** para o mesmo produto (um "de
+caixa" e outro "de unidade"). Isso resolve o dia e cria uma confusão permanente: dois códigos com
+saldo, ninguém sabe qual usar, e o histórico do produto fica partido em dois. Se já existir um par
+assim, avise — não use os dois.
 
 ---
 
