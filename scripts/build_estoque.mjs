@@ -267,16 +267,40 @@ for (const it of itensRecon) {
     // o motivo digitado no ajuste vem do próprio histórico — quando existe, ele É a explicação
     const motivos = sn && sn.motivos ? Object.entries(sn.motivos).sort((x, y) => Math.abs(y[1]) - Math.abs(x[1])) : [];
     const textoMotivo = motivos.length ? motivos.map(([m, q]) => `“${m}” (${Math.round(q)} un)`).join(" · ") : null;
-    // divisão de NF entre L1 e L4: o ajuste na loja destino casa com a metade de uma nota
-    // lançada na loja irmã. É o processo real de Altamira, feito por ajuste de saldo.
+    // ── divisão de NF entre L1 e L4 ──────────────────────────────────────────
+    // Em Altamira a nota vem no nome de UMA empresa e é dividida entre as duas por ajuste de
+    // saldo (a metade que entra na loja destino não tem documento nenhum). Três sinais, do mais
+    // forte para o mais fraco:
+    //   1. o motivo diz DIVISAO NF <n> — padrão novo, definitivo
+    //   2. o motivo fala de NOTA/ENTRADA e a loja irmã tem nota daquele produto — é o caso real
+    //      da L1: entrada 0 na própria loja e ajuste "AJUSTE DE NOTA"
+    //   3. a quantidade bate com a metade exata da nota da irmã (assinatura ÷2)
     const irma = it.loja === "L1" ? "L4" : it.loja === "L4" ? "L1" : null;
     if (irma && sn && sn.qtd > 0) {
       const notasIrma = entradaNota[`${irma}|${it.cod}`] || [];
-      const casou = notasIrma.find(n => n.q > 0 && Math.abs(Math.floor(n.q / 2) - Math.abs(sn.qtd)) <= Math.max(1, sn.qtd * 0.15));
-      if (casou) {
+      const textos = motivos.map(m => m[0].toUpperCase()).join(" ");
+      const explicito = /DIVIS[ÃA]O\s*NF\s*(\d+)/.exec(textos);
+      const falaDeNota = /\bNOTA\b|\bENTRADA\b|\bNF\b/.test(textos);
+      const metade = notasIrma.find(n => n.q > 0 && Math.abs(Math.floor(n.q / 2) - Math.abs(sn.qtd)) <= Math.max(1, sn.qtd * 0.15));
+      const maisRecente = notasIrma.length ? notasIrma.slice().sort((a, b) => a.data < b.data ? 1 : -1)[0] : null;
+
+      if (explicito) {
         it.classe = "divisao2";
-        it.detalhe = `divisão da NF ${casou.doc} lançada na ${irma} (${casou.q} un em ${dBR(casou.data)}) — metade veio para cá por ajuste de saldo` +
-          (textoMotivo ? ` · motivo: ${textoMotivo}` : "");
+        it.detalhe = `divisão da NF ${explicito[1]} (motivo escrito no ajuste) — metade veio da ${irma}`;
+        continue;
+      }
+      if (metade) {
+        it.classe = "divisao2";
+        it.detalhe = `divisão da NF ${metade.doc} lançada na ${irma} (${metade.q} un em ${dBR(metade.data)}) — metade veio para cá por ajuste de saldo`;
+        continue;
+      }
+      // ⚠️ Sem entrada NENHUMA nesta loja + ajuste falando de nota + a irmã tem nota do produto:
+      // é divisão. Foi o Athila quem apontou (25/08/2026) que TODO "explicado em parte" da L1 era
+      // isso — a regra anterior exigia a metade exata e perdia os casos com vários ajustes.
+      if (falaDeNota && maisRecente && it.ent === 0) {
+        it.classe = "divisao2";
+        it.detalhe = `provável divisão da NF ${maisRecente.doc} lançada na ${irma} (${maisRecente.q} un em ${dBR(maisRecente.data)}) — ` +
+          `esta loja não teve entrada própria e o ajuste diz “${motivos[0][0]}”`;
         continue;
       }
     }

@@ -381,6 +381,20 @@ sem chutar. ⚠️ O Histórico de Movimento devolve os **mesmos números nas 4 
 **grupo**, não da empresa da sessão (por isso o script consulta uma loja só). E a janela começa em
 01/01/2023, então "mais antigo" significa *primeiro movimento visto desde 2023*, não data de cadastro.
 
+## A L5 é o modelo (22–24/08/2026)
+
+A gerente de Santarém rodou **48 balanços por marca** entre 20 e 24/08 (ITALLIAN, COLORAÇÃO,
+MAQUIAGEM, ESCOVAS, ESMALTES, ACESSÓRIOS…). Efeito medido no painel:
+
+| | antes | depois |
+|---|---|---|
+| produtos com contagem | 805 | **4.635** |
+| % que fecha | 95,5% | **95,3%** |
+
+Ou seja: **sete vezes mais produtos medidos e a taxa de acerto se manteve** — é a prova de que o
+método fecha quando a contagem cobre a marca inteira. A gerente confirma que os saldos estão
+corretos, e o número concorda com ela. É o padrão a replicar em L1 (2.617 contados) e L4 (2.390).
+
 ## Registro de execuções
 
 | Data | Resultado |
