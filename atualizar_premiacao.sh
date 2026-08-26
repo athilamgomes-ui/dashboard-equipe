@@ -38,7 +38,15 @@ if [ -d "$LOCK" ]; then
   fi
 fi
 mkdir "$LOCK" 2>/dev/null || { log "lock: corrida perdida. Abortando."; exit 30; }
-trap 'rmdir "$LOCK" 2>/dev/null' EXIT
+
+# ── trava compartilhada do perfil do Microvix (26/08/2026) ───────────────────
+# O lock acima só protege contra DUAS premiações. Em 25/08 a coleta das 22:41 rodou junto com
+# o pipeline de estoque (22:10→04:05, mesmo ~/.claude/microvix-profile) e voltou parcial:
+# L1 e L4 zeradas. O sanity check reverteu, mas o run foi perdido — e às 14:12 do mesmo dia
+# aconteceu o mesmo com a L1. Agora a premiação espera o perfil ficar livre.
+source "$HOME/.claude/lib_lock_erp.sh"
+trap 'soltar_erp; rmdir "$LOCK" 2>/dev/null' EXIT
+travar_erp 12 || { log "perfil do Microvix ocupado há 12min — abortando sem publicar."; exit 30; }
 
 cd "$REPO" || { log "repo não encontrado"; exit 20; }
 
