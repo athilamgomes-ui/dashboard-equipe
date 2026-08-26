@@ -22,7 +22,14 @@ if ! mkdir "$LOCK" 2>/dev/null; then
     log "já há execução em andamento (lock) — abortando"; exit 30
   fi
 fi
-trap 'rm -rf "$LOCK"' EXIT
+trap 'soltar_erp; rm -rf "$LOCK"' EXIT
+# ── trava compartilhada do perfil do Microvix (26/08/2026) ──────────────────
+# ~20 scripts usam o mesmo ~/.claude/microvix-profile. Duas coletas ao mesmo tempo = a segunda
+# não lê o api_token_lma, sai 10 e o painel PARA DE ATUALIZAR EM SILÊNCIO (aconteceu em 25/08
+# com vendas e compras, que dispararam no mesmo minuto que a premiação).
+source "$HOME/.claude/lib_lock_erp.sh"
+travar_erp 12 || exit 30
+
 
 # ── mantém o Mac acordado enquanto ESTE script roda ──
 # O com.amgomes.keepawake dá caffeinate às 17:56 por 3h10, ou seja, até ~21:06. A rodada

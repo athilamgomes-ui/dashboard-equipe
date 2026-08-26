@@ -17,7 +17,14 @@ if ! mkdir "$LOCK" 2>/dev/null; then
   log "ERRO: outra execução em andamento ($LOCK existe). Abortando."
   exit 30
 fi
-trap 'rmdir "$LOCK" 2>/dev/null' EXIT
+trap 'soltar_erp; rmdir "$LOCK" 2>/dev/null' EXIT
+# ── trava compartilhada do perfil do Microvix (26/08/2026) ──────────────────
+# ~20 scripts usam o mesmo ~/.claude/microvix-profile. Duas coletas ao mesmo tempo = a segunda
+# não lê o api_token_lma, sai 10 e o painel PARA DE ATUALIZAR EM SILÊNCIO (aconteceu em 25/08
+# com vendas e compras, que dispararam no mesmo minuto que a premiação).
+source "$HOME/.claude/lib_lock_erp.sh"
+travar_erp 12 || exit 30
+
 
 cd "$SCRIPTS" || { log "scripts dir não encontrado"; exit 20; }
 
