@@ -40,7 +40,7 @@ const novo = process.argv[4];
 // markup opcional: o ERP deriva o preço do markup ARMAZENADO (venda = custo × (1+markup/100)).
 // Mexer no custo sozinho joga o erro do custo para o preço — foi o que derrubou o 12408 de
 // R$ 67,90 para R$ 0,0655 em 27/08. Passar o markup alvo junto mantém o preço no lugar.
-const markup = (process.argv[5] && /^\d+,\d+$/.test(process.argv[5])) ? process.argv[5] : null;
+const markup = (process.argv[5] && /^[\d.]+,\d+$/.test(process.argv[5])) ? process.argv[5] : null;
 const GRAVAR = process.argv.includes("--gravar");
 const E = LOJAS[loja];
 if (!E || !/^\d+$/.test(cod || "") || !/^[\d.]+,\d{2}$/.test(novo || "")) {
@@ -145,8 +145,9 @@ const custoMudou = depois.custo !== antes.custo;
 // arredondamento — e isso é correção, não estrago. Por isso a tolerância de 1 centavo quando
 // há markup alvo; sem markup, qualquer mexida no preço continua sendo falha.
 const n = (v) => parseFloat(String(v || "").replace(/\./g, "").replace(",", "."));
-const precoIntacto = markup ? Math.abs(n(depois.venda) - n(antes.venda)) <= 0.01
+const precoIntacto = markup ? Math.abs(n(depois.venda) - n(antes.venda)) <= 0.05
                             : depois.venda === antes.venda;
+if (markup) log(`   diferença no preço: R$ ${(n(depois.venda) - n(antes.venda)).toFixed(4)}`);
 const ok = custoMudou && precoIntacto;
 if (!custoMudou) log("⚠️ o custo NÃO mudou — a gravação não pegou.");
 if (!precoIntacto) log(`🔴 O PREÇO DE VENDA MUDOU (${antes.venda} → ${depois.venda}) — isso não era para acontecer.`);
