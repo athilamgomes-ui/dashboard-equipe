@@ -2625,7 +2625,7 @@ async function init() {
   // o Athila fez no painel ficam invisíveis pras vendedoras (localStorage é
   // por-device — não cruza celulares). Aplica ANTES do primeiro render.
   try {
-    const r = await fetch(`${WORKER_URL}/metas-loja`, {cache: 'no-store'});
+    const r = await fetch(`${WORKER_URL}/metas-loja`, {cache: 'no-store', signal: AbortSignal.timeout(7000)});
     const data = await r.json();
     // ⚠️ Filtra por loja E por mês corrente. Ajustes de meses anteriores
     // (mesmas chaves S1-S4) não devem sobrescrever metas do mês atual.
@@ -2656,7 +2656,7 @@ async function init() {
   // 23/06 com a meta da S3). Ver supabase_metas_semanais.sql.
   try {
     const _mk = _mesCorrenteKey(); // mês dos DADOS, não do relógio (bug virada 01/08/2026)
-    const r = await fetch(`${SUPA_URL}/rest/v1/metas_semanais?mes=eq.${_mk}&loja=eq.${LOJA_KEY}&select=semana,meta`, {headers: {apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY}, cache: 'no-store'});
+    const r = await fetch(`${SUPA_URL}/rest/v1/metas_semanais?mes=eq.${_mk}&loja=eq.${LOJA_KEY}&select=semana,meta`, {headers: {apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY}, cache: 'no-store', signal: AbortSignal.timeout(7000)});
     if (r.ok) {
       const rows = await r.json();
       const hist = VENDAS_HIST[LOJA_KEY];
@@ -2677,7 +2677,7 @@ async function init() {
   // Junta Worker + Supabase (mais recente vence) → aprovação nunca some.
   try {
     const [wr, sup] = await Promise.all([
-      fetch(`${WORKER_URL}/overrides`, {cache: 'no-store'}).then(r=>r.json()).catch(()=>({items:[]})),
+      fetch(`${WORKER_URL}/overrides`, {cache: 'no-store', signal: AbortSignal.timeout(7000)}).then(r=>r.json()).catch(()=>({items:[]})),
       supaSelect('sugestoes_overrides'),
     ]);
     const itens = mergeItens(wr.items, sup, x => x.id_sugestao);
@@ -2697,7 +2697,7 @@ async function init() {
   }
   try {
     const [wr, sup] = await Promise.all([
-      fetch(`${WORKER_URL}/feedback-retornos`, {cache: 'no-store'}).then(r=>r.json()).catch(()=>({items:[]})),
+      fetch(`${WORKER_URL}/feedback-retornos`, {cache: 'no-store', signal: AbortSignal.timeout(7000)}).then(r=>r.json()).catch(()=>({items:[]})),
       supaSelect('feedback_retornos', `loja=eq.${LOJA_KEY}`),
     ]);
     // status 'removido' = lápide: o admin apagou o retorno. Enquanto o Worker não
@@ -2727,7 +2727,7 @@ async function init() {
   // globalmente e aplicamos em enterApp().
   try {
     const [wr, sup] = await Promise.all([
-      fetch(`${WORKER_URL}/quizzes`, {cache: 'no-store'}).then(r=>r.json()).catch(()=>({items:[]})),
+      fetch(`${WORKER_URL}/quizzes`, {cache: 'no-store', signal: AbortSignal.timeout(7000)}).then(r=>r.json()).catch(()=>({items:[]})),
       supaSelect('quizzes', `loja=eq.${LOJA_KEY}`),
     ]);
     window.__QUIZZES_REMOTOS = mergeItens(wr.items, sup, q => `${q.loja}|${q.vendedora}|${q.semana}`).filter(q => q.loja === LOJA_KEY);
@@ -2752,7 +2752,7 @@ async function init() {
     pinsDB = await fetch('./vendedoras_pins.json?t=' + Date.now()).then(r=>r.json());
   } catch(e) { pinsDB = {}; }
   try {
-    mensagensDB = await fetch('./mensagem_gerente.json?t=' + Date.now()).then(r=>r.json());
+    mensagensDB = await fetch('./mensagem_gerente.json?t=' + Date.now(), { signal: AbortSignal.timeout(6000) }).then(r=>r.json());
   } catch(e) { mensagensDB = {}; }
 
   // Mensagem PUBLICADA PELA GERENTE via app (Worker) — vence o JSON estático.
@@ -2761,7 +2761,7 @@ async function init() {
   // Texto vazio publicado = gerente removeu a mensagem (não mostra nada).
   try {
     const [wr, sup] = await Promise.all([
-      fetch(`${WORKER_URL}/mensagem-gerente`, {cache: 'no-store'}).then(r=>r.json()).catch(()=>({items:[]})),
+      fetch(`${WORKER_URL}/mensagem-gerente`, {cache: 'no-store', signal: AbortSignal.timeout(7000)}).then(r=>r.json()).catch(()=>({items:[]})),
       supaSelect('mensagens_gerente', `loja=eq.${LOJA_KEY}`),
     ]);
     const minha = mergeItens(wr.items, sup, x => x.loja).find(x => x.loja === LOJA_KEY);
