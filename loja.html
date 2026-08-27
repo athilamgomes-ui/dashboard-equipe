@@ -1493,6 +1493,13 @@ const HIST_MENSAL_VENDAS = {
   },
 };
 
+// Meses de AFASTAMENTO (licença/ausência) — o gráfico "Evolução mês a mês" marca
+// esses pontos como "afastada" pra não parecerem queda de desempenho, e pula a
+// comparação % com o mês anterior quando ele foi afastamento.
+const AFASTAMENTOS = {
+  '2026-07': { L1: ['Tatiane'] },   // Tatiane afastada em julho/2026 (R$624 = ausência)
+};
+
 // Metas mensais por mês (pra gráfico mostrar linha de meta)
 const META_MENSAL_HIST = {
   '2026-05': {L1:140000, L3:80000, L4:140000, L5:90000},
@@ -3620,7 +3627,8 @@ function renderGraficoMensalVendedora() {
   const pontos = mesesAnt.map(mk => {
     const v = (HIST_MENSAL_VENDAS[mk]?.[LOJA_KEY] || {})[currentUser] || 0;
     const [ano, mn] = mk.split('-');
-    return {mes: nomesMes[parseInt(mn,10)-1], ano: ano.slice(2), valor: v, parcial:false};
+    const afast = (AFASTAMENTOS[mk]?.[LOJA_KEY] || []).includes(currentUser);
+    return {mes: nomesMes[parseInt(mn,10)-1], ano: ano.slice(2), valor: v, parcial:false, afastada: afast};
   });
   // Mês corrente (parcial)
   pontos.push({
@@ -3660,16 +3668,19 @@ function renderGraficoMensalVendedora() {
 
   // Pontos + valores
   const dots = coords.map(c => {
-    const cor = c.p.parcial ? 'var(--yellow)' : 'var(--blue)';
+    const cor = c.p.afastada ? 'var(--muted)' : (c.p.parcial ? 'var(--yellow)' : 'var(--blue)');
+    const lbl = c.p.afastada ? 'afastada' : (c.p.valor>=1000?(c.p.valor/1000).toFixed(1)+'k':'R$'+c.p.valor);
     return `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="4" fill="${cor}" stroke="var(--bg2)" stroke-width="2"/>
-            <text x="${c.x.toFixed(1)}" y="${(c.y-9).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="600" fill="${cor}">${c.p.valor>=1000?(c.p.valor/1000).toFixed(1)+'k':'R$'+c.p.valor}</text>`;
+            <text x="${c.x.toFixed(1)}" y="${(c.y-9).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="600" fill="${cor}">${lbl}</text>`;
   }).join('');
 
   // Comparação com mês anterior
   const ult = pontos[pontos.length-1];
   const ant = pontos[pontos.length-2];
   let cmp = '';
-  if (ant && ant.valor > 0) {
+  if (ant && ant.afastada) {
+    cmp = `<div style="font-size:12px;color:var(--muted);margin-top:6px">${ant.mes}/${ant.ano} foi afastamento — sem comparação de %</div>`;
+  } else if (ant && ant.valor > 0) {
     const delta = ((ult.valor - ant.valor) / ant.valor * 100);
     const sinal = delta >= 0 ? '↗' : '↘';
     const cor = delta >= 0 ? 'var(--green)' : 'var(--red)';
@@ -4126,6 +4137,13 @@ function renderMetas() {
       <div class="prog">
         <div class="prog-fill" style="width:${Math.min(ld.vendido_mes / ld.meta_mensal * 100,100)}%;background:var(--blue)"></div>
       </div>
+      ${(() => {
+        const alvo90 = Math.round(ld.meta_mensal * 0.9);
+        const falta90 = alvo90 - ld.vendido_mes;
+        return falta90 > 0
+          ? `<div class="sub" style="margin-top:8px;color:var(--yellow)">🎯 90% da meta = <b>${fR(alvo90)}</b> · faltam <b>${fR(falta90)}</b> pra chegar lá — é aí que libera o prêmio individual do mês pra equipe.</div>`
+          : `<div class="sub" style="margin-top:8px;color:var(--green)">✅ Passou dos 90% (<b>${fR(alvo90)}</b>) — o prêmio individual do mês está liberado pra equipe.</div>`;
+      })()}
     </div>
   `;
 }
@@ -4265,9 +4283,11 @@ function renderMeuPremioMes() {
     <div class="card">
       <h3>Seu total do mês</h3>
       <div class="big">${fR(mesTotal)}</div>
-      ${atual
-        ? `<div class="sub">prêmio atual: <b style="color:var(--green)">${fR(premioAtual)}</b>${maOk?' (com bônus Marcas A)':''}</div>`
-        : `<div class="sub">faltam ${fR(31000 - mesTotal)} pro seu primeiro prêmio (R$ 31 mil)</div>`}
+      ${liberado
+        ? (atual
+            ? `<div class="sub">prêmio atual: <b style="color:var(--green)">${fR(premioAtual)}</b>${maOk?' (com bônus Marcas A)':''}</div>`
+            : `<div class="sub">faltam ${fR(31000 - mesTotal)} pro seu primeiro prêmio (R$ 31 mil)</div>`)
+        : `<div class="sub">Enquanto a loja não chega a 90%, quem garante seu prêmio é <b>você passar de R$ 40 mil</b> sozinha — faltam <b style="color:var(--yellow)">${fR(Math.max(40000 - mesTotal, 0))}</b> pro seu prêmio individual.</div>`}
       <div class="prog" style="margin-top:10px">
         <div class="prog-fill" style="width:${Math.min(mesTotal / teto * 100, 100)}%;background:var(--green)"></div>
       </div>
