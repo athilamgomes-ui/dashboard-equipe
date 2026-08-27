@@ -18,7 +18,10 @@ import { garantirSessao } from "./microvix_auth.mjs";
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const D_DIR = path.join(DIR, "..", "dados_estoque");
-const PROFILE_DIR = path.join(homedir(), ".claude", "microvix-profile");
+// MICROVIX_PROFILE permite rodar numa consulta de LEITURA sem brigar com o cron da precificação
+// (que abre o ~/.claude/microvix-profile de 15 em 15 min, seg-sáb 08:00–19:45, e derruba o
+// navegador de quem estiver usando: "Target page, context or browser has been closed").
+const PROFILE_DIR = process.env.MICROVIX_PROFILE || path.join(homedir(), ".claude", "microvix-profile");
 const URL = "https://linx.microvix.com.br/gestor_web/produtos/relatorio_compra_venda_saldo_empresa.asp";
 const LOJA_TO_EMP = { L1: 1, L3: 3, L4: 4, L5: 10 };
 
@@ -80,8 +83,18 @@ try {
     out.lojas[lj] = r.prods;
     log(`${lj}: ${r.n} produtos com movimento desde ${DESDE} em ${((Date.now() - t0) / 1000).toFixed(0)}s`);
   }
-  fs.writeFileSync(path.join(D_DIR, "entradas_desde.json"), JSON.stringify(out));
-  log("OK → dados_estoque/entradas_desde.json");
+  // Preserva as lojas que NÃO foram coletadas nesta execução (mesmo padrão do coleta_estoque_saldo).
+  // Sem isso, rodar só L3,L5 apagava o dado de L1,L4 — e o que some é justamente a evidência
+  // "comprou 3, vendeu 339" que identifica erro de fator de conversão.
+  const P_OUT = path.join(D_DIR, "entradas_desde.json");
+  try {
+    const antigo = JSON.parse(fs.readFileSync(P_OUT, "utf8"));
+    for (const [lj, prods] of Object.entries(antigo.lojas || {})) {
+      if (!out.lojas[lj]) { out.lojas[lj] = prods; log(`${lj}: preservado da coleta anterior (${Object.keys(prods).length} produtos)`); }
+    }
+  } catch (_) { /* primeira execução: não há o que preservar */ }
+  fs.writeFileSync(P_OUT, JSON.stringify(out));
+  log(`OK → dados_estoque/entradas_desde.json (lojas: ${Object.keys(out.lojas).join(", ")})`);
   await ctx.close().catch(() => {}); process.exit(0);
 } catch (e) {
   log(`FALHA: ${e.message}`);
