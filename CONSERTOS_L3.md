@@ -1,798 +1,677 @@
-# Consertos de estoque — L3 · Casa da Beleza Itaituba
+# Estoque L3 · Casa da Beleza Itaituba
 
-**103 produtos · R$ 77.615,85 de valor que o sistema mostra e não existe.**
+Fonte: **Registro de Inventário** do ERP (Suprimentos → Relatórios → Registro de Inventário),
+puxado em 27/08/2026 — é o relatório que valoriza o estoque, o mesmo que você usa.
 
-Critério: custo médio maior que 3x o preço de venda, com saldo nesta loja. Margem apertada
-acontece; vender a menos de um terço do custo, não — isso é dado errado, não negócio ruim.
-
-Fonte: snapshot do pipeline de estoque (26/08) + histórico de compra/venda desde 2023.
-Onde aparece ✅, o custo foi conferido lendo a nota de entrada no ERP.
-
-## Resumo do que fazer
-
-| Tipo de conserto | Produtos | Valor envolvido | Quem resolve |
-|---|---:|---:|---|
-| conferir a nota | 11 | R$ 39.609,39 | abrir a nota primeiro |
-| fator a confirmar | 6 | R$ 14.725,96 | abrir a nota primeiro |
-| fator de conversão | 3 | R$ 11.995,10 | quem dá entrada de NF (cadastro do produto) |
-| saldo sem origem | 55 | R$ 7.512,01 | contagem física na loja |
-| fator de conversão (qtd estimada) | 9 | R$ 2.593,14 | — |
-| custo corrompido | 9 | R$ 881,50 | ajuste de custo no ERP |
-| preço a conferir | 10 | R$ 298,75 | quem define preço |
-
-> **A ordem importa:** corrigir o fator de conversão ANTES do custo. Se corrigir só o
-> custo, a próxima nota daquele produto reintroduz o erro, porque a entrada continua
-> lançando pacote como peça.
+Estoque declarado: **26.790 peças · R$ 256.951,65** em 159 marcas.
 
 ---
 
-## PROBELLE PROFISSIONAL
+# Parte A — produtos com custo errado
 
-_2 produto(s) · R$ 37.351,36_
+**94 produtos · R$ 9.874,24** de valor que o sistema mostra e não existe.
 
-### 20358 — AMP ARGAN PROBELLE 17 ML
+Critério: custo maior que 3x o preço de venda. Margem apertada acontece; vender a menos
+de um terço do custo, não.
 
-- Custo no ERP: **R$ 81,40** · preço de venda: R$ 10,90 · saldo: 457 un · valor inflado: **R$ 37.199,80**
-- Evidência: custo 7,5x o preço
-- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
+| Tipo de conserto | Produtos | Valor | Quem resolve |
+|---|---:|---:|---|
+| conferir a nota | 11 | R$ 3.705,87 | abrir a nota primeiro |
+| fator de conversão (qtd estimada) | 1 | R$ 2.325,57 | confirmar a quantidade, depois cadastrar |
+| custo corrompido | 29 | R$ 1.632,14 | ajuste de custo no ERP |
+| sem movimento | 14 | R$ 1.631,09 | contagem física (ver parte B) |
+| preço a conferir | 33 | R$ 469,11 | quem define preço |
+| fator a confirmar | 6 | R$ 110,46 | abrir a nota primeiro |
 
-### 75872 — PO DESCOLORANTE AMETISTA SACHE
+> **A ordem importa:** fator de conversão antes do custo. Corrigindo só o custo, a
+> próxima nota reintroduz o erro — a entrada continua lançando pacote como peça.
 
-- Custo no ERP: **R$ 75,78** · preço de venda: R$ 12,63 · saldo: 2 un · valor inflado: **R$ 151,56**
-- Evidência: custo 6,0x o preço
-- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
-
-
-## SANTA CLARA
-
-_8 produto(s) · R$ 19.801,68_
-
-### 17665 — TOALHA COMP MULT DESC 250
-
-- Custo no ERP: **R$ 37,40** · preço de venda: R$ 1,00 · saldo: 231 un · valor inflado: **R$ 8.639,40**
-- Evidência: comprou 1, vendeu 17 (razão 17x) · ✅ NF 647502/1 — **1,00 CX** a R$ 71,75 (SANTA CLARA)
-- **Conserto:** Parece embalagem de 17, mas R$ 37,40 ÷ 17 = R$ 2,20, que ainda passa do preço de R$ 1,00. **Abrir a nota** e ver a unidade.
-
-### 156 — LIXA PRETA ESP ST CLARA UN
-
-- Custo no ERP: **R$ 6,96** · preço de venda: R$ 0,25 · saldo: 864 un · valor inflado: **R$ 6.013,44**
-- Evidência: comprou 7, vendeu 152 (razão 22x)
-- **Conserto:** Parece embalagem de 22, mas R$ 6,96 ÷ 22 = R$ 0,32, que ainda passa do preço de R$ 0,25. **Abrir a nota** e ver a unidade. ⚠️ E o preço de R$ 0,25 também não se sustenta — conferir os dois, custo e preço.
-
-### 13637 — CLIPS PLAST.CABELO POTE C/250
-
-- Custo no ERP: **R$ 20,09** · preço de venda: R$ 0,50 · saldo: 196 un · valor inflado: **R$ 3.937,64**
-- Evidência: no nome: C/250 · comprou 2, vendeu 304 (razão 152x)
-- **Conserto:** Cadastrar **fator de conversão = 250** (está no nome do produto). O custo unitário cai de R$ 20,09 para **R$ 0,08** — margem de 522% sobre o preço de R$ 0,50.
-- Efeito: o estoque desta loja reduz R$ 3.921,89 (correção, não perda)
+## SANTA CLARA  ·  _ATIVA_
 
 ### 12573 — LIXA POP CAN ST CLARA UN
 
-- Custo no ERP: **R$ 5,38** · preço de venda: R$ 0,25 · saldo: 201 un · valor inflado: **R$ 1.081,38**
+- Custo no inventário: **R$ 11,57** · preço: R$ 0,25 · saldo: 201 un · inflado: **R$ 2.325,57**
 - Evidência: comprou 6, vendeu 5.153 (razão 859x)
-- **Conserto:** Cadastrar fator de conversão. Pelo histórico o pacote tem **~859 peças** (estimativa: comprou 6, vendeu 5.153) — **confirmar o número exato na nota ou na embalagem antes de gravar**. Com 859, o custo unitário cai de R$ 5,38 para R$ 0,01, margem de 3.892% sobre R$ 0,25.
-- Efeito: o estoque desta loja reduz R$ 1.080,12 (correção, não perda)
+- **Conserto:** Cadastrar fator de conversão. Pelo histórico o pacote tem **~859 peças** — **confirmar na nota antes de gravar**. Com 859, o custo cai de R$ 11,57 para R$ 0,01, margem de 1.756% sobre R$ 0,25.
+- Efeito: o estoque reduz R$ 2.322,86 (correção, não perda)
 
-### 5519 — PO ADGISTRENTE SANTA CLARA 20G
+### 41022 — FRASCO SKINCARE C/ESC.S.190ML
 
-- Custo no ERP: **R$ 42,88** · preço de venda: R$ 0,92 · saldo: 2 un · valor inflado: **R$ 85,76**
-- Evidência: preço de R$ 0,92 com custo de R$ 42,88
-- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+- Custo no inventário: **R$ 8,06** · preço: R$ 0,01 · saldo: 6 un · inflado: **R$ 48,36**
+- Evidência: custo é 806x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
 
-### 7098 — PAPEL DEP.10X16CM PERLON C/100
+### 1126 — LENCOL DESC C/ ELASTICO SANTA CLARA
 
-- Custo no ERP: **R$ 8,00** · preço de venda: R$ 0,01 · saldo: 3 un · valor inflado: **R$ 24,00**
-- Evidência: no nome: C/100
-- **Conserto:** Parece embalagem de 100, mas R$ 8,00 ÷ 100 = R$ 0,08, que ainda passa do preço de R$ 0,01. **Abrir a nota** e ver a unidade. ⚠️ E o preço de R$ 0,01 também não se sustenta — conferir os dois, custo e preço.
+- Custo no inventário: **R$ 10,71** · preço: R$ 2,06 · saldo: 4 un · inflado: **R$ 42,84**
+- Evidência: custo 5,2x o preço
+- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
 
 ### 8637 — LENCOL DESC ST CLARA 15UN
 
-- Custo no ERP: **R$ 14,46** · preço de venda: R$ 2,10 · saldo: 1 un · valor inflado: **R$ 14,46**
+- Custo no inventário: **R$ 31,60** · preço: R$ 2,10 · saldo: 1 un · inflado: **R$ 31,60**
 - Evidência: no nome: 15 UN
-- **Conserto:** Cadastrar **fator de conversão = 15** (está no nome do produto). O custo unitário cai de R$ 14,46 para **R$ 0,96** — margem de 118% sobre o preço de R$ 2,10.
-- Efeito: o estoque desta loja reduz R$ 13,50 (correção, não perda)
+- **Conserto:** Parece embalagem de 15, mas R$ 31,60 ÷ 15 = R$ 2,11, que ainda passa do preço de R$ 2,10. **Abrir a nota** e ver a unidade.
+
+### 7098 — PAPEL DEP.10X16CM PERLON C/100
+
+- Custo no inventário: **R$ 7,69** · preço: R$ 0,01 · saldo: 3 un · inflado: **R$ 23,07**
+- Evidência: no nome: C/100
+- **Conserto:** Parece embalagem de 100, mas R$ 7,69 ÷ 100 = R$ 0,08, que ainda passa do preço de R$ 0,01. **Abrir a nota** e ver a unidade. ⚠️ E o preço de R$ 0,01 também não se sustenta — conferir os dois.
 
 ### 5034 — PAPEL DEP.10X16CM PERLON C/25
 
-- Custo no ERP: **R$ 1,12** · preço de venda: R$ 0,01 · saldo: 5 un · valor inflado: **R$ 5,60**
+- Custo no inventário: **R$ 2,95** · preço: R$ 0,01 · saldo: 5 un · inflado: **R$ 14,75**
 - Evidência: no nome: C/25
-- **Conserto:** Parece embalagem de 25, mas R$ 1,12 ÷ 25 = R$ 0,04, que ainda passa do preço de R$ 0,01. **Abrir a nota** e ver a unidade. ⚠️ E o preço de R$ 0,01 também não se sustenta — conferir os dois, custo e preço.
+- **Conserto:** Parece embalagem de 25, mas R$ 2,95 ÷ 25 = R$ 0,12, que ainda passa do preço de R$ 0,01. **Abrir a nota** e ver a unidade. ⚠️ E o preço de R$ 0,01 também não se sustenta — conferir os dois.
 
+## IMPORTADOS  ·  _ATIVA_
 
-## NATHY
+### 242 — ADESIVO PARA UNHAS BETH
 
-_1 produto(s) · R$ 8.043,00_
-
-### 49395 — FD ALGODAO CARD HID NATHY 500G ROLO 20UN/FD
-
-- Custo no ERP: **R$ 229,80** · preço de venda: R$ 31,90 · saldo: 35 un · valor inflado: **R$ 8.043,00**
-- Evidência: no nome: 20UN por fardo · comprou 6, vendeu 105 (razão 18x)
-- **Conserto:** Cadastrar **fator de conversão = 20** (está no nome do produto). O custo unitário cai de R$ 229,80 para **R$ 11,49** — margem de 178% sobre o preço de R$ 31,90.
-- Efeito: o estoque desta loja reduz R$ 7.640,85 (correção, não perda)
-
-
-## MACRILAN
-
-_1 produto(s) · R$ 2.813,60_
-
-### 202307 — KIT MADEMOISELLE MACRILAN
-
-- Custo no ERP: **R$ 703,40** · preço de venda: R$ 122,10 · saldo: 4 un · valor inflado: **R$ 2.813,60**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-
-## PHALLEBEUTY
-
-_3 produto(s) · R$ 2.426,12_
-
-### 64092 — STARGLOW PO BANANA PHALLEBEAUTY 10G
-
-- Custo no ERP: **R$ 143,00** · preço de venda: R$ 13,00 · saldo: 7 un · valor inflado: **R$ 1.001,00**
-- Evidência: comprou 1, vendeu 15 (razão 15x)
-- **Conserto:** Cadastrar fator de conversão. Pelo histórico o pacote tem **~15 peças** (estimativa: comprou 1, vendeu 15) — **confirmar o número exato na nota ou na embalagem antes de gravar**. Com 15, o custo unitário cai de R$ 143,00 para R$ 9,53, margem de 36% sobre R$ 13,00.
-- Efeito: o estoque desta loja reduz R$ 934,27 (correção, não perda)
-
-### 64091 — SERUM FACIAL ROSA MOSQUETA 30ML
-
-- Custo no ERP: **R$ 66,00** · preço de venda: R$ 11,04 · saldo: 12 un · valor inflado: **R$ 792,00**
-- Evidência: custo 6,0x o preço
+- Custo no inventário: **R$ 27,02** · preço: R$ 5,00 · saldo: 75 un · inflado: **R$ 2.026,50**
+- Evidência: custo 5,4x o preço
 - **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
-
-### 64159 — MOUSSE MICELAR ANTI OLEOSIDADE 150ML PHALLEBEAUTY
-
-- Custo no ERP: **R$ 158,28** · preço de venda: R$ 27,00 · saldo: 4 un · valor inflado: **R$ 633,12**
-- Evidência: custo 5,9x o preço
-- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
-
-
-## ITALLIAN HAIR
-
-_2 produto(s) · R$ 1.202,40_
-
-### 204358 — KIT HOME CARE TRIVITT COM HIDRATACAO
-
-- Custo no ERP: **R$ 10,53** · preço de venda: R$ 2,00 · saldo: 108 un · valor inflado: **R$ 1.137,24**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 40339 — CB CORRETOR AZUL ITALLIAN COLOR 60G
-
-- Custo no ERP: **R$ 5,43** · preço de venda: R$ 0,01 · saldo: 12 un · valor inflado: **R$ 65,16**
-- Evidência: custo é 543x o preço
-- **Conserto:** **Corrigir o custo médio** pelo valor da última nota de entrada. O preço (R$ 0,01) provavelmente está certo.
-
-
-## MEY BRASIL
-
-_2 produto(s) · R$ 1.164,00_
-
-### 63669 — CILIOS POSTICOS 6D MEY BEAUTY
-
-- Custo no ERP: **R$ 30,00** · preço de venda: R$ 6,00 · saldo: 36 un · valor inflado: **R$ 1.080,00**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 63668 — CILIOS POSTICOS 5 PARES MEY BEAUTY
-
-- Custo no ERP: **R$ 84,00** · preço de venda: R$ 1,33 · saldo: 1 un · valor inflado: **R$ 84,00**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-
-## HELLO MINI
-
-_5 produto(s) · R$ 599,60_
-
-### 75651 — OY650-1 UNHA BAILARINA ALONGADA AUTOCOLANTE COM 24 UNHAS
-
-- Custo no ERP: **R$ 28,80** · preço de venda: R$ 5,27 · saldo: 6 un · valor inflado: **R$ 172,80**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 75654 — OY650-15 UNHA BAILARINA ALONGADA AUTOCOLANTE COM 24 UNHAS
-
-- Custo no ERP: **R$ 28,80** · preço de venda: R$ 5,27 · saldo: 5 un · valor inflado: **R$ 144,00**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 75655 — OY650-17 UNHA BAILARINA ALONGADA AUTOCOLANTE COM 24 UNHAS
-
-- Custo no ERP: **R$ 28,80** · preço de venda: R$ 5,27 · saldo: 4 un · valor inflado: **R$ 115,20**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 75672 — PC401 8# PINCEL P/ ACRILICO CERDA NAILON
-
-- Custo no ERP: **R$ 11,00** · preço de venda: R$ 1,83 · saldo: 10 un · valor inflado: **R$ 110,00**
-- Evidência: custo 6,0x o preço
-- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
-
-### 75652 — OY650-13 UNHA BAILARINA ALONGADA AUTOCOLANTE COM 24 UNHAS
-
-- Custo no ERP: **R$ 28,80** · preço de venda: R$ 5,27 · saldo: 2 un · valor inflado: **R$ 57,60**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-
-## MISS FRANDY
-
-_5 produto(s) · R$ 546,95_
-
-### 55398 — CAIXA DE 12 GRADES COM DECORACAO PARA UNHAS ARTIST
-
-- Custo no ERP: **R$ 56,25** · preço de venda: R$ 7,08 · saldo: 5 un · valor inflado: **R$ 281,25**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 45155 — PINCEL MAQUIAGEM PARA BLUSH MISS FRANDY
-
-- Custo no ERP: **R$ 9,00** · preço de venda: R$ 2,08 · saldo: 18 un · valor inflado: **R$ 162,00**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 30875 — PLACA PARA COLA FIO A FIO MISS FRANDY
-
-- Custo no ERP: **R$ 8,40** · preço de venda: R$ 0,74 · saldo: 7 un · valor inflado: **R$ 58,80**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 45144 — PINCEL MAQUIAGEM LINHA M.A
-
-- Custo no ERP: **R$ 3,50** · preço de venda: R$ 0,67 · saldo: 11 un · valor inflado: **R$ 38,50**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 42770 — PINCEL PARA MAQUIAGEM MISS FRANDY PM15-1212
-
-- Custo no ERP: **R$ 3,20** · preço de venda: R$ 0,67 · saldo: 2 un · valor inflado: **R$ 6,40**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-
-## JAPINHA
-
-_4 produto(s) · R$ 490,34_
-
-### 16988 — KIT SHAMPOO DETOX / ATIVO REDUTOR DE QUIABO JAPINHA 1LT
-
-- Custo no ERP: **R$ 50,31** · preço de venda: R$ 0,01 · saldo: 6 un · valor inflado: **R$ 301,86**
-- Evidência: custo é 5.031x o preço
-- **Conserto:** **Corrigir o custo médio** pelo valor da última nota de entrada. O preço (R$ 0,01) provavelmente está certo.
-
-### 9116 — BOTOX OJOIN JAPINHA 1KG
-
-- Custo no ERP: **R$ 27,36** · preço de venda: R$ 0,01 · saldo: 3 un · valor inflado: **R$ 82,08**
-- Evidência: custo é 2.736x o preço
-- **Conserto:** **Corrigir o custo médio** pelo valor da última nota de entrada. O preço (R$ 0,01) provavelmente está certo.
-
-### 9115 — BOTOX OJON JAPINHA 300G
-
-- Custo no ERP: **R$ 12,13** · preço de venda: R$ 0,01 · saldo: 5 un · valor inflado: **R$ 60,65**
-- Evidência: custo é 1.213x o preço
-- **Conserto:** **Corrigir o custo médio** pelo valor da última nota de entrada. O preço (R$ 0,01) provavelmente está certo.
-
-### 16945 — Kit Shampoo Detox / Ativo Redutor Organico  Japinha 120ml
-
-- Custo no ERP: **R$ 15,25** · preço de venda: R$ 0,20 · saldo: 3 un · valor inflado: **R$ 45,75**
-- Evidência: preço de R$ 0,20 com custo de R$ 15,25
-- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
-
-
-## OTIMO BIJUTERIAS
-
-_14 produto(s) · R$ 483,32_
-
-### 13964 — CILIOS 8308
-
-- Custo no ERP: **R$ 20,00** · preço de venda: R$ 0,01 · saldo: 5 un · valor inflado: **R$ 100,00**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 4875 — SAIA CARNAVAL 2
-
-- Custo no ERP: **R$ 12,29** · preço de venda: R$ 2,60 · saldo: 6 un · valor inflado: **R$ 73,74**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 16489 — SAIA CARNAVAL
-
-- Custo no ERP: **R$ 13,06** · preço de venda: R$ 3,90 · saldo: 4 un · valor inflado: **R$ 52,24**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 1378 — COLAR
-
-- Custo no ERP: **R$ 12,96** · preço de venda: R$ 0,02 · saldo: 3 un · valor inflado: **R$ 38,88**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 1363 — COLAR
-
-- Custo no ERP: **R$ 12,48** · preço de venda: R$ 0,02 · saldo: 3 un · valor inflado: **R$ 37,44**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 2571 — CILIOS OTIMOS
-
-- Custo no ERP: **R$ 1,25** · preço de venda: R$ 0,02 · saldo: 28 un · valor inflado: **R$ 35,00**
-- Evidência: comprou 4, vendeu 46 (razão 12x)
-- **Conserto:** Parece embalagem de 12, mas R$ 1,25 ÷ 12 = R$ 0,10, que ainda passa do preço de R$ 0,02. **Abrir a nota** e ver a unidade. ⚠️ E o preço de R$ 0,02 também não se sustenta — conferir os dois, custo e preço.
-
-### 13815 — PINCEL SKIN CARE
-
-- Custo no ERP: **R$ 5,00** · preço de venda: R$ 0,01 · saldo: 6 un · valor inflado: **R$ 30,00**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 5015 — BRINCO
-
-- Custo no ERP: **R$ 6,63** · preço de venda: R$ 0,02 · saldo: 4 un · valor inflado: **R$ 26,52**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 1386 — PRESILHA
-
-- Custo no ERP: **R$ 4,72** · preço de venda: R$ 0,01 · saldo: 5 un · valor inflado: **R$ 23,60**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 4602 — ESPELHO DE BOLSA OTIMO
-
-- Custo no ERP: **R$ 6,53** · preço de venda: R$ 0,03 · saldo: 3 un · valor inflado: **R$ 19,59**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 1312 — LAÇO PDD OTIMOS
-
-- Custo no ERP: **R$ 3,46** · preço de venda: R$ 0,02 · saldo: 5 un · valor inflado: **R$ 17,30**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 5705 — CAIXINHA DE PRESENTE 12
-
-- Custo no ERP: **R$ 2,75** · preço de venda: R$ 0,01 · saldo: 5 un · valor inflado: **R$ 13,75**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 2685 — BRINCO
-
-- Custo no ERP: **R$ 6,53** · preço de venda: R$ 1,15 · saldo: 2 un · valor inflado: **R$ 13,06**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 7742 — GRAMPO 6
-
-- Custo no ERP: **R$ 0,55** · preço de venda: R$ 0,01 · saldo: 4 un · valor inflado: **R$ 2,20**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-
-## DOMPEL
-
-_1 produto(s) · R$ 380,00_
-
-### 75339 — ESCOVA PIRULITO SUMMER 4023 DISP C/9 UN
-
-- Custo no ERP: **R$ 95,00** · preço de venda: R$ 21,11 · saldo: 4 un · valor inflado: **R$ 380,00**
-- Evidência: comprou 1, vendeu 5 (razão 5x)
-- **Conserto:** Cadastrar fator de conversão. Pelo histórico o pacote tem **~5 peças** (estimativa: comprou 1, vendeu 5) — **confirmar o número exato na nota ou na embalagem antes de gravar**. Com 5, o custo unitário cai de R$ 95,00 para R$ 19,00, margem de 11% sobre R$ 21,11.
-- Efeito: o estoque desta loja reduz R$ 304,00 (correção, não perda)
-
-
-## YAMÁ
-
-_1 produto(s) · R$ 373,05_
-
-### 5267 — MINI KIT FASHION COLOR 9.1 YAMA
-
-- Custo no ERP: **R$ 41,45** · preço de venda: R$ 10,90 · saldo: 9 un · valor inflado: **R$ 373,05**
-- Evidência: custo 3,8x o preço
-- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
-
-
-## DAFU
-
-_11 produto(s) · R$ 340,60_
-
-### 76422 — UNHA
-
-- Custo no ERP: **R$ 12,60** · preço de venda: R$ 2,24 · saldo: 6 un · valor inflado: **R$ 75,60**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 76420 — UNHA
-
-- Custo no ERP: **R$ 12,60** · preço de venda: R$ 2,24 · saldo: 5 un · valor inflado: **R$ 63,00**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 64437 — DF-GT0725 ADESIVO DE UNHA
-
-- Custo no ERP: **R$ 3,59** · preço de venda: R$ 0,68 · saldo: 12 un · valor inflado: **R$ 43,08**
-- Evidência: preço de R$ 0,68 com custo de R$ 3,59
-- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
-
-### 64431 — DF-CR033025 CILIOS
-
-- Custo no ERP: **R$ 7,00** · preço de venda: R$ 1,17 · saldo: 6 un · valor inflado: **R$ 42,00**
-- Evidência: comprou 4, vendeu 39 (razão 10x)
-- **Conserto:** Cadastrar fator de conversão. Pelo histórico o pacote tem **~10 peças** (estimativa: comprou 4, vendeu 39) — **confirmar o número exato na nota ou na embalagem antes de gravar**. Com 10, o custo unitário cai de R$ 7,00 para R$ 0,70, margem de 67% sobre R$ 1,17.
-- Efeito: o estoque desta loja reduz R$ 37,80 (correção, não perda)
-
-### 76443 — ADESIVO FACIAL
-
-- Custo no ERP: **R$ 3,64** · preço de venda: R$ 0,69 · saldo: 9 un · valor inflado: **R$ 32,76**
-- Evidência: comprou 2, vendeu 16 (razão 8x)
-- **Conserto:** Cadastrar fator de conversão. Pelo histórico o pacote tem **~8 peças** (estimativa: comprou 2, vendeu 16) — **confirmar o número exato na nota ou na embalagem antes de gravar**. Com 8, o custo unitário cai de R$ 3,64 para R$ 0,46, margem de 52% sobre R$ 0,69.
-- Efeito: o estoque desta loja reduz R$ 28,66 (correção, não perda)
-
-### 64448 — ORNAMENTO P/CABELO (FAIXA) - POLIESTER
-
-- Custo no ERP: **R$ 9,80** · preço de venda: R$ 1,79 · saldo: 3 un · valor inflado: **R$ 29,40**
-- Evidência: comprou 1, vendeu 9 (razão 9x)
-- **Conserto:** Cadastrar fator de conversão. Pelo histórico o pacote tem **~9 peças** (estimativa: comprou 1, vendeu 9) — **confirmar o número exato na nota ou na embalagem antes de gravar**. Com 9, o custo unitário cai de R$ 9,80 para R$ 1,09, margem de 64% sobre R$ 1,79.
-- Efeito: o estoque desta loja reduz R$ 26,13 (correção, não perda)
-
-### 76455 — KIT PINCEL
-
-- Custo no ERP: **R$ 11,20** · preço de venda: R$ 1,87 · saldo: 2 un · valor inflado: **R$ 22,40**
-- Evidência: custo 6,0x o preço
-- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
-
-### 64456 — ESPONJA PARA MAQUIAGEM DF-EP100001
-
-- Custo no ERP: **R$ 5,60** · preço de venda: R$ 0,93 · saldo: 2 un · valor inflado: **R$ 11,20**
-- Evidência: comprou 1, vendeu 11 (razão 11x)
-- **Conserto:** Cadastrar fator de conversão. Pelo histórico o pacote tem **~11 peças** (estimativa: comprou 1, vendeu 11) — **confirmar o número exato na nota ou na embalagem antes de gravar**. Com 11, o custo unitário cai de R$ 5,60 para R$ 0,51, margem de 83% sobre R$ 0,93.
-- Efeito: o estoque desta loja reduz R$ 10,18 (correção, não perda)
-
-### 64458 — DF-UP35014 KIT PINCEL
-
-- Custo no ERP: **R$ 9,80** · preço de venda: R$ 1,63 · saldo: 1 un · valor inflado: **R$ 9,80**
-- Evidência: comprou 1, vendeu 12 (razão 12x)
-- **Conserto:** Cadastrar fator de conversão. Pelo histórico o pacote tem **~12 peças** (estimativa: comprou 1, vendeu 12) — **confirmar o número exato na nota ou na embalagem antes de gravar**. Com 12, o custo unitário cai de R$ 9,80 para R$ 0,82, margem de 100% sobre R$ 1,63.
-- Efeito: o estoque desta loja reduz R$ 8,98 (correção, não perda)
-
-### 27593 — OLEO HIDRATANTE DE CUTICULA - DAFU
-
-- Custo no ERP: **R$ 5,76** · preço de venda: R$ 0,58 · saldo: 1 un · valor inflado: **R$ 5,76**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 64432 — DF-CR033026 CILIOS
-
-- Custo no ERP: **R$ 5,60** · preço de venda: R$ 0,93 · saldo: 1 un · valor inflado: **R$ 5,60**
-- Evidência: comprou 2, vendeu 23 (razão 12x)
-- **Conserto:** Cadastrar fator de conversão. Pelo histórico o pacote tem **~12 peças** (estimativa: comprou 2, vendeu 23) — **confirmar o número exato na nota ou na embalagem antes de gravar**. Com 12, o custo unitário cai de R$ 5,60 para R$ 0,47, margem de 99% sobre R$ 0,93.
-- Efeito: o estoque desta loja reduz R$ 5,13 (correção, não perda)
-
-
-## REAL LOVE
-
-_20 produto(s) · R$ 314,53_
-
-### 57839 — ESPONJA DE MAQUIAGEM
-
-- Custo no ERP: **R$ 8,00** · preço de venda: R$ 0,01 · saldo: 8 un · valor inflado: **R$ 64,00**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 14789 — CILIOS POSTICOS DE FIBRA DE TEREFTALATO DE POLIETILENO
-
-- Custo no ERP: **R$ 5,31** · preço de venda: R$ 0,01 · saldo: 10 un · valor inflado: **R$ 53,10**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 14796 — PINCEL PARA UNHA
-
-- Custo no ERP: **R$ 5,38** · preço de venda: R$ 0,01 · saldo: 7 un · valor inflado: **R$ 37,66**
-- Evidência: custo é 538x o preço
-- **Conserto:** **Corrigir o custo médio** pelo valor da última nota de entrada. O preço (R$ 0,01) provavelmente está certo.
-
-### 14795 — CILIOS POSTICOS DE FIBRA DETEREFTALA DE POLIETILENO
-
-- Custo no ERP: **R$ 5,38** · preço de venda: R$ 0,01 · saldo: 6 un · valor inflado: **R$ 32,28**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 14785 — OLEO DUO DE CUTICULAS DE ROSAS - PESSEGO
-
-- Custo no ERP: **R$ 2,13** · preço de venda: R$ 0,01 · saldo: 11 un · valor inflado: **R$ 23,43**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 14784 — COLA CILIOS/ UNHA POSTIÇO
-
-- Custo no ERP: **R$ 2,13** · preço de venda: R$ 0,01 · saldo: 6 un · valor inflado: **R$ 12,78**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 14793 — LAPIS P/ SOBRANCELHA
-
-- Custo no ERP: **R$ 2,63** · preço de venda: R$ 0,01 · saldo: 4 un · valor inflado: **R$ 10,52**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 13535 — CONJ DECORACAO (4 GLITTER E 2 APLICADORES)
-
-- Custo no ERP: **R$ 2,09** · preço de venda: R$ 0,01 · saldo: 5 un · valor inflado: **R$ 10,45**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 14782 — KIT (1 NAVALHA P/ SOBRANCELHA E 1 REFIL DE LAMINA)
-
-- Custo no ERP: **R$ 2,28** · preço de venda: R$ 0,01 · saldo: 4 un · valor inflado: **R$ 9,12**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 13617 — COLA P/ CILIOS BRANCA
-
-- Custo no ERP: **R$ 2,95** · preço de venda: R$ 0,01 · saldo: 3 un · valor inflado: **R$ 8,85**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 14781 — CANETA HIDRATANTE DE CUTICULAS PESSEGO - PACOTE
-
-- Custo no ERP: **R$ 2,13** · preço de venda: R$ 0,01 · saldo: 4 un · valor inflado: **R$ 8,52**
-- Evidência: o nome diz 'PACOTE' mas não diz quantas peças
-- **Conserto:** **Abrir a nota** e descobrir quantas peças vêm no PACOTE. Provável fator de conversão.
-
-### 14791 — CONJUNTO
-
-- Custo no ERP: **R$ 1,16** · preço de venda: R$ 0,01 · saldo: 7 un · valor inflado: **R$ 8,12**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 14790 — PINCEL APLICADOR DE GLOSS - KIT COM 12 PCT, CADA PCT CONTEM 50 PECAS
-
-- Custo no ERP: **R$ 1,16** · preço de venda: R$ 0,01 · saldo: 6 un · valor inflado: **R$ 6,96**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 14780 — ESPELHO COM MOLDURA DE PLASTICO
-
-- Custo no ERP: **R$ 2,20** · preço de venda: R$ 0,01 · saldo: 3 un · valor inflado: **R$ 6,60**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 14786 — NAVALHA DE PLASTICO PARA SOBRANCELHA
-
-- Custo no ERP: **R$ 3,16** · preço de venda: R$ 0,01 · saldo: 2 un · valor inflado: **R$ 6,32**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 14792 — DISCO DE LIXA PARA LIXADEIRA
-
-- Custo no ERP: **R$ 1,16** · preço de venda: R$ 0,01 · saldo: 4 un · valor inflado: **R$ 4,64**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 14798 — PINCEL P/ UNHA COM PONTA BOLEADOR 2 EM 1
-
-- Custo no ERP: **R$ 4,64** · preço de venda: R$ 0,01 · saldo: 1 un · valor inflado: **R$ 4,64**
-- Evidência: custo é 464x o preço
-- **Conserto:** **Corrigir o custo médio** pelo valor da última nota de entrada. O preço (R$ 0,01) provavelmente está certo.
-
-### 14800 — TESOURA DE METAL PARA SOBRANCELHA
-
-- Custo no ERP: **R$ 1,04** · preço de venda: R$ 0,01 · saldo: 3 un · valor inflado: **R$ 3,12**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 14783 — ALMOFADA DE APOIO DE BRACO P/ MANICURE DE PILIURETANO
-
-- Custo no ERP: **R$ 2,28** · preço de venda: R$ 0,01 · saldo: 1 un · valor inflado: **R$ 2,28**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 14794 — PREP BACTERICIDA
-
-- Custo no ERP: **R$ 1,14** · preço de venda: R$ 0,01 · saldo: 1 un · valor inflado: **R$ 1,14**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-
-## ZGY
-
-_5 produto(s) · R$ 261,83_
-
-### 15816 — CILIOS DE CANTO
-
-- Custo no ERP: **R$ 7,20** · preço de venda: R$ 0,01 · saldo: 22 un · valor inflado: **R$ 158,40**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 11440 — COLAR COM PIGENTE
-
-- Custo no ERP: **R$ 15,68** · preço de venda: R$ 0,01 · saldo: 3 un · valor inflado: **R$ 47,04**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 8813 — COLAR DE METAL
-
-- Custo no ERP: **R$ 17,70** · preço de venda: R$ 0,01 · saldo: 2 un · valor inflado: **R$ 35,40**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 1344 — PRESILHA COM 3
-
-- Custo no ERP: **R$ 10,53** · preço de venda: R$ 0,02 · saldo: 1 un · valor inflado: **R$ 10,53**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 3455 — ARGOLA AÇO INOXIDAVEL
-
-- Custo no ERP: **R$ 5,23** · preço de venda: R$ 0,02 · saldo: 2 un · valor inflado: **R$ 10,46**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-
-## RISQUE
-
-_2 produto(s) · R$ 259,50_
-
-### 5202 — ESMALTE RISQUE GRAO DE CAFE
-
-- Custo no ERP: **R$ 16,53** · preço de venda: R$ 4,90 · saldo: 10 un · valor inflado: **R$ 165,30**
-- Evidência: custo 3,4x o preço
-- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
-
-### 6135 — ESMALTE RISQUE MALICIA
-
-- Custo no ERP: **R$ 18,84** · preço de venda: R$ 4,90 · saldo: 5 un · valor inflado: **R$ 94,20**
-- Evidência: custo 3,8x o preço
-- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
-
-
-## CHEN YUMEI
-
-_4 produto(s) · R$ 242,40_
-
-### 76530 — WZS451 CINTO
-
-- Custo no ERP: **R$ 16,80** · preço de venda: R$ 2,80 · saldo: 7 un · valor inflado: **R$ 117,60**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 76524 — WZS1117 CINTO
-
-- Custo no ERP: **R$ 16,80** · preço de venda: R$ 2,80 · saldo: 5 un · valor inflado: **R$ 84,00**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 76509 — WZS376 CINTO
-
-- Custo no ERP: **R$ 14,40** · preço de venda: R$ 2,40 · saldo: 2 un · valor inflado: **R$ 28,80**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-### 76508 — WZS484 CINTO
-
-- Custo no ERP: **R$ 12,00** · preço de venda: R$ 2,00 · saldo: 1 un · valor inflado: **R$ 12,00**
-- Evidência: nenhuma entrada desde 01/01/2023
-- **Conserto:** **Contar fisicamente.** Tem saldo sem nenhuma compra desde 2023 — não se conserta mexendo em custo.
-
-
-## IMPALA
-
-_2 produto(s) · R$ 178,20_
-
-### 18015 — OLEO PARA CUTICULAS IMPALA TRATAMENTO
-
-- Custo no ERP: **R$ 5,94** · preço de venda: R$ 0,01 · saldo: 24 un · valor inflado: **R$ 142,56**
-- Evidência: custo é 594x o preço
-- **Conserto:** **Corrigir o custo médio** pelo valor da última nota de entrada. O preço (R$ 0,01) provavelmente está certo.
-
-### 18014 — ESMALTE IMPALA A COR DA MODA CREMOSO INTUICAO
-
-- Custo no ERP: **R$ 5,94** · preço de venda: R$ 0,01 · saldo: 6 un · valor inflado: **R$ 35,64**
-- Evidência: custo é 594x o preço
-- **Conserto:** **Corrigir o custo médio** pelo valor da última nota de entrada. O preço (R$ 0,01) provavelmente está certo.
-
-
-## NATHYDRAS
-
-_1 produto(s) · R$ 151,25_
-
-### 45512 — REPARADOR DE PONTAS ALHO 30ML
-
-- Custo no ERP: **R$ 13,75** · preço de venda: R$ 0,01 · saldo: 11 un · valor inflado: **R$ 151,25**
-- Evidência: custo é 1.375x o preço
-- **Conserto:** **Corrigir o custo médio** pelo valor da última nota de entrada. O preço (R$ 0,01) provavelmente está certo.
-
-
-## LUDURANA
-
-_1 produto(s) · R$ 72,00_
-
-### 18093 — ESMALTE LUDURANA GLITTER FIO DE OURO SOLTO 8ML
-
-- Custo no ERP: **R$ 18,00** · preço de venda: R$ 0,12 · saldo: 4 un · valor inflado: **R$ 72,00**
-- Evidência: preço de R$ 0,12 com custo de R$ 18,00
-- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
-
-
-## NOVO TOQUE
-
-_1 produto(s) · R$ 54,84_
-
-### 76009 — PRIMER TRANSP GEL 9ML
-
-- Custo no ERP: **R$ 54,84** · preço de venda: R$ 9,14 · saldo: 1 un · valor inflado: **R$ 54,84**
-- Evidência: custo 6,0x o preço
-- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
-
-
-## SENSCIENCE
-
-_1 produto(s) · R$ 34,00_
-
-### 8984 — FLYER PROD SENSCIENCE
-
-- Custo no ERP: **R$ 0,34** · preço de venda: R$ 0,01 · saldo: 100 un · valor inflado: **R$ 34,00**
-- Evidência: preço de R$ 0,01 com custo de R$ 0,34
-- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
-
-
-## VARCARE
-
-_1 produto(s) · R$ 13,12_
-
-### 65042 — AMOSTRA SACHE INVERSOR VIP LINE VARCARE 15 ML
-
-- Custo no ERP: **R$ 32,80** · preço de venda: R$ 1,20 · saldo: 0 un · valor inflado: **R$ 13,12**
-- Evidência: custo 27,3x o preço
-- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
-
-
-## RUBY ROSE
-
-_2 produto(s) · R$ 9,67_
-
-### 65567 — RR-1800-1 CORRETIVO LIQUIDO MELU RUBY ROSE RR-1800-1
-
-- Custo no ERP: **R$ 1,14** · preço de venda: R$ 0,06 · saldo: 8 un · valor inflado: **R$ 9,12**
-- Evidência: preço de R$ 0,06 com custo de R$ 1,14
-- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
-
-### 64989 — UNHA POSTICA BAILARINA DECORADA 2010000002810
-
-- Custo no ERP: **R$ 0,55** · preço de venda: R$ 0,09 · saldo: 1 un · valor inflado: **R$ 0,55**
-- Evidência: preço de R$ 0,09 com custo de R$ 0,55
-- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
-
-
-## SEM MARCA
-
-_1 produto(s) · R$ 6,00_
-
-### 5341 — CARTAZ FASHION COLOR ARGAN
-
-- Custo no ERP: **R$ 0,06** · preço de venda: R$ 0,01 · saldo: 100 un · valor inflado: **R$ 6,00**
-- Evidência: preço de R$ 0,01 com custo de R$ 0,06
-- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
-
-
-## IMPORTADOS
-
-_1 produto(s) · R$ 1,40_
 
 ### 64987 — ESPONJA COXINHA PARA MAQUIAGEM 2010000002193
 
-- Custo no ERP: **R$ 0,28** · preço de venda: R$ 0,05 · saldo: 5 un · valor inflado: **R$ 1,40**
-- Evidência: preço de R$ 0,05 com custo de R$ 0,28
+- Custo no inventário: **R$ 2,75** · preço: R$ 0,05 · saldo: 5 un · inflado: **R$ 13,75**
+- Evidência: preço de R$ 0,05 com custo de R$ 2,75
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+## ITALLIAN HAIR  ·  _ENCALHADA_
+
+### 204358 — KIT HOME CARE TRIVITT COM HIDRATACAO
+
+- Custo no inventário: **R$ 11,60** · preço: R$ 2,00 · saldo: 108 un · inflado: **R$ 1.252,80**
+- Evidência: 0 entrada e 0 venda desde 01/01/2023
+- **Conserto:** **Contar fisicamente.** Tem saldo e nenhum movimento em 3 anos e meio — provavelmente não existe na loja. Ver a parte B.
+
+### 40339 — CB CORRETOR AZUL ITALLIAN COLOR 60G
+
+- Custo no inventário: **R$ 5,84** · preço: R$ 0,01 · saldo: 12 un · inflado: **R$ 70,08**
+- Evidência: custo é 584x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+## MEY BRASIL  ·  _ATIVA_
+
+### 63669 — CILIOS POSTICOS 6D MEY BEAUTY
+
+- Custo no inventário: **R$ 30,00** · preço: R$ 6,00 · saldo: 36 un · inflado: **R$ 1.080,00**
+- Evidência: custo 5,0x o preço
+- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
+
+### 63668 — CILIOS POSTICOS 5 PARES MEY BEAUTY
+
+- Custo no inventário: **R$ 7,00** · preço: R$ 1,33 · saldo: 1 un · inflado: **R$ 7,00**
+- Evidência: custo 5,3x o preço
+- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
+
+## OTIMO BIJUTERIAS  ·  _ENCALHADA_
+
+### 40795 — ESTOJO PARA MAQUIAGEM
+
+- Custo no inventário: **R$ 12,90** · preço: R$ 0,01 · saldo: 5 un · inflado: **R$ 64,50**
+- Evidência: custo é 1.290x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 4875 — SAIA CARNAVAL 2
+
+- Custo no inventário: **R$ 10,60** · preço: R$ 2,60 · saldo: 6 un · inflado: **R$ 63,60**
+- Evidência: 0 entrada e 0 venda desde 01/01/2023
+- **Conserto:** **Contar fisicamente.** Tem saldo e nenhum movimento em 3 anos e meio — provavelmente não existe na loja. Ver a parte B.
+
+### 41613 — PULSEIRA D2
+
+- Custo no inventário: **R$ 9,33** · preço: R$ 0,01 · saldo: 5 un · inflado: **R$ 46,65**
+- Evidência: custo é 933x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 2688 — BRINCO 7
+
+- Custo no inventário: **R$ 7,00** · preço: R$ 0,02 · saldo: 6 un · inflado: **R$ 42,00**
+- Evidência: 0 entrada e 0 venda desde 01/01/2023
+- **Conserto:** **Contar fisicamente.** Tem saldo e nenhum movimento em 3 anos e meio — provavelmente não existe na loja. Ver a parte B.
+
+### 17051 — COLAR
+
+- Custo no inventário: **R$ 6,66** · preço: R$ 0,01 · saldo: 6 un · inflado: **R$ 39,96**
+- Evidência: 0 entrada e 0 venda desde 01/01/2023
+- **Conserto:** **Contar fisicamente.** Tem saldo e nenhum movimento em 3 anos e meio — provavelmente não existe na loja. Ver a parte B.
+
+### 1378 — COLAR
+
+- Custo no inventário: **R$ 11,25** · preço: R$ 0,02 · saldo: 3 un · inflado: **R$ 33,75**
+- Evidência: 0 entrada e 0 venda desde 01/01/2023
+- **Conserto:** **Contar fisicamente.** Tem saldo e nenhum movimento em 3 anos e meio — provavelmente não existe na loja. Ver a parte B.
+
+### 40686 — ELASTICO
+
+- Custo no inventário: **R$ 4,16** · preço: R$ 0,01 · saldo: 8 un · inflado: **R$ 33,28**
+- Evidência: custo é 416x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 1363 — COLAR
+
+- Custo no inventário: **R$ 10,85** · preço: R$ 0,02 · saldo: 3 un · inflado: **R$ 32,55**
+- Evidência: 0 entrada e 0 venda desde 01/01/2023
+- **Conserto:** **Contar fisicamente.** Tem saldo e nenhum movimento em 3 anos e meio — provavelmente não existe na loja. Ver a parte B.
+
+### 17053 — COLAR
+
+- Custo no inventário: **R$ 10,00** · preço: R$ 0,01 · saldo: 3 un · inflado: **R$ 30,00**
+- Evidência: custo é 1.000x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 40651 — TIARA K
+
+- Custo no inventário: **R$ 4,66** · preço: R$ 0,01 · saldo: 6 un · inflado: **R$ 27,96**
+- Evidência: 0 entrada e 0 venda desde 01/01/2023
+- **Conserto:** **Contar fisicamente.** Tem saldo e nenhum movimento em 3 anos e meio — provavelmente não existe na loja. Ver a parte B.
+
+### 2571 — CILIOS OTIMOS
+
+- Custo no inventário: **R$ 1,08** · preço: R$ 0,02 · saldo: 24 un · inflado: **R$ 25,92**
+- Evidência: comprou 4, vendeu 46 (razão 12x)
+- **Conserto:** Parece embalagem de 12, mas R$ 1,08 ÷ 12 = R$ 0,09, que ainda passa do preço de R$ 0,02. **Abrir a nota** e ver a unidade. ⚠️ E o preço de R$ 0,02 também não se sustenta — conferir os dois.
+
+### 5015 — BRINCO
+
+- Custo no inventário: **R$ 5,75** · preço: R$ 0,02 · saldo: 4 un · inflado: **R$ 23,00**
+- Evidência: preço de R$ 0,02 com custo de R$ 5,75
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 17052 — COLAR
+
+- Custo no inventário: **R$ 5,66** · preço: R$ 0,01 · saldo: 4 un · inflado: **R$ 22,64**
+- Evidência: 0 entrada e 0 venda desde 01/01/2023
+- **Conserto:** **Contar fisicamente.** Tem saldo e nenhum movimento em 3 anos e meio — provavelmente não existe na loja. Ver a parte B.
+
+### 5705 — CAIXINHA DE PRESENTE 12
+
+- Custo no inventário: **R$ 3,90** · preço: R$ 0,01 · saldo: 5 un · inflado: **R$ 19,50**
+- Evidência: custo é 390x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 49029 — PULSEIRA V16
+
+- Custo no inventário: **R$ 4,83** · preço: R$ 0,01 · saldo: 4 un · inflado: **R$ 19,32**
+- Evidência: custo é 483x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 44232 — BRINCO 69
+
+- Custo no inventário: **R$ 5,66** · preço: R$ 0,01 · saldo: 3 un · inflado: **R$ 16,98**
+- Evidência: custo é 566x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 13964 — CILIOS 8308
+
+- Custo no inventário: **R$ 3,25** · preço: R$ 0,01 · saldo: 5 un · inflado: **R$ 16,25**
+- Evidência: custo é 325x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 4602 — ESPELHO DE BOLSA OTIMO
+
+- Custo no inventário: **R$ 5,25** · preço: R$ 0,03 · saldo: 3 un · inflado: **R$ 15,75**
+- Evidência: preço de R$ 0,03 com custo de R$ 5,25
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 1312 — LAÇO PDD OTIMOS
+
+- Custo no inventário: **R$ 3,00** · preço: R$ 0,02 · saldo: 5 un · inflado: **R$ 15,00**
+- Evidência: preço de R$ 0,02 com custo de R$ 3,00
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 49037 — CAIXINHA DE PRESENTE 15
+
+- Custo no inventário: **R$ 2,33** · preço: R$ 0,01 · saldo: 6 un · inflado: **R$ 13,98**
+- Evidência: 0 entrada e 0 venda desde 01/01/2023
+- **Conserto:** **Contar fisicamente.** Tem saldo e nenhum movimento em 3 anos e meio — provavelmente não existe na loja. Ver a parte B.
+
+### 51096 — PULSEIRA 5
+
+- Custo no inventário: **R$ 3,92** · preço: R$ 0,01 · saldo: 3 un · inflado: **R$ 11,76**
+- Evidência: custo é 392x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 2685 — BRINCO
+
+- Custo no inventário: **R$ 5,66** · preço: R$ 1,15 · saldo: 2 un · inflado: **R$ 11,32**
+- Evidência: custo 4,9x o preço
+- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
+
+### 4553 — UNHA
+
+- Custo no inventário: **R$ 2,50** · preço: R$ 0,02 · saldo: 4 un · inflado: **R$ 10,00**
+- Evidência: preço de R$ 0,02 com custo de R$ 2,50
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 1386 — PRESILHA
+
+- Custo no inventário: **R$ 1,91** · preço: R$ 0,01 · saldo: 5 un · inflado: **R$ 9,55**
+- Evidência: preço de R$ 0,01 com custo de R$ 1,91
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 13815 — PINCEL SKIN CARE
+
+- Custo no inventário: **R$ 1,33** · preço: R$ 0,01 · saldo: 6 un · inflado: **R$ 7,98**
+- Evidência: 0 entrada e 0 venda desde 01/01/2023
+- **Conserto:** **Contar fisicamente.** Tem saldo e nenhum movimento em 3 anos e meio — provavelmente não existe na loja. Ver a parte B.
+
+### 52485 — PIRANHA 715
+
+- Custo no inventário: **R$ 3,75** · preço: R$ 0,90 · saldo: 2 un · inflado: **R$ 7,50**
+- Evidência: preço de R$ 0,90 com custo de R$ 3,75
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 7742 — GRAMPO 6
+
+- Custo no inventário: **R$ 1,42** · preço: R$ 0,01 · saldo: 4 un · inflado: **R$ 5,68**
+- Evidência: preço de R$ 0,01 com custo de R$ 1,42
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 41414 — ELASTICO
+
+- Custo no inventário: **R$ 0,75** · preço: R$ 0,01 · saldo: 7 un · inflado: **R$ 5,25**
+- Evidência: preço de R$ 0,01 com custo de R$ 0,75
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 41093 — BRINCO 6
+
+- Custo no inventário: **R$ 4,66** · preço: R$ 0,01 · saldo: 1 un · inflado: **R$ 4,66**
+- Evidência: custo é 466x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 49678 — LACO B
+
+- Custo no inventário: **R$ 3,33** · preço: R$ 0,01 · saldo: 1 un · inflado: **R$ 3,33**
+- Evidência: custo é 333x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 41276 — BRINCO S6
+
+- Custo no inventário: **R$ 3,08** · preço: R$ 0,01 · saldo: 1 un · inflado: **R$ 3,08**
+- Evidência: custo é 308x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 45944 — RABICO
+
+- Custo no inventário: **R$ 0,62** · preço: R$ 0,01 · saldo: 3 un · inflado: **R$ 1,86**
+- Evidência: preço de R$ 0,01 com custo de R$ 0,62
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+## JAPINHA  ·  _ENCALHADA_
+
+### 16988 — KIT SHAMPOO DETOX / ATIVO REDUTOR DE QUIABO JAPINHA 1LT
+
+- Custo no inventário: **R$ 59,51** · preço: R$ 0,01 · saldo: 6 un · inflado: **R$ 357,06**
+- Evidência: custo é 5.951x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 9116 — BOTOX OJOIN JAPINHA 1KG
+
+- Custo no inventário: **R$ 32,36** · preço: R$ 0,01 · saldo: 3 un · inflado: **R$ 97,08**
+- Evidência: custo é 3.236x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 9115 — BOTOX OJON JAPINHA 300G
+
+- Custo no inventário: **R$ 14,34** · preço: R$ 0,01 · saldo: 4 un · inflado: **R$ 57,36**
+- Evidência: custo é 1.434x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 16945 — Kit Shampoo Detox / Ativo Redutor Organico Japinha 120ml
+
+- Custo no inventário: **R$ 18,04** · preço: R$ 0,20 · saldo: 3 un · inflado: **R$ 54,12**
+- Evidência: preço de R$ 0,20 com custo de R$ 18,04
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+## ZGY  ·  _ENCALHADA_
+
+### 15816 — CILIOS DE CANTO
+
+- Custo no inventário: **R$ 7,20** · preço: R$ 0,01 · saldo: 22 un · inflado: **R$ 158,40**
+- Evidência: custo é 720x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 2083 — BRINCO DETALHES PEQUENO
+
+- Custo no inventário: **R$ 8,00** · preço: R$ 0,02 · saldo: 8 un · inflado: **R$ 64,00**
+- Evidência: custo é 400x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,02) provavelmente está certo.
+
+### 52211 — BRINCO COM 3 PARES ARGOLA
+
+- Custo no inventário: **R$ 20,00** · preço: R$ 0,01 · saldo: 3 un · inflado: **R$ 60,00**
+- Evidência: 0 entrada e 0 venda desde 01/01/2023
+- **Conserto:** **Contar fisicamente.** Tem saldo e nenhum movimento em 3 anos e meio — provavelmente não existe na loja. Ver a parte B.
+
+### 8813 — COLAR DE METAL
+
+- Custo no inventário: **R$ 17,70** · preço: R$ 0,01 · saldo: 2 un · inflado: **R$ 35,40**
+- Evidência: custo é 1.770x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 11440 — COLAR COM PIGENTE
+
+- Custo no inventário: **R$ 8,33** · preço: R$ 0,01 · saldo: 3 un · inflado: **R$ 24,99**
+- Evidência: 0 entrada e 0 venda desde 01/01/2023
+- **Conserto:** **Contar fisicamente.** Tem saldo e nenhum movimento em 3 anos e meio — provavelmente não existe na loja. Ver a parte B.
+
+### 2712 — BRINCO LISO
+
+- Custo no inventário: **R$ 10,00** · preço: R$ 0,02 · saldo: 1 un · inflado: **R$ 10,00**
+- Evidência: custo é 500x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,02) provavelmente está certo.
+
+### 3455 — ARGOLA AÇO INOXIDAVEL
+
+- Custo no inventário: **R$ 4,00** · preço: R$ 0,02 · saldo: 2 un · inflado: **R$ 8,00**
+- Evidência: preço de R$ 0,02 com custo de R$ 4,00
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 1840 — BRINCO GOTA DOURADA PEQUENO - otimos
+
+- Custo no inventário: **R$ 5,00** · preço: R$ 0,02 · saldo: 1 un · inflado: **R$ 5,00**
+- Evidência: preço de R$ 0,02 com custo de R$ 5,00
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 1344 — PRESILHA COM 3
+
+- Custo no inventário: **R$ 4,50** · preço: R$ 0,02 · saldo: 1 un · inflado: **R$ 4,50**
+- Evidência: preço de R$ 0,02 com custo de R$ 4,50
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+## MISS FRANDY  ·  _SAINDO_
+
+### 45155 — PINCEL MAQUIAGEM PARA BLUSH MISS FRANDY
+
+- Custo no inventário: **R$ 9,42** · preço: R$ 2,08 · saldo: 18 un · inflado: **R$ 169,56**
+- Evidência: custo 4,5x o preço
+- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
+
+### 15727 — PINCEL MISS FRANDY PM16
+
+- Custo no inventário: **R$ 57,54** · preço: R$ 12,90 · saldo: 2 un · inflado: **R$ 115,08**
+- Evidência: custo 4,5x o preço
+- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
+
+### 45144 — PINCEL MAQUIAGEM LINHA M.A
+
+- Custo no inventário: **R$ 3,46** · preço: R$ 0,67 · saldo: 11 un · inflado: **R$ 38,06**
+- Evidência: preço de R$ 0,67 com custo de R$ 3,46
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 30875 — PLACA PARA COLA FIO A FIO MISS FRANDY
+
+- Custo no inventário: **R$ 3,75** · preço: R$ 0,74 · saldo: 7 un · inflado: **R$ 26,25**
+- Evidência: preço de R$ 0,74 com custo de R$ 3,75
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 42770 — PINCEL PARA MAQUIAGEM MISS FRANDY PM15-1212
+
+- Custo no inventário: **R$ 7,46** · preço: R$ 0,67 · saldo: 2 un · inflado: **R$ 14,92**
+- Evidência: preço de R$ 0,67 com custo de R$ 7,46
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+## REAL LOVE  ·  _ENCALHADA_
+
+### 57839 — ESPONJA DE MAQUIAGEM
+
+- Custo no inventário: **R$ 8,00** · preço: R$ 0,01 · saldo: 8 un · inflado: **R$ 64,00**
+- Evidência: custo é 800x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 14789 — CILIOS POSTICOS DE FIBRA DE TEREFTALATO DE POLIETILENO
+
+- Custo no inventário: **R$ 5,31** · preço: R$ 0,01 · saldo: 10 un · inflado: **R$ 53,10**
+- Evidência: custo é 531x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 14796 — PINCEL PARA UNHA
+
+- Custo no inventário: **R$ 6,83** · preço: R$ 0,01 · saldo: 7 un · inflado: **R$ 47,81**
+- Evidência: custo é 683x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 14795 — CILIOS POSTICOS DE FIBRA DETEREFTALA DE POLIETILENO
+
+- Custo no inventário: **R$ 5,38** · preço: R$ 0,01 · saldo: 5 un · inflado: **R$ 26,90**
+- Evidência: custo é 538x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 14785 — OLEO DUO DE CUTICULAS DE ROSAS - PESSEGO
+
+- Custo no inventário: **R$ 2,13** · preço: R$ 0,01 · saldo: 11 un · inflado: **R$ 23,43**
+- Evidência: preço de R$ 0,01 com custo de R$ 2,13
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 14784 — COLA CILIOS/ UNHA POSTIÇO
+
+- Custo no inventário: **R$ 2,13** · preço: R$ 0,01 · saldo: 6 un · inflado: **R$ 12,78**
+- Evidência: preço de R$ 0,01 com custo de R$ 2,13
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 14793 — LAPIS P/ SOBRANCELHA
+
+- Custo no inventário: **R$ 2,63** · preço: R$ 0,01 · saldo: 4 un · inflado: **R$ 10,52**
+- Evidência: preço de R$ 0,01 com custo de R$ 2,63
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 13535 — CONJ DECORACAO (4 GLITTER E 2 APLICADORES)
+
+- Custo no inventário: **R$ 2,09** · preço: R$ 0,01 · saldo: 5 un · inflado: **R$ 10,45**
+- Evidência: preço de R$ 0,01 com custo de R$ 2,09
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 14782 — KIT (1 NAVALHA P/ SOBRANCELHA E 1 REFIL DE LAMINA)
+
+- Custo no inventário: **R$ 2,28** · preço: R$ 0,01 · saldo: 4 un · inflado: **R$ 9,12**
+- Evidência: preço de R$ 0,01 com custo de R$ 2,28
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 13617 — COLA P/ CILIOS BRANCA
+
+- Custo no inventário: **R$ 2,95** · preço: R$ 0,01 · saldo: 3 un · inflado: **R$ 8,85**
+- Evidência: preço de R$ 0,01 com custo de R$ 2,95
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 14781 — CANETA HIDRATANTE DE CUTICULAS PESSEGO - PACOTE
+
+- Custo no inventário: **R$ 2,04** · preço: R$ 0,01 · saldo: 4 un · inflado: **R$ 8,16**
+- Evidência: o nome diz 'PACOTE' mas não diz quantas peças
+- **Conserto:** **Abrir a nota** e ver quantas peças vêm no PACOTE.
+
+### 14791 — CONJUNTO
+
+- Custo no inventário: **R$ 1,16** · preço: R$ 0,01 · saldo: 7 un · inflado: **R$ 8,12**
+- Evidência: preço de R$ 0,01 com custo de R$ 1,16
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 14790 — PINCEL APLICADOR DE GLOSS - KIT COM 12 PCT, CADA PCT CONTEM 50 PECAS
+
+- Custo no inventário: **R$ 1,16** · preço: R$ 0,01 · saldo: 6 un · inflado: **R$ 6,96**
+- Evidência: o nome diz 'PCT' mas não diz quantas peças
+- **Conserto:** **Abrir a nota** e ver quantas peças vêm no PCT.
+
+### 14780 — ESPELHO COM MOLDURA DE PLASTICO
+
+- Custo no inventário: **R$ 2,20** · preço: R$ 0,01 · saldo: 3 un · inflado: **R$ 6,60**
+- Evidência: 0 entrada e 0 venda desde 01/01/2023
+- **Conserto:** **Contar fisicamente.** Tem saldo e nenhum movimento em 3 anos e meio — provavelmente não existe na loja. Ver a parte B.
+
+### 14786 — NAVALHA DE PLASTICO PARA SOBRANCELHA
+
+- Custo no inventário: **R$ 3,16** · preço: R$ 0,01 · saldo: 2 un · inflado: **R$ 6,32**
+- Evidência: custo é 316x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 14792 — DISCO DE LIXA PARA LIXADEIRA
+
+- Custo no inventário: **R$ 1,16** · preço: R$ 0,01 · saldo: 4 un · inflado: **R$ 4,64**
+- Evidência: preço de R$ 0,01 com custo de R$ 1,16
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 14800 — TESOURA DE METAL PARA SOBRANCELHA
+
+- Custo no inventário: **R$ 1,04** · preço: R$ 0,01 · saldo: 3 un · inflado: **R$ 3,12**
+- Evidência: preço de R$ 0,01 com custo de R$ 1,04
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 14783 — ALMOFADA DE APOIO DE BRACO P/ MANICURE DE PILIURETANO
+
+- Custo no inventário: **R$ 2,28** · preço: R$ 0,01 · saldo: 1 un · inflado: **R$ 2,28**
+- Evidência: 0 entrada e 0 venda desde 01/01/2023
+- **Conserto:** **Contar fisicamente.** Tem saldo e nenhum movimento em 3 anos e meio — provavelmente não existe na loja. Ver a parte B.
+
+### 14794 — PREP BACTERICIDA
+
+- Custo no inventário: **R$ 1,14** · preço: R$ 0,01 · saldo: 1 un · inflado: **R$ 1,14**
+- Evidência: preço de R$ 0,01 com custo de R$ 1,14
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+## NATHYDRAS  ·  _ENCALHADA_
+
+### 45512 — REPARADOR DE PONTAS ALHO 30ML
+
+- Custo no inventário: **R$ 13,75** · preço: R$ 0,01 · saldo: 11 un · inflado: **R$ 151,25**
+- Evidência: custo é 1.375x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+## IMPALA  ·  _ENCALHADA_
+
+### 18015 — OLEO PARA CUTICULAS IMPALA TRATAMENTO
+
+- Custo no inventário: **R$ 2,91** · preço: R$ 0,01 · saldo: 24 un · inflado: **R$ 69,84**
+- Evidência: preço de R$ 0,01 com custo de R$ 2,91
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+### 53127 — REMOVEDOR DE ESMALTE COM ACETONA TIRESMALT ORIGINAL 100ml
+
+- Custo no inventário: **R$ 3,18** · preço: R$ 0,01 · saldo: 20 un · inflado: **R$ 63,60**
+- Evidência: custo é 318x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+### 18014 — ESMALTE IMPALA A COR DA MODA CREMOSO INTUICAO
+
+- Custo no inventário: **R$ 2,91** · preço: R$ 0,01 · saldo: 6 un · inflado: **R$ 17,46**
+- Evidência: preço de R$ 0,01 com custo de R$ 2,91
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+## VIVI  ·  _ENCALHADA_
+
+### 2230 — COLA PARA CILIOS 7G - VIVI
+
+- Custo no inventário: **R$ 10,91** · preço: R$ 1,95 · saldo: 12 un · inflado: **R$ 130,92**
+- Evidência: custo 5,6x o preço
+- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
+
+## INOAR  ·  _ENCALHADA_
+
+### 52262 — INOAR BLENDS CREME PARA PENTEAR 500GR
+
+- Custo no inventário: **R$ 29,61** · preço: R$ 6,90 · saldo: 3 un · inflado: **R$ 88,83**
+- Evidência: custo 4,3x o preço
+- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
+
+## APSE  ·  _ATIVA_
+
+### 17320 — CREME APICE 80G
+
+- Custo no inventário: **R$ 5,79** · preço: R$ 0,01 · saldo: 9 un · inflado: **R$ 52,11**
+- Evidência: custo é 579x o preço
+- **Conserto:** **Corrigir o custo médio** pelo valor da última nota. O preço (R$ 0,01) provavelmente está certo.
+
+## RUBY ROSE  ·  _ATIVA_
+
+### 65573 — 2024.8.1 - ILUME COLORS 2024.8.1
+
+- Custo no inventário: **R$ 6,90** · preço: R$ 1,38 · saldo: 3 un · inflado: **R$ 20,70**
+- Evidência: custo 5,0x o preço
+- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
+
+### 64989 — UNHA POSTICA BAILARINA DECORADA 2010000002810
+
+- Custo no inventário: **R$ 5,45** · preço: R$ 0,09 · saldo: 1 un · inflado: **R$ 5,45**
+- Evidência: preço de R$ 0,09 com custo de R$ 5,45
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+## VARCARE  ·  _ENCALHADA_
+
+### 65042 — AMOSTRA SACHE INVERSOR VIP LINE VARCARE 15 ML
+
+- Custo no inventário: **R$ 32,80** · preço: R$ 1,20 · saldo: 0 un · inflado: **R$ 13,12**
+- Evidência: custo 27,3x o preço
+- **Conserto:** **Abrir a última nota de entrada** e comparar unidade, quantidade e valor.
+
+## SEM MARCA  ·  _ENCALHADA_
+
+### 5341 — CARTAZ FASHION COLOR ARGAN
+
+- Custo no inventário: **R$ 0,10** · preço: R$ 0,01 · saldo: 100 un · inflado: **R$ 10,00**
+- Evidência: preço de R$ 0,01 com custo de R$ 0,10
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+## SENSCIENCE  ·  _ENCALHADA_
+
+### 8984 — FLYER PROD SENSCIENCE
+
+- Custo no inventário: **R$ 0,10** · preço: R$ 0,01 · saldo: 100 un · inflado: **R$ 10,00**
+- Evidência: preço de R$ 0,01 com custo de R$ 0,10
+- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+
+## LUDURANA  ·  _ENCALHADA_
+
+### 18093 — ESMALTE LUDURANA GLITTER FIO DE OURO SOLTO 8ML
+
+- Custo no inventário: **R$ 1,50** · preço: R$ 0,12 · saldo: 4 un · inflado: **R$ 6,00**
+- Evidência: preço de R$ 0,12 com custo de R$ 1,50
 - **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
 
 
-## VIVAI
+---
 
-_1 produto(s) · R$ 1,09_
+# Parte B — que marcas ainda existem na loja
 
-### 62989 — BATOM LIQUIDO MATTE 06 CORES - VIVAI
+Medido por entrada e venda desde 01/01/2023. Marca com saldo e nenhum movimento em três
+anos e meio quase certamente não está na prateleira — é saldo que ficou no sistema.
 
-- Custo no ERP: **R$ 1,09** · preço de venda: R$ 0,06 · saldo: 1 un · valor inflado: **R$ 1,09**
-- Evidência: preço de R$ 0,06 com custo de R$ 1,09
-- **Conserto:** **Conferir o preço** — pode ser o preço que está errado, não o custo.
+| Situação | Marcas | Peças | Valor | O que significa |
+|---|---:|---:|---:|---|
+| **FANTASMA** | 7 | 25 | R$ 413,74 | saldo com **0 entrada e 0 venda** desde 2023 — quase certamente não existe na loja |
+| **MORTA** | 13 | 384 | R$ 1.727,53 | não se compra e o saldo dá **mais de 3 anos** de venda no ritmo atual |
+| **SAINDO** | 7 | 260 | R$ 2.593,97 | não se compra mais, mas ainda gira |
+| **ENCALHADA** | 64 | 8.759 | R$ 109.027,76 | ainda se compra, mas o saldo dá mais de 3 anos |
+| **ATIVA** | 68 | 17.362 | R$ 143.188,65 | compra e gira |
 
+## FANTASMA — saldo com **0 entrada e 0 venda** desde 2023 — quase certamente não existe na loja
+
+| Marca | Produtos | Peças | Valor | Entrou | Vendeu |
+|---|---:|---:|---:|---:|---:|
+| GAMA | 1 | 1 | R$ 148,24 | 0 | 0 |
+| LE VANGEE | 1 | 17 | R$ 124,10 | 0 | 0 |
+| MINU COMERCIO | 1 | 1 | R$ 65,00 | 0 | 0 |
+| LATIKA | 1 | 3 | R$ 53,70 | 0 | 0 |
+| MAKE ON E | 1 | 1 | R$ 18,98 | 0 | 0 |
+| JC IMPORT | 1 | 1 | R$ 3,71 | 0 | 0 |
+| JACK DESIGN | 1 | 1 | R$ 0,01 | 0 | 0 |
+
+## MORTA — não se compra e o saldo dá **mais de 3 anos** de venda no ritmo atual
+
+| Marca | Produtos | Peças | Valor | Entrou | Vendeu |
+|---|---:|---:|---:|---:|---:|
+| MACRILAN | 4 | 11 | R$ 545,53 | 0 | 4 |
+| IMPORTADORA JF | 1 | 188 | R$ 376,00 | 0 | 94 |
+| AMIGOLD | 1 | 7 | R$ 153,93 | 0 | 8 |
+| MANDALA | 1 | 7 | R$ 142,52 | 0 | 2 |
+| MELU RUBY ROSE | 4 | 11 | R$ 128,49 | 0 | 11 |
+| VOLIA | 3 | 6 | R$ 110,70 | 0 | 3 |
+| X & D | 1 | 7 | R$ 91,00 | 0 | 4 |
+| MAX BRASIL | 1 | 74 | R$ 74,00 | 0 | 88 |
+| MERHEJE | 1 | 7 | R$ 42,42 | 0 | 2 |
+| CHEN YUMEI | 5 | 16 | R$ 29,80 | 0 | 8 |
+| MAX LOVE | 1 | 1 | R$ 15,50 | 0 | 1 |
+| MEU MEU BIJOUTERIAS | 4 | 12 | R$ 15,07 | 0 | 2 |
+| SOLIDER | 8 | 37 | R$ 2,57 | 0 | 14 |
 

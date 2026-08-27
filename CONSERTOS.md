@@ -1,36 +1,23 @@
-# Consertos de estoque — as 4 lojas
+# Estoque — as 4 lojas
 
-Uma lista por loja, organizada **marca → produto → o que fazer**. Cada lista é autônoma:
-dá para mandar a da loja para quem trabalha nela sem precisar do resto.
+Fonte: **Registro de Inventário** do ERP, puxado em 27/08/2026.
 
-| Loja | | Produtos | Valor que não existe | Lista |
-|---|---|---:|---:|---|
-| **L1** | Casa da Beleza Altamira | 454 | R$ 316.344,29 | [CONSERTOS_L1.md](CONSERTOS_L1.md) |
-| **L3** | Casa da Beleza Itaituba | 103 | R$ 77.615,85 | [CONSERTOS_L3.md](CONSERTOS_L3.md) |
-| **L4** | MissBeleza Altamira | 268 | R$ 162.262,78 | [CONSERTOS_L4.md](CONSERTOS_L4.md) |
-| **L5** | MissBeleza Santarém | 149 | R$ 64.416,45 | [CONSERTOS_L5.md](CONSERTOS_L5.md) |
-| | **Total** | **974** | **R$ 620.639,37** | |
+| Loja | | Peças | Valor no ERP | Consertos de custo | Marcas fantasma + mortas |
+|---|---|---:|---:|---:|---:|
+| **L1** | Casa da Beleza Altamira | 72.222 | R$ 1.029.133,76 | 173 (R$ 122.603,23) | 168 (R$ 147.357,11) |
+| **L3** | Casa da Beleza Itaituba | 26.790 | R$ 256.951,65 | 94 (R$ 9.874,24) | 20 (R$ 2.141,27) |
+| **L4** | MissBeleza Altamira | 74.865 | R$ 780.785,07 | 95 (R$ 37.104,95) | 110 (R$ 230.187,79) |
+| **L5** | MissBeleza Santarém | 29.725 | R$ 367.501,84 | 113 (R$ 10.453,33) | 16 (R$ 4.769,31) |
 
-## Por tipo de conserto (as 4 lojas)
+## Onde está o dinheiro parado
 
-| Tipo | Produtos | Valor | O que significa |
-|---|---:|---:|---|
-| saldo sem origem | 517 | R$ 195.853,91 | tem peça e nenhuma compra desde 2023 — não é custo, é contagem |
-| custo corrompido | 67 | R$ 125.327,30 | custo sem relação com nada; quantidades de compra normais |
-| conferir a nota | 175 | R$ 89.111,94 | sem evidência suficiente aqui — precisa abrir a nota |
-| fator a confirmar | 47 | R$ 82.207,43 | cheira a embalagem e a conta não fecha — abrir a nota |
-| fator de conversão (qtd estimada) | 79 | R$ 70.296,78 | é embalagem, mas o número exato precisa sair da nota antes de gravar |
-| fator de conversão | 33 | R$ 54.330,95 | a quantidade da embalagem está no nome do produto — é só cadastrar |
-| preço a conferir | 56 | R$ 3.511,06 | pode ser o preço que está errado, não o custo |
+| Situação | Marcas | Peças | Valor |
+|---|---:|---:|---:|
+| **FANTASMA** — saldo com **0 entrada e 0 venda** desde 2023 — quase certamente não existe na loja | 105 | 1.277 | R$ 19.505,13 |
+| **MORTA** — não se compra e o saldo dá **mais de 3 anos** de venda no ritmo atual | 209 | 20.980 | R$ 364.950,35 |
+| **SAINDO** — não se compra mais, mas ainda gira | 77 | 4.988 | R$ 66.171,91 |
+| **ENCALHADA** — ainda se compra, mas o saldo dá mais de 3 anos | 235 | 80.132 | R$ 738.443,00 |
+| **ATIVA** — compra e gira | 341 | 96.225 | R$ 1.245.301,93 |
 
-## A ordem de fazer
-
-1. **Fator de conversão primeiro.** Se corrigir só o custo, a próxima nota daquele produto
-   reintroduz o erro — a entrada continua lançando pacote como peça.
-2. **Depois o custo médio** dos que ficaram (custo corrompido).
-3. **Contagem por último**, para os de saldo sem origem — e aí já com o custo certo,
-   senão conta-se duas vezes.
-
-> O valor do estoque cai conforme os consertos entram. Isso aparece no balanço e **é
-> correção de um número que nunca existiu, não perda** — mas o contador precisa saber antes.
+_A mesma marca conta em mais de uma loja: as somas são por loja, não de marcas distintas._
 

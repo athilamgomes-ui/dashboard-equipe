@@ -36,7 +36,12 @@ const LOJAS = { L1: 1, L3: 3, L4: 4, L5: 10 };   // ⚠️ nunca empresas 9 nem 
 
 const loja = (process.argv[2] || "L1").toUpperCase();
 const marca = (process.argv[3] && /^\d+$/.test(process.argv[3])) ? process.argv[3] : null;
-const sintetico = process.argv.includes("--sintetico") || !marca;
+// --analitico força o analítico SEM filtro de marca: uma execução devolve o custo ICMS real de
+// TODOS os produtos da loja. É o jeito certo de comparar custo × preço em massa — a coluna
+// "Custo Médio" do relatório de saldo NÃO serve para isso (27/08/2026: ela dizia R$ 204,16 num
+// algodão que o Registro de Inventário valoriza a R$ 1,16, e o certo é o do inventário).
+const sintetico = process.argv.includes("--analitico") ? false
+  : (process.argv.includes("--sintetico") || !marca);
 const E = LOJAS[loja];
 if (!E) { console.error(`loja inválida: ${loja} (use L1, L3, L4 ou L5)`); process.exit(1); }
 const log = (m) => console.log(`[inv] ${m}`);
@@ -93,11 +98,23 @@ const r = await nav;
 if (!r) { console.error("FALHA: o relatório não terminou de carregar (timeout) — NÃO vou salvar dado parcial."); await ctx.close(); process.exit(10); }
 await page.waitForTimeout(1200);
 
+// ⚠️ SANIDADE (27/08/2026): a navegação pode terminar com sucesso e a página vir VAZIA —
+// L4 e L5 devolveram 175 linhas onde L1 e L3 devolveram 58.339, e o script gravou "OK".
+// Relatório vazio tem que ser FALHA, senão o passo seguinte conclui "esta loja não tem
+// problema nenhum" a partir de dado que não foi coletado.
+const linhasTab = await page.evaluate(() => document.querySelectorAll("table tr").length);
+const MIN = sintetico ? 50 : (marca ? 3 : 5000);
+if (linhasTab < MIN) {
+  const txt = await page.evaluate(() => (document.body?.innerText || "").replace(/\s+/g, " ").slice(0, 400));
+  console.error(`FALHA: o relatório voltou com ${linhasTab} linhas (esperado ≥ ${MIN}) — está vazio. NÃO vou gravar.`);
+  console.error(`  a página diz: ${txt}`);
+  await ctx.close(); process.exit(10);
+}
+
 const html = await page.content();
 const nome = `inventario_${loja}${marca ? "_m" + marca : ""}${sintetico ? "" : "_analitico"}.html`;
 fs.mkdirSync(OUT_DIR, { recursive: true });
 const dest = path.join(OUT_DIR, nome);
 fs.writeFileSync(dest, html, "utf8");
-const linhas = await page.evaluate(() => document.querySelectorAll("table tr").length);
-log(`OK → ${dest}  (${linhas} linhas na tabela, ${(html.length / 1024).toFixed(0)} KB)`);
+log(`OK → ${dest}  (${linhasTab} linhas na tabela, ${(html.length / 1024).toFixed(0)} KB)`);
 await ctx.close();
