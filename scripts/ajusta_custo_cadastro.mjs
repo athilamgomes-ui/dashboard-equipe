@@ -99,7 +99,9 @@ if (antes.custo == null) { console.error(`ABORTADO: não achei o campo custo_${c
 log(`ANTES  → ${antes.descr}`);
 log(`         custo=${antes.custo} · custo médio=${antes.customed} · venda=${antes.venda} · markup=${antes.markup} · un=${antes.unid}`);
 log(`PEDIDO → custo ${antes.custo} → ${novo}${markup ? ` · markup ${antes.markup} → ${markup}` : ""}   (venda, custo médio, unidade e saldo NÃO serão tocados)`);
-if (!markup) log("⚠️ sem markup alvo: o ERP vai RECALCULAR o preço a partir do markup atual — confira se é isso mesmo que você quer.");
+if (!markup) log("modo A (decidido em 27/08): sem markup alvo. O preço do CADASTRO vai se recalcular\n" +
+  "         e virar um número qualquer — ele já era errado e L1/L4 vendem pela Tabela Altamira.\n" +
+  "         A conferência que vale é a Tabela Altamira, feita depois do lote (confere_altamira.py).");
 
 if (!GRAVAR) {
   log("SIMULAÇÃO — nada foi gravado. Repita com --gravar para valer.");
@@ -145,12 +147,14 @@ const custoMudou = depois.custo !== antes.custo;
 // arredondamento — e isso é correção, não estrago. Por isso a tolerância de 1 centavo quando
 // há markup alvo; sem markup, qualquer mexida no preço continua sendo falha.
 const n = (v) => parseFloat(String(v || "").replace(/\./g, "").replace(",", "."));
-const precoIntacto = markup ? Math.abs(n(depois.venda) - n(antes.venda)) <= 0.05
-                            : depois.venda === antes.venda;
-if (markup) log(`   diferença no preço: R$ ${(n(depois.venda) - n(antes.venda)).toFixed(4)}`);
+// Com markup alvo, a trava é "o preço do cadastro não pode se mexer" (tolerância de 5 centavos
+// para o arredondamento do ERP). SEM markup — o modo A — o preço do cadastro MUDA de propósito;
+// aí a trava é só "o custo gravou", e quem confere o preço de verdade é a Tabela Altamira.
+const precoIntacto = markup ? Math.abs(n(depois.venda) - n(antes.venda)) <= 0.05 : true;
+log(`   preço do cadastro: ${antes.venda} → ${depois.venda}${markup ? "" : "  (esperado no modo A)"}`);
 const ok = custoMudou && precoIntacto;
 if (!custoMudou) log("⚠️ o custo NÃO mudou — a gravação não pegou.");
-if (!precoIntacto) log(`🔴 O PREÇO DE VENDA MUDOU (${antes.venda} → ${depois.venda}) — isso não era para acontecer.`);
+if (!precoIntacto) log(`🔴 O PREÇO DO CADASTRO MUDOU (${antes.venda} → ${depois.venda}) — com markup alvo isso não era para acontecer.`);
 
 let hist = [];
 try { hist = JSON.parse(fs.readFileSync(OUT, "utf8")); } catch (_) {}
