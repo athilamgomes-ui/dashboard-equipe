@@ -591,6 +591,56 @@ function modoRender(arqE1, arqE2, arqStores, arqC8, coletadoEm) {
     } else warn(`sem semanas em DADOS['${mesKey}'].L1 para sincronizar SEMANAS_MES`);
   }
 
+  // 4b3. HIST_MENSAL_VENDAS — registra meses FECHADOS automaticamente (a "virada").
+  // O gráfico "Evolução mês a mês" do loja.html lê essa const; se o mês que fechou
+  // não entra aqui, o gráfico fica com buraco (bug julho/2026: pulava jun→ago pra
+  // TODAS as vendedoras). Idempotente: só INSERE mês que falta, nunca reescreve os
+  // já presentes. Fonte = soma das semanas de DADOS[mês] por vendedora (exclui
+  // "Outros"; cliente 8 já vem subtraído). Também espelha META_MENSAL_HIST.
+  {
+    try {
+      const spanH = extractConst(loja, "HIST_MENSAL_VENDAS");
+      const histObj = spanH.obj;
+      const fechados = Object.keys(dadosAntes).filter((mk) => /^\d{4}-\d{2}$/.test(mk) && mk < mesKey);
+      const faltantes = fechados.filter((mk) => !histObj[mk]).sort();
+      let blocos = "", inseridos = [];
+      for (const mk of faltantes) {
+        const mdata = dadosAntes[mk];
+        const lojasStr = [];
+        for (const lk of LOJAS) {
+          const st = mdata?.[lk];
+          if (!st || !st.vendas) continue;
+          const tot = {};
+          for (const sid of Object.keys(st.vendas)) {
+            for (const [nome, v] of Object.entries(st.vendas[sid] || {})) {
+              if (nome === "Outros") continue;
+              tot[nome] = (tot[nome] || 0) + v;
+            }
+          }
+          const pares = Object.entries(tot).filter(([, v]) => v > 0).map(([n, v]) => `'${n.replace(/'/g, "\\'")}':${Math.round(v)}`);
+          if (pares.length) lojasStr.push(`    ${lk}: {${pares.join(",")}},`);
+        }
+        if (lojasStr.length) { blocos += `  '${mk}': {\n${lojasStr.join("\n")}\n  },\n`; inseridos.push(mk); }
+      }
+      if (blocos) {
+        loja = loja.slice(0, spanH.end - 1) + blocos + loja.slice(spanH.end - 1);
+        log(`HIST_MENSAL_VENDAS: mês(es) fechado(s) registrado(s) automaticamente: ${inseridos.join(", ")}`);
+        // META_MENSAL_HIST — espelha a meta mensal dos meses recém-inseridos
+        try {
+          const spanM = extractConst(loja, "META_MENSAL_HIST");
+          const metaObj = spanM.obj;
+          let mblocos = "";
+          for (const mk of inseridos) {
+            if (metaObj[mk]) continue;
+            const linha = LOJAS.map((lk) => `${lk}:${Math.round(dadosAntes[mk]?.[lk]?.meta_mensal || 0)}`).join(", ");
+            mblocos += `  '${mk}': {${linha}},\n`;
+          }
+          if (mblocos) { loja = loja.slice(0, spanM.end - 1) + mblocos + loja.slice(spanM.end - 1); }
+        } catch (e) { warn(`META_MENSAL_HIST não sincronizado: ${e.message}`); }
+      }
+    } catch (e) { warn(`HIST_MENSAL_VENDAS não sincronizado: ${e.message}`); }
+  }
+
   // 4c. VENDAS_HIST por loja (espelho de DADOS: semanas/vendas/marcasA_loja + ontem/hoje)
   {
     const span = extractConst(loja, "VENDAS_HIST");
