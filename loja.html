@@ -4287,7 +4287,7 @@ function renderMeuPremioMes() {
         ? (atual
             ? `<div class="sub">prêmio atual: <b style="color:var(--green)">${fR(premioAtual)}</b>${maOk?' (com bônus Marcas A)':''}</div>`
             : `<div class="sub">faltam ${fR(31000 - mesTotal)} pro seu primeiro prêmio (R$ 31 mil)</div>`)
-        : `<div class="sub">Enquanto a loja não chega a 90%, quem garante seu prêmio é <b>você passar de R$ 40 mil</b> sozinha — faltam <b style="color:var(--yellow)">${fR(Math.max(40000 - mesTotal, 0))}</b> pro seu prêmio individual.</div>`}
+        : `<div class="sub">Enquanto a loja não chega a 90%, o que garante seu prêmio é <b>você passar de R$ 40 mil</b> sozinha — faltam <b style="color:var(--yellow)">${fR(Math.max(40000 - mesTotal, 0))}</b> pro seu prêmio individual.</div>`}
       <div class="prog" style="margin-top:10px">
         <div class="prog-fill" style="width:${Math.min(mesTotal / teto * 100, 100)}%;background:var(--green)"></div>
       </div>
