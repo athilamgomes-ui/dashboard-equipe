@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-08-27T19:46:52.591Z",
+  "gerado_em": "2026-08-27T20:32:58.205Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
@@ -291,15 +291,14 @@
             "credito_icms_pct": 0,
             "preco_atual": 120.9,
             "cod_erp": "204542",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 38.76,
             "marca_detectada": true,
-            "marca_fonte": "erp"
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "2.12.012",
