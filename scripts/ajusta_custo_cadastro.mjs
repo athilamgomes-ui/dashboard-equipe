@@ -37,6 +37,10 @@ const LOJAS = { L1: 1, L3: 3, L4: 4, L5: 10 };   // ⚠️ nunca 9 nem 11
 const loja = (process.argv[2] || "").toUpperCase();
 const cod = process.argv[3];
 const novo = process.argv[4];
+// markup opcional: o ERP deriva o preço do markup ARMAZENADO (venda = custo × (1+markup/100)).
+// Mexer no custo sozinho joga o erro do custo para o preço — foi o que derrubou o 12408 de
+// R$ 67,90 para R$ 0,0655 em 27/08. Passar o markup alvo junto mantém o preço no lugar.
+const markup = (process.argv[5] && /^\d+,\d+$/.test(process.argv[5])) ? process.argv[5] : null;
 const GRAVAR = process.argv.includes("--gravar");
 const E = LOJAS[loja];
 if (!E || !/^\d+$/.test(cod || "") || !/^[\d.]+,\d{2}$/.test(novo || "")) {
@@ -94,21 +98,32 @@ if (antes.produtosNaGrade.length !== 1 || antes.produtosNaGrade[0] !== cod) {
 if (antes.custo == null) { console.error(`ABORTADO: não achei o campo custo_${cod}_${E}.`); await ctx.close(); process.exit(20); }
 log(`ANTES  → ${antes.descr}`);
 log(`         custo=${antes.custo} · custo médio=${antes.customed} · venda=${antes.venda} · markup=${antes.markup} · un=${antes.unid}`);
-log(`PEDIDO → custo ${antes.custo} → ${novo}   (venda, custo médio, unidade e saldo NÃO serão tocados)`);
+log(`PEDIDO → custo ${antes.custo} → ${novo}${markup ? ` · markup ${antes.markup} → ${markup}` : ""}   (venda, custo médio, unidade e saldo NÃO serão tocados)`);
+if (!markup) log("⚠️ sem markup alvo: o ERP vai RECALCULAR o preço a partir do markup atual — confira se é isso mesmo que você quer.");
 
 if (!GRAVAR) {
   log("SIMULAÇÃO — nada foi gravado. Repita com --gravar para valer.");
   await ctx.close(); process.exit(0);
 }
 
-const preencheu = await page.evaluate(({ cod, E, novo }) => {
-  const e = document.querySelector(`[name="custo_${cod}_${E}"]`);
-  if (!e) return false;
-  e.value = novo;
-  e.dispatchEvent(new Event("change", { bubbles: true }));
-  e.dispatchEvent(new Event("blur", { bubbles: true }));
-  return e.value === novo;
-}, { cod, E, novo });
+// digitação REAL: setar .value não dispara os recálculos da tela em alguns campos.
+const selCusto = `input[name="custo_${cod}_${E}"]`;
+await page.click(selCusto); await page.fill(selCusto, "");
+await page.type(selCusto, novo, { delay: 55 });
+await page.keyboard.press("Tab"); await page.waitForTimeout(600);
+if (markup) {
+  const selMk = `input[name="markup_${cod}_${E}"]`;
+  await page.click(selMk); await page.fill(selMk, "");
+  await page.type(selMk, markup, { delay: 55 });
+  await page.keyboard.press("Tab"); await page.waitForTimeout(800);
+}
+const naTela = await page.evaluate(({ cod, E }) => ({
+  custo: document.querySelector(`[name="custo_${cod}_${E}"]`)?.value,
+  markup: document.querySelector(`[name="markup_${cod}_${E}"]`)?.value,
+  venda: document.querySelector(`[name="venda_${cod}_${E}"]`)?.value,
+}), { cod, E });
+log(`NA TELA antes de salvar → custo=${naTela.custo} · markup=${naTela.markup} · venda=${naTela.venda}`);
+const preencheu = naTela.custo === novo;
 if (!preencheu) { console.error("ABORTADO: não consegui escrever no campo."); await ctx.close(); process.exit(20); }
 
 const nav = page.waitForNavigation({ waitUntil: "load", timeout: 180000 }).catch(() => null);
@@ -125,7 +140,13 @@ const depois = await lerLinha();
 log(`DEPOIS → custo=${depois.custo} · custo médio=${depois.customed} · venda=${depois.venda} · markup=${depois.markup} · un=${depois.unid}`);
 
 const custoMudou = depois.custo !== antes.custo;
-const precoIntacto = depois.venda === antes.venda;
+// A trava é "o preço não pode se mexer". Mas quando se passa um markup alvo, o ERP recalcula
+// venda = custo × (1+markup/100) e o resultado pode diferir do valor antigo por CENTAVOS de
+// arredondamento — e isso é correção, não estrago. Por isso a tolerância de 1 centavo quando
+// há markup alvo; sem markup, qualquer mexida no preço continua sendo falha.
+const n = (v) => parseFloat(String(v || "").replace(/\./g, "").replace(",", "."));
+const precoIntacto = markup ? Math.abs(n(depois.venda) - n(antes.venda)) <= 0.01
+                            : depois.venda === antes.venda;
 const ok = custoMudou && precoIntacto;
 if (!custoMudou) log("⚠️ o custo NÃO mudou — a gravação não pegou.");
 if (!precoIntacto) log(`🔴 O PREÇO DE VENDA MUDOU (${antes.venda} → ${depois.venda}) — isso não era para acontecer.`);
