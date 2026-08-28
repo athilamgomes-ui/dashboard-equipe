@@ -465,9 +465,34 @@ const numPT = v => { const n=parseFloat(String(v||"").replace(/\./g,"").replace(
 function aoEscolherArquivo(input){
   const f = input.files && input.files[0];
   if(!f) return;
-  if(!/\.csv$/i.test(f.name)){
-    alert("Só consigo ler .csv. No Excel: Arquivo > Salvar como > CSV, e envie esse arquivo.");
+  const ehExcel = /\.xlsx?$/i.test(f.name);
+  if(!ehExcel && !/\.csv$/i.test(f.name)){
+    alert("Consigo ler .xlsx, .xls e .csv. Envie a planilha em um desses formatos.");
     input.value=""; return;
+  }
+  // Excel direto: a loja monta a planilha no Excel, e antes tinha que salvar como CSV
+  // (passo a mais que sempre gerava confusão de separador e acento). Agora lê o .xlsx.
+  if(ehExcel){
+    if(typeof XLSX === "undefined"){
+      alert("O leitor de Excel não carregou (sem internet?). Salve como CSV e tente de novo.");
+      input.value=""; return;
+    }
+    const fr = new FileReader();
+    fr.onload = () => {
+      try{
+        const wb = XLSX.read(new Uint8Array(fr.result), {type:"array", cellDates:false});
+        const aba = wb.SheetNames[0];
+        // header:1 devolve matriz de linhas, igual ao parseCSV; defval:"" evita buracos.
+        const linhas = XLSX.utils.sheet_to_json(wb.Sheets[aba], {header:1, defval:"", raw:false})
+          .map(l => l.map(c => String(c==null?"":c).trim()))
+          .filter(l => l.some(c => c !== ""));
+        if(linhas.length<2){ alert("A planilha parece vazia."); return; }
+        previaCSV = { arquivo:f.name, cab:linhas[0], corpo:linhas.slice(1), map:mapearColunas(linhas[0]) };
+        renderVal();
+      }catch(e){ alert("Não consegui ler esse Excel: "+e.message); }
+    };
+    fr.readAsArrayBuffer(f);
+    return;
   }
   const fr = new FileReader();
   fr.onload = () => {
@@ -556,9 +581,9 @@ function renderVal(){
   const importador =
     '<div class="lote">'+
       '<div><b>Planilha de validade da loja</b><div class="hint">O ERP ainda não controla lote, então a planilha que a loja já faz é a fonte. '+
-      'No Excel: <b>Arquivo &gt; Salvar como &gt; CSV</b>, e envie o CSV aqui.</div></div>'+
+      'Aceita <b>.xlsx</b> direto do Excel — não precisa mais salvar como CSV. (.csv também serve.)</div></div>'+
       '<div class="lote-b"><label class="btn urg" style="cursor:pointer">Enviar planilha (CSV)'+
-      '<input type="file" accept=".csv,text/csv" style="display:none" onchange="aoEscolherArquivo(this)"></label></div>'+
+      '<input type="file" accept=".xlsx,.xls,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none" onchange="aoEscolherArquivo(this)"></label></div>'+
     '</div>';
 
   let previa = "";

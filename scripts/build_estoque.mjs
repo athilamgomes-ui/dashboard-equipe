@@ -564,6 +564,9 @@ ${HTML_BODY}
 const PUBLICO = ${JSON.stringify(PUBLICO)};
 const PAYLOAD = ${JSON.stringify(PAYLOAD)};
 </script>
+<!-- SheetJS: permite importar a planilha de validade em .xlsx direto, sem a loja
+     ter que salvar como CSV antes (pedido do Athila em 28/08/2026). -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>${APP_JS}</script>
 </body></html>`;
 
