@@ -2566,6 +2566,11 @@ let quizConfirmado = false; // travou seleção da pergunta atual
 
 // Detecta se acesso veio do painel do dono (index.html mesmo dominio) → libera sem PIN
 function acessoDoPainelDono() {
+  // Sinal explícito: o hub (index.html) marca os links de "espiar app" com &dono=1.
+  // É o caminho confiável — o document.referrer some em PWA, nova aba, bookmark ou
+  // quando o navegador corta o referer, e aí o modo dono falhava e travava no PIN
+  // (relato Athila 28/08). O referrer fica só como reserva pra links antigos.
+  if (PARAMS.get('dono') === '1') return true;
   const ref = document.referrer || '';
   if (!ref) return false;
   try {
