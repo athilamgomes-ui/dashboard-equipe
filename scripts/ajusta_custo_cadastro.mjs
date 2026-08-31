@@ -99,6 +99,21 @@ if (antes.custo == null) { console.error(`ABORTADO: não achei o campo custo_${c
 log(`ANTES  → ${antes.descr}`);
 log(`         custo=${antes.custo} · custo médio=${antes.customed} · venda=${antes.venda} · markup=${antes.markup} · un=${antes.unid}`);
 log(`PEDIDO → custo ${antes.custo} → ${novo}${markup ? ` · markup ${antes.markup} → ${markup}` : ""}   (venda, custo médio, unidade e saldo NÃO serão tocados)`);
+// ⚠️ TRAVA DA HERANÇA DE PREÇO (31/08/2026 — custou 5 produtos com o preço derrubado).
+// Produto SEM preço próprio na tabela da praça HERDA o preço do cadastro. Nesses, mexer no
+// custo em modo A derruba o PREÇO DE VENDA de verdade — a Luva Nitrílica caiu de R$ 79,90
+// para R$ 3,99. A assinatura é simples: preço do cadastro IGUAL ao preço da tabela da praça.
+// Passe PRECO_PRACA=<valor pt-BR> para o script conferir antes de gravar.
+const precoPraca = process.env.PRECO_PRACA || null;
+if (precoPraca && !markup) {
+  const n = (v) => parseFloat(String(v || "").replace(/\./g, "").replace(",", "."));
+  if (Math.abs(n(antes.venda) - n(precoPraca)) <= 0.01) {
+    console.error(`ABORTADO: o preço do cadastro (${antes.venda}) é IGUAL ao da tabela da praça ` +
+      `(${precoPraca}) — este produto HERDA o preço. Em modo A o preço de venda cairia junto com ` +
+      `o custo. Rode com markup alvo, ou corrija o preço na tabela depois.`);
+    await ctx.close(); process.exit(21);
+  }
+}
 if (!markup) log("modo A (decidido em 27/08): sem markup alvo. O preço do CADASTRO vai se recalcular\n" +
   "         e virar um número qualquer — ele já era errado e L1/L4 vendem pela Tabela Altamira.\n" +
   "         A conferência que vale é a Tabela Altamira, feita depois do lote (confere_altamira.py).");
