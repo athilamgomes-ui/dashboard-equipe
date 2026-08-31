@@ -1672,6 +1672,15 @@ const HISTORICO_PREMIOS = {
     },
   },
   '2026-08': {
+    // S5 CONGELADA 31/08/2026 (fechou sab 29/08). Coleta FINAL 24-29/08 refeita hoje 14:40
+    // (cron_etapa1_vendas + coleta_cliente8): resultado IDENTICO ao do ultimo run de sabado
+    // (16:10) nas 4 lojas, vendedora por vendedora — delta zero. O sabado ja estava completo,
+    // diferente do que aconteceu na S4. Cliente 8 (R Maura) = zero nas 4 lojas (verificado).
+    // Meta REAL S5: L1=52500 L3=40500 L4=64500 L5=27500. NENHUMA loja atingiu os 70% da faixa
+    // minima, entao o pool e zero nas quatro — sem premio nesta semana e sem push pras lojas.
+    // L1 55,1% (MA 29,5%) · L3 43,8% · L4 39,8% · L5 64,2% (a mais perto: faltaram R$ 1.598).
+    // As metas da S5 vieram infladas pela redistribuicao do que faltava do mes (L4 pediu
+    // R$ 64.500 numa loja que vinha fazendo ~R$ 25 mil/semana). IMUTAVEL.
     // S1 CONGELADA 03/08/2026 (semana-toco de virada de mes: SO o sabado 01/08, 1 dia).
     // Coleta final de 01/08 refeita hoje (cron_etapa1_vendas + coleta_cliente8) — resultado
     // IDENTICO ao do fechamento, nada mudou. Cliente 8 (R Maura) = R$0 nas 4 lojas.
@@ -1695,36 +1704,36 @@ const HISTORICO_PREMIOS = {
     // L1 68,7% parou R$569 abaixo dos R$30.100 da faixa 70 · L3 39,5% · L4 50,5% (MA 31,2%,
     // mas bonus so vale a partir de 70% da meta). IMUTAVEL.
     L1: {
-      'Tatiane': {S1:53, S2:29, S3:31, S4:0},
-      'Rayra': {S1:21, S2:26, S3:18, S4:0},
-      'Sofia': {S1:18, S2:16, S3:12, S4:0},
-      'Bárbara': {S1:28, S2:29, S3:18, S4:0},
-      _em_pct: {S1:87, S2:85.1, S3:75.2,S4:68.7},
-      _pool:   {S1:120, S2:100, S3:80,S4:0},  // S1: faixa 80 (100) + bonus Marcas A (36,9%) · S2: faixa 80, sem bonus (MA 29,3%)
+      'Tatiane': {S1:53, S2:29, S3:31, S4:0, S5:0},
+      'Rayra': {S1:21, S2:26, S3:18, S4:0, S5:0},
+      'Sofia': {S1:18, S2:16, S3:12, S4:0, S5:0},
+      'Bárbara': {S1:28, S2:29, S3:18, S4:0, S5:0},
+      _em_pct: {S1:87, S2:85.1, S3:75.2,S4:68.7, S5:55.1},
+      _pool:   {S1:120, S2:100, S3:80,S4:0, S5:0},  // S1: faixa 80 (100) + bonus Marcas A (36,9%) · S2: faixa 80, sem bonus (MA 29,3%)
     },
     L3: {
-      'Ana Mira': {S1:0, S2:15, S3:0, S4:0},
-      'Raimunda': {S1:0, S2:28, S3:0, S4:0},
-      'Brunna': {S1:0, S2:16, S3:0, S4:0},
-      'Naila': {S1:0, S2:21, S3:0, S4:0},
-      _em_pct: {S1:33.7, S2:72.9, S3:51.7,S4:39.5},
-      _pool:   {S1:0, S2:80, S3:0,S4:0},  // S1: 33,7% da meta — abaixo de 70%, sem pool · S2: faixa 70 (MA 18,5%)
+      'Ana Mira': {S1:0, S2:15, S3:0, S4:0, S5:0},
+      'Raimunda': {S1:0, S2:28, S3:0, S4:0, S5:0},
+      'Brunna': {S1:0, S2:16, S3:0, S4:0, S5:0},
+      'Naila': {S1:0, S2:21, S3:0, S4:0, S5:0},
+      _em_pct: {S1:33.7, S2:72.9, S3:51.7,S4:39.5, S5:43.8},
+      _pool:   {S1:0, S2:80, S3:0,S4:0, S5:0},  // S1: 33,7% da meta — abaixo de 70%, sem pool · S2: faixa 70 (MA 18,5%)
     },
     L4: {
-      'Tanaia': {S1:0, S2:0, S3:0, S4:0},
-      'Josilene': {S1:123, S2:28, S3:0, S4:0},
-      'Bruna F.': {S1:97, S2:56, S3:0, S4:0},
-      'Débora': {S1:110, S2:36, S3:0, S4:0},
-      _em_pct: {S1:105, S2:83.7, S3:53.8,S4:50.5},
-      _pool:   {S1:330, S2:120, S3:0,S4:0},  // S1: faixa 100 (280) + bonus MA (32,7%) · S2: faixa 80 (100) + bonus MA (39,3%)
+      'Tanaia': {S1:0, S2:0, S3:0, S4:0, S5:0},
+      'Josilene': {S1:123, S2:28, S3:0, S4:0, S5:0},
+      'Bruna F.': {S1:97, S2:56, S3:0, S4:0, S5:0},
+      'Débora': {S1:110, S2:36, S3:0, S4:0, S5:0},
+      _em_pct: {S1:105, S2:83.7, S3:53.8,S4:50.5, S5:39.8},
+      _pool:   {S1:330, S2:120, S3:0,S4:0, S5:0},  // S1: faixa 100 (280) + bonus MA (32,7%) · S2: faixa 80 (100) + bonus MA (39,3%)
     },
     L5: {
-      'Rayssa': {S1:0, S2:17, S3:17, S4:14},
-      'Joyce': {S1:0, S2:27, S3:23, S4:30},
-      'Rosiene': {S1:0, S2:15, S3:20, S4:24},
-      'Karina': {S1:0, S2:21, S3:20, S4:32},
-      _em_pct: {S1:69.9, S2:77, S3:70.2,S4:82.7},
-      _pool:   {S1:0, S2:80, S3:80,S4:100},  // S1: R$5 abaixo da faixa 70 (R$3.500), sem pool · S2: faixa 70 (MA 21,6%)
+      'Rayssa': {S1:0, S2:17, S3:17, S4:14, S5:0},
+      'Joyce': {S1:0, S2:27, S3:23, S4:30, S5:0},
+      'Rosiene': {S1:0, S2:15, S3:20, S4:24, S5:0},
+      'Karina': {S1:0, S2:21, S3:20, S4:32, S5:0},
+      _em_pct: {S1:69.9, S2:77, S3:70.2,S4:82.7, S5:64.2},
+      _pool:   {S1:0, S2:80, S3:80,S4:100, S5:0},  // S1: R$5 abaixo da faixa 70 (R$3.500), sem pool · S2: faixa 70 (MA 21,6%)
     },
   },
 };
