@@ -1,0 +1,21 @@
+{
+  "fonte": "Microvix performance_por_vendedor Jan-Ago/2026 (8 meses)",
+  "coletado_em": "2026-08-28",
+  "obs": "ERP NAO guarda data de admissao das vendedoras (cadastro_funcionarios vazio). Datas reais so no administrativo. Aqui: quem vendeu no ano e saiu = rotatividade observada.",
+  "base_ativa": 16,
+  "saidas_trabalharam_de_fato": [
+    {"loja":"L1","nome":"Alcione","vendas":105890,"qtd":1319},
+    {"loja":"L1/L4","nome":"Rosana","vendas":87706,"qtd":1248,"nota":"desligada 04/07"},
+    {"loja":"L4","nome":"Emanuelle","vendas":33880,"qtd":547},
+    {"loja":"L4","nome":"Rayslan","vendas":33046,"qtd":460},
+    {"loja":"L5","nome":"Thalita Vitoria","vendas":19284,"qtd":211},
+    {"loja":"L3","nome":"Jaqueline Chagas","vendas":16717,"qtd":216},
+    {"loja":"L1","nome":"Fernanda Lohanny","vendas":12207,"qtd":176},
+    {"loja":"L4","nome":"Elianna","vendas":7171,"qtd":128,"nota":"desligada 23/06"}
+  ],
+  "saidas_breves": ["Geciane(92)","Luciana Sousa(83)","Gisele Pauleane(57)","Tarcila(2)","Alana Leticia(4)"],
+  "turnover_conservador_ano_pct": 75,
+  "turnover_amplo_ano_pct": 122,
+  "venda_media_ativa_mes": 19885,
+  "custo_repor_margem_rampa": {"margem_usada":0.30,"d30":3579,"d60":5369,"d90":6562}
+}

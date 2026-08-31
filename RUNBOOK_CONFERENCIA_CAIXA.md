@@ -753,3 +753,35 @@ marca `CONCLUIU=1`; `trap 'exit 143' TERM` e `trap 'exit 130' INT` fazem a inter
 Detalhe de teste: `pkill -f atualizar_caixa_diario.sh` **não** encerra a rotina na hora — o bash
 adia o trap enquanto espera um filho em primeiro plano, e o filho (`atualizar_conferencia_caixa.sh`)
 pode estar no `sleep 300` do próprio retry. Para encerrar de verdade, mate a árvore.
+
+## Falha também tem que avisar pelo WhatsApp (31/08/2026)
+
+A sessão da InfinitePay expirou em 29/08 e o Athila passou **três dias** (29, 30, 31) sem relatório
+e sem saber por quê. O ERP estava perfeito — quem caiu foi só a adquirente:
+
+```
+InfinitePay L1 · 2026-08-30
+❌ sessão da InfinitePay expirou. Refaça: node infinitepay_sessao.mjs login
+```
+
+O pipeline **avisava**: `avisar_falha()` disparava notificação do macOS e escrevia `ultimo_erro.txt`.
+Só que o Athila lê **WhatsApp**, não fica olhando a tela do Mac. Para quem está na loja, a rotina que
+não roda é indistinguível de um dia sem divergência: nos dois casos o telefone não toca.
+
+Agora `avisar_falha()` manda a falha pelo **mesmo canal** da conferência, com o motivo e a ação:
+
+```
+node aviso_caixa.mjs --falha="motivo" --acao="o que fazer" 2026-08-30
+```
+
+Reaproveita o template aprovado — a Meta exige texto fixo em volta das variáveis e não aceita texto
+livre fora da janela de 24h, então os quatro campos recebem motivo/ação em vez das divergências.
+Uma mensagem por dia no máximo (`AAAA-MM-DD.falha-avisada`), porque a rotina pode ser repetida à mão.
+
+⚠️ **A sessão da InfinitePay não se renova sozinha** — o login é QR Code lido no app do celular.
+Nenhum conserto de código evita isso; o que dá para garantir é que a expiração seja avisada **no
+mesmo dia**, e não descoberta três dias depois.
+
+Detalhe de implementação que quase passou: `--falha` na frente fazia `process.argv[3]` cair no
+`--acao=...` e a mensagem saía com "Conferência de caixa · o /o=". Posicionais e flags agora são
+separados, e a data é o primeiro posicional com cara de data.

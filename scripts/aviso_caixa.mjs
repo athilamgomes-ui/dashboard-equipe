@@ -214,12 +214,44 @@ export async function enviar(m, { canal } = {}) {
   throw new Error("não consegui avisar por nenhum canal → " + erros.join(" | "));
 }
 
+// ── aviso de FALHA ────────────────────────────────────────────────────────────
+// A conferência que não roda é tão importante quanto a que roda: entre 29 e 31/08/2026 a
+// sessão da InfinitePay expirou e o Athila passou TRÊS DIAS sem relatório e sem saber por
+// quê. O pipeline avisava só por notificação do macOS — que não serve para quem está na
+// loja, longe do Mac. O canal que ele lê é o WhatsApp, então a falha vai por ele também.
+// Reaproveita o template aprovado (a Meta exige texto fixo em volta das variáveis, não dá
+// para mandar texto livre fora da janela de 24h): os quatro campos recebem o motivo e a
+// ação, em vez das divergências.
+export function montarFalha(dia, motivo, acao) {
+  const linhas = ["❌ a conferência NÃO rodou", motivo, acao ? "→ " + acao : ""].filter(Boolean);
+  return {
+    titulo: "Conferência de caixa · " + dBR(dia),
+    linhas, painel: PAINEL,
+    whatsapp: [
+      dBR(dia),
+      "NÃO RODOU — " + motivo,
+      acao || "ver o log em ~/.claude/logs/caixa",
+      "nenhuma (a conferência do dia não existe)",
+    ],
+  };
+}
+
 if (import.meta.url === "file://" + process.argv[1]) {
-  const arq = process.argv[2];
-  const dia = process.argv[3] || new Date(Date.now() - 864e5).toISOString().slice(0, 10);
-  const canal = (process.argv.find(a => a.startsWith("--canal=")) || "").split("=")[1] || null;
-  if (!arq) { console.error("uso: node aviso_caixa.mjs resumos.json [2026-08-04] [--canal=whatsapp|telegram]"); process.exit(2); }
-  const m = montarLinhas(JSON.parse(fs.readFileSync(arq, "utf8")), dia);
+  // Posicionais e flags separados: com --falha na frente, o antigo process.argv[3]
+  // pegava o "--acao=..." como se fosse a data e a mensagem saía com "Conferência de
+  // caixa · o /o=". Data é o primeiro posicional que parece uma data.
+  const flag = n => { const a = process.argv.find(x => x.startsWith("--" + n + "=")); return a ? a.slice(n.length + 3) : null; };
+  const posicionais = process.argv.slice(2).filter(a => !a.startsWith("--"));
+  const arq = posicionais.find(a => /\.json$/i.test(a)) || null;
+  const dia = posicionais.find(a => /^\d{4}-\d{2}-\d{2}$/.test(a))
+           || new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+  const canal = flag("canal");
+  const falha = flag("falha");
+  const acao  = flag("acao");
+  if (!arq && !falha) { console.error("uso: node aviso_caixa.mjs resumos.json [2026-08-04] [--canal=whatsapp|telegram]\n     node aviso_caixa.mjs --falha=\"motivo\" [--acao=\"o que fazer\"] [dia]"); process.exit(2); }
+  const m = falha
+    ? montarFalha(dia, falha, acao)
+    : montarLinhas(JSON.parse(fs.readFileSync(arq, "utf8")), dia);
   console.log("── mensagem ──\n" + montarTexto(m) + "\n");
   enviar(m, { canal })
     .then(r => {

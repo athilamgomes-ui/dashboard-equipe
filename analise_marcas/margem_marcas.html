@@ -1,0 +1,568 @@
+<title>Margem real por marca</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#FBF8F9; --surface:#FFFFFF; --line:#E6DCE0; --line-forte:#D2C2C9;
+  --ink:#241C21; --ink-2:#5C4C54; --ink-3:#8A7680;
+  --accent:#7A2E52; --accent-suave:#F3E8ED;
+  --bom:#2E6B4F; --medio:#9A6318; --ruim:#A03040;
+  --bom-bg:#E4F0E9; --medio-bg:#F7ECDD; --ruim-bg:#F7E3E5;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#171114; --surface:#211A1E; --line:#342A2F; --line-forte:#4A3B42;
+  --ink:#F2E9ED; --ink-2:#BFAEB6; --ink-3:#8A7680;
+  --accent:#E39BBB; --accent-suave:#33202A;
+  --bom:#77C79D; --medio:#DDA95E; --ruim:#E58592;
+  --bom-bg:#1D2F26; --medio-bg:#332618; --ruim-bg:#331E22;
+}}
+:root[data-theme="dark"]{
+  --ground:#171114; --surface:#211A1E; --line:#342A2F; --line-forte:#4A3B42;
+  --ink:#F2E9ED; --ink-2:#BFAEB6; --ink-3:#8A7680;
+  --accent:#E39BBB; --accent-suave:#33202A;
+  --bom:#77C79D; --medio:#DDA95E; --ruim:#E58592;
+  --bom-bg:#1D2F26; --medio-bg:#332618; --ruim-bg:#331E22;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:56px 28px 88px;display:flex;flex-direction:column;gap:48px}
+h1{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:clamp(30px,4.5vw,44px);
+  line-height:1.1;margin:0;letter-spacing:-.015em;text-wrap:balance}
+.eyebrow{font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 14px}
+.sub{color:var(--ink-2);max-width:62ch;margin:16px 0 0}
+h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:23px;margin:0 0 6px;letter-spacing:-.01em}
+.sec{display:flex;flex-direction:column;gap:18px}
+.sec-intro{color:var(--ink-2);max-width:64ch;margin:0}
+.placar{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.placar div{background:var(--surface);padding:20px 22px}
+.placar .n{font-family:Fraunces,Georgia,serif;font-size:32px;font-weight:600;line-height:1;
+  font-variant-numeric:tabular-nums;display:block;margin-bottom:7px}
+.placar .l{font-size:12.5px;color:var(--ink-2);line-height:1.4}
+.tabela-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:660px}
+th{text-align:left;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+  font-weight:600;padding:13px 12px;border-bottom:1px solid var(--line-forte);white-space:nowrap;background:var(--surface)}
+td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.marca{font-weight:500;white-space:nowrap}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.liq{font-weight:600}
+.bom{color:var(--bom)} .medio{color:var(--medio)} .ruim{color:var(--ruim)}
+.st{color:var(--ink-3);font-size:12.5px}
+.barcel{width:120px;padding-right:16px}
+.bar{display:block;height:7px;background:var(--line);border-radius:1px;overflow:hidden}
+.bar-fill{display:block;height:100%;border-radius:1px}
+.b-bom{background:var(--bom)} .b-medio{background:var(--medio)} .b-ruim{background:var(--ruim)}
+.cv{text-align:center;font-weight:600;font-size:12px;width:34px}
+.cv-S{color:var(--accent)} .cv-A{color:var(--ink-2)} .cv-B{color:var(--ink-3)} .cv-none{color:var(--ink-3);opacity:.5}
+.cob{font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.c-ok{color:var(--ink-3)} .c-parc{color:var(--medio)} .c-nao{color:var(--ruim)}
+.cob-lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em}
+.linha-fraca .marca,.linha-fraca .num{opacity:.55}
+.callout{border-left:3px solid var(--accent);background:var(--accent-suave);padding:18px 22px;border-radius:0 3px 3px 0}
+.callout p{margin:0 0 10px} .callout p:last-child{margin:0}
+.lista{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.lista li{display:flex;gap:14px;align-items:baseline;padding:12px 16px;background:var(--surface);
+  border:1px solid var(--line);border-radius:3px;flex-wrap:wrap}
+.lista .nome{font-weight:600;min-width:150px}
+.lista .val{font-variant-numeric:tabular-nums;font-weight:600}
+.lista .por{color:var(--ink-2);font-size:13.5px;flex:1;min-width:220px}
+.legenda{font-size:12.5px;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:20px;
+  padding-top:6px;border-top:1px solid var(--line)}
+.nota{font-size:13px;color:var(--ink-2);border-top:1px solid var(--line);padding-top:22px;max-width:66ch}
+.nota strong{color:var(--ink)}
+.nota p{margin:0 0 10px} .nota p:last-child{margin:0}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">Grupo A.M. Gomes · junho a agosto de 2026</p>
+  <h1>Quais marcas realmente dão lucro</h1>
+  <p class="sub">Margem líquida por marca, calculada com o custo que veio na nota, o preço
+  que a loja realmente cobrou e a regra fiscal de cada produto — 21% no custo e imposto
+  zero quando é substituição tributária, custo cheio e 19% quando não é.</p>
+</header>
+
+<section class="sec">
+  <div class="placar">
+    <div><span class="n">20 de 38</span><span class="l">marcas passam dos 17% de lucro líquido</span></div>
+    <div><span class="n">62,7%</span><span class="l">do faturamento vem dessas marcas</span></div>
+    <div><span class="n">2 de 13</span><span class="l">marcas da curva S ficam abaixo dos 17%</span></div>
+  </div>
+</section>
+
+<section class="sec">
+  <h2>A curva de compras está quase toda certa</h2>
+  <p class="sec-intro">Das treze marcas que hoje têm prioridade máxima no orçamento, onze
+  entregam os 17% ou mais. Duas não — e uma delas por pouco.</p>
+  <ul class="lista">
+    <li><span class="nome">BEAUTY COLOR</span><span class="val medio">16,3%</span><span class="por">R$ 38.330 vendidos em três meses — está na linha, não abaixo dela</span></li>
+    <li><span class="nome">TRUSS</span><span class="val ruim">6,2%</span><span class="por">R$ 27.971 vendidos em três meses — bem abaixo do corte</span></li>
+  </ul>
+  <div class="callout">
+    <p><strong>Truss é o caso para decidir.</strong> R$ 27.971 vendidos a 6,2% de lucro líquido.
+    Não é caso de parar de vender: marca de salão puxa o profissional para dentro da loja e ele
+    compra outras coisas. É caso de <strong>comprar menos e renegociar o custo</strong>.</p>
+    <p><strong>Beauty Color a 16,3% fica onde está.</strong> A diferença para o corte é menor que
+    a margem de erro do próprio cálculo. Trocar a classificação por 0,7 ponto seria falsa precisão.</p>
+  </div>
+</section>
+
+<section class="sec">
+  <h2>O que está fora da curva e deveria entrar</h2>
+  <p class="sec-intro">Estas marcas passam dos 17% e não têm classificação nenhuma no orçamento
+  de compras — ou seja, ninguém está cuidando para que não faltem.</p>
+  <ul class="lista">
+    <li><span class="nome">APSE</span><span class="val bom">23,7%</span><span class="por">R$ 53.804 em três meses</span></li>
+    <li><span class="nome">KING BOLSAS</span><span class="val bom">38,3%</span><span class="por">R$ 7.096 em três meses</span></li>
+    <li><span class="nome">FOX</span><span class="val bom">46,1%</span><span class="por">R$ 6.225 em três meses</span></li>
+    <li><span class="nome">DONA PELE</span><span class="val bom">17,2%</span><span class="por">R$ 4.672 em três meses</span></li>
+  </ul>
+  <div class="callout">
+    <p><strong>Apse é a que pesa.</strong> Quarta maior marca do grupo entre as medidas,
+    R$ 53.804 em três meses a 23,7% de lucro — e sem lugar na curva.</p>
+  </div>
+</section>
+
+<section class="sec">
+  <h2>Todas as marcas</h2>
+  <p class="sec-intro">Ordenadas por faturamento. A coluna de cobertura diz quanto da venda
+  da marca entrou na conta: onde ela é baixa, o percentual de lucro vale pouco.</p>
+  <div class="tabela-wrap">
+    <table>
+      <thead><tr>
+        <th>Marca</th><th style="text-align:center">Curva</th><th class="num">Venda 3 meses</th>
+        <th class="num">Lucro líquido</th><th></th><th class="num">É ST</th><th class="num">Cobertura</th>
+      </tr></thead>
+      <tbody>
+<tr class="">
+    <td class="marca">ITALLIAN HAIR</td>
+    <td class="cv cv-S">S</td>
+    <td class="num">107.152</td>
+    <td class="num liq bom">50,1%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:100%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">98%</td>
+  </tr>
+<tr class="">
+    <td class="marca">APSE</td>
+    <td class="cv cv-none">—</td>
+    <td class="num">53.804</td>
+    <td class="num liq bom">23,7%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:47%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">WIDI CARE</td>
+    <td class="cv cv-S">S</td>
+    <td class="num">46.535</td>
+    <td class="num liq bom">20,2%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:40%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">NATUM PROFISSIONAL</td>
+    <td class="cv cv-S">S</td>
+    <td class="num">43.780</td>
+    <td class="num liq bom">42,5%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:85%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">97%</td>
+  </tr>
+<tr class="">
+    <td class="marca">BEAUTY COLOR</td>
+    <td class="cv cv-S">S</td>
+    <td class="num">38.330</td>
+    <td class="num liq medio">16,3%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:33%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">96%</td>
+  </tr>
+<tr class="">
+    <td class="marca">HAIR EXTRATTUS</td>
+    <td class="cv cv-S">S</td>
+    <td class="num">33.588</td>
+    <td class="num liq bom">23,5%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:47%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">99%</td>
+  </tr>
+<tr class="">
+    <td class="marca">LIZZE</td>
+    <td class="cv cv-A">A</td>
+    <td class="num">31.970</td>
+    <td class="num liq ruim">-0,1%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-ruim" style="width:2%"></span></span></td>
+    <td class="num st">0,0%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">TRUSS</td>
+    <td class="cv cv-S">S</td>
+    <td class="num">27.971</td>
+    <td class="num liq ruim">6,2%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-ruim" style="width:12%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">IGORA ROYAL</td>
+    <td class="cv cv-B">B</td>
+    <td class="num">27.291</td>
+    <td class="num liq medio">13,7%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:27%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="linha-fraca">
+    <td class="marca">SANTA CLARA</td>
+    <td class="cv cv-S">S</td>
+    <td class="num">26.215</td>
+    <td class="num liq bom">20,6%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:41%"></span></span></td>
+    <td class="num st">62,9%</td>
+    <td class="cob c-nao">24% <span class="cob-lbl">pouco</span></td>
+  </tr>
+<tr class="">
+    <td class="marca">FELPS</td>
+    <td class="cv cv-S">S</td>
+    <td class="num">24.921</td>
+    <td class="num liq bom">19,1%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:38%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">99%</td>
+  </tr>
+<tr class="">
+    <td class="marca">CBB</td>
+    <td class="cv cv-S">S</td>
+    <td class="num">20.678</td>
+    <td class="num liq bom">22,4%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:45%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">KISS NEW YORK</td>
+    <td class="cv cv-B">B</td>
+    <td class="num">20.538</td>
+    <td class="num liq medio">14,1%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:28%"></span></span></td>
+    <td class="num st">97,8%</td>
+    <td class="cob c-parc">63% <span class="cob-lbl">parcial</span></td>
+  </tr>
+<tr class="">
+    <td class="marca">KAMALEAO</td>
+    <td class="cv cv-B">B</td>
+    <td class="num">18.713</td>
+    <td class="num liq medio">13,4%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:27%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">MUNDIAL</td>
+    <td class="cv cv-A">A</td>
+    <td class="num">17.865</td>
+    <td class="num liq medio">11,9%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:24%"></span></span></td>
+    <td class="num st">96,6%</td>
+    <td class="cob c-ok">72%</td>
+  </tr>
+<tr class="">
+    <td class="marca">YAMÁ</td>
+    <td class="cv cv-S">S</td>
+    <td class="num">17.845</td>
+    <td class="num liq bom">17,7%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:35%"></span></span></td>
+    <td class="num st">97,9%</td>
+    <td class="cob c-ok">90%</td>
+  </tr>
+<tr class="">
+    <td class="marca">DEPIL BELLA</td>
+    <td class="cv cv-B">B</td>
+    <td class="num">17.077</td>
+    <td class="num liq medio">16,6%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:33%"></span></span></td>
+    <td class="num st">93,7%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">LET ME BE</td>
+    <td class="cv cv-A">A</td>
+    <td class="num">16.810</td>
+    <td class="num liq bom">34,7%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:69%"></span></span></td>
+    <td class="num st">98,5%</td>
+    <td class="cob c-ok">95%</td>
+  </tr>
+<tr class="">
+    <td class="marca">INOAR</td>
+    <td class="cv cv-B">B</td>
+    <td class="num">11.254</td>
+    <td class="num liq ruim">9,7%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-ruim" style="width:19%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">94%</td>
+  </tr>
+<tr class="">
+    <td class="marca">OTIMO BIJUTERIAS</td>
+    <td class="cv cv-A">A</td>
+    <td class="num">11.014</td>
+    <td class="num liq bom">24,8%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:50%"></span></span></td>
+    <td class="num st">34,1%</td>
+    <td class="cob c-parc">59% <span class="cob-lbl">parcial</span></td>
+  </tr>
+<tr class="">
+    <td class="marca">REPOS</td>
+    <td class="cv cv-B">B</td>
+    <td class="num">10.518</td>
+    <td class="num liq bom">27,3%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:54%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">81%</td>
+  </tr>
+<tr class="">
+    <td class="marca">PELO E PELE</td>
+    <td class="cv cv-none">—</td>
+    <td class="num">10.466</td>
+    <td class="num liq ruim">5,1%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-ruim" style="width:10%"></span></span></td>
+    <td class="num st">74,0%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">MARCO BONI</td>
+    <td class="cv cv-S">S</td>
+    <td class="num">10.387</td>
+    <td class="num liq medio">12,9%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:26%"></span></span></td>
+    <td class="num st">91,9%</td>
+    <td class="cob c-parc">64% <span class="cob-lbl">parcial</span></td>
+  </tr>
+<tr class="">
+    <td class="marca">NATHYDRAS</td>
+    <td class="cv cv-B">B</td>
+    <td class="num">9.767</td>
+    <td class="num liq bom">36,6%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:73%"></span></span></td>
+    <td class="num st">41,4%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">IMPALA</td>
+    <td class="cv cv-B">B</td>
+    <td class="num">9.645</td>
+    <td class="num liq medio">14,8%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:29%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">82%</td>
+  </tr>
+<tr class="">
+    <td class="marca">CLESS</td>
+    <td class="cv cv-none">—</td>
+    <td class="num">8.485</td>
+    <td class="num liq medio">15,3%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:31%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">98%</td>
+  </tr>
+<tr class="">
+    <td class="marca">LABOTRAT</td>
+    <td class="cv cv-none">—</td>
+    <td class="num">8.428</td>
+    <td class="num liq medio">16,0%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:32%"></span></span></td>
+    <td class="num st">94,8%</td>
+    <td class="cob c-ok">95%</td>
+  </tr>
+<tr class="">
+    <td class="marca">PROBELLE PROFISSIONAL</td>
+    <td class="cv cv-S">S</td>
+    <td class="num">8.422</td>
+    <td class="num liq bom">25,0%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:50%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">CADIVEU</td>
+    <td class="cv cv-A">A</td>
+    <td class="num">8.122</td>
+    <td class="num liq bom">27,7%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:55%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">97%</td>
+  </tr>
+<tr class="">
+    <td class="marca">KING BOLSAS</td>
+    <td class="cv cv-none">—</td>
+    <td class="num">7.096</td>
+    <td class="num liq bom">38,3%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:76%"></span></span></td>
+    <td class="num st">85,8%</td>
+    <td class="cob c-ok">71%</td>
+  </tr>
+<tr class="">
+    <td class="marca">VARCARE</td>
+    <td class="cv cv-B">B</td>
+    <td class="num">7.026</td>
+    <td class="num liq bom">34,2%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:68%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">DELLA E DELLE</td>
+    <td class="cv cv-none">—</td>
+    <td class="num">7.003</td>
+    <td class="num liq medio">15,5%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:31%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">94%</td>
+  </tr>
+<tr class="">
+    <td class="marca">SALON LINE</td>
+    <td class="cv cv-B">B</td>
+    <td class="num">6.975</td>
+    <td class="num liq medio">14,2%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:28%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">91%</td>
+  </tr>
+<tr class="">
+    <td class="marca">VIZZELA</td>
+    <td class="cv cv-A">A</td>
+    <td class="num">6.932</td>
+    <td class="num liq ruim">8,0%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-ruim" style="width:16%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-parc">64% <span class="cob-lbl">parcial</span></td>
+  </tr>
+<tr class="">
+    <td class="marca">PROBELLE VAREJO</td>
+    <td class="cv cv-S">S</td>
+    <td class="num">6.810</td>
+    <td class="num liq bom">25,2%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:50%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">MUTARI</td>
+    <td class="cv cv-B">B</td>
+    <td class="num">6.474</td>
+    <td class="num liq bom">30,8%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:61%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">89%</td>
+  </tr>
+<tr class="">
+    <td class="marca">RAAVI</td>
+    <td class="cv cv-B">B</td>
+    <td class="num">6.442</td>
+    <td class="num liq medio">12,3%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:25%"></span></span></td>
+    <td class="num st">97,1%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">ZGY</td>
+    <td class="cv cv-A">A</td>
+    <td class="num">6.265</td>
+    <td class="num liq medio">12,0%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:24%"></span></span></td>
+    <td class="num st">16,3%</td>
+    <td class="cob c-parc">70% <span class="cob-lbl">parcial</span></td>
+  </tr>
+<tr class="">
+    <td class="marca">FOX</td>
+    <td class="cv cv-none">—</td>
+    <td class="num">6.225</td>
+    <td class="num liq bom">46,1%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:92%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">99%</td>
+  </tr>
+<tr class="">
+    <td class="marca">SOFT HAIR</td>
+    <td class="cv cv-B">B</td>
+    <td class="num">5.908</td>
+    <td class="num liq medio">16,3%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:33%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">94%</td>
+  </tr>
+<tr class="">
+    <td class="marca">AMEND</td>
+    <td class="cv cv-none">—</td>
+    <td class="num">5.634</td>
+    <td class="num liq ruim">7,3%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-ruim" style="width:14%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">BAUNY</td>
+    <td class="cv cv-B">B</td>
+    <td class="num">5.103</td>
+    <td class="num liq medio">14,7%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-medio" style="width:29%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">DONA PELE</td>
+    <td class="cv cv-none">—</td>
+    <td class="num">4.672</td>
+    <td class="num liq bom">17,2%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:34%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+<tr class="">
+    <td class="marca">DEPILFLAX</td>
+    <td class="cv cv-A">A</td>
+    <td class="num">4.038</td>
+    <td class="num liq bom">18,8%</td>
+    <td class="barcel"><span class="bar"><span class="bar-fill b-bom" style="width:37%"></span></span></td>
+    <td class="num st">100%</td>
+    <td class="cob c-ok">100%</td>
+  </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="legenda">
+    <span><strong style="color:var(--accent)">S</strong> não pode faltar · <strong>A</strong> alta prioridade · <strong>B</strong> quando sobra espaço</span>
+    <span><strong style="color:var(--bom)">verde</strong> 17% ou mais · <strong style="color:var(--medio)">âmbar</strong> 10 a 17% · <strong style="color:var(--ruim)">vermelho</strong> abaixo de 10%</span>
+  </div>
+</section>
+
+<section class="sec">
+  <h2>Cadastro fiscal divergente</h2>
+  <p class="sec-intro">227 produtos têm NCM de substituição tributária mas estão
+  cadastrados como tributado integralmente, ou o contrário. Venderam R$ 42.511
+  em três meses.</p>
+  <div class="callout">
+    <p>Isso vale dinheiro nas duas direções: produto ST saindo com 19% destacado é imposto pago a mais,
+    produto tributado saindo como ST é o contrário. <strong>A correção precisa passar pelo contador</strong>,
+    conferida contra o Anexo XIII do RICMS-PA — o Convênio 142/2018 é a regra geral, não a do Pará.</p>
+  </div>
+</section>
+
+<div class="nota">
+  <p><strong>Como o custo foi apurado.</strong> O ERP tem duas colunas de custo e as duas têm defeito:
+  o custo da última compra traz o preço da embalagem (o pote de 250 clips por R$ 68) e o custo médio
+  está distorcido pelos balanços de junho. Cada produto foi checado nas duas: quando concordam, vale;
+  quando a razão entre elas é um número redondo, é embalagem; quando o custo médio está inflado, vale
+  o da nota. Onde nenhuma fecha, o produto ficou de fora — por isso a coluna de cobertura.</p>
+  <p><strong>O que ainda falta.</strong> Fornecedor do Pará não paga ST, e essa exceção não está
+  aplicada aqui porque o relatório não traz a origem por produto. Como quase toda a compra vem de
+  São Paulo, o efeito é pequeno, mas existe. Marcas com cobertura abaixo de 40% — Santa Clara à frente —
+  precisam de nova medição antes de servirem para decidir compra.</p>
+</div>
+</div>

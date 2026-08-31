@@ -1,0 +1,226 @@
+<title>Como você ganha e como você desconta</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter+Tight:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#FDFBF7; --surface:#FFFFFF; --surface-2:#F6F1E9; --line:#E4DACB; --line-forte:#CBBBA3;
+  --ink:#221D16; --ink-2:#5A4F41; --ink-3:#8B7F6D;
+  --accent:#8C4A20; --accent-2:#B86B33; --accent-suave:#F7EBDF;
+  --sim:#2F6446; --sim-bg:#E6F0E9; --nao:#9C3327; --nao-bg:#F8E7E4;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#16130F; --surface:#1F1B15; --surface-2:#282219; --line:#38301F; --line-forte:#54492F;
+  --ink:#F3EDE3; --ink-2:#C4B8A5; --ink-3:#8B7F6D;
+  --accent:#E0A268; --accent-2:#C98A4E; --accent-suave:#2A2015;
+  --sim:#7FC49C; --sim-bg:#1B2C22; --nao:#E58C7E; --nao-bg:#301D1A;
+}}
+:root[data-theme="dark"]{
+  --ground:#16130F; --surface:#1F1B15; --surface-2:#282219; --line:#38301F; --line-forte:#54492F;
+  --ink:#F3EDE3; --ink-2:#C4B8A5; --ink-3:#8B7F6D;
+  --accent:#E0A268; --accent-2:#C98A4E; --accent-suave:#2A2015;
+  --sim:#7FC49C; --sim-bg:#1B2C22; --nao:#E58C7E; --nao-bg:#301D1A;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"Inter Tight",-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:56px 26px 96px;display:flex;flex-direction:column;gap:56px}
+h1{font-family:Newsreader,Georgia,serif;font-weight:500;font-size:clamp(32px,5.5vw,50px);
+  line-height:1.08;margin:0;letter-spacing:-.02em;text-wrap:balance}
+h2{font-family:Newsreader,Georgia,serif;font-weight:500;font-size:clamp(24px,3.6vw,32px);
+  margin:0;letter-spacing:-.015em;line-height:1.2}
+h3{font-size:15px;font-weight:600;margin:0;letter-spacing:-.005em}
+p{margin:0}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 16px}
+.lead{font-family:Newsreader,Georgia,serif;font-size:20px;line-height:1.5;color:var(--ink-2);margin:20px 0 0;max-width:56ch}
+.parte{display:flex;flex-direction:column;gap:26px}
+.parte-topo{display:flex;flex-direction:column;gap:12px;padding-bottom:20px;border-bottom:2px solid var(--line-forte)}
+.parte-n{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.bloco{display:flex;flex-direction:column;gap:12px}
+.destaque{background:var(--accent-suave);border-left:3px solid var(--accent);padding:20px 24px;border-radius:0 4px 4px 0;display:flex;flex-direction:column;gap:12px}
+.destaque strong{color:var(--ink)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:22px 24px;display:flex;flex-direction:column;gap:14px}
+.condicao{display:flex;gap:16px;align-items:flex-start}
+.condicao .letra{font-family:Newsreader,Georgia,serif;font-size:34px;line-height:1;color:var(--accent);font-weight:600;min-width:30px}
+.condicao .txt{flex:1}
+.tabela-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:420px}
+th{text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  font-weight:600;padding:13px 16px;border-bottom:1px solid var(--line-forte);white-space:nowrap}
+td{padding:11px 16px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+.num-2{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--accent-2);font-weight:600}
+.zero{color:var(--ink-3);font-weight:400}
+.destaque-linha td{background:var(--surface-2)}
+.regra{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line)}
+.regra:last-child{border-bottom:none}
+.regra .marca{font-weight:600;min-width:190px}
+.regra .val{display:flex;gap:20px;flex-wrap:wrap;flex:1}
+.regra .val span{white-space:nowrap}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;letter-spacing:.01em}
+.p-sim{background:var(--sim-bg);color:var(--sim)}
+.p-nao{background:var(--nao-bg);color:var(--nao)}
+.lembrete{font-family:Newsreader,Georgia,serif;font-size:22px;line-height:1.45;color:var(--ink);
+  padding:26px 0;border-top:2px solid var(--line-forte);border-bottom:2px solid var(--line-forte);max-width:52ch}
+.pendente{background:var(--surface-2);border:1px dashed var(--line-forte);border-radius:4px;padding:16px 20px;font-size:14.5px;color:var(--ink-2)}
+.pendente strong{color:var(--accent)}
+ul{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px}
+li::marker{color:var(--accent-2)}
+.rodape{font-size:13.5px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:24px}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Grupo A.M. Gomes · vale para as quatro lojas</p>
+  <h1>Como você ganha e como você desconta</h1>
+  <p class="lead">Duas regras que todo mundo precisa saber de cor: o que faz o seu prêmio
+  subir, e até onde você pode ir no desconto.</p>
+</header>
+
+<section class="parte">
+  <div class="parte-topo">
+    <span class="parte-n">Parte um</span>
+    <h2>O seu prêmio</h2>
+  </div>
+
+  <div class="destaque">
+    <p><strong>Sobre a meta do mês da loja.</strong> Não existe um percentual pago por bater
+    a meta. O que existe é melhor do que isso, e quase ninguém está sabendo:</p>
+    <p><strong>quando a loja vai bem, o valor que você precisa vender para ganhar o prêmio
+    do mês cai de R$ 40 mil para R$ 31 mil.</strong> A meta da loja não paga uma porcentagem —
+    ela abaixa a régua para todas vocês.</p>
+  </div>
+
+  <div class="bloco">
+    <h3>Prêmio do mês — primeiro você precisa se qualificar</h3>
+    <div class="card">
+      <div class="condicao">
+        <span class="letra">A</span>
+        <span class="txt"><strong>A loja fez 90% ou mais da meta</strong> e você vendeu
+        R$ 31 mil ou mais. Você ganha.</span>
+      </div>
+      <div class="condicao">
+        <span class="letra">B</span>
+        <span class="txt"><strong>A loja ficou abaixo de 90%</strong>, mas você vendeu
+        R$ 40 mil sozinha. Você ganha assim mesmo.</span>
+      </div>
+    </div>
+    <p>Se não for nenhum dos dois casos, não há prêmio mensal naquele mês.</p>
+  </div>
+
+  <div class="bloco">
+    <h3>Qualificando, o valor vem do quanto você vendeu</h3>
+    <div class="tabela-wrap">
+      <table>
+        <thead><tr><th>Você vendeu no mês</th><th class="num">Prêmio</th><th class="num-2">Com 30%+ em Marcas A</th></tr></thead>
+        <tbody>
+          <tr><td>R$ 55 mil ou mais</td><td class="num">R$ 600</td><td class="num-2">R$ 650</td></tr>
+          <tr><td>R$ 50 mil</td><td class="num">R$ 500</td><td class="num-2">R$ 550</td></tr>
+          <tr><td>R$ 45 mil</td><td class="num">R$ 400</td><td class="num-2">R$ 450</td></tr>
+          <tr><td>R$ 40 mil</td><td class="num">R$ 300</td><td class="num-2">R$ 350</td></tr>
+          <tr><td>R$ 35 mil</td><td class="num">R$ 200</td><td class="num-2">R$ 250</td></tr>
+          <tr class="destaque-linha"><td>R$ 31 mil</td><td class="num">R$ 100</td><td class="num-2">R$ 150</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>O bônus de Marcas A do prêmio mensal olha <strong>as suas vendas</strong>: se 30% ou mais
+    do que você vendeu no mês foi Marca A, você sobe de faixa.</p>
+  </div>
+
+  <div class="bloco">
+    <h3>Prêmio da semana — a loja inteira junta</h3>
+    <p>Toda semana a loja gera um valor conforme o quanto fez da meta. Esse valor é dividido
+    entre vocês proporcionalmente ao que cada uma vendeu.</p>
+    <div class="tabela-wrap">
+      <table>
+        <thead><tr><th>A loja fez</th><th class="num">Valor da semana</th><th class="num-2">Com 30%+ em Marcas A</th></tr></thead>
+        <tbody>
+          <tr><td>120% ou mais da meta</td><td class="num">R$ 420</td><td class="num-2">R$ 470</td></tr>
+          <tr><td>110%</td><td class="num">R$ 350</td><td class="num-2">R$ 400</td></tr>
+          <tr><td>100%</td><td class="num">R$ 280</td><td class="num-2">R$ 330</td></tr>
+          <tr><td>90%</td><td class="num">R$ 180</td><td class="num-2">R$ 230</td></tr>
+          <tr><td>80%</td><td class="num">R$ 100</td><td class="num-2">R$ 120</td></tr>
+          <tr><td>70%</td><td class="num">R$ 80</td><td class="num-2">R$ 100</td></tr>
+          <tr><td>menos de 70%</td><td class="num zero">—</td><td class="num-2 zero">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Passando de 120%, ainda entram <strong>R$ 10 a cada 10 pontos</strong>: 130% da meta
+    vira R$ 430, 140% vira R$ 440, e assim por diante.</p>
+    <p>Aqui o bônus de Marcas A olha <strong>a loja toda</strong>, não cada uma
+    individualmente. É a única parte que depende de todo mundo junto.</p>
+  </div>
+
+  <p class="lembrete">Semana fechada não muda mais. O que foi calculado fica registrado como
+  está, mesmo que alguém entre ou saia da equipe depois.</p>
+</section>
+
+<section class="parte">
+  <div class="parte-topo">
+    <span class="parte-n">Parte dois</span>
+    <h2>O desconto</h2>
+  </div>
+
+  <div class="destaque">
+    <p><strong>Cliente sem cadastro não tem desconto.</strong> O desconto passou a ser uma
+    vantagem de quem está no clube.</p>
+    <p>Isso muda o que você fala. Não é mais "faz o cadastro que eu te dou desconto" —
+    é <strong>"esse preço é dos clientes cadastrados, quer entrar?"</strong></p>
+  </div>
+
+  <div class="bloco">
+    <h3>Até onde você pode ir</h3>
+    <div class="card">
+      <div class="regra">
+        <span class="marca">Regra geral</span>
+        <span class="val">
+          <span>cliente cadastrado <span class="pill p-sim">até 7%</span></span>
+          <span>profissional <span class="pill p-sim">até 15%</span></span>
+        </span>
+      </div>
+      <div class="regra">
+        <span class="marca">Marco Boni e Santa Clara</span>
+        <span class="val">
+          <span>cliente cadastrado <span class="pill p-nao">sem desconto</span></span>
+          <span>profissional <span class="pill p-sim">até 5%</span></span>
+        </span>
+      </div>
+      <div class="regra">
+        <span class="marca">Wella</span>
+        <span class="val">
+          <span>cliente cadastrado <span class="pill p-sim">5%</span></span>
+          <span>profissional <span class="pill p-sim">até 10%</span></span>
+        </span>
+      </div>
+      <div class="regra">
+        <span class="marca">Coloração e esmalteria</span>
+        <span class="val"><span class="pill p-nao">fora da tabela de desconto</span></span>
+      </div>
+    </div>
+    <p>Desconto acima disso, só quando a gestão comunicar uma promoção específica.
+    Nunca por conta própria.</p>
+  </div>
+
+  <p class="lembrete">O máximo não é o padrão. Sete por cento é o teto, não a régua.
+  Um cliente que não pediu desconto não precisa receber sete — pode receber três,
+  pode receber nenhum. O desconto serve para fechar a venda, não é um cumprimento.</p>
+
+  <div class="bloco">
+    <h3>Por que os limites são diferentes por marca</h3>
+    <p>Não é escolha aleatória. Cada marca deixa um lucro diferente para a loja, e
+    o teto de desconto respeita esse lucro. Marco Boni e Wella estão entre as de
+    margem mais apertada — poucos pontos de desconto ali consomem tudo o que sobra.</p>
+  </div>
+
+  <div class="pendente">
+    <strong>Falta definir:</strong> as gerentes liberam desconto em Marco Boni e Santa Clara
+    quando o profissional leva produto grande. Para virar regra, "grande" precisa de um valor —
+    acima de quanto? Enquanto não houver esse número, vale o limite de 5%.
+  </div>
+</section>
+
+<p class="rodape">Dúvida sobre um caso específico — cliente insistindo, compra grande fora
+do padrão, promoção de fornecedor — fale com a sua gerente antes de fechar. Nunca depois.</p>
+
+</div>

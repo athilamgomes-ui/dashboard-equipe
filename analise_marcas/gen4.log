@@ -1,0 +1,22 @@
+node:fs:436
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open '/Users/elkgomes/Desktop/claude/dashboard-equipe/analise_marcas/_gerador_loja.js'
+    at Object.readFileSync (node:fs:436:20)
+    at [stdin]:4:14
+    at runScriptInThisContext (node:internal/vm:219:10)
+    at node:internal/process/execution:483:12
+    at [stdin]-wrapper:6:24
+    at runScriptInContext (node:internal/process/execution:481:60)
+    at evalFunction (node:internal/process/execution:315:30)
+    at evalTypeScript (node:internal/process/execution:327:3)
+    at node:internal/main/eval_stdin:51:5
+    at ReadStream.<anonymous> (node:internal/process/execution:237:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/elkgomes/Desktop/claude/dashboard-equipe/analise_marcas/_gerador_loja.js'
+}
+
+Node.js v26.0.0

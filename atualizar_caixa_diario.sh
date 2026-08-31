@@ -38,8 +38,25 @@ DIA="${DIA:-$(date -v-1d +%Y-%m-%d)}"
 log(){ echo "[caixa-diario $(date +%H:%M:%S)] $*"; }
 
 avisar_falha(){                        # falha silenciosa é o pior modo de falhar
+  # $1 = motivo · $2 = o que fazer (opcional)
   /usr/bin/osascript -e "display notification \"${1:0:200}\" with title \"⚠️ Conferência de caixa\" sound name \"Basso\"" 2>/dev/null
   echo "[caixa-diario] $1" > $LOGDIR/ultimo_erro.txt
+
+  # ⚠️ NOTIFICAÇÃO DO MAC NÃO BASTA. Entre 29 e 31/08/2026 a sessão da InfinitePay expirou
+  # e o Athila passou TRÊS DIAS sem relatório sem saber por quê: ele lê WhatsApp, não fica
+  # olhando a tela do Mac. A conferência que NÃO rodou precisa avisar pelo mesmo canal da
+  # que roda — senão o silêncio é indistinguível de "está tudo bem".
+  # Uma mensagem por dia, no máximo: a rotina pode ser repetida à mão várias vezes.
+  local marca="$LOGDIR/$(date +%Y-%m-%d).falha-avisada"
+  if [ ! -f "$marca" ]; then
+    if $NODE "$SCRIPTS/aviso_caixa.mjs" --falha="$1" ${2:+--acao="$2"} "$DIA" \
+         >> "$HOJE_LOG-aviso-falha.log" 2>&1; then
+      touch "$marca"
+      log "  falha avisada no WhatsApp"
+    else
+      log "  ⚠️ nem o aviso de falha saiu (ver $HOJE_LOG-aviso-falha.log)"
+    fi
+  fi
 }
 
 # ── SE SOLTA DE QUEM CHAMOU ───────────────────────────────────────────────────
@@ -163,7 +180,7 @@ done
 if [ -n "$FALHAS" ]; then
   # Sessão expirada é o caso esperado: o acesso é por QR Code, não há re-login
   # automático possível. Avisa para alguém escanear — e segue com quem deu certo.
-  avisar_falha "InfinitePay falhou em:$FALHAS — provável sessão expirada (node infinitepay_sessao.mjs login)"
+  avisar_falha "InfinitePay: sessão expirada nas lojas$FALHAS — a conferência de $DIA não pôde ser feita" "no Mac, rode: node ~/Desktop/claude/dashboard-equipe/scripts/infinitepay_sessao.mjs login e escaneie o QR no app"
 fi
 if [ -z "$(ls -A "$ARQ"/*.csv 2>/dev/null)" ]; then
   log "ERRO: nenhum arquivo coletado — nada a conciliar"

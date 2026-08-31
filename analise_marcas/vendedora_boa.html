@@ -1,0 +1,266 @@
+<title>O que faz uma vendedora vender</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Archivo:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#FAF8F5; --surface:#FFFFFF; --surface-2:#F2EEE8; --line:#DFD8CE; --line-forte:#C0B4A5;
+  --ink:#1E1C19; --ink-2:#544E45; --ink-3:#847C70;
+  --accent:#1F5560; --accent-2:#2E7484; --accent-suave:#E4EEF0;
+  --alerta:#8A4A12; --alerta-bg:#F6EADC;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#141412; --surface:#1D1C1A; --surface-2:#262421; --line:#35322D; --line-forte:#4E4941;
+  --ink:#F0EDE7; --ink-2:#BEB6AA; --ink-3:#847C70;
+  --accent:#7FC3D0; --accent-2:#5FA9B8; --accent-suave:#17282C;
+  --alerta:#D69B5E; --alerta-bg:#2B2116;
+}}
+:root[data-theme="dark"]{
+  --ground:#141412; --surface:#1D1C1A; --surface-2:#262421; --line:#35322D; --line-forte:#4E4941;
+  --ink:#F0EDE7; --ink-2:#BEB6AA; --ink-3:#847C70;
+  --accent:#7FC3D0; --accent-2:#5FA9B8; --accent-suave:#17282C;
+  --alerta:#D69B5E; --alerta-bg:#2B2116;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:Archivo,-apple-system,BlinkMacSystemFont,sans-serif;font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
+.wrap{max-width:820px;margin:0 auto;padding:60px 26px 100px;display:flex;flex-direction:column;gap:60px}
+h1{font-family:Spectral,Georgia,serif;font-weight:500;font-size:clamp(32px,5.2vw,48px);line-height:1.1;margin:0;letter-spacing:-.02em;text-wrap:balance}
+h2{font-family:Spectral,Georgia,serif;font-weight:500;font-size:clamp(23px,3.4vw,30px);margin:0;letter-spacing:-.012em;line-height:1.22}
+h3{font-size:16px;font-weight:700;margin:0;letter-spacing:-.005em}
+h4{font-size:13px;font-weight:600;margin:0;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+p{margin:0}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:700;margin:0 0 15px}
+.lead{font-family:Spectral,Georgia,serif;font-size:20.5px;line-height:1.52;color:var(--ink-2);margin:20px 0 0;max-width:58ch}
+.sec{display:flex;flex-direction:column;gap:22px}
+.sec>p,.sec>ul{max-width:64ch}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:460px}
+th{text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:12px 14px;border-bottom:1px solid var(--line-forte);white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.forte{font-weight:600}
+.destaque{background:var(--accent-suave);border-left:3px solid var(--accent);padding:20px 24px;border-radius:0 3px 3px 0;display:flex;flex-direction:column;gap:12px}
+.alerta{background:var(--alerta-bg);border-left:3px solid var(--alerta);padding:20px 24px;border-radius:0 3px 3px 0;display:flex;flex-direction:column;gap:12px}
+.frase{font-family:Spectral,Georgia,serif;font-size:23px;line-height:1.42;padding:26px 0;border-top:2px solid var(--line-forte);border-bottom:2px solid var(--line-forte);max-width:50ch}
+.loja-bloco{display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
+.duas{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.cartao{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:20px 22px;display:flex;flex-direction:column;gap:10px}
+.cartao .quem{font-family:Spectral,Georgia,serif;font-size:21px;font-weight:600;color:var(--accent)}
+ul{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:9px}
+li::marker{color:var(--accent-2)}
+ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:12px}
+ol li::marker{color:var(--accent);font-weight:700}
+.fonte{font-size:13px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:22px;display:flex;flex-direction:column;gap:7px}
+.fonte a{color:var(--accent-2)}
+.rubrica{background:var(--surface);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.rubrica .item{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:5px}
+.rubrica .item:last-child{border-bottom:none}
+.rubrica .t{font-weight:600}
+.rubrica .d{font-size:14.5px;color:var(--ink-2)}
+.nota-rodape{font-size:14px;color:var(--ink-2);background:var(--surface-2);padding:18px 22px;border-radius:3px;max-width:66ch}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Documento interno · Áthila · agosto de 2026</p>
+  <h1>O que faz uma vendedora vender</h1>
+  <p class="lead">O que a pesquisa mostra, o que os números das quatro lojas medem, e o que
+  isso quer dizer para contratar e treinar. Este documento é para gestão — a versão para
+  as equipes é outra.</p>
+</header>
+
+<section class="sec">
+  <h2>A pesquisa: o que realmente prevê venda</h2>
+  <p>A meta-análise de referência sobre vendedores mediu traços contra <strong>venda real</strong>,
+  não contra a opinião do supervisor. A distinção importa, e o resultado é desconfortável.</p>
+  <div class="tw"><table>
+    <thead><tr><th>O que se mede</th><th class="n">Prevê venda real</th><th class="n">Prevê nota do chefe</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Achievement</strong> — sabe o objetivo e persegue até terminar</td><td class="n forte">0,41</td><td class="n">0,25</td></tr>
+      <tr><td><strong>Potency</strong> — assertividade, iniciativa</td><td class="n forte">0,26</td><td class="n">0,28</td></tr>
+      <tr><td>Inteligência geral</td><td class="n forte">0,04</td><td class="n">0,40</td></tr>
+    </tbody>
+  </table></div>
+  <div class="alerta">
+    <p><strong>Inteligência prevê venda em 0,04 — praticamente nada.</strong> Mas prevê a nota do
+    chefe em 0,40. Ou seja: a candidata articulada impressiona quem entrevista sem vender mais
+    por isso. É a armadilha número um de qualquer processo seletivo de vendas.</p>
+  </div>
+  <p><strong>Achievement</strong> é o preditor mais forte que existe — e é a descrição literal do
+  que já se observa na loja: saber para que se está ali, e cumprir. Não é simpatia, não é
+  facilidade de fala. É querer bater a própria meta.</p>
+  <p><strong>Grit</strong> — persistência diante da recusa — aparece em pesquisa mais recente
+  prevendo desempenho <em>e</em> reduzindo a intenção de sair. Num negócio que perdeu cinco
+  vendedoras boas em um semestre, isso seleciona para as duas coisas ao mesmo tempo.</p>
+</section>
+
+<section class="sec">
+  <h2>O que não funciona sozinho</h2>
+  <p>A escala que mede orientação ao cliente em vez de orientação à venda tem efeito
+  <strong>fraco: 0,14</strong>. E o motivo é conhecido: orientação ao cliente só vira resultado
+  quando existe <strong>técnica de venda junto</strong>.</p>
+  <p class="frase">"Atenda bem" não é treinamento. Uma vendedora pode atender muito bem
+  e não vender — ela só não sabe o que fazer com o atendimento.</p>
+</section>
+
+<section class="sec">
+  <h2>Os números da casa: três medidas, não uma</h2>
+  <p>Faturamento é resultado. O que a loja já mede todo dia e explica o resultado são
+  três coisas separadas — e elas se movem em direções diferentes.</p>
+  <ul>
+    <li><strong>Atendimentos</strong> — quantas clientes você pega para si</li>
+    <li><strong>Peças por atendimento</strong> — quantos itens você monta na venda</li>
+    <li><strong>Valor por peça</strong> — o quanto vale cada item que você vende</li>
+  </ul>
+  <div class="destaque">
+    <p><strong>O achado que contraria o senso comum:</strong> as vendedoras reconhecidas como
+    melhores colocam <em>menos</em> itens na sacola e faturam mais.</p>
+    <p>Média das citadas: ticket R$ 90, <strong>2,78 peças</strong>, R$ 32 por peça.<br>
+    Média das demais: ticket R$ 81, <strong>3,23 peças</strong>, R$ 25 por peça.</p>
+    <p>Elas não vendem mais coisas. Vendem <strong>coisas melhores</strong>.</p>
+  </div>
+  <p>Na Casa da Beleza Altamira, onde a diferença é mais nítida, a distância da primeira para a
+  última é de 46% no ticket mas <strong>77% no valor por peça</strong> — e a última é justamente
+  quem coloca mais peças na sacola. Ela monta compra grande em quantidade e pequena em valor.</p>
+<div class="loja-bloco">
+    <h4>Casa da Beleza Altamira</h4>
+    <div class="tw"><table><thead><tr><th>Vendedora</th><th class="n">Atendimentos</th><th class="n">Ticket</th><th class="n">Peças por atend.</th><th class="n">Valor por peça</th></tr></thead><tbody>
+      <tr><td>Tatiane</td><td class="n">2.492</td><td class="n forte">R$ 104</td><td class="n">3.04</td><td class="n forte">R$ 34</td></tr>
+      <tr><td>Rayra</td><td class="n">2.996</td><td class="n forte">R$ 95</td><td class="n">2.78</td><td class="n forte">R$ 34</td></tr>
+      <tr><td>Bárbara</td><td class="n">1.202</td><td class="n forte">R$ 88</td><td class="n">2.73</td><td class="n forte">R$ 32</td></tr>
+      <tr><td>Sofia</td><td class="n">1.192</td><td class="n forte">R$ 85</td><td class="n">2.71</td><td class="n forte">R$ 31</td></tr>
+      <tr><td>Alcione</td><td class="n">1.319</td><td class="n forte">R$ 80</td><td class="n">2.97</td><td class="n forte">R$ 27</td></tr>
+      <tr><td>Rosana</td><td class="n">741</td><td class="n forte">R$ 71</td><td class="n">3.69</td><td class="n forte">R$ 19</td></tr>
+    </tbody></table></div></div>
+<div class="loja-bloco">
+    <h4>Miss Beleza Altamira</h4>
+    <div class="tw"><table><thead><tr><th>Vendedora</th><th class="n">Atendimentos</th><th class="n">Ticket</th><th class="n">Peças por atend.</th><th class="n">Valor por peça</th></tr></thead><tbody>
+      <tr><td>Tanaia</td><td class="n">1.327</td><td class="n forte">R$ 88</td><td class="n">3.02</td><td class="n forte">R$ 29</td></tr>
+      <tr><td>Bruna</td><td class="n">3.923</td><td class="n forte">R$ 83</td><td class="n">2.67</td><td class="n forte">R$ 31</td></tr>
+      <tr><td>Josilene</td><td class="n">2.500</td><td class="n forte">R$ 82</td><td class="n">2.89</td><td class="n forte">R$ 28</td></tr>
+      <tr><td>Débora</td><td class="n">1.279</td><td class="n forte">R$ 79</td><td class="n">2.70</td><td class="n forte">R$ 29</td></tr>
+      <tr><td>Rayslan</td><td class="n">460</td><td class="n forte">R$ 72</td><td class="n">2.42</td><td class="n forte">R$ 30</td></tr>
+      <tr><td>Rosana</td><td class="n">507</td><td class="n forte">R$ 69</td><td class="n">3.11</td><td class="n forte">R$ 22</td></tr>
+      <tr><td>Emanuelle</td><td class="n">547</td><td class="n forte">R$ 62</td><td class="n">2.70</td><td class="n forte">R$ 23</td></tr>
+    </tbody></table></div></div>
+<div class="loja-bloco">
+    <h4>Miss Beleza Santarém</h4>
+    <div class="tw"><table><thead><tr><th>Vendedora</th><th class="n">Atendimentos</th><th class="n">Ticket</th><th class="n">Peças por atend.</th><th class="n">Valor por peça</th></tr></thead><tbody>
+      <tr><td>Rayssa</td><td class="n">1.739</td><td class="n forte">R$ 104</td><td class="n">3.73</td><td class="n forte">R$ 28</td></tr>
+      <tr><td>Joyce</td><td class="n">1.770</td><td class="n forte">R$ 98</td><td class="n">3.55</td><td class="n forte">R$ 28</td></tr>
+      <tr><td>Rosiene</td><td class="n">1.474</td><td class="n forte">R$ 95</td><td class="n">3.44</td><td class="n forte">R$ 28</td></tr>
+      <tr><td>Karina</td><td class="n">872</td><td class="n forte">R$ 90</td><td class="n">3.60</td><td class="n forte">R$ 25</td></tr>
+    </tbody></table></div></div>
+<div class="loja-bloco">
+    <h4>Casa da Beleza Itaituba</h4>
+    <div class="tw"><table><thead><tr><th>Vendedora</th><th class="n">Atendimentos</th><th class="n">Ticket</th><th class="n">Peças por atend.</th><th class="n">Valor por peça</th></tr></thead><tbody>
+      <tr><td>Raimunda</td><td class="n">1.677</td><td class="n forte">R$ 79</td><td class="n">3.62</td><td class="n forte">R$ 22</td></tr>
+      <tr><td>Naila</td><td class="n">1.451</td><td class="n forte">R$ 77</td><td class="n">3.44</td><td class="n forte">R$ 22</td></tr>
+      <tr><td>Ana Mira</td><td class="n">1.873</td><td class="n forte">R$ 76</td><td class="n">3.49</td><td class="n forte">R$ 22</td></tr>
+      <tr><td>Brunna W.</td><td class="n">1.039</td><td class="n forte">R$ 71</td><td class="n">3.35</td><td class="n forte">R$ 21</td></tr>
+    </tbody></table></div></div>
+</section>
+
+<section class="sec">
+  <h2>Existem dois caminhos, e eles pedem cobranças diferentes</h2>
+  <div class="duas">
+    <div class="cartao">
+      <span class="quem">O caminho do volume</span>
+      <p>Bruna e Josilene têm <strong>ticket praticamente igual</strong> — R$ 83 contra R$ 82.
+      A Bruna fatura 59% mais porque atende 57% mais gente, na mesma escala de trabalho.</p>
+      <p>Não é que ela venda melhor por atendimento. Ela <strong>pega mais atendimentos</strong>.
+      Isso é iniciativa, não oportunidade.</p>
+    </div>
+    <div class="cartao">
+      <span class="quem">O caminho do valor</span>
+      <p>Tatiane tem o maior ticket da empresa, R$ 104, com R$ 34 por peça. Tanaia tem o melhor
+      ticket da Miss, R$ 88, com poucos atendimentos.</p>
+      <p>Aqui o que decide é <strong>qual item entra na sacola</strong> — e a capacidade de
+      sustentar o produto de maior valor sem recorrer ao desconto.</p>
+    </div>
+  </div>
+  <p>A conversa com cada uma muda conforme o caminho. Com quem tem ticket alto e poucos
+  atendimentos, cobra-se abordagem. Com quem atende muito e fecha barato, cobra-se produto.
+  Cobrar "aumente o ticket médio" de todas trata problemas diferentes com a mesma frase.</p>
+</section>
+
+<section class="sec">
+  <h2>O caso do protetor solar</h2>
+  <p>A vendedora e a gerente pediram redução de preço porque a farmácia vende o mesmo item a
+  R$ 39 e a loja pedia R$ 63. Outra vendedora disse que não precisava — que vendia naquele preço.</p>
+  <p class="frase">Quem não domina o valor do produto negocia pelo preço. O desconto é o
+  instrumento de quem não tem argumento.</p>
+  <p>O efeito não fica na venda dela: um pedido de redução atendido derruba a margem para
+  a loja inteira, em todas as vendas daquele item, inclusive as de quem venderia sem desconto.</p>
+</section>
+
+<section class="sec">
+  <h2>Contratação: o que já se faz certo</h2>
+  <p>O processo usado em junho — dez candidatas, teste escrito, apresentação de um produto à
+  escolha para três avaliadores, e montagem de venda composta a partir de um produto sorteado —
+  é uma <strong>amostra de trabalho</strong>.</p>
+  <div class="destaque">
+    <p>Amostra de trabalho tem validade de <strong>0,54</strong> na meta-análise clássica
+    (0,33 em reanálise posterior). Entrevista estruturada: 0,42 a 0,51.
+    Entrevista comum, de conversa: <strong>0,19</strong>.</p>
+    <p>É o instrumento do topo da lista. E a tarefa da venda composta testa exatamente
+    o que os números mostram que separa as melhores.</p>
+  </div>
+  <h3>Três ajustes que aumentam a precisão sem mudar o formato</h3>
+  <ol>
+    <li><strong>Ficha de pontuação preenchida na hora, por cada avaliador, antes de conversarem.</strong>
+    Quando três pessoas discutem antes de anotar, a primeira opinião contamina as outras duas e
+    o que parecia três avaliações vira uma.</li>
+    <li><strong>Rever o teste escrito.</strong> Boa parte das candidatas tem escolaridade baixa,
+    e a pesquisa mostra que inteligência geral prevê venda em 0,04. Um teste escrito pode estar
+    eliminando boa vendedora por uma habilidade que não prevê venda. Se o objetivo é ver
+    raciocínio, vale fazer as mesmas cinco perguntas <strong>faladas</strong>.</li>
+    <li><strong>Anotar o que aconteceu, não só quem passou.</strong> Guardar as notas das dez
+    permite, daqui a um ano, comparar a nota com a venda real e descobrir quais critérios
+    de fato previram. Sem isso, não há como melhorar o processo.</li>
+  </ol>
+  <h3>O que pontuar na venda composta</h3>
+  <div class="rubrica">
+    <div class="item"><span class="t">Perguntou antes de oferecer</span><span class="d">Descobriu para quem é, como usa, o que já usou — ou saiu falando do produto</span></div>
+    <div class="item"><span class="t">Complementou com o que faz sentido</span><span class="d">O segundo item tem relação de uso com o primeiro, ou é só mais um item</span></div>
+    <div class="item"><span class="t">Sustentou o produto de maior valor</span><span class="d">Ofereceu o melhor e defendeu o porquê, ou foi direto para o mais barato</span></div>
+    <div class="item"><span class="t">Falou do produto com segurança</span><span class="d">Sabe o que o produto faz, para que serve, para quem serve</span></div>
+    <div class="item"><span class="t">Fechou</span><span class="d">Conduziu para a decisão, ou ficou esperando o cliente decidir sozinho</span></div>
+    <div class="item"><span class="t">Recorreu ao preço</span><span class="d">Ofereceu desconto por conta própria como primeiro recurso — sinal negativo</span></div>
+  </div>
+</section>
+
+<section class="sec">
+  <h2>O que isso muda no treinamento</h2>
+  <ul>
+    <li><strong>Treinar produto, não simpatia.</strong> A diferença entre R$ 34 e R$ 19 por peça
+    é conhecimento do que está na prateleira. Quem não conhece, vende o barato — é o único que
+    consegue explicar.</li>
+    <li><strong>Cobrar abordagem de quem atende pouco.</strong> Mesma escala, mesmas horas: a
+    diferença de atendimentos é de quem vai buscar a cliente que entrou.</li>
+    <li><strong>Tratar pedido de desconto como sinal.</strong> Quando a vendedora pede redução
+    de preço, o que falta quase sempre é argumento de produto, não preço competitivo.</li>
+    <li><strong>Onde a equipe é homogênea, o problema não é a equipe.</strong> Em Santarém e
+    Itaituba a diferença entre a primeira e a última é de 11% a 16% — lá o ganho vem do que
+    está na prateleira, não de quem atende.</li>
+  </ul>
+</section>
+
+<div class="nota-rodape">
+  <strong>Limites deste documento.</strong> Os números cobrem janeiro a 26 de agosto de 2026 e
+  descrevem correlação, não causa — não provam que vender item mais caro <em>causa</em> bom
+  desempenho, apenas que andam juntos. As correlações da pesquisa vêm de meta-análises
+  internacionais, em contextos de venda diferentes do varejo de beleza no interior do Pará.
+  Servem para orientar decisão, não para substituir observação.
+</div>
+
+<div class="fonte">
+  <span>Vinchur, Schippmann et al. — <em>A Meta-Analytic Review of Predictors of Job Performance for Salespeople</em></span>
+  <span>Schmidt &amp; Hunter — <em>The Validity and Utility of Selection Methods in Personnel Psychology</em></span>
+  <span>McDaniel et al. — <em>The Validity of Employment Interviews</em></span>
+  <span>Saxe &amp; Weitz — <em>The SOCO Scale</em>; Franke &amp; Park — meta-análise SOCO</span>
+  <span>Journal of Business-to-Business Marketing — <em>The Role of Grit in the Selling Process</em></span>
+</div>
+
+</div>

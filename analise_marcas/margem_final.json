@@ -1,0 +1,2138 @@
+{
+ "diag": {
+  "ok": 7831,
+  "pack": 198,
+  "veneno": 39,
+  "semCusto": 72,
+  "semNCM": 1447,
+  "descartado": 398
+ },
+ "marcas": [
+  {
+   "m": "ITALLIAN HAIR",
+   "rec": 104647.51999999987,
+   "liq": 0.5012581859560558,
+   "stPct": 1,
+   "n": 409
+  },
+  {
+   "m": "APSE",
+   "rec": 53803.86000000002,
+   "liq": 0.2370938780228777,
+   "stPct": 1,
+   "n": 194
+  },
+  {
+   "m": "WIDI CARE",
+   "rec": 46423.20000000005,
+   "liq": 0.20230873270261407,
+   "stPct": 1,
+   "n": 189
+  },
+  {
+   "m": "NATUM PROFISSIONAL",
+   "rec": 42609.130000000005,
+   "liq": 0.42519578151443127,
+   "stPct": 1,
+   "n": 241
+  },
+  {
+   "m": "BEAUTY COLOR",
+   "rec": 36956.830000000075,
+   "liq": 0.16327614273193847,
+   "stPct": 1,
+   "n": 481
+  },
+  {
+   "m": "HAIR EXTRATTUS",
+   "rec": 33376.690000000024,
+   "liq": 0.23476162884935564,
+   "stPct": 1,
+   "n": 256
+  },
+  {
+   "m": "LIZZE",
+   "rec": 31823.629999999997,
+   "liq": -0.0014006469406538484,
+   "stPct": 0,
+   "n": 11
+  },
+  {
+   "m": "TRUSS",
+   "rec": 27970.82000000002,
+   "liq": 0.062170834820001665,
+   "stPct": 1,
+   "n": 82
+  },
+  {
+   "m": "IGORA ROYAL",
+   "rec": 27290.89,
+   "liq": 0.1371343774424359,
+   "stPct": 1,
+   "n": 76
+  },
+  {
+   "m": "FELPS",
+   "rec": 24606.570000000003,
+   "liq": 0.19058699891939437,
+   "stPct": 1,
+   "n": 135
+  },
+  {
+   "m": "CBB",
+   "rec": 20628.949999999993,
+   "liq": 0.22418975323513804,
+   "stPct": 1,
+   "n": 104
+  },
+  {
+   "m": "KAMALEAO",
+   "rec": 18713.080000000013,
+   "liq": 0.13377246556953734,
+   "stPct": 1,
+   "n": 98
+  },
+  {
+   "m": "DEPIL BELLA",
+   "rec": 17076.620000000006,
+   "liq": 0.16568725485488345,
+   "stPct": 0.9371023071310358,
+   "n": 185
+  },
+  {
+   "m": "YAMÁ",
+   "rec": 16026.990000000002,
+   "liq": 0.17702132465297588,
+   "stPct": 0.9789517557570073,
+   "n": 143
+  },
+  {
+   "m": "LET ME BE",
+   "rec": 15889.549999999996,
+   "liq": 0.34731089426698697,
+   "stPct": 0.9851298494922763,
+   "n": 48
+  },
+  {
+   "m": "KISS NEW YORK",
+   "rec": 12983.949999999995,
+   "liq": 0.14074746745019823,
+   "stPct": 0.9779111903542451,
+   "n": 80
+  },
+  {
+   "m": "MUNDIAL",
+   "rec": 12874.749999999996,
+   "liq": 0.11916308122487805,
+   "stPct": 0.96601099050467,
+   "n": 120
+  },
+  {
+   "m": "INOAR",
+   "rec": 10597.98,
+   "liq": 0.09674567794994904,
+   "stPct": 0.994159264312633,
+   "n": 102
+  },
+  {
+   "m": "PELO E PELE",
+   "rec": 10425.619999999997,
+   "liq": 0.05113807620074405,
+   "stPct": 0.7395512209345827,
+   "n": 144
+  },
+  {
+   "m": "NATHYDRAS",
+   "rec": 9766.679999999995,
+   "liq": 0.3660084552785595,
+   "stPct": 0.413568377381055,
+   "n": 35
+  },
+  {
+   "m": "REPOS",
+   "rec": 8477.340000000002,
+   "liq": 0.27289419676455107,
+   "stPct": 1,
+   "n": 62
+  },
+  {
+   "m": "PROBELLE PROFISSIONAL",
+   "rec": 8421.939999999997,
+   "liq": 0.2500232381137841,
+   "stPct": 1,
+   "n": 73
+  },
+  {
+   "m": "CLESS",
+   "rec": 8293.039999999999,
+   "liq": 0.15336527136008024,
+   "stPct": 1,
+   "n": 118
+  },
+  {
+   "m": "LABOTRAT",
+   "rec": 7989.649999999996,
+   "liq": 0.16037999161415079,
+   "stPct": 0.9479664315708451,
+   "n": 137
+  },
+  {
+   "m": "IMPALA",
+   "rec": 7931.539999999985,
+   "liq": 0.14761845997120382,
+   "stPct": 0.9948332858436068,
+   "n": 448
+  },
+  {
+   "m": "CADIVEU",
+   "rec": 7876.179999999999,
+   "liq": 0.2766582975503352,
+   "stPct": 1,
+   "n": 56
+  },
+  {
+   "m": "VARCARE",
+   "rec": 7025.689999999999,
+   "liq": 0.342099496277234,
+   "stPct": 0.9994306609030572,
+   "n": 21
+  },
+  {
+   "m": "PROBELLE VAREJO",
+   "rec": 6810.209999999995,
+   "liq": 0.25233174601076946,
+   "stPct": 1,
+   "n": 104
+  },
+  {
+   "m": "MARCO BONI",
+   "rec": 6599.8499999999985,
+   "liq": 0.12863926149836744,
+   "stPct": 0.9191360409706283,
+   "n": 93
+  },
+  {
+   "m": "DELLA E DELLE",
+   "rec": 6581.02,
+   "liq": 0.15506855168347763,
+   "stPct": 1,
+   "n": 41
+  },
+  {
+   "m": "OTIMO BIJUTERIAS",
+   "rec": 6551.12,
+   "liq": 0.24837875966247006,
+   "stPct": 0.3412927865769518,
+   "n": 181
+  },
+  {
+   "m": "RAAVI",
+   "rec": 6442.449999999999,
+   "liq": 0.12297921287708868,
+   "stPct": 0.9709225527555512,
+   "n": 69
+  },
+  {
+   "m": "SANTA CLARA",
+   "rec": 6354.749999999992,
+   "liq": 0.20615870805303146,
+   "stPct": 0.6291120815138297,
+   "n": 163
+  },
+  {
+   "m": "SALON LINE",
+   "rec": 6343.549999999999,
+   "liq": 0.1418898582024261,
+   "stPct": 1,
+   "n": 117
+  },
+  {
+   "m": "FOX",
+   "rec": 6179.849999999999,
+   "liq": 0.4613774379637047,
+   "stPct": 1,
+   "n": 62
+  },
+  {
+   "m": "MUTARI",
+   "rec": 5735.459999999998,
+   "liq": 0.3078738078549933,
+   "stPct": 1,
+   "n": 47
+  },
+  {
+   "m": "AMEND",
+   "rec": 5634.37,
+   "liq": 0.07265682764887649,
+   "stPct": 1,
+   "n": 80
+  },
+  {
+   "m": "SOFT HAIR",
+   "rec": 5527.519999999998,
+   "liq": 0.16348904029293443,
+   "stPct": 1,
+   "n": 93
+  },
+  {
+   "m": "BAUNY",
+   "rec": 5102.590000000001,
+   "liq": 0.14713567815560327,
+   "stPct": 1,
+   "n": 86
+  },
+  {
+   "m": "KING BOLSAS",
+   "rec": 5024.83,
+   "liq": 0.38304244919728636,
+   "stPct": 0.8577384707542345,
+   "n": 13
+  },
+  {
+   "m": "DONA PELE",
+   "rec": 4671.8200000000015,
+   "liq": 0.17219089348476613,
+   "stPct": 1,
+   "n": 20
+  },
+  {
+   "m": "VIZZELA",
+   "rec": 4449.47,
+   "liq": 0.0801768772460541,
+   "stPct": 1,
+   "n": 34
+  },
+  {
+   "m": "ZGY",
+   "rec": 4377.22,
+   "liq": 0.12043698054929841,
+   "stPct": 0.16270144064040643,
+   "n": 73
+  },
+  {
+   "m": "DEPILFLAX",
+   "rec": 4037.920000000001,
+   "liq": 0.1878281862939335,
+   "stPct": 1,
+   "n": 54
+  }
+ ],
+ "fiscalErrado": [
+  {
+   "cod": "80155",
+   "desc": "PRANCHA LIZZE FUSION 480 127V",
+   "ncm": "85163200",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 8604.05
+  },
+  {
+   "cod": "58209",
+   "desc": "HENNA CASTANHO ESCURO DELLA & DELLE 1,5G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 935.11
+  },
+  {
+   "cod": "18397",
+   "desc": "HENNA CASTANHO ESCURO DELLA & DELLE 8G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 804.7
+  },
+  {
+   "cod": "18398",
+   "desc": "HENNA CASTANHO ESCURO DELLA & DELLE 3G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 772.1600000000001
+  },
+  {
+   "cod": "203832",
+   "desc": "REFIL ATIVADOR ANTI-FRIZZ CACHOS APICE 500ml",
+   "ncm": "33059000",
+   "cadastro": "- -",
+   "deveria": "ST",
+   "rec": 770.4300000000001
+  },
+  {
+   "cod": "9147",
+   "desc": "HAIR SPRAY CH FIX FORTE 400ML CLESS",
+   "ncm": "33053000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 762.4000000000001
+  },
+  {
+   "cod": "80200",
+   "desc": "GELATINA ATIVADORA ULTRA NUTRITIVA PHYTOMANGA - WIDI CARE - 300",
+   "ncm": "33059000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 752.3699999999999
+  },
+  {
+   "cod": "202907",
+   "desc": "BLINDANDO A JUBA CREME PARA PENTEAR ESCUDO ANTIUMIDADE E ANTIFRIZ",
+   "ncm": "33059000",
+   "cadastro": "- -",
+   "deveria": "ST",
+   "rec": 721.6800000000001
+  },
+  {
+   "cod": "58210",
+   "desc": "HENNA CASTANHO MEDIO DELLA & DELLE 1,5G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 693.48
+  },
+  {
+   "cod": "202908",
+   "desc": "BLINDANDO A JUBA MASCARA ESCUDO ANTIUMIDADE E ANTIFRIZZ - WD - 30",
+   "ncm": "33059000",
+   "cadastro": "- -",
+   "deveria": "ST",
+   "rec": 679.02
+  },
+  {
+   "cod": "30652",
+   "desc": "AGUA OXIGENADA BELA E COR BEAUTY COLOR VL30 1L",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 671.23
+  },
+  {
+   "cod": "55876",
+   "desc": "DBELLA DOLOMITA CORPORAL E FACIAL 800G",
+   "ncm": "25181000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 612.62
+  },
+  {
+   "cod": "18399",
+   "desc": "HENNA CASTANHO MEDIO DELLA E DELLE 3G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 584.62
+  },
+  {
+   "cod": "30651",
+   "desc": "AGUA OXIGENADA BELA E COR BEAUTY COLOR VL20 1L",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 520.49
+  },
+  {
+   "cod": "3426",
+   "desc": "PAPEL P/ DEPILAÇAO ROLO 50M",
+   "ncm": "56039290",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 501.44999999999993
+  },
+  {
+   "cod": "202910",
+   "desc": "BLINDANDO A JUBA SHAMPOO ESCUDO ANTIUMIDADE E ANTIFRIZZ - WD - 30",
+   "ncm": "33051000",
+   "cadastro": "- -",
+   "deveria": "ST",
+   "rec": 490.64
+  },
+  {
+   "cod": "12154",
+   "desc": "OX 30 BEAUTY COLOR 1L",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 481.23
+  },
+  {
+   "cod": "58208",
+   "desc": "HENNA CASTANHO CLARO DELLA & DELLE 1,5G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 479.07
+  },
+  {
+   "cod": "12153",
+   "desc": "OX 20 BEAUTY COLOR 1L",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 454.52000000000004
+  },
+  {
+   "cod": "9115",
+   "desc": "BOTOX OJON JAPINHA 300G",
+   "ncm": "33059000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 452.78
+  },
+  {
+   "cod": "202165",
+   "desc": "DBELLA FOLHAS PRONTAS SOB 20 FLS",
+   "ncm": "33072090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 446.27
+  },
+  {
+   "cod": "58211",
+   "desc": "HENNA PRETA DELLA E DELLE 1,5G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 445.24
+  },
+  {
+   "cod": "9148",
+   "desc": "HAIR SPRAY CH FORTE S/PERF CLESS 400ML",
+   "ncm": "33053000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 439.86
+  },
+  {
+   "cod": "20110",
+   "desc": "HENNA PRETA DELLA E DELLE 3G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 426.47
+  },
+  {
+   "cod": "203719",
+   "desc": "MASCARA PIGMENTANTE CACHORRO CARAMELO 100 ML KAMALEAO COLOR",
+   "ncm": "33059000",
+   "cadastro": "- -",
+   "deveria": "ST",
+   "rec": 422.4
+  },
+  {
+   "cod": "41734",
+   "desc": "ESCOVA PARA BARBA MARCO BONI",
+   "ncm": "82121010",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 412.89
+  },
+  {
+   "cod": "12149",
+   "desc": "OX 20 BEAUTY COLOR 67,5ML",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 406.62
+  },
+  {
+   "cod": "10649",
+   "desc": "HAIR SPRAY TRIVITT 300ML",
+   "ncm": "33053000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 402.77
+  },
+  {
+   "cod": "14407",
+   "desc": "HSPRAY NORMAL CARE LISS 400ML",
+   "ncm": "33053000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 387.05999999999995
+  },
+  {
+   "cod": "202164",
+   "desc": "DBELLA REFIL PINK PITAYA DEO 100G",
+   "ncm": "33072090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 387
+  },
+  {
+   "cod": "74838",
+   "desc": "HENNA CASTANHO CLARO DELLA & DELLE 3G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 381.43
+  },
+  {
+   "cod": "202594",
+   "desc": "KIT GLANCE HENNA MINI CASTANHO ESCURO 1,5 G",
+   "ncm": "33042010",
+   "cadastro": "- -",
+   "deveria": "ST",
+   "rec": 381.08
+  },
+  {
+   "cod": "11296",
+   "desc": "DUO DE PINÇAS MUNDIAL BC-391",
+   "ncm": "82032090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 379.89
+  },
+  {
+   "cod": "202595",
+   "desc": "KIT GLANCE HENNA MINI CASTANHO MEDIO 1,5 G",
+   "ncm": "33042010",
+   "cadastro": "- -",
+   "deveria": "ST",
+   "rec": 379.36
+  },
+  {
+   "cod": "7512",
+   "desc": "HAIR SPRAY FORTE CARE LISS CLESS 400ML",
+   "ncm": "33053000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 376.85
+  },
+  {
+   "cod": "9116",
+   "desc": "BOTOX OJOIN JAPINHA 1KG",
+   "ncm": "33059000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 368.58000000000004
+  },
+  {
+   "cod": "12151",
+   "desc": "OX 40 BEAUTY COLOR 67,5ML",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 365.8
+  },
+  {
+   "cod": "202906",
+   "desc": "BLINDANDO A JUBA CONDICIONADOR ESCUDO ANTIUMIDADE E ANTIFRIZZ - W",
+   "ncm": "33059000",
+   "cadastro": "- -",
+   "deveria": "ST",
+   "rec": 356.12
+  },
+  {
+   "cod": "12152",
+   "desc": "OX 10 BEAUTY COLOR 1L",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 344.59999999999997
+  },
+  {
+   "cod": "30653",
+   "desc": "AGUA OXIGENADA BELA E COR BEAUTY COLOR VL40 1L",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 338.62
+  },
+  {
+   "cod": "12155",
+   "desc": "OX 40 BEAUTY COLOR 1L",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 318.82
+  },
+  {
+   "cod": "61367",
+   "desc": "BRUMA FACIAL FIXADORA GLASS HB343 RUBYROSE",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 301.29999999999995
+  },
+  {
+   "cod": "202162",
+   "desc": "DBELLA CERA HIDROSSOLUVEL ALGODAO DOCE 600 G",
+   "ncm": "33072090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 281.51
+  },
+  {
+   "cod": "30650",
+   "desc": "AGUA OXIGENADA BELA E COR VL 10 1L",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 280.35
+  },
+  {
+   "cod": "3463",
+   "desc": "MOUSSE GLOSS CHARMING 140ML",
+   "ncm": "33053000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 275.12
+  },
+  {
+   "cod": "17063",
+   "desc": "CONJ COLAR COLOR",
+   "ncm": "71132000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 268.95
+  },
+  {
+   "cod": "62866",
+   "desc": "PAPEL DEPILACAO ROLO C/440 FLS",
+   "ncm": "56039290",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 263.52
+  },
+  {
+   "cod": "65178",
+   "desc": "HENNA PRETO INTENSO 1,5G DELLA E DELLE",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 253.04000000000002
+  },
+  {
+   "cod": "15815",
+   "desc": "CILIOS CANTO 3 PARES",
+   "ncm": "39269090",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 252.3
+  },
+  {
+   "cod": "52706",
+   "desc": "ESMALTE PARA UNHAS 10ML",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 238.8
+  },
+  {
+   "cod": "18396",
+   "desc": "HENNA CASTANHO MEDIO DELLA & DELLE 8G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 233.38
+  },
+  {
+   "cod": "30648",
+   "desc": "AGUA OXIGENADA BELA E COE BEAUTY COLOR 70 ML 30VOL",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 229.15000000000003
+  },
+  {
+   "cod": "12148",
+   "desc": "OX 10 BEAUTY COLOR 67,5ML",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 225.45000000000002
+  },
+  {
+   "cod": "80154",
+   "desc": "MASCARA PIGMENTANTE RAPOSINHA 60G KAMALEAO COLOR",
+   "ncm": "33059000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 210.04999999999998
+  },
+  {
+   "cod": "12150",
+   "desc": "OX 30 BEAUTY COLOR 67,5ML",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 201.67000000000002
+  },
+  {
+   "cod": "43497",
+   "desc": "KIT SHAMPOO E CONDICIONADOR TUTANO JAPINHA 500ml",
+   "ncm": "33051000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 198.28
+  },
+  {
+   "cod": "15816",
+   "desc": "CILIOS DE CANTO",
+   "ncm": "39269090",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 186.91000000000003
+  },
+  {
+   "cod": "202163",
+   "desc": "DBELLA CERA HIDROSSOLUVEL ALGODAO DOCE 1,3 kg",
+   "ncm": "33072090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 186.54
+  },
+  {
+   "cod": "11294",
+   "desc": "DUO DE PINÇAS MUNDIAL BC-408",
+   "ncm": "82032090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 177.29999999999998
+  },
+  {
+   "cod": "7509",
+   "desc": "HAIR SPRAY NORMAL CHARMING 400ML",
+   "ncm": "33053000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 175.8
+  },
+  {
+   "cod": "15009",
+   "desc": "PIRANHA GRANDE LAÇO",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 171.3
+  },
+  {
+   "cod": "30649",
+   "desc": "AGUA OXIGENADA BELA E COR BEAUTY COLOR 70 ML 40VOL",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 168.67000000000002
+  },
+  {
+   "cod": "30647",
+   "desc": "AGUA OXIGENADA BELA E COR BEAUTY COLOR 70 ML 20VOL",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 168.36
+  },
+  {
+   "cod": "6808",
+   "desc": "BUCHA VEGETAL NATURAL P/BANHO",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 166.41
+  },
+  {
+   "cod": "74837",
+   "desc": "HENNA PRETO INTENSO 8G DELLA E DELLE",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 165.8
+  },
+  {
+   "cod": "2697",
+   "desc": "BRINCO FLOR DE LINHA",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 163.28
+  },
+  {
+   "cod": "79672",
+   "desc": "2 PRESILHAS DE METAL E 1 RABICO DE POLIESTER",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 162.9
+  },
+  {
+   "cod": "2655",
+   "desc": "CINTO OTIMOS 2",
+   "ncm": "42022220",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 162.47
+  },
+  {
+   "cod": "17058",
+   "desc": "COLAR DOURADO PREGO",
+   "ncm": "71132000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 160.41
+  },
+  {
+   "cod": "74834",
+   "desc": "HENNA CASTANHO CLARO DELLA & DELLE 8G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 158.66
+  },
+  {
+   "cod": "77684",
+   "desc": "UNHA OTIMOS CAIXA",
+   "ncm": "49089000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 156.94
+  },
+  {
+   "cod": "54499",
+   "desc": "KIT LA BENIG FIXADOR 10ML/HENNA CAST MEDIO 3G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 149.7
+  },
+  {
+   "cod": "57065",
+   "desc": "CHARMING H.SPRAY FORTE 150ML",
+   "ncm": "33053000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 144.98999999999998
+  },
+  {
+   "cod": "202185",
+   "desc": "COLAR PEROLAS PEQUENAS - ZGY",
+   "ncm": "71171900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 144
+  },
+  {
+   "cod": "62499",
+   "desc": "RAAVI SABONETE LIQUIDO FACIAL 150 ML",
+   "ncm": "34012090",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 141.20000000000002
+  },
+  {
+   "cod": "40822",
+   "desc": "AGUA OXIGENADA BELA E COR BEAUTY COLOR 70 ML 10VO",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 132.78
+  },
+  {
+   "cod": "11726",
+   "desc": "ALGODAO DISCO PADRAO 50 UND RICCA",
+   "ncm": "56012110",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 130.32
+  },
+  {
+   "cod": "13777",
+   "desc": "ESMALTE IMPALA BAILARINA PLIE CREMOSO",
+   "ncm": "33043000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 126.16
+  },
+  {
+   "cod": "50085",
+   "desc": "ESCOVA P/ CILIOS - PACOTE C/ 50 UNID",
+   "ncm": "96033000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 125.73
+  },
+  {
+   "cod": "6701",
+   "desc": "CONJ PINCAS PROF MUNDIAL",
+   "ncm": "82032090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 122
+  },
+  {
+   "cod": "202828",
+   "desc": "DBELLA ROLO DESCARTAVEL 50MTS",
+   "ncm": "56031190",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 117.72
+  },
+  {
+   "cod": "54495",
+   "desc": "KIT LA BENIG FIXADOR 10ML/HENNA CAST CLARO 1,5G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 116.69999999999999
+  },
+  {
+   "cod": "202596",
+   "desc": "KIT GLANCE HENNA MINI PRETO 1,5 G",
+   "ncm": "33042010",
+   "cadastro": "- -",
+   "deveria": "ST",
+   "rec": 116.69999999999999
+  },
+  {
+   "cod": "54497",
+   "desc": "KIT LA BENIG FIXADOR 10ML/HENNA MARROM 1,5G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 116.41999999999999
+  },
+  {
+   "cod": "40686",
+   "desc": "ELASTICO",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 113.58
+  },
+  {
+   "cod": "203846",
+   "desc": "OLEO DE AMENDOAS 100ML",
+   "ncm": "15159090",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 112.22
+  },
+  {
+   "cod": "202160",
+   "desc": "PA1920|DBELLA CERA HIDRO. MELANCIA 600 G",
+   "ncm": "33072090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 111.14999999999999
+  },
+  {
+   "cod": "1958",
+   "desc": "BRACELETE",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 109.92
+  },
+  {
+   "cod": "10264",
+   "desc": "BRINCO DE PRESSAO",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 109.58
+  },
+  {
+   "cod": "11287",
+   "desc": "PINÇA PONTA RETA BC-383 MUNDIAL",
+   "ncm": "82032090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 107.49999999999999
+  },
+  {
+   "cod": "51097",
+   "desc": "PULSEIRA PEROLA",
+   "ncm": "91021110",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 107.2
+  },
+  {
+   "cod": "50242",
+   "desc": "DAPPING",
+   "ncm": "70139190",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 104.16000000000001
+  },
+  {
+   "cod": "203505",
+   "desc": "ARGILA BRANCA 500G LABOTRAT",
+   "ncm": "25070010",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 96.03
+  },
+  {
+   "cod": "5025",
+   "desc": "BRINCO ZGY",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 94.5
+  },
+  {
+   "cod": "52193",
+   "desc": "ESPELHO COM MOLDURA DE PLASTICO",
+   "ncm": "42021900",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 94.5
+  },
+  {
+   "cod": "7900",
+   "desc": "BRINCO COM DETALHE EM PEDRAS - ZGY",
+   "ncm": "71171900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 93.25999999999999
+  },
+  {
+   "cod": "16276",
+   "desc": "PARAF TERMICA DBELLA 350G",
+   "ncm": "27122000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 91.8
+  },
+  {
+   "cod": "65176",
+   "desc": "HENNA CASTANHO MEDIO DELLA & DELLE 3G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 89.8
+  },
+  {
+   "cod": "203455",
+   "desc": "BRINCO DE METAL - DAFU",
+   "ncm": "71171900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 84.5
+  },
+  {
+   "cod": "49991",
+   "desc": "ESCOVA ROSA CERDAS BR.P/UNHAS",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 82.11999999999999
+  },
+  {
+   "cod": "9843",
+   "desc": "COLA CILIOS 48H INCOLOR RUBY KISSES",
+   "ncm": "35061090",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 81.2
+  },
+  {
+   "cod": "49942",
+   "desc": "DOSADOR ACETONA C/P.ALGODAO RS",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 80.91
+  },
+  {
+   "cod": "777",
+   "desc": "BRINCO",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 79.92
+  },
+  {
+   "cod": "204133",
+   "desc": "GARNIER HID FACIAL 85G ANTIMANCHAS",
+   "ncm": "33049910",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 79.61
+  },
+  {
+   "cod": "49029",
+   "desc": "PULSEIRA V16",
+   "ncm": "91021900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 74.5
+  },
+  {
+   "cod": "5517",
+   "desc": "CAPA TINTURA S/M DESC C/6 UN SANTA CLARA",
+   "ncm": "39262000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 71.38
+  },
+  {
+   "cod": "41276",
+   "desc": "BRINCO S6",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 69.26
+  },
+  {
+   "cod": "77275",
+   "desc": "KS imPRESS Toenails - Lustre White",
+   "ncm": "39269090",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 66.9
+  },
+  {
+   "cod": "49405",
+   "desc": "BICARBONATO DE SODIO 200G - PELO E PELE",
+   "ncm": "33012990",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 64.86000000000001
+  },
+  {
+   "cod": "79331",
+   "desc": "BISNAGA GEL AFRICA BAOBA 50g - APICE",
+   "ncm": "33059000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 63.8
+  },
+  {
+   "cod": "65135",
+   "desc": "DESENCRAVADOR DUP.INOX SIL.CUT",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 63.6
+  },
+  {
+   "cod": "15004",
+   "desc": "PULSEIRA 07",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 59.699999999999996
+  },
+  {
+   "cod": "52618",
+   "desc": "OLEO ESSENCIAL DE ALECRIM 10ML LABOTRAT",
+   "ncm": "33019010",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 56.9
+  },
+  {
+   "cod": "27683",
+   "desc": "CONJUNTO DE BRINCOS PEDRINHAS COM 3 PARES - ZGY",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 56.42999999999999
+  },
+  {
+   "cod": "57069",
+   "desc": "CARE LISS H SPRAY NORMAL 150ML",
+   "ncm": "33053000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 55.42
+  },
+  {
+   "cod": "11799",
+   "desc": "LAMINA BARBEAR ENOX BELLIZ",
+   "ncm": "82122010",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 54.11
+  },
+  {
+   "cod": "65177",
+   "desc": "HENNA PRETO INTENSO 3G DELLA E DELLE",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 53.9
+  },
+  {
+   "cod": "204121",
+   "desc": "BWY 5D CILIOS SINTETICOS MULTIPACK - 01",
+   "ncm": "67041900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 53.9
+  },
+  {
+   "cod": "64869",
+   "desc": "LAMINA DE BARBEAR DUPLO FIO ENOX SUPER (4 UNID)",
+   "ncm": "82122010",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 53.66
+  },
+  {
+   "cod": "41040",
+   "desc": "COLAR COLOR",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 51.72
+  },
+  {
+   "cod": "52622",
+   "desc": "OLEO ESSENCIAL DE CRAVO 10ML LABOTRAT",
+   "ncm": "33019010",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 51.21
+  },
+  {
+   "cod": "45565",
+   "desc": "BUCHA VEGETAL MISTA P/BANHO",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 49.5
+  },
+  {
+   "cod": "44232",
+   "desc": "BRINCO 69",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 49
+  },
+  {
+   "cod": "12550",
+   "desc": "BACIA AZUL PEDICURE-347 ST CLARA",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 48.059999999999995
+  },
+  {
+   "cod": "65543",
+   "desc": "CREME PARA RACHADURA NATURAL 90g - PELO E PELE",
+   "ncm": "33019010",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 47.8
+  },
+  {
+   "cod": "202182",
+   "desc": "COLAR FOLHEADO COM PEROLAS ALONGADAS TRANSPARENTE - ZGY",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 47.8
+  },
+  {
+   "cod": "30178",
+   "desc": "ESPELHO OTIMOS GLITER",
+   "ncm": "70099200",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 47.7
+  },
+  {
+   "cod": "65022",
+   "desc": "OXIDANTE 30 VOL FELPS 90ML",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 47.43
+  },
+  {
+   "cod": "79433",
+   "desc": "RAAVI SABONETE ACIDO GLICOLICO 10% 250 ML",
+   "ncm": "34012090",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 46.13
+  },
+  {
+   "cod": "56034",
+   "desc": "LEAVE IN ATV ACIDO HIAL HYALUR LIGHT CR SOULPOWER PRO 315ML",
+   "ncm": "33059000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 45.9
+  },
+  {
+   "cod": "79650",
+   "desc": "1 PIRANHA DE PLASTICO 1 RABICO DE POLIESTER E 1 TIARA - DAFU",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 45.7
+  },
+  {
+   "cod": "202780",
+   "desc": "ESMALTE IMPALA A COR DA MODA TRANSPARENTE DISCRETO COMERCIAL",
+   "ncm": "33043000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 45.67
+  },
+  {
+   "cod": "47650",
+   "desc": "ELASTICO PARA CABELO C/ 2UN COLORIDO - HP887-1",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 45.32000000000001
+  },
+  {
+   "cod": "203847",
+   "desc": "OLEO DE GIRASSOL 100ML",
+   "ncm": "15159090",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 45.02
+  },
+  {
+   "cod": "203127",
+   "desc": "brinco 10a",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 44.7
+  },
+  {
+   "cod": "20677",
+   "desc": "ELASTICO P CABELO 2UN PRETO- HP887-2",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 44.15
+  },
+  {
+   "cod": "79044",
+   "desc": "RK CONTOUR POP STICK FRAPPE POP",
+   "ncm": "94037000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 43.9
+  },
+  {
+   "cod": "28430",
+   "desc": "ESPONJA - DAFU",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 41.79
+  },
+  {
+   "cod": "203457",
+   "desc": "BRINCO DE METAL COMUM LATAO",
+   "ncm": "71171900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 41.7
+  },
+  {
+   "cod": "202181",
+   "desc": "COLAR PEROLAS DOURADO/PRATA E BRANCO - ZGY",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 41.41
+  },
+  {
+   "cod": "53187",
+   "desc": "PINCA INOX NEON PONTA RETA RICCA (EM POTE)",
+   "ncm": "82032090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 41.400000000000006
+  },
+  {
+   "cod": "8813",
+   "desc": "COLAR DE METAL",
+   "ncm": "49111090",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 41.24
+  },
+  {
+   "cod": "59910",
+   "desc": "CILIOS KNY THE NEW NATURAL TRIO 01",
+   "ncm": "67041900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 40.9
+  },
+  {
+   "cod": "18504",
+   "desc": "DOSADOR TR.MOD.VENEZA 190ML",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 40.870000000000005
+  },
+  {
+   "cod": "48497",
+   "desc": "TONICO DE ALHO 28ML LABOTRAT",
+   "ncm": "33019010",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 40.18
+  },
+  {
+   "cod": "41414",
+   "desc": "ELASTICO",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 38.15
+  },
+  {
+   "cod": "50472",
+   "desc": "OLEO CORPORAL DE ROSA MOSQUETA 120ML LABOTRAT",
+   "ncm": "33012990",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 38
+  },
+  {
+   "cod": "7632",
+   "desc": "BACIA PEDICURE CITRICAS 1682",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 37
+  },
+  {
+   "cod": "59542",
+   "desc": "CHARMING H.SPRAY NORMAL 150ML",
+   "ncm": "33053000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 36.9
+  },
+  {
+   "cod": "203453",
+   "desc": "BRINCO DE METAL PEDRA DE VIDRO - DAFU",
+   "ncm": "71171900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 36.41
+  },
+  {
+   "cod": "79570",
+   "desc": "DF-UNPA-03-UNHA POSTICA DE PLASTICO - MARCA: DAFU - PACOTE COM 24",
+   "ncm": "39269090",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 36
+  },
+  {
+   "cod": "15309",
+   "desc": "ESMALTE EM GEL BRILHO 10ML - HJ1099-61",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 35.8
+  },
+  {
+   "cod": "57146",
+   "desc": "ESPATULA/RASPADOR INOX P/CUTICULA",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 34.8
+  },
+  {
+   "cod": "58334",
+   "desc": "APARELHO DE BARBEAR MASCULINO EXPERT",
+   "ncm": "82121020",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 34.5
+  },
+  {
+   "cod": "15321",
+   "desc": "COLAR CORRENTE GRANDE COM DETALHE EM BRILHO - G01-866982-C",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 33.87
+  },
+  {
+   "cod": "203125",
+   "desc": "BRINCO-LUYZ",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 33.64
+  },
+  {
+   "cod": "13149",
+   "desc": "CORTADOR DE UNHA MAO MISTO BC-159M COLORS MUNDIAL",
+   "ncm": "00000000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 32.7
+  },
+  {
+   "cod": "79644",
+   "desc": "DF7-GT23-CONJUNTO UNHA (1 DECORACAO PARA UNHA E 1 APLICADOR)",
+   "ncm": "39269090",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 31.64
+  },
+  {
+   "cod": "27612",
+   "desc": "COLAR COM CORRENTE DUPLA PIGENTE RETANGULAR SIMPLES - ZGY",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 30.9
+  },
+  {
+   "cod": "77693",
+   "desc": "BRINCO",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 30
+  },
+  {
+   "cod": "56731",
+   "desc": "OIL ARGAN FELPS 7ML",
+   "ncm": "33012990",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 29.8
+  },
+  {
+   "cod": "65134",
+   "desc": "ESPATULA/RASPADOR INOX SIL.CUTILA",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 29.8
+  },
+  {
+   "cod": "46937",
+   "desc": "BORRIFADOR DE PLASTICO 600ML 2557 C/ 120",
+   "ncm": "96161000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 29.700000000000003
+  },
+  {
+   "cod": "63455",
+   "desc": "ESCOVA PLAST.MAFE CAB.S/EMB.",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 29.400000000000002
+  },
+  {
+   "cod": "45581",
+   "desc": "AMOLECEDOR CUT.LAPSAN 30 ML.",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 29.22
+  },
+  {
+   "cod": "54501",
+   "desc": "KIT LA BENIG FIXADOR 10ML/HENNA PRETO 3G",
+   "ncm": "12119090",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 27.96
+  },
+  {
+   "cod": "57068",
+   "desc": "CARE LISS H SPRAY FORTE 150ML",
+   "ncm": "33053000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 27.9
+  },
+  {
+   "cod": "41058",
+   "desc": "ANEL PLASTICO C/ RESERVATORIO",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 26.700000000000003
+  },
+  {
+   "cod": "27653",
+   "desc": "ANEL 3 GOTAS - F35-279423B",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 26.58
+  },
+  {
+   "cod": "2689",
+   "desc": "CONJUNTO BRINCO DE METAL",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 25
+  },
+  {
+   "cod": "28466",
+   "desc": "CONJUNTO ESPONJAS SUPORTE E 1 ESCOVA DE MASSAGEM FACIAL",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 24.9
+  },
+  {
+   "cod": "202183",
+   "desc": "COLAR DIVERSO COM PIGENTE - ZGY",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 24.9
+  },
+  {
+   "cod": "79610",
+   "desc": "DF-UNPT12-2-UNHA POSTICA DE PLASTICO",
+   "ncm": "39269090",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 24
+  },
+  {
+   "cod": "202177",
+   "desc": "COLAR 04 - ZGY",
+   "ncm": "71171900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 23.9
+  },
+  {
+   "cod": "76882",
+   "desc": "ESCOVA PRT.C/CERDAS BR.P/UNHAS",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 23.700000000000003
+  },
+  {
+   "cod": "54641",
+   "desc": "DOSADOR ACETONA C/P.ALG.LILAS",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 22.9
+  },
+  {
+   "cod": "12545",
+   "desc": "BACIA ANAT ROSA MANICURE ST CLARA",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 22.700000000000003
+  },
+  {
+   "cod": "75584",
+   "desc": "BICO DE PATO ACRILICO - HP1346",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 22.270000000000003
+  },
+  {
+   "cod": "12555",
+   "desc": "BACIA ANAT PRT MANICURE ST CLARA",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 22.01
+  },
+  {
+   "cod": "10604",
+   "desc": "BORRIFADOR",
+   "ncm": "00000000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 21.51
+  },
+  {
+   "cod": "2712",
+   "desc": "BRINCO LISO",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 20.9
+  },
+  {
+   "cod": "27678",
+   "desc": "ANEL COM FENDA E PEDRINHAS - F34-325621M",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 19.8
+  },
+  {
+   "cod": "56993",
+   "desc": "COPO DE VIDRO - DAFU",
+   "ncm": "70133700",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 19.6
+  },
+  {
+   "cod": "11043",
+   "desc": "ALGODAO CARD HID NATHY 25G BOLA",
+   "ncm": "52030000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 19.5
+  },
+  {
+   "cod": "7896",
+   "desc": "CAVIAR P/ JOIAS DE UNHAS 0.8 - OY1394-1",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 19.32
+  },
+  {
+   "cod": "7897",
+   "desc": "FITA MICROPOLE OLHOS P/ ALONGAMNETO DE CILIOS - BZH127 9",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 18.66
+  },
+  {
+   "cod": "9701",
+   "desc": "BARBEADOR DE METAL IMPORTADO. SANTA CLARA",
+   "ncm": "82121020",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 17.9
+  },
+  {
+   "cod": "12551",
+   "desc": "BACIA PRT PEDICURE-347 ST CLARA",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 17.9
+  },
+  {
+   "cod": "77762",
+   "desc": "ESMALTE COLORAMA DIVERTIDAMENTE AMARELO",
+   "ncm": "33043000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 17.8
+  },
+  {
+   "cod": "1124",
+   "desc": "DOSADOR ACETONA ST? CLARA 150ML 1123",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 16.9
+  },
+  {
+   "cod": "9709",
+   "desc": "BACIA VERDE AG.P/PEDICURE-347 SANTA CLARA",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 16.9
+  },
+  {
+   "cod": "10048",
+   "desc": "BACIA ESP VR AG SANTA CLARA",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 16.48
+  },
+  {
+   "cod": "79645",
+   "desc": "DF7-GT25-CONJUNTO UNHA (1 DECORACAO PARA UNHA E 1 APLICADOR)",
+   "ncm": "39269090",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 16
+  },
+  {
+   "cod": "1761",
+   "desc": "TOUCA DESC SANTA CLARA 392",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 15.9
+  },
+  {
+   "cod": "61087",
+   "desc": "OX 20 VOL FELPS 90ML",
+   "ncm": "28470000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 15.9
+  },
+  {
+   "cod": "203450",
+   "desc": "BRINCO DE METAL - DAFU",
+   "ncm": "71171900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 15.9
+  },
+  {
+   "cod": "28371",
+   "desc": "ARGOLA TRIANGULAR COLORIDA - ZGY",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 15
+  },
+  {
+   "cod": "1746",
+   "desc": "BACIA MAN FAZ UNHA S CLARA 187",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 14.760000000000002
+  },
+  {
+   "cod": "49928",
+   "desc": "ESPATULA CREME LUXO MED.C/25UD",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 14.450000000000001
+  },
+  {
+   "cod": "13559",
+   "desc": "APARELHO BARBEAR MUNDIAL BC-130",
+   "ncm": "82121020",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 13.9
+  },
+  {
+   "cod": "41093",
+   "desc": "BRINCO 6",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 13.9
+  },
+  {
+   "cod": "48794",
+   "desc": "DOSADOR VERDE MOD.VENEZA 190ML",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 13.9
+  },
+  {
+   "cod": "203456",
+   "desc": "BRINCO DE METAL - IMITACAO PEROLA - DAFU",
+   "ncm": "71171900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 13.9
+  },
+  {
+   "cod": "27577",
+   "desc": "BRINCO FORMATO FOLHA COLORIDO - ZGY",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 13.14
+  },
+  {
+   "cod": "203130",
+   "desc": "BRINCO",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 12.9
+  },
+  {
+   "cod": "203451",
+   "desc": "BRINCO DE PLASTICO COLORIDO - DAFU",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 12.9
+  },
+  {
+   "cod": "203452",
+   "desc": "BRINCO DE METAL COMUM LATAO - DAFU",
+   "ncm": "71171900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 12.9
+  },
+  {
+   "cod": "1652",
+   "desc": "BRINCO DETALHES COM PEROLA 16 - ZGY",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 12.51
+  },
+  {
+   "cod": "51096",
+   "desc": "PULSEIRA 5",
+   "ncm": "91021110",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 11.62
+  },
+  {
+   "cod": "1817",
+   "desc": "BRINCO PEROLA GRANDE 05 - ZGY",
+   "ncm": "71171900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 10.9
+  },
+  {
+   "cod": "1840",
+   "desc": "BRINCO GOTA DOURADA PEQUENO - otimos",
+   "ncm": "71171900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 10.9
+  },
+  {
+   "cod": "79615",
+   "desc": "NAVALHA DE PLASTICO - DAFU",
+   "ncm": "82121010",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 10.9
+  },
+  {
+   "cod": "202743",
+   "desc": "FIBRA DE VIDRO EM ROLO VERTIX 4M",
+   "ncm": "70191900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 10.9
+  },
+  {
+   "cod": "27524",
+   "desc": "BRINCO ARGOLA MEIA LUA COLORIDA - ZGY",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 9.9
+  },
+  {
+   "cod": "27576",
+   "desc": "BRINCO CORAÇÃO GRANDE - F34-572230X",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 9.9
+  },
+  {
+   "cod": "78863",
+   "desc": "ESMALTE COLORAMA BL NUDE 4.0 6X8ML",
+   "ncm": "33043000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 9.9
+  },
+  {
+   "cod": "63454",
+   "desc": "ESCOVA JACARE SIMPL.CAB.S/EMB.",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 9.8
+  },
+  {
+   "cod": "203129",
+   "desc": "BRINCO A8",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 8.9
+  },
+  {
+   "cod": "41042",
+   "desc": "ESPATULA PLASTICA LUXO PRETA SANTA CLARA",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 8.55
+  },
+  {
+   "cod": "49280",
+   "desc": "ESP P/ BANHO ESFOLIANTE",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 8
+  },
+  {
+   "cod": "57282",
+   "desc": "COLA DE CIANOACRILATO PARA UNHAS POSTICAS",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 7.9
+  },
+  {
+   "cod": "9683",
+   "desc": "ESPATULA CREME LUXO PRETO SANTA CLARA",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 7.8
+  },
+  {
+   "cod": "11796",
+   "desc": "APAR FEM SOFT 1751",
+   "ncm": "82121020",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 6.99
+  },
+  {
+   "cod": "12543",
+   "desc": "BACIA MANICURE ANAT LILAS ST CLARA",
+   "ncm": "39249000",
+   "cadastro": "TI-PA - TRIBUTADO INTEGRALMENTE-PARÁ (1)",
+   "deveria": "ST",
+   "rec": 6.9
+  },
+  {
+   "cod": "202224",
+   "desc": "ESCOVA PR.C.BR.P/UNHA-CX.DISP.",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 6.88
+  },
+  {
+   "cod": "77666",
+   "desc": "ANEL",
+   "ncm": "71179000",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 6.87
+  },
+  {
+   "cod": "52980",
+   "desc": "ESCOVA PLAST OVAL MASSAGEADORA S CLARA",
+   "ncm": "71131900",
+   "cadastro": "ST - PA - SUBSTITUICAO TRIBUTARIA-PARÁ (2)",
+   "deveria": "TI",
+   "rec": 3.9
+  }
+ ]
+}

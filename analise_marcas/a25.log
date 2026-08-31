@@ -1,0 +1,27 @@
+[mensal] launch headless... ano=2025 meses=1..8
+[mensal] garantindo sessão (v4/home — valida sessão ASP real)...
+[mensal] tela de login detectada (https://erp.microvix.com.br/) — preenchendo creds...
+[mensal] tela de seleção de empresa — clicando na empresa 1 (Casa da Beleza Altamira)...
+[mensal] login OK → https://linx.microvix.com.br/v4/home/index.asp
+[mensal] v4/home OK — navegando para gestor_web pra pegar token...
+[mensal] token OK (295 chars)
+[mensal] mês 1: 01/01/2025 a 31/01/2025
+[mensal]   mês 1 emp10: -cliente8 R$9272.99 → 100379
+[mensal]   mês 1: L1=93765 L3=44243 L4=104155 L5=100379 (líq. cliente8)
+[mensal] mês 2: 01/02/2025 a 28/02/2025
+[mensal]   mês 2: L1=90647 L3=41166 L4=104378 L5=92097 (líq. cliente8)
+[mensal] mês 3: 01/03/2025 a 31/03/2025
+[mensal]   mês 3: L1=110872 L3=53257 L4=125006 L5=108596 (líq. cliente8)
+[mensal] mês 4: 01/04/2025 a 30/04/2025
+[mensal]   mês 4: L1=105453 L3=62971 L4=128738 L5=102022 (líq. cliente8)
+[mensal] mês 5: 01/05/2025 a 31/05/2025
+[mensal]   mês 5 emp3: -cliente8 R$147.00 → 58098
+[mensal]   mês 5 emp4: -cliente8 R$3378.55 → 173502
+[mensal]   mês 5: L1=124977 L3=58098 L4=173502 L5=99993 (líq. cliente8)
+[mensal] mês 6: 01/06/2025 a 30/06/2025
+[mensal]   mês 6: L1=105039 L3=54057 L4=141565 L5=95933 (líq. cliente8)
+[mensal] mês 7: 01/07/2025 a 31/07/2025
+[mensal]   mês 7: L1=115366 L3=57374 L4=158152 L5=100029 (líq. cliente8)
+[mensal] mês 8: 01/08/2025 a 26/08/2025
+[mensal]   mês 8: L1=105418 L3=42768 L4=131162 L5=91535 (líq. cliente8)
+[mensal] OK em 137.1s

@@ -23,7 +23,7 @@ import { join } from "node:path";
 import { writeFileSync } from "node:fs";
 import { garantirSessao } from "./microvix_auth.mjs";
 
-const PROFILE_DIR = process.env.MICROVIX_PROFILE || join(homedir(), ".claude", "microvix-profile");
+const PROFILE_DIR = join(homedir(), ".claude", "microvix-profile");
 const URL = "https://linx.microvix.com.br/gestor_web/produtos/relatorio_manut.asp";
 const log = m => process.stderr.write(`[fiscal] ${m}\n`);
 
@@ -103,7 +103,6 @@ async function coletaEmpresa(page, E) {
   await page.waitForTimeout(3500);
 
   const map = {};
-  const falhas = [];
   let { recs, pgTotal } = await parsePagina(page);
   recs.forEach(r => { if (r.codigo) map[r.codigo] = r; });
   const total = MAXPG ? Math.min(MAXPG, pgTotal) : pgTotal;
@@ -130,31 +129,24 @@ async function coletaEmpresa(page, E) {
         if (p % 10 === 0 || p === total) log(`  emp${E} pg ${p}/${total} — acum ${Object.keys(map).length}`);
       } catch (e) { log(`  emp${E} pg ${p} retry (${tent + 1}): ${String(e.message).slice(0, 50)}`); await page.waitForTimeout(2000); }
     }
-    if (!ok) falhas.push(p);
   }
   const arr = Object.values(map);
   log(`emp${E}: ${arr.length} produtos coletados (c/ncm=${arr.filter(r => r.ncm).length})`);
-  if (falhas.length) {
-    // ANTES gravava truncado em silêncio — o fiscal_ncm_ti.json de jun/2026 ficou com 1/3 do catálogo
-    // e ninguém percebeu por 2 meses. Página perdida agora é erro, não aviso.
-    throw new Error(`emp${E}: ${falhas.length} de ${total} páginas falharam (${falhas.slice(0, 8).join(",")}${falhas.length > 8 ? "..." : ""}) — coleta INCOMPLETA`);
-  }
-  return { produtos: arr, paginas: total };
+  return arr;
 }
 
 const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true, viewport: { width: 1600, height: 1000 } });
 const page = ctx.pages()[0] || (await ctx.newPage());
 try {
   await garantirSessao(page, { log, tokenOpcional: true });  // raspa relatorio_manut.asp (só sessão; ERP migrou 30/07)
-  const result = {}; const meta = {}; const incompleto = [];
+  const result = {};
   for (const E of argEmp) {
-    try { const r = await coletaEmpresa(page, E); result[EMP_TO_LOJA[E] || E] = r.produtos; meta[EMP_TO_LOJA[E] || E] = { paginas: r.paginas, produtos: r.produtos.length }; }
-    catch (e) { log(`emp${E} FALHOU: ${e.message}`); result[EMP_TO_LOJA[E] || E] = []; incompleto.push(`${EMP_TO_LOJA[E] || E}: ${e.message}`); }
+    try { result[EMP_TO_LOJA[E] || E] = await coletaEmpresa(page, E); }
+    catch (e) { log(`emp${E} FALHOU: ${e.message}`); result[EMP_TO_LOJA[E] || E] = []; }
     // grava incremental a cada loja
-    writeFileSync(OUT, JSON.stringify({ _coletado_em: new Date().toISOString(), modo: MODO, configs: CFGS, _meta: meta, _incompleto: incompleto.length ? incompleto : undefined, lojas: result }, null, 1));
+    writeFileSync(OUT, JSON.stringify({ _coletado_em: new Date().toISOString(), modo: MODO, configs: CFGS, lojas: result }, null, 1));
   }
   log(`gravado ${OUT}`);
-  if (incompleto.length) { log("⚠ COLETA INCOMPLETA:\n  " + incompleto.join("\n  ")); process.exitCode = 20; }
   if (MAXPG) process.stdout.write(JSON.stringify(result[EMP_TO_LOJA[argEmp[0]]]?.slice(0, 8) || [], null, 1));
   await ctx.close().catch(() => {});
   process.exit(0);

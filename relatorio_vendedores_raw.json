@@ -1,0 +1,117 @@
+{
+ "dia": "29/08/2026",
+ "coletadoEm": "2026-08-30T14:42:33.170Z",
+ "semMovimento": false,
+ "lojas": [
+  {
+   "emp": 1,
+   "loja": "Casa da Beleza",
+   "total": {
+    "tickets": 61,
+    "pecas": 165,
+    "valor": 5928.78,
+    "pa": 2.7,
+    "tm": 97.19
+   },
+   "vendedores": [
+    {
+     "nome": "Tatiane",
+     "cod": "35",
+     "tickets": 27,
+     "pecas": 73,
+     "valor": 2869.83,
+     "pa": 2.7,
+     "tm": 106.29,
+     "cmv": 49.67,
+     "semVendedor": false
+    },
+    {
+     "nome": "Rayra Luana Souza Dos Santos",
+     "cod": "121",
+     "tickets": 13,
+     "pecas": 46,
+     "valor": 1530.6,
+     "pa": 3.54,
+     "tm": 117.74,
+     "cmv": 74.11,
+     "semVendedor": false
+    },
+    {
+     "nome": "Barbara Sabrina",
+     "cod": "163",
+     "tickets": 16,
+     "pecas": 33,
+     "valor": 1176.89,
+     "pa": 2.06,
+     "tm": 73.56,
+     "cmv": 63.41,
+     "semVendedor": false
+    },
+    {
+     "nome": "Sofia De Oliveira Matos",
+     "cod": "161",
+     "tickets": 5,
+     "pecas": 13,
+     "valor": 351.46,
+     "pa": 2.6,
+     "tm": 70.29,
+     "cmv": 51.69,
+     "semVendedor": false
+    }
+   ]
+  },
+  {
+   "emp": 4,
+   "loja": "MissBeleza",
+   "total": {
+    "tickets": 61,
+    "pecas": 173,
+    "valor": 4930.64,
+    "pa": 2.84,
+    "tm": 80.83
+   },
+   "vendedores": [
+    {
+     "nome": "Josilene De Sousa Alves",
+     "cod": "120",
+     "tickets": 22,
+     "pecas": 73,
+     "valor": 2076.53,
+     "pa": 3.32,
+     "tm": 94.39,
+     "cmv": 72.1,
+     "semVendedor": false
+    },
+    {
+     "nome": "Bruna Figueiró",
+     "cod": "146",
+     "tickets": 26,
+     "pecas": 56,
+     "valor": 1747.14,
+     "pa": 2.15,
+     "tm": 67.2,
+     "cmv": 46.83,
+     "semVendedor": false
+    },
+    {
+     "nome": "Debora Emily",
+     "cod": "164",
+     "tickets": 13,
+     "pecas": 44,
+     "valor": 1106.97,
+     "pa": 3.38,
+     "tm": 85.15,
+     "cmv": 33.64,
+     "semVendedor": false
+    }
+   ]
+  }
+ ],
+ "grupo": {
+  "tickets": 122,
+  "pecas": 338,
+  "valor": 10859.42,
+  "pa": 2.77,
+  "tm": 89.01
+ }
+}

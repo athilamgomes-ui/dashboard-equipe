@@ -1,0 +1,401 @@
+<title>Miss Beleza Itaituba — segundo semestre</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#FCF9FA; --surface:#FFFFFF; --surface-2:#F5EFF2; --line:#E8DCE2; --line-forte:#D0B9C4;
+  --ink:#221A1E; --ink-2:#5B4B53; --ink-3:#8C7A83;
+  --accent:#A52757; --accent-2:#C4477A; --accent-suave:#FBE9F0;
+  --ok:#2C6B4A; --ok-bg:#E3F1E9; --ruim:#A8302F; --ruim-bg:#F9E5E4; --medio:#8F5A12; --medio-bg:#F8EEDD;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#171215; --surface:#211A1E; --surface-2:#2B2126; --line:#392C33; --line-forte:#573F49;
+  --ink:#F5EBEF; --ink-2:#C6B2BB; --ink-3:#8C7A83;
+  --accent:#F09BBD; --accent-2:#D9799E; --accent-suave:#331A25;
+  --ok:#7CC79E; --ok-bg:#1C2F24; --ruim:#EE8B89; --ruim-bg:#331D1D; --medio:#DBA75D; --medio-bg:#322415;
+}}
+:root[data-theme="dark"]{
+  --ground:#171215; --surface:#211A1E; --surface-2:#2B2126; --line:#392C33; --line-forte:#573F49;
+  --ink:#F5EBEF; --ink-2:#C6B2BB; --ink-3:#8C7A83;
+  --accent:#F09BBD; --accent-2:#D9799E; --accent-suave:#331A25;
+  --ok:#7CC79E; --ok-bg:#1C2F24; --ruim:#EE8B89; --ruim-bg:#331D1D; --medio:#DBA75D; --medio-bg:#322415;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:Inter,-apple-system,sans-serif;
+  font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:780px;margin:0 auto;padding:52px 24px 100px;display:flex;flex-direction:column;gap:14px}
+h1{font-family:"Bricolage Grotesque",Impact,sans-serif;font-weight:800;font-size:clamp(34px,7vw,58px);
+  line-height:.98;margin:0;letter-spacing:-.03em;text-wrap:balance}
+h2{font-family:"Bricolage Grotesque",Impact,sans-serif;font-weight:700;font-size:clamp(26px,4.4vw,36px);
+  margin:0;letter-spacing:-.02em;line-height:1.1}
+h3{font-family:"Bricolage Grotesque",Impact,sans-serif;font-weight:700;font-size:20px;margin:0;letter-spacing:-.01em}
+p{margin:0}
+.cap{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.lead{font-size:20px;line-height:1.5;color:var(--ink-2);margin:18px 0 0;max-width:52ch}
+.sec{display:flex;flex-direction:column;gap:20px;padding:44px 0;border-top:2px solid var(--line-forte)}
+.sec:first-of-type{border-top:none}
+.sec>p,.sec>ul,.sec>ol{max-width:56ch}
+.n-gigante{font-family:"Bricolage Grotesque",Impact,sans-serif;font-weight:800;
+  font-size:clamp(58px,13vw,104px);line-height:.9;letter-spacing:-.045em;color:var(--accent);font-variant-numeric:tabular-nums}
+.n-legenda{font-size:17px;color:var(--ink-2);max-width:40ch;margin-top:6px}
+.meses{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.mes{background:var(--surface);padding:14px 8px;text-align:center}
+.mes .nm{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:600;margin-bottom:5px}
+.mes .vl{font-family:"Bricolage Grotesque",Impact,sans-serif;font-weight:700;font-size:23px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.m-ok .vl{color:var(--ok)} .m-medio .vl{color:var(--medio)} .m-ruim .vl{color:var(--ruim)}
+.mes.virada{background:var(--accent-suave)}
+.caixa{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:24px 26px;display:flex;flex-direction:column;gap:14px}
+.forte{background:var(--accent);color:#fff;border-radius:4px;padding:26px 28px;display:flex;flex-direction:column;gap:12px}
+.forte h3{color:#fff} .forte p{color:#fff;opacity:.95}
+:root[data-theme="dark"] .forte,:root:not([data-theme="light"]) .forte{color:#1A1013}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .forte h3,:root:not([data-theme="light"]) .forte p{color:#1A1013}}
+:root[data-theme="dark"] .forte h3,:root[data-theme="dark"] .forte p{color:#1A1013}
+.duelo{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.duelo div{background:var(--surface);padding:20px 18px;text-align:center}
+.duelo .qual{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:700;margin-bottom:10px}
+.duelo .big{font-family:"Bricolage Grotesque",Impact,sans-serif;font-weight:800;font-size:38px;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.duelo .sm{font-size:13.5px;color:var(--ink-2);margin-top:7px}
+.duelo .venc{color:var(--accent)}
+.regra{display:flex;flex-direction:column;gap:4px;padding:16px 0;border-bottom:1px solid var(--line)}
+.regra:last-child{border-bottom:none}
+.regra .t{font-weight:700;font-size:17px}
+.regra .d{color:var(--ink-2);font-size:16px}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:16px;min-width:400px}
+th{text-align:left;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:700;padding:13px 16px;border-bottom:1px solid var(--line-forte)}
+td{padding:12px 16px;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:none}
+.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.sim{color:var(--ok);font-weight:700} .nao{color:var(--ruim);font-weight:700}
+.calend{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.ev{background:var(--surface);padding:16px 20px;display:flex;gap:18px;align-items:baseline;flex-wrap:wrap}
+.ev .quando{font-family:"Bricolage Grotesque",Impact,sans-serif;font-weight:700;color:var(--accent);min-width:110px;font-size:18px}
+.ev .oque{font-weight:600;flex:1;min-width:170px}
+.ev .obs{color:var(--ink-2);font-size:15px;width:100%}
+ul{margin:0;padding-left:24px;display:flex;flex-direction:column;gap:11px}
+li::marker{color:var(--accent)}
+ol{margin:0;padding-left:24px;display:flex;flex-direction:column;gap:13px}
+ol li::marker{color:var(--accent);font-weight:700}
+.rodape{font-size:15px;color:var(--ink-2);background:var(--surface-2);padding:22px 24px;border-radius:4px;margin-top:20px}
+
+.fala{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:0 4px 4px 0;padding:16px 20px;display:flex;flex-direction:column;gap:7px}
+.fala .quem{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:700}
+.fala p{font-size:17px;line-height:1.5;color:var(--ink)}
+.sec>.fala{max-width:56ch}
+.rodape{font-size:15px;color:var(--ink-2);background:var(--surface-2);padding:22px 24px;
+  border-radius:4px;margin-top:34px;border-top:2px solid var(--line-forte)}
+
+.gwrap{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:26px 24px 18px}
+.gwrap svg{width:100%;height:auto;display:block;overflow:visible}
+.g-nota{font-size:14px;color:var(--ink-2);margin-top:14px;text-align:center}
+.vantagem{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.vantagem:last-child{border-bottom:none}
+.vantagem .ord{font-family:"Bricolage Grotesque",Impact,sans-serif;font-weight:800;font-size:26px;
+  line-height:1;color:var(--accent);min-width:30px;font-variant-numeric:tabular-nums}
+.vantagem .cont{flex:1;display:flex;flex-direction:column;gap:5px}
+.vantagem .vt{font-weight:700;font-size:17.5px}
+.vantagem .vd{color:var(--ink-2);font-size:16px;line-height:1.5}
+
+.g-grade{stroke:var(--line);stroke-width:1}
+.g-area{fill:var(--accent);opacity:.13}
+.g-linha{fill:none;stroke:var(--accent);stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+.g-dot{fill:var(--accent);stroke:var(--surface);stroke-width:2.5}
+.g-dot.pico{r:6}
+.g-lbl{fill:transparent;font-size:0}
+.g-lbl.pico{fill:var(--accent);font-size:15px;font-family:Inter,sans-serif;font-weight:800;text-anchor:middle}
+.g-mes{fill:var(--ink-3);font-size:12.5px;font-family:Inter,sans-serif;font-weight:600;text-anchor:middle;letter-spacing:.03em}
+
+.destaque-frase{font-family:"Bricolage Grotesque",Impact,sans-serif;font-weight:800;
+  font-size:clamp(36px,7vw,62px);line-height:1;letter-spacing:-.035em;color:var(--accent);margin:0}
+
+.g-linha25{fill:none;stroke:var(--ink-3);stroke-width:2;stroke-dasharray:5 4;stroke-linejoin:round;opacity:.75}
+.g-dot25{fill:var(--ink-3);opacity:.6}
+.g-legt{fill:var(--accent);font-size:12.5px;font-family:Inter,sans-serif;font-weight:700}
+.g-legt25{fill:var(--ink-3)}
+</style>
+
+<div class="wrap">
+
+<header style="padding-bottom:20px">
+  <p class="cap">Miss Beleza Itaituba · 1º de setembro de 2026</p>
+  <h1>Plano do segundo semestre</h1>
+  <p class="lead">Este documento reúne o que foi apresentado na reunião: o resultado do ano
+  até aqui, o Clube Miss Itaituba, as regras de desconto, a premiação e o calendário até dezembro.
+  Fica como referência da loja.</p>
+</header>
+
+<section class="sec">
+  <h2>A curva do ano</h2>
+  <p>O faturamento da loja mês a mês, de janeiro a julho, comparado com 2025.</p>
+  <div class="gwrap">
+    <svg viewBox="0 0 700 270" role="img" aria-label="Faturamento mês a mês de 2026 comparado a 2025, de janeiro a julho">
+    <line class="g-grade" x1="16" y1="228.0" x2="684" y2="228.0"/>
+    <line class="g-grade" x1="16" y1="136.0" x2="684" y2="136.0"/>
+    <line class="g-grade" x1="16" y1="44.0" x2="684" y2="44.0"/>
+    <path class="g-area" d="M16.0 176.0 L127.3 205.8 L238.7 155.5 L350.0 144.6 L461.3 126.7 L572.7 126.9 L684.0 60.1 L684.0 228 L16.0 228 Z"/>
+    <path class="g-linha25" d="M16.0 195.8 L127.3 205.1 L238.7 168.6 L350.0 139.2 L461.3 154.0 L572.7 166.1 L684.0 156.1"/>
+    <path class="g-linha" d="M16.0 176.0 L127.3 205.8 L238.7 155.5 L350.0 144.6 L461.3 126.7 L572.7 126.9 L684.0 60.1"/>
+    <circle class="g-dot25" cx="16.0" cy="195.8" r="3"/>
+    <circle class="g-dot25" cx="127.3" cy="205.1" r="3"/>
+    <circle class="g-dot25" cx="238.7" cy="168.6" r="3"/>
+    <circle class="g-dot25" cx="350.0" cy="139.2" r="3"/>
+    <circle class="g-dot25" cx="461.3" cy="154.0" r="3"/>
+    <circle class="g-dot25" cx="572.7" cy="166.1" r="3"/>
+    <circle class="g-dot25" cx="684.0" cy="156.1" r="3"/>
+    <circle class="g-dot" cx="16.0" cy="176.0" r="4.5"/>
+    <circle class="g-dot" cx="127.3" cy="205.8" r="4.5"/>
+    <circle class="g-dot" cx="238.7" cy="155.5" r="4.5"/>
+    <circle class="g-dot" cx="350.0" cy="144.6" r="4.5"/>
+    <circle class="g-dot" cx="461.3" cy="126.7" r="4.5"/>
+    <circle class="g-dot" cx="572.7" cy="126.9" r="4.5"/>
+    <circle class="g-dot pico" cx="684.0" cy="60.1" r="6"/>
+    <text class="g-mes" x="16.0" y="249.0">Jan</text>
+    <text class="g-mes" x="127.3" y="249.0">Fev</text>
+    <text class="g-mes" x="238.7" y="249.0">Mar</text>
+    <text class="g-mes" x="350.0" y="249.0">Abr</text>
+    <text class="g-mes" x="461.3" y="249.0">Mai</text>
+    <text class="g-mes" x="572.7" y="249.0">Jun</text>
+    <text class="g-mes" x="684.0" y="249.0">Jul</text>
+    <g class="g-leg">
+      <line class="g-linha" x1="16" y1="18" x2="42" y2="18"/>
+      <text class="g-legt" x="49" y="22">2026</text>
+      <line class="g-linha25" x1="102" y1="18" x2="128" y2="18"/>
+      <text class="g-legt g-legt25" x="135" y="22">2025</text>
+    </g>
+  </svg>
+    <p class="g-nota">De janeiro a julho. Agosto entra quando o mês fechar.</p>
+  </div>
+  <p>A loja cresceu em quase todos os meses e <strong>julho foi o maior mês da história recente da loja</strong> — muito acima de qualquer mês de 2025.</p>
+</section>
+
+<section class="sec">
+  <h2>Julho</h2>
+  <p class="destaque-frase">O melhor mês</p>
+  <p class="n-legenda">Julho foi o mês de maior faturamento da loja em 2026, e o maior salto entre as quatro lojas do grupo.</p>
+  <div class="forte">
+    <h3>Itaituba foi a loja que mais cresceu no grupo.</h3>
+    <p>Enquanto o grupo caiu no ano, esta loja subiu — e subiu vendendo para menos gente. O que mudou foi o que está na prateleira: a loja passou a ter o que a cliente procura.</p>
+  </div>
+  <p>Agosto perdeu ritmo em todas as lojas do grupo, mas aqui a loja seguiu acima de 2025.</p>
+  <p><strong>O objetivo do segundo semestre é manter o sortimento certo e transformar cliente que compra em cliente cadastrada.</strong></p>
+</section>
+
+<section class="sec">
+  <h2>Treinamento toda segunda-feira</h2>
+  <div class="caixa">
+    <p>A partir de agora há <strong>treinamento semanal com a Dona Elk, toda segunda-feira</strong>.</p>
+    <p>É lá que serão trabalhados ticket médio, fidelização de cliente, uso do desconto e
+    conhecimento das marcas. Dúvida sobre produto, sobre como conduzir um atendimento ou
+    como montar uma venda deve ser levada para a segunda-feira.</p>
+  </div>
+</section>
+
+<section class="sec">
+  <h2>Clube Miss Itaituba</h2>
+  <p>A loja passa a ter dois clubes de cliente:</p>
+  <div class="calend">
+    <div class="ev"><span class="quando">Clube Miss Itaituba</span><span class="oque">Cliente final</span>
+      <span class="obs">Nome, CPF, telefone, CEP e data de nascimento.</span></div>
+    <div class="ev"><span class="quando">Clube Miss Itaituba Pro</span><span class="oque">Profissional da beleza</span>
+      <span class="obs">CNPJ ou CPF, nome da profissional ou do salão, telefone e data de nascimento. O Instagram do trabalho é registrado junto.</span></div>
+  </div>
+  <h3>O que a cliente ganha ao se cadastrar</h3>
+  <div class="caixa">
+    <div class="vantagem"><span class="ord">1</span><span class="cont">
+      <span class="vt">Compra antes de o produto ir para a prateleira</span>
+      <span class="vd">Toda mercadoria que chega é anunciada na comunidade do WhatsApp do clube.
+      Quem é do clube compra primeiro — não disputa a última unidade.</span></span></div>
+    <div class="vantagem"><span class="ord">2</span><span class="cont">
+      <span class="vt">Aviso pessoal quando chega a marca dela</span>
+      <span class="vd">A loja acompanha o que cada cliente costuma comprar. Quando chega a marca
+      que é a cara dela, ela recebe mensagem no privado — não é aviso para todo mundo, é para ela.</span></span></div>
+    <div class="vantagem"><span class="ord">3</span><span class="cont">
+      <span class="vt">Promoções que só o clube tem</span>
+      <span class="vd">Haverá promoções em áreas específicas da loja válidas apenas para clientes
+      cadastradas. Quem não é do clube não participa.</span></span></div>
+    <div class="vantagem"><span class="ord">4</span><span class="cont">
+      <span class="vt">Convite para eventos e workshops</span>
+      <span class="vd">As vagas são limitadas e o convite vai primeiro para o clube.</span></span></div>
+    <div class="vantagem"><span class="ord">5</span><span class="cont">
+      <span class="vt">10% no mês do aniversário</span>
+      <span class="vd">São 10% em <strong>uma compra</strong>, em qualquer produto da loja.
+      A cliente escolhe o dia: vale em qualquer dia do mês do aniversário dela, não precisa
+      ser na data. Para usar, ela apresenta a mensagem de parabéns que recebeu da loja.</span></span></div>
+    <div class="vantagem"><span class="ord">6</span><span class="cont">
+      <span class="vt">Direito a desconto nas compras</span>
+      <span class="vd">Quem não tem cadastro não tem desconto. Ter cadastro dá direito ao
+      desconto — não significa desconto em toda compra.</span></span></div>
+  </div>
+  <p>Para comprar usando o cadastro, a cliente apresenta documento. O cadastro é pessoal e
+  não pode ser usado por outra pessoa.</p>
+</section>
+
+<section class="sec">
+  <h2>Como o Clube funciona na prática</h2>
+  <p>São quatro passos. Todos acontecem pelo número da loja.</p>
+  <div class="calend">
+    <div class="ev"><span class="quando">1</span><span class="oque">Cadastrar no caixa</span>
+      <span class="obs">CPF, nome, telefone e CEP. É o que basta para a cliente entrar no Clube Miss Itaituba.</span></div>
+    <div class="ev"><span class="quando">2</span><span class="oque">Convidar para a comunidade</span>
+      <span class="obs">A loja envia o link da comunidade para a cliente cadastrada. Só entra quem tem cadastro.</span></div>
+    <div class="ev"><span class="quando">3</span><span class="oque">Anunciar na comunidade o que chegou</span>
+      <span class="obs">É a vendedora responsável pelas redes sociais no dia quem anuncia. Se ela não estiver, a responsabilidade é da gerente. Toda mercadoria nova é anunciada — e a cliente do Clube pode comprar antes de o produto ir para a prateleira.</span></div>
+    <div class="ev"><span class="quando">4</span><span class="oque">Quem está no celular da loja no dia responde</span>
+      <span class="obs">A vendedora responsável pelo atendimento online do dia atende. Se ela estiver ocupada com cliente presencial, a caixa começa e passa para ela.</span></div>
+  </div>
+  <div class="caixa">
+    <h3>Quem atende se apresenta pelo nome.</h3>
+    <p>Sempre, na primeira mensagem. A cliente precisa saber com quem está falando —
+    e é assim que a venda fica registrada com quem atendeu.</p>
+  </div>
+  <p>Isso não muda nada no atendimento que cada uma já faz pelo WhatsApp dela. A comunidade
+  é um canal a mais, que alcança também as clientes que ainda não têm vendedora.</p>
+  <div class="caixa">
+    <h3>Por que a comunidade e não o status</h3>
+    <p>O status só aparece para quem já salvou o número da loja e ainda por cima abre os status
+    naquele dia. A comunidade chega na conversa, direto — todo mundo que está nela vê.</p>
+    <p>É a diferença entre esperar a cliente passar na frente da loja e falar com ela.</p>
+  </div>
+</section>
+
+<section class="sec">
+  <h2>Como oferecer o cadastro</h2>
+  <p>O cadastro não é um papel a preencher. É uma vantagem que se oferece.</p>
+  <h3>Quando oferecer</h3>
+  <ul>
+    <li><strong>Quando a cliente pergunta sobre desconto.</strong> É o melhor momento — a
+    resposta já é o convite.</li>
+    <li><strong>Antes de fechar a venda</strong>, enquanto a cliente ainda está no balcão.</li>
+    <li><strong>Quando ela procura algo que não há em estoque.</strong> O aviso de chegada
+    é o motivo.</li>
+  </ul>
+  <h3>O que falar</h3>
+  <div class="fala">
+    <span class="quem">A cliente pergunta se tem desconto</span>
+    <p>"Tem sim, para quem é do Clube Miss Itaituba. A senhora já tem cadastro com a gente?
+    Posso fazer agora, é rápido."</p>
+  </div>
+  <div class="fala">
+    <span class="quem">Oferecendo o cadastro</span>
+    <p>"Preciso do seu nome, CPF, telefone e a data do seu aniversário. Assim a senhora entra
+    no Clube Miss Itaituba: fica sabendo de tudo que chega na loja antes de ir para a prateleira,
+    participa das promoções que são só do clube, e no mês do seu aniversário tem 10% em
+    qualquer produto."</p>
+  </div>
+  <div class="fala">
+    <span class="quem">Explicando o aviso de chegada</span>
+    <p>"A gente tem um grupo no WhatsApp só de quem é do clube. Tudo que chega eu mando lá
+    primeiro — a senhora vê e já reserva, antes de ir para a prateleira."</p>
+  </div>
+  <div class="fala">
+    <span class="quem">A cliente procura algo que não há</span>
+    <p>"Esse produto vai chegar. Deixa eu fazer seu cadastro — assim que ele entrar eu te
+    aviso no seu WhatsApp, antes de ir para a prateleira."</p>
+  </div>
+  <div class="fala">
+    <span class="quem">A cliente trabalha na área</span>
+    <p>"A senhora trabalha com beleza? Então tem o Clube Miss Itaituba Pro, que tem condição diferente.
+    Preciso do CNPJ ou CPF, o nome do salão e o Instagram do seu trabalho."</p>
+  </div>
+  <div class="caixa">
+    <p><strong>A vantagem que mais convence não é o desconto.</strong> É saber primeiro.
+    Marca boa acaba rápido, e a cliente do clube não corre atrás — ela é avisada.</p>
+    <p>Desconto qualquer loja copia amanhã. Avisar a cliente certa, no privado, quando chega
+    a marca que ela usa, ninguém copia.</p>
+  </div>
+</section>
+
+<section class="sec">
+  <h2>Tabela de desconto</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Produto</th><th class="num">Cliente do Clube</th><th class="num">Profissional</th></tr></thead>
+    <tbody>
+      <tr><td>Regra geral</td><td class="num">até 7%</td><td class="num">até 15%</td></tr>
+      <tr><td>Marco Boni e Santa Clara</td><td class="num nao">sem desconto</td><td class="num">até 5%</td></tr>
+      <tr><td>Wella</td><td class="num">5%</td><td class="num">até 10%</td></tr>
+      <tr><td>Coloração</td><td class="num nao">sem desconto</td><td class="num">preço profissional</td></tr>
+      <tr><td>Esmalteria</td><td class="num nao">sem desconto</td><td class="num nao">sem desconto</td></tr>
+    </tbody>
+  </table></div>
+  <div class="regra"><span class="t">Cliente sem cadastro não tem desconto</span>
+    <span class="d">O desconto é vantagem de quem é do Clube.</span></div>
+  <div class="regra"><span class="t">Ter cadastro não significa desconto em toda compra</span>
+    <span class="d">O desconto é uma ferramenta para fechar a venda, não uma obrigação.
+    O máximo da tabela é o teto, não o padrão.</span></div>
+  <div class="regra"><span class="t">Marco Boni e Santa Clara: o que é produto grande</span>
+    <span class="d">Os 5% para profissional valem na embalagem grande — potão, pacotão, caixa,
+    rolo. Item avulso não entra.</span></div>
+  <div class="regra"><span class="t">Como funciona o desconto de aniversário</span>
+    <span class="d">São 10% em uma única compra, em qualquer produto. Vale em qualquer dia do
+    mês do aniversário — não precisa ser na data. A cliente apresenta a mensagem de parabéns
+    que recebeu, e o desconto entra <strong>no lugar</strong> dos 7% do Clube, não somado.</span></div>
+  <div class="regra"><span class="t">Desconto acima da tabela, apenas quando a gestão comunicar</span>
+    <span class="d">Promoções específicas serão informadas por escrito antes de começarem.
+    Em caso de dúvida, consulte a gerente antes de fechar a venda.</span></div>
+</section>
+
+<section class="sec">
+  <h2>Premiação</h2>
+  <h3>Prêmio semanal</h3>
+  <p>A meta do mês é dividida em metas semanais. <strong>Toda semana em que a loja bate a meta,
+  o prêmio daquela semana é pago</strong> e dividido entre a equipe, proporcional ao que cada
+  uma vendeu.</p>
+  <div class="tw"><table>
+    <thead><tr><th>A loja fez</th><th class="num">Prêmio da semana</th><th class="num">Com 30%+ em Marcas A</th></tr></thead>
+    <tbody>
+      <tr><td>120% ou mais</td><td class="num">R$ 420</td><td class="num">R$ 470</td></tr>
+      <tr><td>110%</td><td class="num">R$ 350</td><td class="num">R$ 400</td></tr>
+      <tr><td>100%</td><td class="num">R$ 280</td><td class="num">R$ 330</td></tr>
+      <tr><td>90%</td><td class="num">R$ 180</td><td class="num">R$ 230</td></tr>
+      <tr><td>80%</td><td class="num">R$ 100</td><td class="num">R$ 120</td></tr>
+      <tr><td>70%</td><td class="num">R$ 80</td><td class="num">R$ 100</td></tr>
+    </tbody>
+  </table></div>
+  <p>Por isso é possível fechar o mês abaixo da meta e ainda assim ter recebido durante o mês:
+  <strong>o pagamento é por semana batida.</strong></p>
+  <h3>Prêmio mensal</h3>
+  <p>Individual. Primeiro é preciso se qualificar por uma das duas condições:</p>
+  <div class="calend">
+    <div class="ev"><span class="quando">Condição A</span><span class="oque">A loja fez 90% ou mais da meta e a vendedora vendeu R$ 31 mil ou mais</span></div>
+    <div class="ev"><span class="quando">Condição B</span><span class="oque">A loja ficou abaixo de 90% e a vendedora vendeu R$ 40 mil sozinha</span></div>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th>Venda no mês</th><th class="num">Prêmio</th><th class="num">Com 30%+ em Marcas A</th></tr></thead>
+    <tbody>
+      <tr><td>R$ 55 mil ou mais</td><td class="num">R$ 600</td><td class="num">R$ 650</td></tr>
+      <tr><td>R$ 50 mil</td><td class="num">R$ 500</td><td class="num">R$ 550</td></tr>
+      <tr><td>R$ 45 mil</td><td class="num">R$ 400</td><td class="num">R$ 450</td></tr>
+      <tr><td>R$ 40 mil</td><td class="num">R$ 300</td><td class="num">R$ 350</td></tr>
+      <tr><td>R$ 35 mil</td><td class="num">R$ 200</td><td class="num">R$ 250</td></tr>
+      <tr><td>R$ 31 mil</td><td class="num">R$ 100</td><td class="num">R$ 150</td></tr>
+    </tbody>
+  </table></div>
+  <div class="regra"><span class="t">Marcas A</span>
+    <span class="d">No prêmio semanal, o bônus considera as Marcas A da loja inteira.
+    No prêmio mensal, considera as vendas de cada vendedora. As marcas que entram nessa
+    contagem serão trabalhadas no treinamento de segunda-feira.</span></div>
+  <div class="regra"><span class="t">Semana fechada não é recalculada</span>
+    <span class="d">O valor apurado fica registrado, mesmo havendo mudança de equipe depois.</span></div>
+</section>
+
+<section class="sec">
+  <h2>Calendário até dezembro</h2>
+  <div class="calend">
+    <div class="ev"><span class="quando">14 a 19/09</span><span class="oque">Semana do Cliente</span>
+      <span class="obs">Maior oportunidade do ano para cadastrar clientes no Clube Miss Itaituba.</span></div>
+    <div class="ev"><span class="quando">07/11</span><span class="oque">Aniversário da Miss Beleza</span></div>
+    <div class="ev"><span class="quando">Novembro</span><span class="oque">Black Friday</span></div>
+    <div class="ev"><span class="quando">Dezembro</span><span class="oque">Natal</span>
+      <span class="obs">Mês de maior faturamento do ano.</span></div>
+  </div>
+  <p>As condições de cada data serão comunicadas por escrito antes de cada período.</p>
+</section>
+
+<div class="rodape">
+  Este documento foi apresentado na reunião de 1º de setembro de 2026 e enviado à equipe.
+  Serve como referência para consulta sobre Clube, desconto, premiação e calendário.
+  Alterações nas regras serão comunicadas por escrito e este documento será atualizado.
+</div>
+
+</div>

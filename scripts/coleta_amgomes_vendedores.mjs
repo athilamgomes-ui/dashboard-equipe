@@ -4,7 +4,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { garantirSessao } from "./microvix_auth.mjs";
 
-const PROFILE_DIR = join(homedir(), ".claude", "microvix-profile");
+const PROFILE_DIR = process.env.MICROVIX_PROFILE || join(homedir(), ".claude", "microvix-profile");
 const LOJA_POR_EMPRESA = { 1: "L1", 3: "L3", 4: "L4", 10: "L5" };
 
 function logErr(msg) { process.stderr.write(`[vend] ${msg}\n`); }
