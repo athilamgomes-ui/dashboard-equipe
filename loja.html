@@ -1043,8 +1043,6 @@ const VENDEDORAS_META = {
   'Bárbara':  {loja:'L1', badges:['nova']},  // entrou jun/2026, no lugar da Alcione
   'Ana Mira': {loja:'L3', badges:['gerente']},
   'Raimunda': {loja:'L3', badges:[]},
-  'Brunna':   {loja:'L3', badges:[]},
-  'Naila':    {loja:'L3', badges:[]},
   'Tanaia':   {loja:'L4', badges:['gerente','gestante']},
   'Josilene': {loja:'L4', badges:[]},
   'Bruna F.': {loja:'L4', badges:[]},
@@ -1053,13 +1051,15 @@ const VENDEDORAS_META = {
   'Joyce':    {loja:'L5', badges:[]},
   'Rosiene':  {loja:'L5', badges:['gerente']},
   'Karina':   {loja:'L5', badges:[]},
-  'Lucas':    {loja:'L5', badges:['caixa']},
   // Desligadas: fora das telas operacionais (sem PIN, não entram no roster ativo
   // nem em cálculo de semana aberta), MAS preservadas aqui pra integridade do
   // histórico — seus prêmios das semanas em que participaram ficam congelados em
   // HISTORICO_PREMIOS e NÃO são recalculados. Ver [[premiacao-imutabilidade-semanas-fechadas]].
   'Elianna':  {loja:'L4', badges:[], status:'desligada', desde:'2026-06-23'},
   'Rosana':   {loja:'L4', badges:[], status:'desligada', desde:'2026-07-04'},
+  'Naila':    {loja:'L3', badges:[], status:'desligada', desde:'2026-08-31'},
+  'Brunna':   {loja:'L3', badges:[], status:'desligada', desde:'2026-08-31'},
+  'Lucas':    {loja:'L5', badges:['caixa'], status:'desligada', desde:'2026-08-31'},
 };
 // True se a vendedora foi desligada (não deve aparecer em telas operacionais).
 function isDesligada(nome) { return (VENDEDORAS_META[nome]?.status) === 'desligada'; }
@@ -2897,7 +2897,7 @@ async function init() {
 
 function renderVendList() {
   const vends = Object.entries(VENDEDORAS_META)
-    .filter(([n,m]) => m.loja === LOJA_KEY)
+    .filter(([n,m]) => m.loja === LOJA_KEY && !isDesligada(n))
     .map(([n]) => n);
   const html = vends.map(v => {
     const init = v.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();

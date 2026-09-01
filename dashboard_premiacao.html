@@ -244,11 +244,11 @@ const LOJAS_BASE = {
   L1: { nome:'Casa da Beleza Altamira', cor:'#ffb347',
         vendedoras:['Tatiane','Rayra','Sofia','Bárbara'] },
   L3: { nome:'Miss Beleza Itaituba', cor:'#00d4aa',
-        vendedoras:['Ana Mira','Raimunda','Brunna','Naila'] },
+        vendedoras:['Ana Mira','Raimunda'] },
   L4: { nome:'MissBeleza Altamira', cor:'#7c5cfc',
         vendedoras:['Tanaia','Josilene','Bruna F.','Débora'] },
   L5: { nome:'MissBeleza Santarém', cor:'#ef4444',
-        vendedoras:['Rayssa','Joyce','Rosiene','Karina','Lucas'] },
+        vendedoras:['Rayssa','Joyce','Rosiene','Karina'] },
 };
 
 // ─── DADOS ──────────────────────────────────────────────────────────────────
@@ -659,7 +659,7 @@ const DADOS = {
     L1: {
       meta_mensal: 160000,
       semanas: [
-        {id:'S1', label:'Semana 1', periodo:'01/09–05/09', meta:29700},{id:'S2', label:'Semana 2', periodo:'08/09–12/09', meta:39900},{id:'S3', label:'Semana 3', periodo:'14/09–19/09', meta:40000},{id:'S4', label:'Semana 4', periodo:'21/09–26/09', meta:35200},{id:'S5', label:'Semana 5', periodo:'28/09–30/09', meta:15200},
+        {id:'S1', label:'Semana 1', periodo:'01/09–05/09', meta:30000},{id:'S2', label:'Semana 2', periodo:'08/09–12/09', meta:39800},{id:'S3', label:'Semana 3', periodo:'14/09–19/09', meta:39800},{id:'S4', label:'Semana 4', periodo:'21/09–26/09', meta:35200},{id:'S5', label:'Semana 5', periodo:'28/09–30/09', meta:15200},
       ],
       vendas: {}, marcasA_loja: {}, marcasA_indiv: {}, tickets: {}, pecas: {}, cmv: {}, vendas_marca: {}
     },
@@ -673,7 +673,7 @@ const DADOS = {
     L4: {
       meta_mensal: 160000,
       semanas: [
-        {id:'S1', label:'Semana 1', periodo:'01/09–05/09', meta:30100},{id:'S2', label:'Semana 2', periodo:'08/09–12/09', meta:37700},{id:'S3', label:'Semana 3', periodo:'14/09–19/09', meta:40000},{id:'S4', label:'Semana 4', periodo:'21/09–26/09', meta:37400},{id:'S5', label:'Semana 5', periodo:'28/09–30/09', meta:14800},
+        {id:'S1', label:'Semana 1', periodo:'01/09–05/09', meta:32100},{id:'S2', label:'Semana 2', periodo:'08/09–12/09', meta:37700},{id:'S3', label:'Semana 3', periodo:'14/09–19/09', meta:38000},{id:'S4', label:'Semana 4', periodo:'21/09–26/09', meta:37400},{id:'S5', label:'Semana 5', periodo:'28/09–30/09', meta:14800},
       ],
       vendas: {}, marcasA_loja: {}, marcasA_indiv: {}, tickets: {}, pecas: {}, cmv: {}, vendas_marca: {}
     },
@@ -705,8 +705,6 @@ const VENDEDORAS_META = {
   'Bárbara':  {loja:'L1', badges:['nova']},  // entrou jun/2026, no lugar da Alcione
   'Ana Mira': {loja:'L3', badges:['gerente']},
   'Raimunda': {loja:'L3', badges:[]},
-  'Brunna':   {loja:'L3', badges:[]},
-  'Naila':    {loja:'L3', badges:[]},
   'Tanaia':   {loja:'L4', badges:['gerente','gestante']},
   'Josilene': {loja:'L4', badges:[]},
   'Bruna F.': {loja:'L4', badges:[]},
@@ -715,11 +713,13 @@ const VENDEDORAS_META = {
   'Joyce':    {loja:'L5', badges:[]},
   'Rosiene':  {loja:'L5', badges:['gerente']},
   'Karina':   {loja:'L5', badges:[]},
-  'Lucas':    {loja:'L5', badges:['caixa']},
   // Desligada: fora do roster ativo (LOJAS_BASE), mas preservada aqui pra
   // integridade do histórico — prêmios congelados em HISTORICO_PREMIOS.
   'Elianna':  {loja:'L4', badges:[], status:'desligada', desde:'2026-06-23'},
   'Rosana':   {loja:'L4', badges:[], status:'desligada', desde:'2026-07-04'},
+  'Naila':    {loja:'L3', badges:[], status:'desligada', desde:'2026-08-31'},
+  'Brunna':   {loja:'L3', badges:[], status:'desligada', desde:'2026-08-31'},
+  'Lucas':    {loja:'L5', badges:['caixa'], status:'desligada', desde:'2026-08-31'},
 };
 function isDesligada(nome) { return (VENDEDORAS_META[nome]?.status) === 'desligada'; }
 
