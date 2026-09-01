@@ -650,7 +650,41 @@ const DADOS = {
       vendas_marca: {}
     },
   },
-  '2026-09': null,
+  '2026-09': {
+    // SETEMBRO/2026 — rollover 31/08. Metas semanais ancoradas na venda REAL por dia da semana
+    // (coleta diária jul–ago) + forma de julho. S2/S3 são os picos (pós-pagamento + Dia do Cliente
+    // 15/09), S4 abaixo, S5 = seg/ter/qua de fim de mês (real). Somam a meta mensal (=agosto).
+    // 07/09 é feriado (loja fechada) — S2 vai de 08 a 12/09. Meta Real definida com o Athila.
+    semana_atual: 'S1',
+    L1: {
+      meta_mensal: 160000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/09–05/09', meta:29700},{id:'S2', label:'Semana 2', periodo:'08/09–12/09', meta:39900},{id:'S3', label:'Semana 3', periodo:'14/09–19/09', meta:40000},{id:'S4', label:'Semana 4', periodo:'21/09–26/09', meta:35200},{id:'S5', label:'Semana 5', periodo:'28/09–30/09', meta:15200},
+      ],
+      vendas: {}, marcasA_loja: {}, marcasA_indiv: {}, tickets: {}, pecas: {}, cmv: {}, vendas_marca: {}
+    },
+    L3: {
+      meta_mensal: 90000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/09–05/09', meta:15500},{id:'S2', label:'Semana 2', periodo:'08/09–12/09', meta:23000},{id:'S3', label:'Semana 3', periodo:'14/09–19/09', meta:22400},{id:'S4', label:'Semana 4', periodo:'21/09–26/09', meta:20400},{id:'S5', label:'Semana 5', periodo:'28/09–30/09', meta:8700},
+      ],
+      vendas: {}, marcasA_loja: {}, marcasA_indiv: {}, tickets: {}, pecas: {}, cmv: {}, vendas_marca: {}
+    },
+    L4: {
+      meta_mensal: 160000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/09–05/09', meta:30100},{id:'S2', label:'Semana 2', periodo:'08/09–12/09', meta:37700},{id:'S3', label:'Semana 3', periodo:'14/09–19/09', meta:40000},{id:'S4', label:'Semana 4', periodo:'21/09–26/09', meta:37400},{id:'S5', label:'Semana 5', periodo:'28/09–30/09', meta:14800},
+      ],
+      vendas: {}, marcasA_loja: {}, marcasA_indiv: {}, tickets: {}, pecas: {}, cmv: {}, vendas_marca: {}
+    },
+    L5: {
+      meta_mensal: 90000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/09–05/09', meta:19400},{id:'S2', label:'Semana 2', periodo:'08/09–12/09', meta:20400},{id:'S3', label:'Semana 3', periodo:'14/09–19/09', meta:23000},{id:'S4', label:'Semana 4', periodo:'21/09–26/09', meta:19300},{id:'S5', label:'Semana 5', periodo:'28/09–30/09', meta:7900},
+      ],
+      vendas: {}, marcasA_loja: {}, marcasA_indiv: {}, tickets: {}, pecas: {}, cmv: {}, vendas_marca: {}
+    },
+  },
   '2026-10': null,
   '2026-11': null,
   '2026-12': null,
@@ -1530,7 +1564,7 @@ const METAS_FUTURAS = {
   '2026-06': {L1:140000,L3:80000,L4:140000,L5:90000},
   '2026-07': {L1:140000,L3:85000,L4:140000,L5:90000}, // confirmado 04/07 via Tabela de Premiação/PDF (L3 subiu de 80k pra 85k)
   '2026-08': {L1:160000,L3:90000,L4:160000,L5:90000},
-  '2026-09': {L1:130000,L3:75000,L4:130000,L5:85000},
+  '2026-09': {L1:160000,L3:90000,L4:160000,L5:90000}, // mantidas = agosto (decisão Athila 31/08)
   '2026-10': {L1:140000,L3:80000,L4:140000,L5:90000},
   '2026-11': {L1:145000,L3:82000,L4:145000,L5:92000},
   '2026-12': {L1:160000,L3:90000,L4:160000,L5:100000},
@@ -1672,6 +1706,7 @@ const HISTORICO_PREMIOS = {
     },
   },
   '2026-08': {
+    // S6 CONGELADA 31/08/2026 (fechamento do mes, 1 dia). Pool ZERO nas 4 lojas (todas abaixo de 70%). Sem premio.
     // S5 CONGELADA 31/08/2026 (fechou sab 29/08). Coleta FINAL 24-29/08 refeita hoje 14:40
     // (cron_etapa1_vendas + coleta_cliente8): resultado IDENTICO ao do ultimo run de sabado
     // (16:10) nas 4 lojas, vendedora por vendedora — delta zero. O sabado ja estava completo,
@@ -1704,36 +1739,36 @@ const HISTORICO_PREMIOS = {
     // L1 68,7% parou R$569 abaixo dos R$30.100 da faixa 70 · L3 39,5% · L4 50,5% (MA 31,2%,
     // mas bonus so vale a partir de 70% da meta). IMUTAVEL.
     L1: {
-      'Tatiane': {S1:53, S2:29, S3:31, S4:0, S5:0},
-      'Rayra': {S1:21, S2:26, S3:18, S4:0, S5:0},
-      'Sofia': {S1:18, S2:16, S3:12, S4:0, S5:0},
-      'Bárbara': {S1:28, S2:29, S3:18, S4:0, S5:0},
-      _em_pct: {S1:87, S2:85.1, S3:75.2,S4:68.7, S5:55.1},
-      _pool:   {S1:120, S2:100, S3:80,S4:0, S5:0},  // S1: faixa 80 (100) + bonus Marcas A (36,9%) · S2: faixa 80, sem bonus (MA 29,3%)
+      'Tatiane': {S1:53, S2:29, S3:31, S4:0, S5:0, S6:0},
+      'Rayra': {S1:21, S2:26, S3:18, S4:0, S5:0, S6:0},
+      'Sofia': {S1:18, S2:16, S3:12, S4:0, S5:0, S6:0},
+      'Bárbara': {S1:28, S2:29, S3:18, S4:0, S5:0, S6:0},
+      _em_pct: {S1:87, S2:85.1, S3:75.2,S4:68.7, S5:55.1, S6:44.2},
+      _pool:   {S1:120, S2:100, S3:80,S4:0, S5:0, S6:0},  // S1: faixa 80 (100) + bonus Marcas A (36,9%) · S2: faixa 80, sem bonus (MA 29,3%)
     },
     L3: {
-      'Ana Mira': {S1:0, S2:15, S3:0, S4:0, S5:0},
-      'Raimunda': {S1:0, S2:28, S3:0, S4:0, S5:0},
-      'Brunna': {S1:0, S2:16, S3:0, S4:0, S5:0},
-      'Naila': {S1:0, S2:21, S3:0, S4:0, S5:0},
-      _em_pct: {S1:33.7, S2:72.9, S3:51.7,S4:39.5, S5:43.8},
-      _pool:   {S1:0, S2:80, S3:0,S4:0, S5:0},  // S1: 33,7% da meta — abaixo de 70%, sem pool · S2: faixa 70 (MA 18,5%)
+      'Ana Mira': {S1:0, S2:15, S3:0, S4:0, S5:0, S6:0},
+      'Raimunda': {S1:0, S2:28, S3:0, S4:0, S5:0, S6:0},
+      'Brunna': {S1:0, S2:16, S3:0, S4:0, S5:0, S6:0},
+      'Naila': {S1:0, S2:21, S3:0, S4:0, S5:0, S6:0},
+      _em_pct: {S1:33.7, S2:72.9, S3:51.7,S4:39.5, S5:43.8, S6:40.2},
+      _pool:   {S1:0, S2:80, S3:0,S4:0, S5:0, S6:0},  // S1: 33,7% da meta — abaixo de 70%, sem pool · S2: faixa 70 (MA 18,5%)
     },
     L4: {
-      'Tanaia': {S1:0, S2:0, S3:0, S4:0, S5:0},
-      'Josilene': {S1:123, S2:28, S3:0, S4:0, S5:0},
-      'Bruna F.': {S1:97, S2:56, S3:0, S4:0, S5:0},
-      'Débora': {S1:110, S2:36, S3:0, S4:0, S5:0},
-      _em_pct: {S1:105, S2:83.7, S3:53.8,S4:50.5, S5:39.8},
-      _pool:   {S1:330, S2:120, S3:0,S4:0, S5:0},  // S1: faixa 100 (280) + bonus MA (32,7%) · S2: faixa 80 (100) + bonus MA (39,3%)
+      'Tanaia': {S1:0, S2:0, S3:0, S4:0, S5:0, S6:0},
+      'Josilene': {S1:123, S2:28, S3:0, S4:0, S5:0, S6:0},
+      'Bruna F.': {S1:97, S2:56, S3:0, S4:0, S5:0, S6:0},
+      'Débora': {S1:110, S2:36, S3:0, S4:0, S5:0, S6:0},
+      _em_pct: {S1:105, S2:83.7, S3:53.8,S4:50.5, S5:39.8, S6:47},
+      _pool:   {S1:330, S2:120, S3:0,S4:0, S5:0, S6:0},  // S1: faixa 100 (280) + bonus MA (32,7%) · S2: faixa 80 (100) + bonus MA (39,3%)
     },
     L5: {
-      'Rayssa': {S1:0, S2:17, S3:17, S4:14, S5:0},
-      'Joyce': {S1:0, S2:27, S3:23, S4:30, S5:0},
-      'Rosiene': {S1:0, S2:15, S3:20, S4:24, S5:0},
-      'Karina': {S1:0, S2:21, S3:20, S4:32, S5:0},
-      _em_pct: {S1:69.9, S2:77, S3:70.2,S4:82.7, S5:64.2},
-      _pool:   {S1:0, S2:80, S3:80,S4:100, S5:0},  // S1: R$5 abaixo da faixa 70 (R$3.500), sem pool · S2: faixa 70 (MA 21,6%)
+      'Rayssa': {S1:0, S2:17, S3:17, S4:14, S5:0, S6:0},
+      'Joyce': {S1:0, S2:27, S3:23, S4:30, S5:0, S6:0},
+      'Rosiene': {S1:0, S2:15, S3:20, S4:24, S5:0, S6:0},
+      'Karina': {S1:0, S2:21, S3:20, S4:32, S5:0, S6:0},
+      _em_pct: {S1:69.9, S2:77, S3:70.2,S4:82.7, S5:64.2, S6:38.2},
+      _pool:   {S1:0, S2:80, S3:80,S4:100, S5:0, S6:0},  // S1: R$5 abaixo da faixa 70 (R$3.500), sem pool · S2: faixa 70 (MA 21,6%)
     },
   },
 };
