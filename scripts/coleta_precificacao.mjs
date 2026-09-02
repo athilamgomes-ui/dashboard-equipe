@@ -50,6 +50,12 @@ const ULTIMA_VENDA = (() => { try { return JSON.parse(readFileSync("/Users/elkgo
 // Preço de MERCADO (pesquisa na internet: mediana/preço mais constante) + FRETE p/ interior PA, por EAN.
 // Só EXIBIÇÃO (campo preco_mercado) — NÃO é trava, NÃO entra no cálculo. É o teto competitivo real. (25/08/2026)
 const PRECO_MERCADO = (() => { try { return JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_preco_mercado.json", "utf8")).precos || {}; } catch { return {}; } })();
+// Ponte EAN->código interno (persistente) + BALANÇO (dados_estoque/snapshot.json) — FALLBACK do preço atual.
+// Quando o relatório de Lista de Preços falha (token_api caiu na migração de auth), o preço atual vem do
+// balanço via EAN->código->preço. O mapa cresce sozinho quando o relatório funciona. (02/09/2026, Opção B do Athila)
+const EAN_COD_FILE = "/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_ean_cod.json";
+const EAN_COD = (() => { try { return JSON.parse(readFileSync(EAN_COD_FILE, "utf8")).ean_cod || {}; } catch { return {}; } })();
+const BALANCO = (() => { try { return JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/dados_estoque/snapshot.json", "utf8")).lojas || {}; } catch { return {}; } })();
 const ST_PA = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/st_pa_ncm.json", "utf8"));
 const ST_NCM = (ST_PA.ncm_st || []).map(String).sort((a, b) => b.length - a.length); // prefixos mais longos primeiro
 const URL_LISTA_PRECOS = "https://linx.microvix.com.br/gestor_web/produtos/relatorio_lista_precos.asp";
@@ -937,6 +943,35 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
       }
       if (preservados) log(`preços preservados de coleta anterior (falha transitória do relatório): ${preservados}`);
     } catch {}
+
+    // ===== FALLBACK do PREÇO ATUAL pelo BALANÇO (Opção B) — quando o relatório de Lista de Preços falha =====
+    // O balanço (dados_estoque/snapshot.json) traz o preço de venda ATUAL por loja. Ponte: EAN->código
+    // (mapa persistente) -> preço do balanço da loja. NÃO sobrepõe preço FRESCO do relatório (só null/preservado*).
+    // Também faz o mapa EAN->código crescer com os códigos que o relatório trouxe (cresce quando o relatório volta).
+    try {
+      let mapDirty = false;
+      for (const L of Object.keys(lojas)) for (const nf of lojas[L]) for (const it of nf.itens) {
+        if (it.cod_erp != null && it.ean && it.ean !== "SEM GTIN" && it.match_tipo !== "balanco") {
+          const e = String(it.ean);
+          if (EAN_COD[e] !== String(it.cod_erp)) { EAN_COD[e] = String(it.cod_erp); mapDirty = true; }
+        }
+      }
+      let viaBalanco = 0;
+      for (const L of Object.keys(lojas)) {
+        const prods = (BALANCO[L] || {}).prods || {};
+        if (!Object.keys(prods).length) continue;
+        for (const nf of lojas[L]) for (const it of nf.itens) {
+          const fresco = it.preco_atual != null && it.match_tipo && !String(it.match_tipo).endsWith("*") && it.match_tipo !== "balanco";
+          if (fresco) continue; // respeita preço fresco do relatório (quando token_api voltar)
+          const cod = EAN_COD[String(it.ean || "")];
+          if (!cod) continue;
+          const p = prods[cod];
+          if (p && Number(p.pre) > 0) { it.preco_atual = Math.round(Number(p.pre) * 100) / 100; it.cod_erp = cod; it.match_tipo = "balanco"; viaBalanco++; }
+        }
+      }
+      if (viaBalanco) log(`preço atual via BALANÇO (relatório indisponível): ${viaBalanco} item(ns)`);
+      if (mapDirty) { try { writeFileSync(EAN_COD_FILE, JSON.stringify({ _doc: "Mapa EAN->codigo interno (ponte p/ preco atual via balanco quando o relatorio falha). Cresce quando o relatorio funciona.", atualizado_em: new Date().toISOString().slice(0, 10), ean_cod: EAN_COD }, null, 0)); log(`mapa EAN->código atualizado (${Object.keys(EAN_COD).length} EANs)`); } catch {} }
+    } catch (e) { log("fallback balanço falhou: " + String(e.message || e)); }
 
     // ===== Último preço de venda REAL (exibição, por EAN) — NÃO é trava =====
     let comUltVenda = 0;
