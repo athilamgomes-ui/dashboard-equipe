@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-09-02T18:20:22.104Z",
+  "gerado_em": "2026-09-02T18:26:56.573Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
@@ -15,6 +15,10 @@
         "valor": 14534.52,
         "lancada": true,
         "natureza": "Venda de Producao",
+        "marca_candidatas": [
+          "Natum",
+          "Hair Extrattus"
+        ],
         "itens": [
           {
             "cprod": "2.11.017",
@@ -22,7 +26,7 @@
             "descricao": "SH MANDIOCA 300 ML HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 140.4,
             "desconto": 0,
             "frete": 0,
@@ -43,9 +47,7 @@
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.11.022",
@@ -53,7 +55,7 @@
             "descricao": "SH NEUTRO 300 ML HAIR EXTRATTUS",
             "qtd": 24,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 274.08,
             "desconto": 0,
             "frete": 0,
@@ -74,9 +76,7 @@
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.11.023",
@@ -84,7 +84,7 @@
             "descricao": "SH PESSEGO 300 ML HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 137.04,
             "desconto": 0,
             "frete": 0,
@@ -105,9 +105,7 @@
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.11.024",
@@ -115,7 +113,7 @@
             "descricao": "SH POS PROGRESSIVA 300 ML HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 173.76,
             "desconto": 0,
             "frete": 0,
@@ -136,9 +134,7 @@
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.11.028",
@@ -146,7 +142,7 @@
             "descricao": "SH MATIZER PLATINUM BLACK 300 ML HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 185.76,
             "desconto": 0,
             "frete": 0,
@@ -167,9 +163,7 @@
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.11.033",
@@ -177,7 +171,7 @@
             "descricao": "SH ANTIRRES BOTTOX VINTAGE 300 ML HAIR EXTRATTUS.",
             "qtd": 36,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 524.88,
             "desconto": 0,
             "frete": 0,
@@ -198,9 +192,7 @@
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.11.058",
@@ -208,7 +200,7 @@
             "descricao": "KIT SH/COND/MASC NEUTRO HAIR EXTRATTUS",
             "qtd": 24,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 632.64,
             "desconto": 0,
             "frete": 0,
@@ -229,9 +221,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.11.059",
@@ -239,7 +229,7 @@
             "descricao": "KIT SH/COND/MASC PESSEGO HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 316.32,
             "desconto": 0,
             "frete": 0,
@@ -260,9 +250,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.11.064",
@@ -270,7 +258,7 @@
             "descricao": "KIT SH/COND/MASC BLACK HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 465.12,
             "desconto": 0,
             "frete": 0,
@@ -291,9 +279,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.12.012",
@@ -301,7 +287,7 @@
             "descricao": "COND PESSEGO 300 ML HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 137.04,
             "desconto": 0,
             "frete": 0,
@@ -322,9 +308,7 @@
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.12.013",
@@ -332,7 +316,7 @@
             "descricao": "COND MANDIOCA 300 ML HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 140.4,
             "desconto": 0,
             "frete": 0,
@@ -353,9 +337,7 @@
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.12.014",
@@ -363,7 +345,7 @@
             "descricao": "COND NEUTRO 300 ML HAIR EXTRATTUS",
             "qtd": 24,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 274.08,
             "desconto": 0,
             "frete": 0,
@@ -384,9 +366,7 @@
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.12.019",
@@ -394,7 +374,7 @@
             "descricao": "COND POS PROGRESSIVA 300 ML HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 173.76,
             "desconto": 0,
             "frete": 0,
@@ -415,9 +395,7 @@
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.12.022",
@@ -425,7 +403,7 @@
             "descricao": "COND MATIZER PLATINUM BLACK 300 ML HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 185.76,
             "desconto": 0,
             "frete": 0,
@@ -446,9 +424,7 @@
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.12.051",
@@ -456,7 +432,7 @@
             "descricao": "KIT MORTE ESCANDALOSA SH/CONDIC 800HAIR 1 L HA",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 435.12,
             "desconto": 0,
             "frete": 0,
@@ -477,9 +453,7 @@
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.12.052",
@@ -487,7 +461,7 @@
             "descricao": "KIT MAIS LISO SH 900ML / COND 800ML HAIR EXTRATTUS.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 435.12,
             "desconto": 0,
             "frete": 0,
@@ -508,9 +482,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.12.053",
@@ -518,7 +490,7 @@
             "descricao": "KIT MILAGRE DOS FIOS SH 900ML / COND 800ML HAIR EXTRATTUS.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 435.12,
             "desconto": 0,
             "frete": 0,
@@ -539,9 +511,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.021",
@@ -549,7 +519,7 @@
             "descricao": "MASC MANDIOCA 250 GR HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 150.72,
             "desconto": 0,
             "frete": 0,
@@ -570,9 +540,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.023",
@@ -580,7 +548,7 @@
             "descricao": "MASC MATIZER BLOND 250 GR HAIR EXTRATTUS.",
             "qtd": 24,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 381.36,
             "desconto": 0,
             "frete": 0,
@@ -601,9 +569,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.027",
@@ -611,7 +577,7 @@
             "descricao": "MASC PESSEGO 250 GR HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 144.36,
             "desconto": 0,
             "frete": 0,
@@ -632,9 +598,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.029",
@@ -642,7 +606,7 @@
             "descricao": "MASC POS PROGRESSIVA 250 GR HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 170.16,
             "desconto": 0,
             "frete": 0,
@@ -663,9 +627,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.033",
@@ -673,7 +635,7 @@
             "descricao": "MASC MATIZER RED 250 GR HAIR EXTRATTUS.",
             "qtd": 24,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 381.36,
             "desconto": 0,
             "frete": 0,
@@ -694,9 +656,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.034",
@@ -704,7 +664,7 @@
             "descricao": "MASC MATIZER PLATINUM BLACK 250 GR HAIR EXTRATTUS.",
             "qtd": 24,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 381.36,
             "desconto": 0,
             "frete": 0,
@@ -725,9 +685,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.035",
@@ -735,7 +693,7 @@
             "descricao": "BOTTOX VINTAGE 1 KG HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 762,
             "desconto": 0,
             "frete": 0,
@@ -756,9 +714,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.036",
@@ -766,7 +722,7 @@
             "descricao": "BOTTOX VINTAGE 100 GR HAIR EXTRATTUS.",
             "qtd": 36,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 467.28,
             "desconto": 0,
             "frete": 0,
@@ -787,9 +743,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.038",
@@ -797,7 +751,7 @@
             "descricao": "BOTTOX VINTAGE BLOND 1 KG HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 762,
             "desconto": 0,
             "frete": 0,
@@ -818,9 +772,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.039",
@@ -828,7 +780,7 @@
             "descricao": "BOTTOX VINTAGE BLOND 100 GR HAIR EXTRATTUS.",
             "qtd": 36,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 467.28,
             "desconto": 0,
             "frete": 0,
@@ -849,9 +801,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.056",
@@ -859,7 +809,7 @@
             "descricao": "MASC MARSALA 250 GR HAIR EXTRATTUS.",
             "qtd": 24,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 381.36,
             "desconto": 0,
             "frete": 0,
@@ -880,9 +830,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.062",
@@ -890,7 +838,7 @@
             "descricao": "SELANTE MAGICA DO LISO 1 L HAIR EXTRATTUS.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 667.8,
             "desconto": 0,
             "frete": 0,
@@ -911,9 +859,7 @@
             "ncm": "33052000",
             "cest": "2001800",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.063",
@@ -921,7 +867,7 @@
             "descricao": "SELANTE MAGICA DO LISO 300 ML HAIR EXTRATTUS.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 282.24,
             "desconto": 0,
             "frete": 0,
@@ -942,9 +888,7 @@
             "ncm": "33052000",
             "cest": "2001800",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.066",
@@ -952,7 +896,7 @@
             "descricao": "SELANTE MAGICA DO LISO BLOND 1 L HAIR EXTRATTUS",
             "qtd": 6,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 333.9,
             "desconto": 0,
             "frete": 0,
@@ -973,9 +917,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.067",
@@ -983,7 +925,7 @@
             "descricao": "SELANTE MAGICA DO LISO BLOND 300 ML HAIR EXTRATTUS.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 282.24,
             "desconto": 0,
             "frete": 0,
@@ -1004,9 +946,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.073",
@@ -1014,7 +954,7 @@
             "descricao": "ALISANTE DEFINITIVA JAPONESA 150 GR HAIR EXTRATTUS.",
             "qtd": 36,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 683.64,
             "desconto": 0,
             "frete": 0,
@@ -1035,9 +975,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.085",
@@ -1045,7 +983,7 @@
             "descricao": "MASC MATIZER CASTANHO 250 GR HAIR EXTRATTUS.",
             "qtd": 24,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 381.36,
             "desconto": 0,
             "frete": 0,
@@ -1066,9 +1004,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.13.100",
@@ -1076,7 +1012,7 @@
             "descricao": "MASCARA LIQUIDA LAMELAR INTENSE 200 GR HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 364.08,
             "desconto": 0,
             "frete": 0,
@@ -1097,9 +1033,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.14.007",
@@ -1107,7 +1041,7 @@
             "descricao": "REPARADOR DE PONTAS 45 ML HAIR EXTRATTUS.",
             "qtd": 36,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 508.68,
             "desconto": 0,
             "frete": 0,
@@ -1128,9 +1062,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.14.008",
@@ -1138,7 +1070,7 @@
             "descricao": "ARGAN OIL  45 ML HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 178.32,
             "desconto": 0,
             "frete": 0,
@@ -1159,9 +1091,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.14.009",
@@ -1169,7 +1099,7 @@
             "descricao": "SERUM POS PROGRESS 45 ML HAIR EXTRATTUS.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 200.04,
             "desconto": 0,
             "frete": 0,
@@ -1190,9 +1120,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.14.015",
@@ -1200,7 +1128,7 @@
             "descricao": "LEAVE-IN POS PROGRESSIVA 250 ML HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 179.76,
             "desconto": 0,
             "frete": 0,
@@ -1221,9 +1149,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.14.022",
@@ -1231,7 +1157,7 @@
             "descricao": "BB CREAMPLUS 120 ML HAIR EXTRATTUS",
             "qtd": 18,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 276.3,
             "desconto": 0,
             "frete": 0,
@@ -1252,9 +1178,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.14.024",
@@ -1262,7 +1186,7 @@
             "descricao": "FLUIDO BIPHASIC 120 ML HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 217.8,
             "desconto": 0,
             "frete": 0,
@@ -1283,9 +1207,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.14.031",
@@ -1293,7 +1215,7 @@
             "descricao": "LEAVE-IN PESSEGO 250 GR HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 180,
             "desconto": 0,
             "frete": 0,
@@ -1314,9 +1236,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.14.034",
@@ -1324,7 +1244,7 @@
             "descricao": "LEAVE-IN MANDIOCA 250 ML HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 143.4,
             "desconto": 0,
             "frete": 0,
@@ -1345,9 +1265,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2.14.035",
@@ -1355,7 +1273,7 @@
             "descricao": "LEAVE-IN NEUTRO 250 ML HAIR EXTRATTUS",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Hair Extrattus",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 139.32,
             "desconto": 0,
             "frete": 0,
@@ -1376,9 +1294,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           }
         ],
         "uf": "ES"
@@ -1394,6 +1310,10 @@
         "valor": 11853.06,
         "lancada": true,
         "natureza": "Venda de Producao",
+        "marca_candidatas": [
+          "Natum",
+          "Hair Extrattus"
+        ],
         "itens": [
           {
             "cprod": "1.11.003",
@@ -1401,7 +1321,7 @@
             "descricao": "SH NEUTRO 5 L NATUM BIO PROFESSIONAL.",
             "qtd": 6,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 359.1,
             "desconto": 0,
             "frete": 0,
@@ -1422,9 +1342,7 @@
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.11.017",
@@ -1432,7 +1350,7 @@
             "descricao": "SH NEUTRO 1 L NATUM BIO PROFESSIONAL.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 359.88,
             "desconto": 0,
             "frete": 0,
@@ -1453,9 +1371,7 @@
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.11.022",
@@ -1463,7 +1379,7 @@
             "descricao": "SH KERATRIX 250 ML NATUM PROFESSIONAL.",
             "qtd": 36,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 574.2,
             "desconto": 0,
             "frete": 0,
@@ -1484,9 +1400,7 @@
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.11.023",
@@ -1494,7 +1408,7 @@
             "descricao": "SH THERMO RESTORE 250 ML NATUM.",
             "qtd": 24,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 382.8,
             "desconto": 0,
             "frete": 0,
@@ -1515,9 +1429,7 @@
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.11.025",
@@ -1525,7 +1437,7 @@
             "descricao": "SH HIDRATANTE KERATRIX 1 L NATUM PROFESSIONAL.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 324,
             "desconto": 0,
             "frete": 0,
@@ -1546,9 +1458,7 @@
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.11.064",
@@ -1556,7 +1466,7 @@
             "descricao": "SHAMPOO NEUTRO BIO 250 ML NATUM",
             "qtd": 36,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 582.48,
             "desconto": 0,
             "frete": 0,
@@ -1577,9 +1487,7 @@
             "ncm": "33051000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.12.016",
@@ -1587,7 +1495,7 @@
             "descricao": "COND NEUTRO 1 L NATUM BIO PROFESSIONAL.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 359.4,
             "desconto": 0,
             "frete": 0,
@@ -1608,9 +1516,7 @@
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.12.022",
@@ -1618,7 +1524,7 @@
             "descricao": "COND KERATRIX 250 ML NATUM PROFESSIONAL.",
             "qtd": 36,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 574.2,
             "desconto": 0,
             "frete": 0,
@@ -1639,9 +1545,7 @@
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.12.023",
@@ -1649,7 +1553,7 @@
             "descricao": "COND THERMO RESTORE 250 ML NATUM.",
             "qtd": 24,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 382.8,
             "desconto": 0,
             "frete": 0,
@@ -1670,9 +1574,7 @@
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.12.040",
@@ -1680,7 +1582,7 @@
             "descricao": "CONDICIONADOR NEUTRO PROFICIONAL 250 ML NATUM",
             "qtd": 36,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 582.48,
             "desconto": 0,
             "frete": 0,
@@ -1701,9 +1603,7 @@
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.13.003",
@@ -1711,7 +1611,7 @@
             "descricao": "MASC NEUTRO 1 KG NATUM BIO PROFESSIONAL.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 360,
             "desconto": 0,
             "frete": 0,
@@ -1732,9 +1632,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.13.006",
@@ -1742,7 +1640,7 @@
             "descricao": "MASC NEUTRO 250 G NATUM BIO PROFESSIONAL.",
             "qtd": 24,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 438.72,
             "desconto": 0,
             "frete": 0,
@@ -1763,9 +1661,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.13.019",
@@ -1773,7 +1669,7 @@
             "descricao": "MASC BLOND PASSION 250 ML NATUM.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 358.92,
             "desconto": 0,
             "frete": 0,
@@ -1794,9 +1690,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.13.024",
@@ -1804,7 +1698,7 @@
             "descricao": "MASCARA KERATRIX FIBER MASK 250 G NATUM.",
             "qtd": 36,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 574.2,
             "desconto": 0,
             "frete": 0,
@@ -1825,9 +1719,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.13.035",
@@ -1835,7 +1727,7 @@
             "descricao": "MASCARA THERMO RESTORE 250  NATUM.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 191.4,
             "desconto": 0,
             "frete": 0,
@@ -1856,9 +1748,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.13.043",
@@ -1866,7 +1756,7 @@
             "descricao": "MASC SILVER BLACK 250 ML NATUM.",
             "qtd": 24,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 476.64,
             "desconto": 0,
             "frete": 0,
@@ -1887,9 +1777,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.13.069",
@@ -1897,7 +1785,7 @@
             "descricao": "INSTANT LISS 1000 ML NATUM",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 1766.16,
             "desconto": 0,
             "frete": 0,
@@ -1918,9 +1806,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.14.005",
@@ -1928,7 +1814,7 @@
             "descricao": "REPARADOR DE PONTAS 45 ML  NATUM.",
             "qtd": 24,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 487.44,
             "desconto": 0,
             "frete": 0,
@@ -1949,9 +1835,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.14.009",
@@ -1959,7 +1843,7 @@
             "descricao": "FINALIZ KERATRIX 250ML NATUM.",
             "qtd": 36,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 574.2,
             "desconto": 0,
             "frete": 0,
@@ -1980,9 +1864,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.14.010",
@@ -1990,7 +1872,7 @@
             "descricao": "FINALIZ THERMO RESTORE 250 ML NATUM.",
             "qtd": 24,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 382.8,
             "desconto": 0,
             "frete": 0,
@@ -2011,9 +1893,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.14.042",
@@ -2021,7 +1901,7 @@
             "descricao": "ON LISS 200 ML NATUM.",
             "qtd": 6,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 253.8,
             "desconto": 0,
             "frete": 0,
@@ -2042,9 +1922,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.14.045",
@@ -2052,7 +1930,7 @@
             "descricao": "ON LISS 60 ML NATUM.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 260.52,
             "desconto": 0,
             "frete": 0,
@@ -2073,9 +1951,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.14.046",
@@ -2083,7 +1959,7 @@
             "descricao": "LUMINI SPA 60ML ROMANTIC NATUM.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 319.44,
             "desconto": 0,
             "frete": 0,
@@ -2104,9 +1980,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.14.049",
@@ -2114,7 +1988,7 @@
             "descricao": "LUMINI SPA 60ML SEDUCTION NATUM.",
             "qtd": 12,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 319.44,
             "desconto": 0,
             "frete": 0,
@@ -2135,9 +2009,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1.14.056",
@@ -2145,7 +2017,7 @@
             "descricao": "FINALIZ NEUTRO 250 ML NATUM",
             "qtd": 36,
             "cfop": "6101",
-            "marca": "Natum",
+            "marca": "PALLOMA BROQUINI PINTO",
             "valor_bruto": 608.04,
             "desconto": 0,
             "frete": 0,
@@ -2166,9 +2038,7 @@
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "marca_detectada": true,
-            "marca_fonte": "descricao"
+            "st_motivo": "ncm"
           }
         ],
         "uf": "ES"
@@ -17316,13 +17186,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 57.9,
             "cod_erp": "204459",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 24.94
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20052",
@@ -17346,13 +17215,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 64.9,
             "cod_erp": "64155",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.09
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20485",
@@ -17376,13 +17244,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 130.9,
             "cod_erp": "65100",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 54.88
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20497",
@@ -17406,13 +17273,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 128.9,
             "cod_erp": "64334",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 54.88
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20492",
@@ -17436,13 +17302,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 54.9,
             "cod_erp": "64335",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 24.62
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20314",
@@ -17466,13 +17331,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "64149",
-            "match_tipo": "ref",
+            "match_tipo": "ref*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.09
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20567",
@@ -17496,13 +17360,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 96.9,
             "cod_erp": "78683",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 38.17
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20737",
@@ -17526,13 +17389,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 75.9,
             "cod_erp": "203123",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 34.49
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20568",
@@ -17556,13 +17418,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 64.9,
             "cod_erp": "78366",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 24.62
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20685",
@@ -17586,13 +17447,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 90.9,
             "cod_erp": "202289",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 38.17
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20902",
@@ -17616,13 +17476,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 40.9,
             "cod_erp": "204555",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 17.45
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20680",
@@ -17646,13 +17505,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "202279",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 24.62
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20677",
@@ -17676,13 +17534,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "202280",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 24.62
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20681",
@@ -17706,13 +17563,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 58.9,
             "cod_erp": "202278",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 22.65
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20565",
@@ -17736,13 +17592,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 125.9,
             "cod_erp": "78680",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 54.89
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20571",
@@ -17766,13 +17621,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 125.9,
             "cod_erp": "78681",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 54.89
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20564",
@@ -17796,13 +17650,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 115.9,
             "cod_erp": "78682",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 47.72
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20570",
@@ -17826,13 +17679,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "78368",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 24.62
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20900",
@@ -17856,13 +17708,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 40.9,
             "cod_erp": "204556",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 17.45
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20569",
@@ -17886,13 +17737,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "78367",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 24.62
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20563",
@@ -17916,13 +17766,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 64.9,
             "cod_erp": "78364",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.09
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20566",
@@ -17946,13 +17795,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 49.9,
             "cod_erp": "78365",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 22.65
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20911",
@@ -17976,13 +17824,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 65.9,
             "cod_erp": "204557",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 29.95
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20739",
@@ -18006,13 +17853,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "203313",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 24.62
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20732",
@@ -18036,13 +17882,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "202922",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 29.56
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20734",
@@ -18066,13 +17911,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "202923",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 29.56
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20733",
@@ -18096,13 +17940,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 64.9,
             "cod_erp": "202924",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 29.56
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20580",
@@ -18126,13 +17969,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 66.9,
             "cod_erp": "78369",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 26.6
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20323",
@@ -18156,13 +17998,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 128.9,
             "cod_erp": "64213",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 54.89
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20039",
@@ -18186,13 +18027,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 128.9,
             "cod_erp": "63061",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 54.89
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20051",
@@ -18216,13 +18056,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 115.9,
             "cod_erp": "64209",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 47.72
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20262",
@@ -18246,13 +18085,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 54.9,
             "cod_erp": "64212",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 24.62
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20764",
@@ -18276,13 +18114,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 64.9,
             "cod_erp": "203834",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 29.56
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20901",
@@ -18306,13 +18143,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 40.9,
             "cod_erp": "204558",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 17.45
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20080",
@@ -18336,13 +18172,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 50.9,
             "cod_erp": "64210",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 22.65
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20272",
@@ -18366,13 +18201,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 80.9,
             "cod_erp": "76020",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 34.49
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20765",
@@ -18396,13 +18230,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 64.9,
             "cod_erp": "203980",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 29.56
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20908",
@@ -18426,13 +18259,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 57.9,
             "cod_erp": "204458",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 24.94
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20689",
@@ -18456,13 +18288,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 116.9,
             "cod_erp": "202292",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 47.72
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20698",
@@ -18486,13 +18317,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 125.9,
             "cod_erp": "202285",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 54.89
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20687",
@@ -18516,13 +18346,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 125.9,
             "cod_erp": "202282",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 54.89
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20697",
@@ -18546,13 +18375,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 75.9,
             "cod_erp": "202300",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 33.39
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20684",
@@ -18576,13 +18404,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "202287",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 24.62
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20690",
@@ -18606,13 +18433,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 64.9,
             "cod_erp": "202291",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.09
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20696",
@@ -18636,13 +18462,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 49.9,
             "cod_erp": "202290",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 22.65
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20686",
@@ -18666,13 +18491,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 75.9,
             "cod_erp": "202288",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 34.49
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20683",
@@ -18696,13 +18520,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "202284",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 24.62
+            "st_motivo": "ncm"
           },
           {
             "cprod": "20688",
@@ -18726,13 +18549,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "202281",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 24.62
+            "st_motivo": "ncm"
           },
           {
             "cprod": "35147",
@@ -18829,13 +18651,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "204191",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 28.39,
             "preco_mercado": {
               "mercado": 45,
               "frete": 70,
@@ -18868,13 +18689,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "204531",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 28.39
+            "st_motivo": "ncm"
           },
           {
             "cprod": "MCPMED01000003",
@@ -18898,13 +18718,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "204175",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 28.39
+            "st_motivo": "ncm"
           },
           {
             "cprod": "MCPGUA01000003",
@@ -18928,13 +18747,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "204176",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 28.39,
             "preco_mercado": {
               "mercado": 45,
               "frete": 70,
@@ -18967,13 +18785,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "65596",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 28.39,
             "preco_mercado": {
               "mercado": 45,
               "frete": 70,
@@ -19006,13 +18823,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "76022",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 28.39
+            "st_motivo": "ncm"
           },
           {
             "cprod": "MCPRAP01000001",
@@ -19036,13 +18852,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "79566",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 28.39
+            "st_motivo": "ncm"
           },
           {
             "cprod": "MCPLOB01000001",
@@ -19066,13 +18881,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "76021",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 28.39
+            "st_motivo": "ncm"
           },
           {
             "cprod": "MCPCHC01000001",
@@ -19096,13 +18910,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "203719",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 28.39,
             "preco_mercado": {
               "mercado": 45,
               "frete": 70,
@@ -19135,13 +18948,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "79554",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 28.39
+            "st_motivo": "ncm"
           },
           {
             "cprod": "MCPPAV01000003",
@@ -19165,13 +18977,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "204535",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 28.39,
             "preco_mercado": {
               "mercado": 45,
               "frete": 70,
@@ -19204,13 +19015,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "65594",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 28.39,
             "preco_mercado": {
               "mercado": 45,
               "frete": 70,
@@ -19243,13 +19053,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "79564",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 28.39
+            "st_motivo": "ncm"
           },
           {
             "cprod": "AURCXATEA06000001",
@@ -19273,13 +19082,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 76.9,
             "cod_erp": "204538",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 34.74,
             "preco_mercado": {
               "mercado": 58,
               "frete": 70,
@@ -19312,13 +19120,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 76.9,
             "cod_erp": "204537",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 34.74,
             "preco_mercado": {
               "mercado": 58,
               "frete": 70,
@@ -19351,13 +19158,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 76.9,
             "cod_erp": "204536",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 34.74,
             "preco_mercado": {
               "mercado": 58,
               "frete": 70,
@@ -19390,13 +19196,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "79703",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 28.39
+            "st_motivo": "ncm"
           },
           {
             "cprod": "MCPCAP03000001",
@@ -19420,13 +19225,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 146.9,
             "cod_erp": "59648",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 66.47
+            "st_motivo": "ncm"
           },
           {
             "cprod": "MCPRAP03000001",
@@ -19450,13 +19254,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 146.9,
             "cod_erp": "59658",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 66.47
+            "st_motivo": "ncm"
           },
           {
             "cprod": "MCPPIC00600001",
@@ -19480,13 +19283,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 38.9,
             "cod_erp": "77715",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 17.3,
             "preco_mercado": {
               "mercado": 25,
               "frete": 70,
@@ -19624,13 +19426,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 59.9,
             "cod_erp": "204177",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.14
+            "st_motivo": "ncm"
           },
           {
             "cprod": "BANCRP03000001",
@@ -19654,13 +19455,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 59.9,
             "cod_erp": "204192",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.14
+            "st_motivo": "ncm"
           },
           {
             "cprod": "BANCRJ03000002",
@@ -19742,13 +19542,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "79701",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 28.39,
             "preco_mercado": {
               "mercado": 45,
               "frete": 70,
@@ -22933,13 +22732,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 47.9,
             "cod_erp": "64301",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 22.96
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1013/8",
@@ -22963,13 +22761,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 41.9,
             "cod_erp": "80100",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 20.29
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1013/10",
@@ -22993,13 +22790,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 48.9,
             "cod_erp": "202847",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 23.19
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1013/11",
@@ -23023,13 +22819,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 38.9,
             "cod_erp": "204343",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 18.54
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1017/A1",
@@ -23053,13 +22848,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 204.9,
             "cod_erp": "78626",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 98.76
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1022/12",
@@ -23083,13 +22877,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 34.9,
             "cod_erp": "74797",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049100",
             "cest": "2001300",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 16.8
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1022/13",
@@ -23113,13 +22906,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 34.9,
             "cod_erp": "74795",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049100",
             "cest": "2001300",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 16.8
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/1TS",
@@ -23143,13 +22935,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 25.9,
             "cod_erp": "204344",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 12.15
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/4TS",
@@ -23173,13 +22964,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 25.9,
             "cod_erp": "204345",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 12.15
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/7TS",
@@ -23203,13 +22993,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 25.9,
             "cod_erp": "204349",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 12.15
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/A2",
@@ -23233,13 +23022,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 56.9,
             "cod_erp": "45225",
-            "match_tipo": "ref",
+            "match_tipo": "ref*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/A2.5",
@@ -23263,13 +23051,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 56.9,
             "cod_erp": "202838",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/A4",
@@ -23293,13 +23080,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 56.9,
             "cod_erp": "45227",
-            "match_tipo": "ref",
+            "match_tipo": "ref*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.23
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/A4.5",
@@ -23323,13 +23109,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 56.9,
             "cod_erp": "204350",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1026/A5",
@@ -23353,13 +23138,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 56.9,
             "cod_erp": "45228",
-            "match_tipo": "ref",
+            "match_tipo": "ref*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 27.26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1044/16",
@@ -23383,13 +23167,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 29.9,
             "cod_erp": "58572",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33041000",
             "cest": "2000900",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 14.47
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1044/17",
@@ -23413,13 +23196,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 29.9,
             "cod_erp": "58660",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33041000",
             "cest": "2000900",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 14.47
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1044/20",
@@ -23443,13 +23225,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 29.9,
             "cod_erp": "204351",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 14.47
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1044/21",
@@ -23473,13 +23254,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 29.9,
             "cod_erp": "204352",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 14.47
+            "st_motivo": "ncm"
           },
           {
             "cprod": "1044/22",
@@ -23503,13 +23283,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 29.9,
             "cod_erp": "80099",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 14.47
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2021/4",
@@ -23533,13 +23312,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 60.9,
             "cod_erp": "29373",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 29
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2022/2",
@@ -23563,13 +23341,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 78.9,
             "cod_erp": "29375",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 37.72
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2022/3",
@@ -23593,13 +23370,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 78.9,
             "cod_erp": "29376",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 37.72
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2022/4",
@@ -23623,13 +23399,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 85.9,
             "cod_erp": "41292",
-            "match_tipo": "ref",
+            "match_tipo": "ref*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 37.44
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2022/A3",
@@ -23653,13 +23428,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 94.9,
             "cod_erp": "78529",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 45.86
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2022/A4",
@@ -23683,13 +23457,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 94.9,
             "cod_erp": "77213",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 45.86
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2022/A4.5",
@@ -23713,13 +23486,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 94.9,
             "cod_erp": "202852",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 45.86
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2205/A3",
@@ -23743,13 +23515,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 73.9,
             "cod_erp": "53821",
-            "match_tipo": "ref",
+            "match_tipo": "ref*",
             "preco_manual": null,
             "ncm": "33049100",
             "cest": "2001300",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 35.75
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2226",
@@ -23773,13 +23544,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 38.9,
             "cod_erp": "14155",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 18.48
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2226/TS",
@@ -23803,13 +23573,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 23.9,
             "cod_erp": "204354",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 11.57
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2236/B3",
@@ -23833,13 +23602,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 48.9,
             "cod_erp": "78635",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 23.19
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2236/N2",
@@ -23863,13 +23631,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 58.9,
             "cod_erp": "202850",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 29.01
+            "st_motivo": "ncm"
           },
           {
             "cprod": "2236/N3",
@@ -23893,13 +23660,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 60.9,
             "cod_erp": "204355",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 29.01
+            "st_motivo": "ncm"
           },
           {
             "cprod": "3000",
@@ -23923,13 +23689,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 86.9,
             "cod_erp": "49661",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 41.79
+            "st_motivo": "ncm"
           },
           {
             "cprod": "5003/TS",
@@ -23953,13 +23718,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 23.9,
             "cod_erp": "204353",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049910",
             "cest": "2001400",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 11.57
+            "st_motivo": "ncm"
           },
           {
             "cprod": "5020/1",
@@ -23983,13 +23747,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 60.9,
             "cod_erp": "49662",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 29
+            "st_motivo": "ncm"
           },
           {
             "cprod": "5023/TS",
@@ -24013,13 +23776,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 31.9,
             "cod_erp": "204348",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 15.06
+            "st_motivo": "ncm"
           },
           {
             "cprod": "5023/1",
@@ -24043,13 +23805,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 66.9,
             "cod_erp": "58403",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 31.91
+            "st_motivo": "ncm"
           },
           {
             "cprod": "5023/1TS",
@@ -24073,13 +23834,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 31.9,
             "cod_erp": "204347",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 15.06
+            "st_motivo": "ncm"
           },
           {
             "cprod": "5033",
@@ -24103,13 +23863,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 72.9,
             "cod_erp": "204346",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 34.82
+            "st_motivo": "ncm"
           },
           {
             "cprod": "6000/C",
@@ -24133,13 +23892,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 29.9,
             "cod_erp": "74799",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "96162000",
             "cest": "2006200",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 15.56
+            "st_motivo": "ncm"
           }
         ],
         "uf": "SP"
