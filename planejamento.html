@@ -211,7 +211,24 @@ async function carregar(){
     if(cpr&&cpr.data&&cpr.data.dados&&Array.isArray(cpr.data.dados.meses)&&cpr.data.dados.meses.length){
       DB.contasERP=parseContasERP(cpr.data.dados, cpr.data.atualizado_em); }
   }catch(e){ DB.contasERP=null; }
+  persistirComprometido();   // espelha o comprometido (por loja×mês) p/ o painel Financeiro ler
   render();
+}
+/* Grava o COMPROMETIDO em trânsito (ENVIADO+FATURADO, sem _noERP), por loja×mês SEM filtro,
+   na tabela Supabase pedidos_comprometido (id=1). O painel Financeiro lê daqui → os dois batem.
+   Roda após a conciliação (detectarFaturamentos já setou _noERP). Best-effort (try/catch). */
+async function persistirComprometido(){
+  try{
+    var porLojaMes={ALTAMIRA:{},ITAITUBA:{},SANTAREM:{}};
+    DB.pedidos.forEach(function(p){
+      if(STATUS_A_PAGAR.indexOf(p.status)<0)return;   // só ENVIADO/FATURADO
+      if(p._noERP)return;                              // FATURADO já no ERP → não duplicar
+      if(!porLojaMes[p.loja])porLojaMes[p.loja]={};
+      var d=p.distribuicao||{};
+      for(var mk in d){ var v=Number(d[mk])||0; if(v) porLojaMes[p.loja][mk]=Math.round(((porLojaMes[p.loja][mk]||0)+v)*100)/100; }
+    });
+    await sb.from('pedidos_comprometido').upsert({id:1,dados:{porLojaMes:porLojaMes},atualizado_em:new Date().toISOString()});
+  }catch(e){ /* tabela pode não existir ainda; ignora */ }
 }
 /* Lê o blob de CONTAS A PAGAR (faturas por vencimento, fonte ERP) da tabela Supabase contas_pagar_erp,
    alimentada pelo coletor fetch_faturas_pagar.mjs (headless). Substitui a fonte antiga (bloco CONTASPAGAR
