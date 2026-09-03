@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-39'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-40'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -211,24 +211,7 @@ async function carregar(){
     if(cpr&&cpr.data&&cpr.data.dados&&Array.isArray(cpr.data.dados.meses)&&cpr.data.dados.meses.length){
       DB.contasERP=parseContasERP(cpr.data.dados, cpr.data.atualizado_em); }
   }catch(e){ DB.contasERP=null; }
-  persistirComprometido();   // espelha o comprometido (por loja×mês) p/ o painel Financeiro ler
   render();
-}
-/* Grava o COMPROMETIDO em trânsito (ENVIADO+FATURADO, sem _noERP), por loja×mês SEM filtro,
-   na tabela Supabase pedidos_comprometido (id=1). O painel Financeiro lê daqui → os dois batem.
-   Roda após a conciliação (detectarFaturamentos já setou _noERP). Best-effort (try/catch). */
-async function persistirComprometido(){
-  try{
-    var porLojaMes={ALTAMIRA:{},ITAITUBA:{},SANTAREM:{}};
-    DB.pedidos.forEach(function(p){
-      if(STATUS_A_PAGAR.indexOf(p.status)<0)return;   // só ENVIADO/FATURADO
-      if(p._noERP)return;                              // FATURADO já no ERP → não duplicar
-      if(!porLojaMes[p.loja])porLojaMes[p.loja]={};
-      var d=p.distribuicao||{};
-      for(var mk in d){ var v=Number(d[mk])||0; if(v) porLojaMes[p.loja][mk]=Math.round(((porLojaMes[p.loja][mk]||0)+v)*100)/100; }
-    });
-    await sb.from('pedidos_comprometido').upsert({id:1,dados:{porLojaMes:porLojaMes},atualizado_em:new Date().toISOString()});
-  }catch(e){ /* tabela pode não existir ainda; ignora */ }
 }
 /* Lê o blob de CONTAS A PAGAR (faturas por vencimento, fonte ERP) da tabela Supabase contas_pagar_erp,
    alimentada pelo coletor fetch_faturas_pagar.mjs (headless). Substitui a fonte antiga (bloco CONTASPAGAR
@@ -663,15 +646,23 @@ async function excluirPedido(id){
 }
 
 function renderOTB(){
-  var html='<div class="card"><h2>Saldo disponível para comprometer (limite − comprometido)</h2>'+
-    '<p class="mut" style="margin-top:-8px">Comprometido = ENVIADO/FATURADO/ENTREGUE. "Em aprovação" = pedidos ATHILA ainda não liberados.</p>';
+  var diasERP=diasContasERP();
+  var alertaERP=(diasERP===null)?'<div class="alerta-box" style="border-left-color:var(--crit);background:#fef2f2;color:#991b1b">🚨 Contas a pagar do ERP indisponível — "Comprometido" abaixo NÃO inclui as faturas do ERP (só pedidos em trânsito).</div>'
+    :(diasERP>1?'<div class="alerta-box" style="border-left-color:var(--crit);background:#fef2f2;color:#991b1b">🚨 Contas a pagar do ERP desatualizado há '+diasERP+' dias (última coleta: '+(DB.contasERP.em||'?')+').</div>':'');
+  var html='<div class="card"><h2>Saldo disponível para comprometer (limite − comprometido)</h2>'+alertaERP+
+    '<p class="mut" style="margin-top:-8px">Comprometido = pedidos em trânsito (enviado+faturado) + contas a pagar já no ERP naquele mês — a MESMA conta do "total comprometido" das abas Pedidos/Aprovações e do "compr" da aba Limites. "Em aprovação" = pedidos ATHILA ainda não liberados.'+(DB.contasERP&&DB.contasERP.em?' <span class="mut">(ERP atualizado '+DB.contasERP.em+')</span>':'')+'</p>';
   lojasVisiveis().forEach(function(lo){
     html+='<div class="lojahead">'+lo.nome+'</div><div style="overflow:auto"><table><tr><th>Mês</th><th class="num">Limite</th><th class="num">Comprometido</th><th class="num">Em aprovação</th><th class="num">Disponível</th><th class="num">Disp. se aprovar tudo</th></tr>';
-    DB.meses.forEach(function(m){var c=(DB.otb[lo.id]||{})[m]||{limite:0,comprometido:0,em_aprovacao:0,disponivel:0,disponivel_pos:0};
-      if(!c.limite&&!c.comprometido&&!c.em_aprovacao)return;
-      html+='<tr><td>'+nomeMes(m)+'</td><td class="num">'+brl(c.limite)+'</td><td class="num">'+brl(c.comprometido)+'</td>'+
-        '<td class="num mut">'+brl(c.em_aprovacao)+'</td><td class="num '+(c.disponivel<0?'neg':'pos')+'">'+brl(c.disponivel)+'</td>'+
-        '<td class="num '+(c.disponivel_pos<0?'neg':'')+'">'+brl(c.disponivel_pos)+'</td></tr>';});
+    DB.meses.forEach(function(m){
+      var otbC=(DB.otb[lo.id]||{})[m]||{limite:0,em_aprovacao:0};
+      var limite=otbC.limite||0, emAprov=otbC.em_aprovacao||0;
+      var comprometido=Math.round((comprometidoLojaMes(lo.id,m)+contasERPLojaMes(lo.id,m))*100)/100;
+      var disponivel=Math.round((limite-comprometido)*100)/100;
+      var disponivelPos=Math.round((limite-comprometido-emAprov)*100)/100;
+      if(!limite&&!comprometido&&!emAprov)return;
+      html+='<tr><td>'+nomeMes(m)+'</td><td class="num">'+brl(limite)+'</td><td class="num">'+brl(comprometido)+'</td>'+
+        '<td class="num mut">'+brl(emAprov)+'</td><td class="num '+(disponivel<0?'neg':'pos')+'">'+brl(disponivel)+'</td>'+
+        '<td class="num '+(disponivelPos<0?'neg':'')+'">'+brl(disponivelPos)+'</td></tr>';});
     html+='</table></div>';});
   el('main').innerHTML=html+'</div>';
 }
