@@ -818,5 +818,6 @@ vazio). O portal às vezes abre um modal de novidade que intercepta cliques — 
 **Validação (03/09):** cartão R$ 1.926,90 = exatamente o total exibido pelo próprio portal; a
 transação com status "Recusada" foi ignorada pelo painel (só entra aprovada/autorizada).
 
-**Aberto:** o portal tem "Trocar estabelecimento". Se L1/L3/L5 também tiverem maquininha Azulzinha
-além da InfinitePay, há movimento de cartão dessas lojas que hoje ninguém confere.
+**Fechado (04/09/2026):** o portal tem "Trocar estabelecimento", mas o Athila confirmou que **só a
+L4 usa Azulzinha** — L1, L3 e L5 são InfinitePay e nada mais. Não há movimento de cartão sem
+conferência. Não reabrir isso sem ele dizer que abriu maquininha nova.
