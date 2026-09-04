@@ -416,9 +416,17 @@ function modoRender(arqE1, arqE2, arqStores, arqC8, coletadoEm) {
         let vtxt = ltxt.slice(vreg.open, vreg.close + 1);
         const linha = `${semId}:${emitirVendasObj(c.vendasSem, c.ordem)},`;
         const reLinha = new RegExp(`(\\n\\s*)${semId}:\\{[^\\n]*?\\},?`);
-        vtxt = reLinha.test(vtxt)
-          ? vtxt.replace(reLinha, `$1${linha}`)
-          : vtxt.replace(/\n(\s*)\}$/, `\n$1  ${linha}\n$1}`);
+        if (reLinha.test(vtxt)) {
+          // semana já existe → substitui a linha
+          vtxt = vtxt.replace(reLinha, `$1${linha}`);
+        } else if (/\{\s*\}/.test(vtxt)) {
+          // vendas seeded como {} inline no rollover → converte pra multilinha e insere a semana
+          // (senão a inserção falha em silêncio e o mês inteiro fica com vendas zeradas)
+          vtxt = vtxt.replace(/\{\s*\}/, `{\n        ${linha}\n      }`);
+        } else {
+          // formato multilinha já existente → insere antes do fecho
+          vtxt = vtxt.replace(/\n(\s*)\}$/, `\n$1  ${linha}\n$1}`);
+        }
         ltxt = ltxt.slice(0, vreg.open) + vtxt + ltxt.slice(vreg.close + 1);
       }
       // marcasA_loja (linha única): atualiza só a chave da semana corrente
