@@ -785,3 +785,38 @@ mesmo dia**, e não descoberta três dias depois.
 Detalhe de implementação que quase passou: `--falha` na frente fazia `process.argv[3]` cair no
 `--acao=...` e a mensagem saía com "Conferência de caixa · o /o=". Posicionais e flags agora são
 separados, e a data é o primeiro posicional com cara de data.
+
+## L4 pela Azulzinha da Caixa (04/09/2026)
+
+A L4 não é InfinitePay: a maquininha é a **Azulzinha**, portal da Caixa operado pela **Fiserv**
+(app OutSystems). `scripts/azulzinha_sessao.mjs` (sessão) + `scripts/coleta_azulzinha.mjs` (coleta).
+
+```bash
+node azulzinha_sessao.mjs login       # 1x: janela visível, o Athila entra
+node coleta_azulzinha.mjs 2026-09-03  # gera "L4 maquininha" e "L4 extrato"
+```
+
+⚠️ **RODA COM JANELA VISÍVEL, NÃO HEADLESS.** O portal usa Radware Bot Manager: em headless a
+navegação cai em `validate.perfdrive.com` com CAPTCHA ("Let's make sure you're human"). Resolver
+CAPTCHA está fora de questão, então a coleta da L4 abre uma janela por ~30s. Não "consertar" isso
+mudando para headless — só vai voltar a falhar.
+
+⚠️ **A lista vem em `data.Vendas.List`.** `ListaVendas` é o nome da variável de tela e existe no
+payload da REQUISIÇÃO; ler essa chave na resposta devolve vazio **em silêncio**, e a loja apareceria
+como "sem movimento" num dia com 48 transações. Custou meia hora.
+
+⚠️ **Taxa e ValorLíquido vêm zerados.** As colunas são omitidas do CSV de propósito — mandar zero
+faria o cruzamento acusar "bruto − taxa ≠ líquido" em toda linha. Consequência aceita: a L4 confere
+o BRUTO contra o ERP, mas não a taxa efetiva por bandeira como as outras três.
+
+Detalhes da mecânica: o endpoint é `screenservices/Vendas_CW/VendasV3/ListaDiaVendasV3/DataActionGetVendasV3`,
+com header `x-csrftoken`. O coletor captura a requisição que a própria tela faz e reproduz trocando
+`Periodo.DataInicio/DataFim`, `IsHoje=false` e `Pagination.CurrentPage` (MaxRecords 100; 500 devolve
+vazio). O portal às vezes abre um modal de novidade que intercepta cliques — o coletor dispensa
+"Pular"/"Fechar"/"Entendi" antes de qualquer interação.
+
+**Validação (03/09):** cartão R$ 1.926,90 = exatamente o total exibido pelo próprio portal; a
+transação com status "Recusada" foi ignorada pelo painel (só entra aprovada/autorizada).
+
+**Aberto:** o portal tem "Trocar estabelecimento". Se L1/L3/L5 também tiverem maquininha Azulzinha
+além da InfinitePay, há movimento de cartão dessas lojas que hoje ninguém confere.
