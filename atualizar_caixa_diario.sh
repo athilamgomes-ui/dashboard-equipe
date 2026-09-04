@@ -3,7 +3,7 @@
 # atualizar_caixa_diario.sh — a rotina diária inteira, sem ninguém no meio.
 #
 #   1) ERP        → atualizar_conferencia_caixa.sh (movimento do dia fechado)
-#   2) InfinitePay→ coleta_infinitepay.mjs por loja (extrato + maquininha do D-1)
+#   2) InfinitePay→ coleta_infinitepay.mjs (L1/L3/L5) + Azulzinha (L4), do D-1
 #   3) conciliação→ conciliar_headless.mjs (motor do painel, fora do navegador)
 #   4) histórico  → grava cifrado no Supabase (o painel abre e você investiga)
 #   5) aviso      → WhatsApp (cai para Telegram se falhar)
@@ -33,7 +33,9 @@ LOGDIR="$HOME/.claude/logs/caixa"
 mkdir -p "$LOGDIR"
 HOJE_LOG="$LOGDIR/$(date +%Y-%m-%d)"
 find "$LOGDIR" -type f -mtime +30 -delete 2>/dev/null   # guarda 30 dias
-LOJAS="L1 L3 L5"                       # L4 não tem conta InfinitePay
+LOJAS="L1 L3 L5"                       # InfinitePay
+# A L4 (MissBeleza Altamira) não é InfinitePay: a maquininha dela é a Azulzinha
+# da Caixa, que tem portal e coletor próprios (coleta_azulzinha.mjs).
 DIA="${DIA:-$(date -v-1d +%Y-%m-%d)}"
 log(){ echo "[caixa-diario $(date +%H:%M:%S)] $*"; }
 
@@ -182,6 +184,17 @@ if [ -n "$FALHAS" ]; then
   # automático possível. Avisa para alguém escanear — e segue com quem deu certo.
   avisar_falha "InfinitePay: sessão expirada nas lojas$FALHAS — a conferência de $DIA não pôde ser feita" "no Mac, rode: node ~/Desktop/claude/dashboard-equipe/scripts/infinitepay_sessao.mjs login e escaneie o QR no app"
 fi
+# ── 2b) L4 · Azulzinha da Caixa ──────────────────────────────────────────────
+# ⚠️ Este coletor abre JANELA VISÍVEL por ~30s. Não é escolha estética: o portal
+# é protegido por Radware Bot Manager e devolve CAPTCHA para navegador headless.
+# Falha aqui não derruba a conferência das outras três — a L4 simplesmente fica
+# de fora do dia, e o aviso diz isso.
+log "coletando Azulzinha L4..."
+if ! $NODE "$SCRIPTS/coleta_azulzinha.mjs" "$DIA" >> $HOJE_LOG-azulzinha.log 2>&1; then
+  log "  FALHA na L4 (ver $HOJE_LOG-azulzinha.log)"
+  avisar_falha "Azulzinha: não consegui coletar a L4 em $DIA — as outras lojas seguem normalmente" "no Mac, rode: node ~/Desktop/claude/dashboard-equipe/scripts/azulzinha_sessao.mjs login"
+fi
+
 if [ -z "$(ls -A "$ARQ"/*.csv 2>/dev/null)" ]; then
   log "ERRO: nenhum arquivo coletado — nada a conciliar"
   exit 10
