@@ -1395,6 +1395,45 @@ const HISTORICO_PREMIOS = {
       _pool:   {S1:0, S2:80, S3:80,S4:100, S5:0, S6:0},  // S1: R$5 abaixo da faixa 70 (R$3.500), sem pool · S2: faixa 70 (MA 21,6%)
     },
   },
+  '2026-09': {
+    // S1 CONGELADA 07/09/2026 (fechou sab 05/09; 07/09 e feriado, fora de janela).
+    // Recoleta FINAL 01-05/09 feita hoje 18:53 (cron_etapa1_vendas + coleta_cliente8 + cron_etapa2_marcas_a):
+    // L1/L3/L4 IDENTICAS ao ultimo run de sabado; L5 16.559 -> 17.032 (Joyce +41, Karina +432 no sabado
+    // a tarde) e MA 13,1% -> 12,8%. Cliente 8 (R Maura) = R$0 nas 4 lojas (verificado).
+    // Meta REAL S1 (Worker /metas-loja + Supabase metas_semanais): L1=30000 L3=15500 L4=32100 L5=19400.
+    // L1 126,4% -> acima de 120 = R$420 (MA 20,1%, sem bonus) · L3 84,0%, L4 80,8% e L5 87,8% -> faixa 80 = R$100.
+    // 'Outros' entra no total da loja e NAO na divisao (L1 R$543 · L3 R$5.081 · L5 -R$87). IMUTAVEL.
+    L1: {
+      'Tatiane': {S1:147},
+      'Rayra': {S1:125},
+      'Sofia': {S1:72},
+      'Bárbara': {S1:76},
+      _em_pct: {S1:126.4},
+      _pool:   {S1:420},
+    },
+    L3: {
+      'Ana Mira': {S1:46},
+      'Raimunda': {S1:54},
+      _em_pct: {S1:84},
+      _pool:   {S1:100},
+    },
+    L4: {
+      'Tanaia': {S1:0},
+      'Josilene': {S1:21},
+      'Bruna F.': {S1:55},
+      'Débora': {S1:24},
+      _em_pct: {S1:80.8},
+      _pool:   {S1:100},
+    },
+    L5: {
+      'Rayssa': {S1:32},
+      'Joyce': {S1:21},
+      'Rosiene': {S1:22},
+      'Karina': {S1:25},
+      _em_pct: {S1:87.8},
+      _pool:   {S1:100},
+    },
+  },
 };
 
 // Helper: lookup do mês atual. Se chave novo mês não existe, retorna {}.

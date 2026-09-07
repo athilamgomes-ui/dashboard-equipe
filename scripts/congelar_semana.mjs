@@ -128,12 +128,13 @@ function grava(file) {
         if (n.startsWith("_")) return m0;
         if (!(n in resultado[L].share)) return m0;
         if (new RegExp("\\b" + semId + "\\s*:").test(corpo)) return m0;
-        return `${q}${nome}${q}: {${corpo.replace(/\s*$/, "")}, ${semId}:${resultado[L].share[n]}}`;
+        const sep = corpo.trim() ? corpo.replace(/\s*$/, "") + ", " : "";  // mês recém-criado: bloco vazio, sem vírgula inicial
+        return `${q}${nome}${q}: {${sep}${semId}:${resultado[L].share[n]}}`;
       })
       .replace(/(_em_pct:\s*\{)([^{}]*)(\})/, (m0, a, corpo, c) =>
-        new RegExp("\\b" + semId + "\\s*:").test(corpo) ? m0 : `${a}${corpo.replace(/\s*$/, "")}, ${semId}:${r.em_pct}${c}`)
+        new RegExp("\\b" + semId + "\\s*:").test(corpo) ? m0 : `${a}${corpo.trim() ? corpo.replace(/\s*$/, "") + ", " : ""}${semId}:${r.em_pct}${c}`)
       .replace(/(_pool:\s*\{)([^{}]*)(\})/, (m0, a, corpo, c) =>
-        new RegExp("\\b" + semId + "\\s*:").test(corpo) ? m0 : `${a}${corpo.replace(/\s*$/, "")}, ${semId}:${r.pool}${c}`);
+        new RegExp("\\b" + semId + "\\s*:").test(corpo) ? m0 : `${a}${corpo.trim() ? corpo.replace(/\s*$/, "") + ", " : ""}${semId}:${r.pool}${c}`);
     bloco = bloco.slice(0, s) + novo + bloco.slice(end + 1);
   }
   if (COMENTARIO) {
