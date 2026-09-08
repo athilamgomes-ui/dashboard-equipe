@@ -32,12 +32,17 @@ page.on("pageerror", e => log("ERRO na página: " + String(e.message).split("\n"
 
 try {
   await page.goto(URL, { waitUntil: "domcontentloaded", timeout: 60000 });
-  // espera o carregar() concluir: DB.pedidos carregado e autoAvancarStatus já rodou (_autoAv definido)
+  // ⚠️ 08/09/2026: com o Auth religado (Fase 2), o carregar() NÃO roda sozinho no DOMContentLoaded
+  // (gate de login → só start() após sessão válida). Mas o gate é só UI: todos os dados (pedidos,
+  // nfes_erp, contas_pagar_erp) vêm por anon. Então chamamos carregar() DIRETO, pulando o login SEM
+  // credenciais — reusa detectarFaturamentos + autoAvancarStatus (mesmíssima lógica) e faz os PATCH.
+  await page.waitForFunction(() => typeof window.carregar === "function", { timeout: 30000 });
+  await page.evaluate(async () => { try { await window.carregar(); } catch (e) {} }); // carregar já awaita autoAvancarStatus (PATCH terminados)
   await page.waitForFunction(
     () => window.DB && Array.isArray(window.DB.pedidos) && window.DB.pedidos.length > 0 && Array.isArray(window.DB._autoAv),
-    { timeout: 60000 }
-  ).catch(() => log("aviso: timeout esperando carregar()/auto-avanço — pode não haver NFes (cm nulo) ou erro de rede"));
-  await page.waitForTimeout(2500); // deixa os PATCH terminarem
+    { timeout: 30000 }
+  ).catch(() => log("aviso: DB.pedidos/_autoAv não populou — pode não haver NFes (cm nulo) ou erro de rede/anon"));
+  await page.waitForTimeout(1500); // margem p/ PATCH residuais
   const r = await page.evaluate(() => ({
     pedidos: (window.DB && window.DB.pedidos || []).length,
     autoAv: (window.DB && window.DB._autoAv) || [],
