@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * coleta_amgomes_mensal.mjs <ANO> [MES_FINAL] [DIA_FINAL]
+ * coleta_amgomes_mensal.mjs <ANO> [MES_FINAL] [DIA_FINAL] [MES_INICIAL]
  *
  * Coleta o faturamento (Venda Líquida) MÊS A MÊS de cada loja em uma única
  * sessão do Microvix (login uma vez, várias consultas ao relatório Vendas por Lojas).
@@ -10,6 +10,10 @@
  * - DIA_FINAL: dia-limite aplicado APENAS ao último mês (MES_FINAL). Opcional.
  *   Se informado, o último mês é coletado de 01 até DIA_FINAL (mês parcial).
  *   Se omitido, todos os meses são coletados inteiros (01 até último dia).
+ * - MES_INICIAL: primeiro mês a coletar (1–12). Default = 1. Retrocompatível — o pipeline
+ *   de VENDAS chama sem esse arg (coleta 1..MES_FINAL). O FINANCEIRO usa MES_INICIAL =
+ *   mês corrente p/ coletar só o mês em curso (parcial) e reaproveitar os meses FECHADOS
+ *   já armazenados (imutáveis), via merge_fat_mensal.mjs — evita raspar o ERP 90×/noite.
  *
  * ⚠️ Para comparação YoY SIMÉTRICA: chamar os DOIS anos com o MESMO
  *   MES_FINAL e DIA_FINAL (ex.: ano corrente e anterior ambos "6 10" →
@@ -36,13 +40,14 @@ const ANO = parseInt(process.argv[2] || "0", 10);
 if (!ANO) { logErr("uso: node coleta_amgomes_mensal.mjs <ANO> [MES_FINAL]"); process.exit(2); }
 const MES_FINAL = parseInt(process.argv[3] || "12", 10);
 const DIA_FINAL = process.argv[4] ? parseInt(process.argv[4], 10) : null;
+const MES_INICIAL = process.argv[5] ? Math.min(MES_FINAL, Math.max(1, parseInt(process.argv[5], 10))) : 1;
 
 const pad = n => String(n).padStart(2, "0");
 const ultimoDia = (ano, mes) => new Date(ano, mes, 0).getDate(); // mes 1-12
 
 // Monta a lista de períodos (um por mês)
 const periodos = [];
-for (let m = 1; m <= MES_FINAL; m++) {
+for (let m = MES_INICIAL; m <= MES_FINAL; m++) {
   const di = `01/${pad(m)}/${ANO}`;
   // DIA_FINAL só se aplica ao último mês (MES_FINAL); demais meses = inteiros
   const dfDia = (m === MES_FINAL && DIA_FINAL) ? DIA_FINAL : ultimoDia(ANO, m);
@@ -51,7 +56,7 @@ for (let m = 1; m <= MES_FINAL; m++) {
 }
 
 const t0 = Date.now();
-logErr(`launch headless... ano=${ANO} meses=1..${MES_FINAL}`);
+logErr(`launch headless... ano=${ANO} meses=${MES_INICIAL}..${MES_FINAL}`);
 const ctx = await chromium.launchPersistentContext(PROFILE_DIR, { headless: true, viewport: { width: 1400, height: 900 } });
 const page = ctx.pages()[0] || (await ctx.newPage());
 
