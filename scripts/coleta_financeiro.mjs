@@ -250,6 +250,34 @@ async function main() {
     lojas,
   };
   log(`OK em ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+
+  // ── ESCRITOR ÚNICO do contas_pagar_erp (unificação 08/09/2026) ───────────────
+  // A tela de pedidos (planejamento.html) lê a tabela Supabase contas_pagar_erp. Antes ela era
+  // escrita por fetch_faturas_pagar.mjs, que usava OUTRA janela (sem mês vencido) e somava subtotais
+  // por vencimento — divergia do financeiro, que conta só "Em aberto" e inclui vencidos (bug relatado
+  // 08/09: L5 set 64.662 vs 56.798). Agora ESTE coletor é a fonte ÚNICA: grava o MESMO a-vencer
+  // (porMes.aberto) que o painel financeiro mostra, do mês corrente pra frente → os dois batem por
+  // construção. fetch_faturas_pagar não grava mais (write desligado). Best-effort (não derruba a coleta).
+  try {
+    const MES_ABBR = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+    const curKey = `${now.getFullYear()}-${pad(now.getMonth() + 1)}`; // exclui meses já vencidos (agosto etc.) do blob do pedidos
+    const mset = new Set();
+    for (const L of ["L1","L3","L4","L5"]) for (const mk of Object.keys((lojas[L] && lojas[L].pagar && lojas[L].pagar.porMes) || {})) if (mk >= curKey) mset.add(mk);
+    const months = [...mset].sort();
+    const lbl = mk => { const [y, m] = mk.split("-"); return `${MES_ABBR[+m - 1]}/${y.slice(2)}`; }; // "Set/26" (parseContasERP do pedidos espera esse formato)
+    const blob = { meses: months.map(lbl), geradoEm: out.geradoEmBR };
+    for (const L of ["L1","L3","L4","L5"]) blob[L] = months.map(mk => Math.round((lojas[L] && lojas[L].pagar && lojas[L].pagar.porMes[mk] && lojas[L].pagar.porMes[mk].aberto) || 0));
+    const SB = "https://valhewbvjwdkkvuejrxa.supabase.co";
+    const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4";
+    const r = await fetch(`${SB}/rest/v1/contas_pagar_erp`, {
+      method: "POST",
+      headers: { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=minimal" },
+      body: JSON.stringify({ id: 1, dados: blob, atualizado_em: new Date().toISOString() }),
+    });
+    if (r.ok) log(`contas_pagar_erp gravado (fonte única p/ pedidos): ${blob.meses.join(",")} · L1=${blob.L1.join("/")}`);
+    else log(`AVISO: upsert contas_pagar_erp falhou ${r.status} ${(await r.text()).slice(0, 200)}`);
+  } catch (e) { log("AVISO: upsert contas_pagar_erp: " + e.message); }
+
   process.stdout.write(JSON.stringify(out));
 }
 main().catch(e => { log("FATAL: " + e.message); process.exit(1); });

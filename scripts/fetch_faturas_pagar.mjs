@@ -278,9 +278,15 @@ async function main() {
     L1: arr("L1"), L3: arr("L3"), L4: arr("L4"), L5: arr("L5"),
   };
   console.log(JSON.stringify(out, null, 2));
-  if (!FILE_MODE) {
-    try { await gravarSupabase(out); log("gravado no Supabase (contas_pagar_erp)"); }
+  // ⚠️ RETIRADO 08/09/2026: coleta_financeiro.mjs virou o ESCRITOR ÚNICO do contas_pagar_erp
+  // (mesma janela + só "Em aberto" que o painel financeiro → os dois dashboards batem). Este script
+  // divergia (janela sem mês vencido + subtotais por vencimento). Deixamos como debug/manual: só grava
+  // com WRITE_SB=1. Sem a flag, apenas imprime (não sobrescreve a fonte única). Ver RUNBOOK_FINANCEIRO.
+  if (!FILE_MODE && process.env.WRITE_SB === "1") {
+    try { await gravarSupabase(out); log("gravado no Supabase (contas_pagar_erp) [WRITE_SB=1]"); }
     catch (e) { log("ERRO ao gravar no Supabase:", e.message); }
+  } else {
+    log("write DESLIGADO (fonte única = coleta_financeiro.mjs). Use WRITE_SB=1 só p/ debug manual.");
   }
 }
 
