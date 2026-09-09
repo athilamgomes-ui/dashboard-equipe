@@ -27,7 +27,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { abrirContexto } from "./azulzinha_sessao.mjs";
+import { abrirContexto, estaLogado } from "./azulzinha_sessao.mjs";
 
 const DIR = path.join(os.homedir(), ".claude", "caixa-arquivos");
 const URL_VENDAS = "https://portal.azulzinhadacaixa.com.br/MinhasVendas?Router=0";
@@ -38,9 +38,14 @@ const linha = a => a.map(cel).join(",");
 const brl = n => Number(n || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const ontem = () => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10); };
 
-export async function coletar(dia) {
+export async function coletar(dia, ctxExterno) {
   fs.mkdirSync(DIR, { recursive: true });
-  const { ctx, page } = await abrirContexto({ headless: false });   // ver aviso acima
+  // ⚠️ A sessão do portal NÃO sobrevive a um navegador novo: ele exige o token
+  // de 6 dígitos do app a cada processo (descoberto em 09/09/2026). Por isso a
+  // coleta aceita um contexto JÁ ABERTO — login e coleta na mesma sessão. Abrir
+  // um contexto por dia faria o portal pedir token cinco vezes.
+  const proprio = !ctxExterno;
+  const { ctx, page } = ctxExterno || await abrirContexto({ headless: false });
   try {
     let req = null;
     page.on("request", r => {
@@ -113,7 +118,7 @@ export async function coletar(dia) {
     console.log(`  total do portal: ${vendas.length} transações · R$ ${brl(soma)}`);
     return saida;
   } finally {
-    await ctx.close().catch(() => {});
+    if (proprio) await ctx.close().catch(() => {});
   }
 }
 

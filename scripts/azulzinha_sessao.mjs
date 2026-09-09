@@ -8,6 +8,11 @@
 // headless. Nenhuma senha entra em script, Keychain ou variável de ambiente —
 // e eu não preencho campo de login de banco.
 //
+// ⚠️ TUDO neste portal roda com janela VISÍVEL (headless: false). O Radware Bot
+// Manager devolve CAPTCHA para navegador headless — checar sessão em headless
+// dizia "expirou" mesmo logado, e o `status` era inútil por construção (achado
+// em 09/09/2026, logo depois de um login bem-sucedido).
+//
 // ⚠️ Profile PRÓPRIO (`~/.claude/azulzinha-profile`). Nunca o microvix-profile
 // (disputado por ~20 scripts) nem o da InfinitePay.
 //
@@ -28,7 +33,7 @@ const MARCADOR = path.join(PERFIL, ".sessao.json");
 // algo que SÓ existe dentro do portal. Na dúvida responde não — falso positivo
 // faria o robô "coletar" a tela de login e publicar vazio como se fosse o
 // movimento do dia.
-async function estaLogado(page) {
+export async function estaLogado(page) {
   if (/\/login/i.test(page.url())) return false;
   if (await page.locator('input[type="password"]').count().catch(() => 0)) return false;
   const txt = await page.locator("body").innerText().catch(() => "");
@@ -47,7 +52,7 @@ export async function abrirContexto({ headless = true } = {}) {
 }
 
 export async function contextoLogado() {
-  const { ctx, page } = await abrirContexto({ headless: true });
+  const { ctx, page } = await abrirContexto({ headless: false });
   await page.goto(URL_PORTAL, { waitUntil: "domcontentloaded", timeout: 60000 });
   await page.waitForTimeout(4000);
   if (!(await estaLogado(page))) {
