@@ -103,6 +103,35 @@ export function carregarMotor(rawPath = RAW) {
 export function conciliar(ctx, loja, arquivos) {
   const alvo = { loja, arquivos: [] };
   const erros = [];
+
+  // ── DIA SEM MOVIMENTO NÃO É ERRO ──
+  // Domingo e feriado geram CSV só com cabeçalho, e o parser do painel devolvia
+  // "não reconheci o arquivo" — mensagem que faz parecer coleta quebrada.
+  // Aconteceu em 06 e 07/09/2026 (domingo + Independência): três lojas, seis
+  // arquivos, seis erros assustadores para lojas que simplesmente não abriram.
+  //
+  // ⚠️ Mas arquivo vazio TAMBÉM é o sintoma de coleta que falhou em silêncio.
+  // O que separa os dois casos é o ERP: se a loja não vendeu nada no ERP
+  // naquele dia, foi dia fechado; se vendeu, o arquivo vazio é problema de
+  // verdade e tem que gritar.
+  const temDado = arquivos.some(a => (a.txt || "").trim().split("\n").length > 1);
+  if (!temDado) {
+    const dia = (arquivos[0]?.nome || "").match(/(\d{2})-(\d{2})/);
+    let vendeuNoERP = null;
+    if (dia) {
+      const iso = new Date().getFullYear() + "-" + dia[2] + "-" + dia[1];
+      const mov = (ctx.__D.movimento || {})[loja] || [];
+      vendeuNoERP = mov.some(x => x.d === iso && (x.car > 0 || x.pix > 0));
+    }
+    alvo.semMovimento = true;
+    if (vendeuNoERP) {
+      alvo.erros = [{ nome: arquivos.map(a => a.nome).join(", "),
+        erro: "a adquirente não devolveu NENHUM lançamento, mas o ERP tem venda de cartão/PIX nesse dia — coleta falhou" }];
+    } else {
+      alvo.erros = [];
+    }
+    return alvo;
+  }
   for (const { nome, txt } of arquivos) {
     try {
       const tmp = { loja, arquivos: [] };
@@ -151,17 +180,20 @@ export function resumir(alvo) {
   const graves = [cartao, pix].filter(Boolean)
     .reduce((a, f) => a + f.semVendaNoERP.n + f.semCobranca.n, 0);
   return {
+    semMovimento: !!alvo.semMovimento,
     loja: alvo.loja,
     arquivos: (alvo.arquivos || []).map(a => ({ nome: a.nome, tipo: a.tipo })),
     erros: alvo.erros || [],
     cartao, pix, conta: alvo.conta || null,
     graves,
+    // Dia fechado conta como OK: não há nada a conferir e não há nada errado.
     ok: graves === 0 && (alvo.erros || []).length === 0,
   };
 }
 
 export function textoResumo(r) {
   const L = [];
+  if (r.semMovimento && !r.erros.length) return "✅ " + r.loja + ": sem movimento (loja fechada)";
   const cab = r.ok ? "✅ " + r.loja : "⚠️ " + r.loja;
   L.push(cab + (r.cartao || r.pix ? "  (" + ((r.cartao || r.pix).ini) + " a " + ((r.cartao || r.pix).fim) + ")" : ""));
   for (const f of [r.cartao, r.pix].filter(Boolean)) {
