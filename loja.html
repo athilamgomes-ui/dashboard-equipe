@@ -2732,6 +2732,7 @@ let mensagensDB = null;
 let selectedVend = null;
 let currentUser = null;
 let currentTab = 'hoje';
+let CASADAS_DB = null;   // vendas casadas por dia/loja/vendedora (casadas.json, 1x/dia)
 let premioSub = 'semana'; // sub-aba da aba Prêmio: 'semana' | 'mes'
 let leuTudo = false;
 // Quiz state
@@ -3142,6 +3143,7 @@ function enterApp() {
     }, 50);
   }
   setTabV('hoje');
+  carregarCasadas();   // async: busca casadas.json e re-renderiza a aba Hoje quando chegar
 }
 
 // ─── UI ──────────────────────────────────────────────────────────────────────
@@ -3311,6 +3313,72 @@ function calcMeuPremio() {
     .reduce((s,[n,d]) => s + (d.sem||0), 0);
   const contrib = totalDistr > 0 ? me.sem / totalDistr : 0;
   return {premio: Math.round(pool * contrib), pool, em_pct, contrib: contrib*100};
+}
+
+// ─── VENDAS CASADAS (desafio de cross-sell) ─────────────────────────────────
+// Dados vêm de casadas.json (coletado 1x/dia; fora do loja.html pra o build da
+// premiação não apagar). Casada = cupom com 2+ produtos complementares da mesma
+// família (tinta+OX, shampoo+condicionador, esmalte+acetona...).
+async function carregarCasadas() {
+  try {
+    CASADAS_DB = await fetch('./casadas.json?t=' + Date.now(), { signal: AbortSignal.timeout(6000) }).then(r => r.json());
+    if (currentTab === 'hoje') renderContent();
+  } catch (e) { console.warn('[casadas] não carregou:', e); }
+}
+
+// período "DD/MM a DD/MM" (SEMANAS_MES) → lista de datas YYYY-MM-DD
+function _casadasDatasSemana(semObj) {
+  if (!semObj || !semObj.periodo) return [];
+  const m = semObj.periodo.match(/(\d{2})\/(\d{2})\D+(\d{2})\/(\d{2})/);
+  if (!m) return [];
+  const ano = +((_mesCorrenteKey() || '').split('-')[0]) || new Date().getFullYear();
+  const d0 = new Date(ano, +m[2] - 1, +m[1]), d1 = new Date(ano, +m[4] - 1, +m[3]);
+  const out = [];
+  for (let d = new Date(d0); d <= d1; d.setDate(d.getDate() + 1))
+    out.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+  return out;
+}
+
+function renderCasadas() {
+  if (!CASADAS_DB || !CASADAS_DB.dias) return '';
+  const ld = DADOS_LOJA[LOJA_KEY];
+  const semObj = (SEMANAS_MES || []).find(s => s.id === (ld?.semana_atual || 'S1'));
+  const datas = _casadasDatasSemana(semObj);
+  if (!datas.length) return '';
+  const comDados = datas.filter(d => CASADAS_DB.dias[d] && CASADAS_DB.dias[d][LOJA_KEY]);
+  if (!comDados.length) return '';
+  const ultimo = comDados[comDados.length - 1];
+  const agg = {};
+  for (const dia of datas) {
+    const dl = (CASADAS_DB.dias[dia] || {})[LOJA_KEY] || {};
+    for (const [nome, v] of Object.entries(dl)) {
+      const a = agg[nome] = agg[nome] || { sem: 0, dia: 0 };
+      a.sem += (v.casadas || 0);
+      if (dia === ultimo) a.dia += (v.casadas || 0);
+    }
+  }
+  const pf = s => (s || '').trim().split(/\s+/)[0];
+  const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s;
+  const linhas = Object.entries(agg).map(([n, a]) => ({ n, ...a })).filter(l => l.sem > 0 || l.dia > 0)
+    .sort((x, y) => y.sem - x.sem || y.dia - x.dia);
+  if (!linhas.length) return '';
+  const euF = pf(currentUser).toUpperCase();
+  const med = i => ['🥇', '🥈', '🥉'][i] || `${i + 1}º`;
+  const [, mm, dd] = ultimo.split('-');
+  const rows = linhas.map((l, i) => {
+    const eu = pf(l.n).toUpperCase() === euF;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 4px;border-top:1px solid var(--border)${eu ? ';background:rgba(124,92,252,.10);border-radius:8px' : ''}">
+      <span style="width:26px;text-align:center;font-weight:700">${med(i)}</span>
+      <span style="flex:1;font-weight:${eu ? '700' : '500'}">${cap(pf(l.n))}${eu ? ' <small style="color:var(--muted)">(você)</small>' : ''}</span>
+      <span style="font-weight:700;font-size:15px;white-space:nowrap">${l.sem}<small style="color:var(--muted);font-weight:500"> na semana${l.dia ? ` · ${l.dia} em ${dd}/${mm}` : ''}</small></span>
+    </div>`;
+  }).join('');
+  return `<div class="card" style="margin-bottom:14px">
+    <h3 style="margin-bottom:2px">🔗 Vendas casadas — ${semObj ? semObj.label : 'semana'}</h3>
+    <p style="font-size:12px;color:var(--muted);margin:2px 0 8px">Cupons em que você conectou produtos que combinam (tinta+OX, shampoo+condicionador, esmalte+acetona...). Bom pra cliente e ótimo pro seu ticket! 💪</p>
+    ${rows}
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">Atualiza 1x/dia após o fechamento · último dia coletado: ${dd}/${mm}</div>
+  </div>`;
 }
 
 function renderContent() {
@@ -3504,6 +3572,8 @@ function renderHoje() {
     ${renderFrescorDados()}
 
     ${renderPushBanner()}
+
+    ${renderCasadas()}
 
     ${souGerente ? renderEditorMensagemGerente(msgGer) : ''}
 
