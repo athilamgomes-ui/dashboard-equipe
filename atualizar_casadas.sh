@@ -11,7 +11,7 @@ SCRIPTS="$REPO/scripts"
 
 source ~/.claude/lib_lock_erp.sh
 travar_erp 15 || { LOG "perfil do Microvix ocupado — abortando (exit 30)"; exit 30; }
-trap 'soltar_erp; rmdir "$LOCK" 2>/dev/null' EXIT
+trap 'soltar_erp' EXIT   # este script nao cria lock proprio: so a trava compartilhada do ERP
 caffeinate -s -w $$ &   # segura o Mac acordado enquanto a coleta roda
 
 DIA="${DIA:-$(date -v-1d '+%d/%m/%Y')}"   # padrão: ontem (dia fechado)
