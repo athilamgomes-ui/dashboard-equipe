@@ -27,8 +27,10 @@ const WORKER_URL = 'https://premiacao-amgomes.nhf6t85hdk.workers.dev';
 const SUPA_URL = 'https://valhewbvjwdkkvuejrxa.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4'; // anon key — pública por design (RLS aberto)
 
+// 60s (era 20s): em 10/09/2026 o /overrides (118 itens, KV) passou a levar ~20,5s
+// de forma consistente e a Etapa 3 era pulada em todo run.
 async function workerGet(path) {
-  const r = await fetch(`${WORKER_URL}${path}`, { signal: AbortSignal.timeout(20000) });
+  const r = await fetch(`${WORKER_URL}${path}`, { signal: AbortSignal.timeout(60000) });
   if (!r.ok) throw new Error(`Worker ${path} → HTTP ${r.status}`);
   return (await r.json()).items || [];
 }
