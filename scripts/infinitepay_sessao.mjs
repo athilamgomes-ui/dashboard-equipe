@@ -99,6 +99,20 @@ export async function contextoLogado(loja) {
   const { ctx, page } = await abrirContexto({ headless: true });
   await page.goto(URL_APP, { waitUntil: "domcontentloaded", timeout: 45000 });
   await page.waitForTimeout(3000);
+
+  // ⚠️ ARRANQUE A FRIO. A primeira abertura do navegador depois de horas parado
+  // mostra a tela de QR por alguns segundos antes de o app reconhecer a sessão.
+  // Decidir em 3s transformava isso em "sessão expirada" — e como a L1 é sempre
+  // a PRIMEIRA loja coletada, ela era sempre a vítima: ficou fora da conferência
+  // em 09 e 10/09/2026 com a rotina dizendo "ok", enquanto L3 e L5 (navegador
+  // já aquecido) passavam. Só declara morta depois de esperar e recarregar.
+  if (!(await estaLogado(page))) {
+    await page.waitForTimeout(5000);
+    if (!(await estaLogado(page))) {
+      await page.reload({ waitUntil: "domcontentloaded", timeout: 45000 }).catch(() => {});
+      await page.waitForTimeout(6000);
+    }
+  }
   if (!(await estaLogado(page))) {
     await ctx.close().catch(() => {});
     const e = new Error("sessão da InfinitePay expirou. Refaça: node infinitepay_sessao.mjs login");
