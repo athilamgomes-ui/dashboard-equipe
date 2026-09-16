@@ -168,18 +168,140 @@ async function coletaSaldoLoja(page, E) {
   return byBrand;
 }
 
-async function coletaSaldos(ctx, page) {
-  // Sequencial (1 loja por vez) — relatório pesado; paralelo saturava o servidor
-  // e derrubava a conexão. ~15-30s por loja, ~1-2min total.
-  const saldos = {};
-  for (const E of EMPRESAS) {
-    try {
-      saldos[EMP_TO_LOJA[E]] = await coletaSaldoLoja(page, E);
-    } catch (e) {
-      log(`saldo emp${E} FALHOU: ${e.message}`);
-      saldos[EMP_TO_LOJA[E]] = {};
+let SALDO_PARADO_COMPLETO = {};   // {L1:true,…} — gravado em compras_raw._saldo_parado_completo
+
+// ======================= SALDO PARADO (2ª passada) =======================
+// ⚠️ BUG CORRIGIDO 16/09/2026. O relatório da 1ª passada (coletaSaldoLoja) roda SEM a opção
+// `sem_movimentacao`, então só lista produto que SE MOVIMENTOU na janela (vendeu nos 60 dias ou
+// entrou no ano). Produto com saldo que não girou simplesmente NÃO VINHA — e o saldo dele sumia
+// do dashboard. Medido em 16/09: 10.892 produtos, ~208 mil un (72% do saldo das 4 lojas) fora
+// da tela; CBB L1 mostrava 239 un tendo 352 no ERP. E era justamente o estoque que NÃO GIRA —
+// o que o plano de queima (Excesso/Morto) mais precisa enxergar. Nos produtos que vinham, o
+// saldo batia 100% com o ERP — o erro era só de cobertura do relatório.
+//
+// Esta passada liga `sem_movimentacao` + `saldo_positivo`: traz TODO produto com saldo > 0,
+// girando ou não, e o merge acrescenta à 1ª passada só os códigos que faltavam (quem já veio
+// mantém vendas/trânsito/saldo da 1ª). Mesmo método do coleta_estoque_saldo.mjs: espera o
+// evento `load` da navegação — contar linhas "até parar de crescer" já entregou relatório
+// TRUNCADO em silêncio (19/08/2026). Truncado vira falha, nunca dado.
+async function coletaSaldoParadoLoja(page, E) {
+  const t0 = Date.now();
+  await gotoRetry(page, URL_SALDO);
+  await page.waitForSelector("#empresas_1", { timeout: 20000 });
+  await page.waitForTimeout(800);
+  await page.evaluate(({ E, d60, hoje, ini }) => {
+    const fd = document;
+    const set = (id, v) => { const e = fd.getElementById(id); if (e) { e.checked = v; if (e.onchange) try { e.onchange(); } catch (_) {} } };
+    const setName = (n, v) => { const e = fd.querySelector(`input[name=${n}]`); if (e) { e.checked = v; if (e.onchange) try { e.onchange(); } catch (_) {} } };
+    [1, 3, 4, 9, 10, 11].forEach(i => set("empresas_" + i, false));
+    set("empresas_" + E, true);                        // ⚠️ nunca empresas 9 nem 11
+    const sv = (id, v) => { const e = fd.getElementById(id); if (e) e.value = v; };
+    sv("data1", d60); sv("data2", hoje);
+    const c1 = fd.querySelector("[name=data1_compra]"); if (c1) c1.value = ini;
+    const c2 = fd.querySelector("[name=data2_compra]"); if (c2) c2.value = hoje;
+    set("controle_dif_periodo", true);
+    set("exibe_estoque_transito", true);
+    set("somenteDisp", false);
+    setName("sem_movimentacao", true);                 // catálogo, não só quem se moveu
+    setName("saldo_positivo", true);                   // …mas só quem TEM saldo (senão são 56 mil linhas)
+    const dep = fd.querySelector("select[name=depositos]");
+    if (dep) [...dep.options].forEach(o => o.selected = true);   // mesmos depósitos da 1ª passada
+    const fa = fd.querySelector("input[name=formas][value=A]"); if (fa) fa.checked = true;
+    const ag = fd.querySelector("select[name=f_agrupamento]");
+    if (ag) [...ag.options].forEach(o => o.selected = (o.text.trim() === "Marca"));
+  }, {
+    E,
+    d60: fmtBR(new Date(HOJE.getTime() - 60 * 86400000)),
+    hoje: fmtBR(HOJE),
+    ini: `01/01/${HOJE.getFullYear()}`,
+  });
+  await page.waitForTimeout(300);
+  const nav = page.waitForNavigation({ waitUntil: "load", timeout: 420000 }).catch(() => null);
+  await page.evaluate(() => {
+    const b = [...document.querySelectorAll("input[type=submit], input[type=button], button, a")]
+      .find(x => /^gerar/i.test((x.value || x.textContent || "").trim()));
+    if (b) b.click();
+  });
+  if (!(await nav)) throw new Error("relatório de saldo parado não terminou de carregar em 420s (seria truncado)");
+  await page.waitForTimeout(1500);
+
+  const r = await page.evaluate(() => {
+    const num = s => { s = String(s || "").trim(); if (!s || s === "-") return 0; const v = parseFloat(s.replace(/\./g, "").replace(",", ".").replace(/[^\d.\-]/g, "")); return isNaN(v) ? 0 : v; };
+    const trs = [...document.querySelectorAll("tr")];
+    let n = 0;
+    for (const tr of trs) {
+      const t = (tr.textContent || "").toLowerCase();
+      if (/c[óo]digo/.test(t) && /saldo/.test(t) && tr.cells && tr.cells.length > 5) { n = tr.cells.length; break; }
+    }
+    if (!n) return { erro: "cabeçalho não encontrado" };
+    // as 3 últimas colunas são sempre o bloco da loja: vendas · trânsito · saldo
+    const iV = n - 3, iT = n - 2, iS = n - 1;
+    const out = {}; let marca = null, linhas = 0;
+    for (const tr of trs) {
+      const txt = (tr.textContent || "").trim();
+      const m = txt.match(/Marca:\s*([A-ZÁÉÍÓÚÇÃÕ0-9 .\-\/\&]+?)\s*\((\d+)\)/i);
+      if (m) { marca = m[1].trim(); continue; }
+      const c = tr.cells; if (!c || c.length !== n) continue;
+      const cod = (c[0].textContent || "").trim(); if (!/^\d+$/.test(cod)) continue;
+      if (!marca || /GERAL/.test(marca)) continue;
+      (out[marca] = out[marca] || { prods: [] }).prods.push({
+        c: cod, d: (c[1].textContent || "").trim(), r: (c[2].textContent || "").trim(),
+        v: num(c[iV].textContent), t: num(c[iT].textContent), s: num(c[iS].textContent),
+      });
+      linhas++;
+    }
+    return { out, linhas };
+  });
+  if (r.erro) throw new Error(`saldo parado emp${E}: ${r.erro}`);
+  log(`saldo parado emp${E}: ${r.linhas} produtos com saldo em ${((Date.now() - t0) / 1000).toFixed(0)}s`);
+  return r.out;
+}
+
+// Acrescenta à 1ª passada os produtos com saldo que ela não trouxe. Nunca sobrescreve quem já veio.
+function mesclarSaldoParado(base, parado, loja) {
+  const jaTem = new Set();
+  for (const blk of Object.values(base)) for (const p of blk.prods) jaTem.add(p.c);
+  let n = 0, un = 0;
+  for (const [marca, blk] of Object.entries(parado)) {
+    for (const p of blk.prods) {
+      if (jaTem.has(p.c)) continue;
+      (base[marca] = base[marca] || { prods: [] }).prods.push(p);
+      jaTem.add(p.c); n++; un += p.s;
     }
   }
+  log(`saldo ${loja}: +${n} produtos parados (+${Math.round(un)} un) que o relatório de movimento não trazia`);
+  return { n, un };
+}
+
+async function coletaSaldos(ctx, page) {
+  // Sequencial (1 loja por vez) — relatório pesado; paralelo saturava o servidor
+  // e derrubava a conexão. ~15-30s por loja na 1ª passada + a 2ª (saldo parado).
+  const saldos = {};
+  const completo = {};
+  for (const E of EMPRESAS) {
+    const loja = EMP_TO_LOJA[E];
+    try {
+      saldos[loja] = await coletaSaldoLoja(page, E);
+    } catch (e) {
+      log(`saldo emp${E} FALHOU: ${e.message}`);
+      saldos[loja] = {};
+      completo[loja] = false;
+      continue;
+    }
+    // 2ª passada: 2 tentativas. Se falhar, segue com a 1ª (como era antes) e marca incompleto —
+    // melhor publicar sem o estoque parado do que não publicar nada.
+    let ok = false;
+    for (let tent = 1; tent <= 2 && !ok; tent++) {
+      try {
+        mesclarSaldoParado(saldos[loja], await coletaSaldoParadoLoja(page, E), loja);
+        ok = true;
+      } catch (e) {
+        log(`saldo parado emp${E} tentativa ${tent} FALHOU: ${e.message}`);
+      }
+    }
+    completo[loja] = ok;
+  }
+  SALDO_PARADO_COMPLETO = completo;
   return saldos;
 }
 
@@ -345,7 +467,7 @@ try {
     const saldos = await coletaSaldos(ctx, page);
     const notas = await coletaNotas(page);
     const pendentes = await coletaPendentes(page);
-    const raw = { saldos, notas, pendentes, _coletado_em: new Date().toISOString() };
+    const raw = { saldos, notas, pendentes, _coletado_em: new Date().toISOString(), _saldo_parado_completo: SALDO_PARADO_COMPLETO };
     writeFileSync(OUT_RAW, JSON.stringify(raw));
     const totProds = Object.values(saldos).reduce((a, lj) => a + Object.values(lj || {}).reduce((x, b) => x + b.prods.length, 0), 0);
     log(`compras_raw.json gravado: saldos=${totProds} produtos, notas=${notas.length}, pendentes={${EMPRESAS.map(E => (pendentes[String(E)]?.NFes?.length || 0)).join(",")}}`);
