@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-09-18T17:31:32.354Z",
+  "gerado_em": "2026-09-18T17:47:42.524Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
@@ -112,13 +112,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 284.9,
             "cod_erp": "204620",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 139
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.282",
@@ -142,13 +141,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 114.9,
             "cod_erp": "204621",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 56
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.283",
@@ -172,13 +170,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "204622",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.288",
@@ -202,13 +199,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 284.9,
             "cod_erp": "204623",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 139
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.364",
@@ -232,13 +228,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 114.9,
             "cod_erp": "204624",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 56
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.289",
@@ -262,13 +257,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "204625",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.353",
@@ -292,13 +286,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "204626",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.333",
@@ -322,13 +315,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 284.9,
             "cod_erp": "204627",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 139
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.9",
@@ -352,13 +344,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 172.9,
             "cod_erp": "204628",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 84
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.10",
@@ -382,13 +373,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 86.9,
             "cod_erp": "204629",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 42
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.347",
@@ -412,13 +402,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "204630",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.14",
@@ -442,13 +431,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "204631",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.346",
@@ -472,13 +460,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 65.9,
             "cod_erp": "204632",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 32
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.336",
@@ -502,13 +489,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "204633",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.348",
@@ -532,13 +518,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 53.9,
             "cod_erp": "204634",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002100",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 26
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.342",
@@ -562,13 +547,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 65.9,
             "cod_erp": "204635",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 32
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.244",
@@ -592,13 +576,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 81.9,
             "cod_erp": "204636",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 35.2
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.286",
@@ -622,13 +605,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 81.9,
             "cod_erp": "204637",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 40
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.27",
@@ -652,13 +634,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 81.9,
             "cod_erp": "204638",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 40
+            "st_motivo": "ncm"
           },
           {
             "cprod": "PROHALL.363",
@@ -682,13 +663,12 @@
             "credito_icms_pct": 0,
             "preco_atual": 49.9,
             "cod_erp": "204639",
-            "match_tipo": "ean",
+            "match_tipo": "ean*",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm",
-            "custo_erp": 24
+            "st_motivo": "ncm"
           }
         ],
         "uf": "ES"
