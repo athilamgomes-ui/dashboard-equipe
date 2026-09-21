@@ -2022,6 +2022,15 @@ const HISTORICO_PREMIOS = {
     },
   },
   '2026-09': {
+    // S3 (14/09–19/09) FECHADA+CONGELADA em 21/09/2026, apos recoleta FINAL da janela completa
+    // (cron_etapa1_vendas + coleta_cliente8 em 21/09 15:07): L1/L4/L5 IDENTICAS ao run de sabado
+    // 16:10 e L3 12.833 -> 12.859 (+26 em Outros). Cliente 8 (R Maura) = R$633,77 na L5 (> Outros
+    // R$585, Outros zerado) e R$0 nas outras 3.
+    // Meta REAL S3 conferida no Supabase metas_semanais/Worker em 21/09: L1=41600 L3=27400
+    // L4=46300 L5=26100 (identica ao hardcoded do HTML).
+    // Marcas A da semana: L1 23,5% · L3 14,5% · L4 22,1% · L5 15% — todas abaixo dos 30% do bonus.
+    // L1 72,3% -> faixa 70 = R$80 (unico pool da semana) · L3 46,9%, L4 56,2% e L5 67,6% -> R$0.
+    // IMUTAVEL.
     // S2 (08/09–12/09) FECHADA+CONGELADA em 14/09/2026 após recoleta final com o sábado inteiro. L1 75,9% → R$80 · L3 56,9% → R$0 · L4 61,1% → R$0 · L5 70,6% → R$80 (Meta Real). IMUTÁVEL.
     // S1 CONGELADA 07/09/2026 (fechou sab 05/09; 07/09 e feriado, fora de janela).
     // Recoleta FINAL 01-05/09 feita hoje 18:53 (cron_etapa1_vendas + coleta_cliente8 + cron_etapa2_marcas_a):
@@ -2031,34 +2040,34 @@ const HISTORICO_PREMIOS = {
     // L1 126,4% -> acima de 120 = R$420 (MA 20,1%, sem bonus) · L3 84,0%, L4 80,8% e L5 87,8% -> faixa 80 = R$100.
     // 'Outros' entra no total da loja e NAO na divisao (L1 R$543 · L3 R$5.081 · L5 -R$87). IMUTAVEL.
     L1: {
-      'Tatiane': {S1:147, S2:29},
-      'Rayra': {S1:125, S2:26},
-      'Sofia': {S1:72, S2:4},
-      'Bárbara': {S1:76, S2:21},
-      _em_pct: {S1:126.4, S2:75.9},
-      _pool:   {S1:420, S2:80},
+      'Tatiane': {S1:147, S2:29, S3:33},
+      'Rayra': {S1:125, S2:26, S3:23},
+      'Sofia': {S1:72, S2:4, S3:11},
+      'Bárbara': {S1:76, S2:21, S3:13},
+      _em_pct: {S1:126.4, S2:75.9, S3:72.3},
+      _pool:   {S1:420, S2:80, S3:80},
     },
     L3: {
-      'Ana Mira': {S1:46, S2:0},
-      'Raimunda': {S1:54, S2:0},
-      _em_pct: {S1:84, S2:56.9},
-      _pool:   {S1:100, S2:0},
+      'Ana Mira': {S1:46, S2:0, S3:0},
+      'Raimunda': {S1:54, S2:0, S3:0},
+      _em_pct: {S1:84, S2:56.9, S3:46.9},
+      _pool:   {S1:100, S2:0, S3:0},
     },
     L4: {
-      'Tanaia': {S1:0, S2:0},
-      'Josilene': {S1:21, S2:0},
-      'Bruna F.': {S1:55, S2:0},
-      'Débora': {S1:24, S2:0},
-      _em_pct: {S1:80.8, S2:61.1},
-      _pool:   {S1:100, S2:0},
+      'Tanaia': {S1:0, S2:0, S3:0},
+      'Josilene': {S1:21, S2:0, S3:0},
+      'Bruna F.': {S1:55, S2:0, S3:0},
+      'Débora': {S1:24, S2:0, S3:0},
+      _em_pct: {S1:80.8, S2:61.1, S3:56.2},
+      _pool:   {S1:100, S2:0, S3:0},
     },
     L5: {
-      'Rayssa': {S1:32, S2:14},
-      'Joyce': {S1:21, S2:19},
-      'Rosiene': {S1:22, S2:25},
-      'Karina': {S1:25, S2:22},
-      _em_pct: {S1:87.8, S2:70.6},
-      _pool:   {S1:100, S2:80},
+      'Rayssa': {S1:32, S2:14, S3:0},
+      'Joyce': {S1:21, S2:19, S3:0},
+      'Rosiene': {S1:22, S2:25, S3:0},
+      'Karina': {S1:25, S2:22, S3:0},
+      _em_pct: {S1:87.8, S2:70.6, S3:67.6},
+      _pool:   {S1:100, S2:80, S3:0},
     },
   },
 };
