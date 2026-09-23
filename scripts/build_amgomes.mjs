@@ -23,7 +23,29 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const HTML = join(__dirname, "..", "dashboard_amgomes.html");
 
 // ── Config (editável) ──
-const META_MENSAL = { L1: 140000, L3: 80000, L4: 140000, L5: 90000 };
+// Metas mensais: LIDAS da premiação (fonte da verdade) por mês corrente; este é só o FALLBACK
+// caso a leitura falhe (mantido nos valores correntes p/ nunca ranquear com meta errada).
+const META_MENSAL_FALLBACK = { L1: 160000, L3: 90000, L4: 160000, L5: 90000 };
+const PREMIACAO_HTML = join(__dirname, "..", "dashboard_premiacao.html");
+// Lê meta_mensal por loja do bloco 'AAAA-MM' do DADOS da premiação. Robusto: meta_mensal é o
+// PRIMEIRO campo de cada bloco de loja, então o regex não cruza pra outra loja. null se não achar.
+function lerMetasPremiacao(aaaa, mmStr) {
+  try {
+    const src = fs.readFileSync(PREMIACAO_HTML, "utf8");
+    const chave = `'${aaaa}-${mmStr}'`;                 // ex '2026-09'
+    const iMes = src.indexOf(chave + ":");
+    if (iMes < 0) return null;
+    const resto = src.slice(iMes + chave.length);
+    const mProx = resto.slice(1).match(/'\d{4}-\d{2}'\s*:/);   // próxima chave de mês limita o bloco
+    const bloco = mProx ? resto.slice(0, mProx.index + 1) : resto;
+    const out = {};
+    for (const L of ["L1", "L3", "L4", "L5"]) {
+      const m = bloco.match(new RegExp(`${L}\\s*:\\s*\\{\\s*meta_mensal\\s*:\\s*(\\d+)`));
+      if (m) out[L] = parseInt(m[1], 10);
+    }
+    return Object.keys(out).length ? out : null;
+  } catch { return null; }
+}
 const LOJA = {
   L1: { emp: "1",  nome: "Casa Beleza Altamira",  cor: "#d97706", chart: "chart_L1", chartTitle: "Casa ATM",      vendTitle: "Casa Altamira" },
   L3: { emp: "3",  nome: "Casa Beleza Itaituba",  cor: "#0891b2", chart: "chart_L3", chartTitle: "Casa Itaituba", vendTitle: "Casa Itaituba" },
@@ -73,6 +95,14 @@ const mesIdx = agora.getMonth();           // 0-based
 const mesLabel = MES_ABBR[mesIdx];
 const mesAntLabel = MES_ABBR[(mesIdx + 11) % 12];
 const diaHoje = agora.getDate();
+
+// ── Metas mensais do mês corrente, LIDAS da premiação (alinha o ranking com o dashboard de premiação) ──
+const metasPrem = lerMetasPremiacao(aaaa, mm);
+const META_MENSAL = { ...META_MENSAL_FALLBACK, ...(metasPrem || {}) };
+if (metasPrem && Object.keys(metasPrem).length === 4)
+  log(`metas mensais lidas da premiação (${aaaa}-${mm}): ` + ["L1", "L3", "L4", "L5"].map(k => `${k} ${(META_MENSAL[k] / 1000)}k`).join(" · "));
+else
+  log(`⚠️ metas da premiação incompletas/não lidas p/ ${aaaa}-${mm} — usando ${metasPrem ? "parcial+fallback" : "fallback"}: ` + JSON.stringify(META_MENSAL));
 
 // fração decorrida do mês (por pesos de dia útil) → meta do período
 const diasNoMes = new Date(aaaa, mesIdx + 1, 0).getDate();
