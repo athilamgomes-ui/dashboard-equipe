@@ -130,8 +130,8 @@
   .progress-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
   .progress-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
   /* METRICS ROW */
-  .metrics { display: flex; gap: 16px; margin-top: 12px; }
-  .metric { flex: 1; }
+  .metrics { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+  .metric { flex: 1; min-width: 68px; }
   .metric-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
   .metric-value { font-size: 18px; font-weight: 700; }
   /* TABLE */
@@ -241,7 +241,7 @@
   </div>
   <div class="header-right">
     <div class="date-badge">📅 01–23/09/2026 — acumulado do mês</div>
-    <div class="last-update" id="lastUpdate">Atualizado em 23/09/2026 às 13:23</div>
+    <div class="last-update" id="lastUpdate">Atualizado em 23/09/2026 às 13:41</div>
   </div>
 </div>
 
@@ -264,6 +264,7 @@
         <div class="metric"><div class="metric-label">Qtde Peças</div><div class="metric-value" style="font-size:15px;">3.084</div></div>
         <div class="metric"><div class="metric-label">V. Líquida</div><div class="metric-value" style="font-size:15px;color:#d97706;">R$106.422</div></div>
         <div class="metric"><div class="metric-label">Margem</div><div class="metric-value" style="font-size:15px;color:#059669;">56,9%</div></div>
+        <div class="metric"><div class="metric-label">Meta Mensal</div><div class="metric-value" style="font-size:15px;color:var(--muted);">R$160.000</div></div>
       </div>
     </div>
     <!-- MissBeleza Santarém — 2º por % de meta (81,3%) — Set/2026 (V. Líquida) -->
@@ -280,6 +281,7 @@
         <div class="metric"><div class="metric-label">Qtde Peças</div><div class="metric-value" style="font-size:15px;">1.992</div></div>
         <div class="metric"><div class="metric-label">V. Líquida</div><div class="metric-value" style="font-size:15px;color:#6366f1;">R$56.182</div></div>
         <div class="metric"><div class="metric-label">Margem</div><div class="metric-value" style="font-size:15px;color:#059669;">53,5%</div></div>
+        <div class="metric"><div class="metric-label">Meta Mensal</div><div class="metric-value" style="font-size:15px;color:var(--muted);">R$90.000</div></div>
       </div>
     </div>
     <!-- MissBeleza Altamira — 3º por % de meta (72,2%) — Set/2026 (V. Líquida) -->
@@ -296,6 +298,7 @@
         <div class="metric"><div class="metric-label">Qtde Peças</div><div class="metric-value" style="font-size:15px;">2.750</div></div>
         <div class="metric"><div class="metric-label">V. Líquida</div><div class="metric-value" style="font-size:15px;color:#dc2626;">R$88.772</div></div>
         <div class="metric"><div class="metric-label">Margem</div><div class="metric-value" style="font-size:15px;color:#059669;">56,3%</div></div>
+        <div class="metric"><div class="metric-label">Meta Mensal</div><div class="metric-value" style="font-size:15px;color:var(--muted);">R$160.000</div></div>
       </div>
     </div>
     <!-- Casa Beleza Itaituba — 4º por % de meta (64,5%) — Set/2026 (V. Líquida) -->
@@ -312,6 +315,7 @@
         <div class="metric"><div class="metric-label">Qtde Peças</div><div class="metric-value" style="font-size:15px;">2.163</div></div>
         <div class="metric"><div class="metric-label">V. Líquida</div><div class="metric-value" style="font-size:15px;color:#0891b2;">R$44.557</div></div>
         <div class="metric"><div class="metric-label">Margem</div><div class="metric-value" style="font-size:15px;color:#059669;">57,4%</div></div>
+        <div class="metric"><div class="metric-label">Meta Mensal</div><div class="metric-value" style="font-size:15px;color:var(--muted);">R$90.000</div></div>
       </div>
     </div>
   </div>

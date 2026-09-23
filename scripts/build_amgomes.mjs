@@ -197,6 +197,7 @@ function kpiCard(m) {
         <div class="metric"><div class="metric-label">Qtde Peças</div><div class="metric-value" style="font-size:15px;">${fmtMil(m.qtd)}</div></div>
         <div class="metric"><div class="metric-label">V. Líquida</div><div class="metric-value" style="font-size:15px;color:${m.cor};">R$${fmtMil(m.vliq)}</div></div>
         <div class="metric"><div class="metric-label">Margem</div><div class="metric-value" style="font-size:15px;color:#059669;">${fmtPct(m.margem)}</div></div>
+        <div class="metric"><div class="metric-label">Meta Mensal</div><div class="metric-value" style="font-size:15px;color:var(--muted);">R$${fmtMil(m.metaMensal)}</div></div>
       </div>
     </div>`;
 }
