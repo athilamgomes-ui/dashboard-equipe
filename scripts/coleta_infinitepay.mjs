@@ -77,11 +77,20 @@ async function baixarExtrato(ctx, page, dia) {
   const linhas = [];
   let cursor = null, paginas = 0, passou = false;
 
+  // ⚠️ O PARAMETRO DO CURSOR E `cursor`, NAO `next_page`. Com o nome errado a
+  // API devolve SEMPRE a primeira pagina e o laco para no segundo giro (o
+  // cursor nao muda): o coletor lia so os 100 lancamentos mais recentes e
+  // devolvia VAZIO para qualquer dia mais antigo, sem erro nenhum. A rodada
+  // diaria (D-1) escapava porque 100 lancamentos cobrem ~7 dias; quem pagou foi
+  // a recuperacao de dias parados — em 24/09/2026 o dia 16/09 saiu com extrato
+  // vazio em duas lojas e virou "PIX faltando" que nao existia.
+  // Testado: cursor OK · next_page, nextPage, page_token, after = mesma pagina.
+  //
   // Feed do mais recente para o mais antigo. Para no primeiro registro anterior
   // ao dia pedido — mas só depois de ter visto o dia, senão para antes da hora
   // quando a coleta roda de madrugada.
   while (paginas < 40 && !passou) {
-    const qs = "limit=100" + (cursor ? "&next_page=" + encodeURIComponent(cursor) : "");
+    const qs = "limit=100" + (cursor ? "&cursor=" + encodeURIComponent(cursor) : "");
     const r = await ctx.request.get(base + "?" + qs, { headers });
     if (!r.ok()) throw new Error("/api/statements → " + r.status());
     const j = await r.json();
