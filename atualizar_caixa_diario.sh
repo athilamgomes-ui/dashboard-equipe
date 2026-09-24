@@ -39,8 +39,26 @@ LOJAS="L1 L3 L5"                       # InfinitePay
 DIA="${DIA:-$(date -v-1d +%Y-%m-%d)}"
 log(){ echo "[caixa-diario $(date +%H:%M:%S)] $*"; }
 
+# Há quantos dias a conferência não sai. Serve para o aviso ESCALAR em vez de
+# repetir a mesma frase todo dia.
+# ⚠️ Motivo real: entre 16 e 23/09/2026 a sessão da InfinitePay caiu e o Athila
+# recebeu NOVE avisos idênticos, nenhum deles dizendo que já eram nove dias.
+# Aviso que não muda de tom vira paisagem, e o silêncio de uma semana fica
+# indistinguível do silêncio de um dia.
+dias_sem_conferencia(){
+  local f="$LOGDIR/ultimo_sucesso.txt"
+  [ -f "$f" ] || { echo 0; return; }
+  local ult; ult=$(cat "$f" 2>/dev/null)
+  local t_ult t_hoje
+  t_ult=$(date -j -f %Y-%m-%d "$ult" +%s 2>/dev/null) || { echo 0; return; }
+  t_hoje=$(date +%s)
+  echo $(( (t_hoje - t_ult) / 86400 ))
+}
+
 avisar_falha(){                        # falha silenciosa é o pior modo de falhar
   # $1 = motivo · $2 = o que fazer (opcional)
+  local N; N=$(dias_sem_conferencia)
+  if [ "$N" -ge 2 ]; then set -- "⛔ HÁ $N DIAS SEM CONFERÊNCIA — $1" "${2:-}"; fi
   /usr/bin/osascript -e "display notification \"${1:0:200}\" with title \"⚠️ Conferência de caixa\" sound name \"Basso\"" 2>/dev/null
   echo "[caixa-diario] $1" > $LOGDIR/ultimo_erro.txt
 
@@ -235,5 +253,6 @@ elif [ $AV -ne 0 ]; then
 fi
 
 CONCLUIU=1
+date +%Y-%m-%d > "$LOGDIR/ultimo_sucesso.txt"
 log "pronto."
 exit 0
