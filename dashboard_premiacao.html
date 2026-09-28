@@ -2100,6 +2100,7 @@ const HISTORICO_PREMIOS = {
     },
   },
   '2026-09': {
+    // Congelado 28/09/2026 12:4x pelo cron (recoleta final seg 28/09 idêntica ao painel). Meta Real da S4.
     // S3 (14/09–19/09) FECHADA+CONGELADA em 21/09/2026, apos recoleta FINAL da janela completa
     // (cron_etapa1_vendas + coleta_cliente8 em 21/09 15:07): L1/L4/L5 IDENTICAS ao run de sabado
     // 16:10 e L3 12.833 -> 12.859 (+26 em Outros). Cliente 8 (R Maura) = R$633,77 na L5 (> Outros
@@ -2118,34 +2119,34 @@ const HISTORICO_PREMIOS = {
     // L1 126,4% -> acima de 120 = R$420 (MA 20,1%, sem bonus) · L3 84,0%, L4 80,8% e L5 87,8% -> faixa 80 = R$100.
     // 'Outros' entra no total da loja e NAO na divisao (L1 R$543 · L3 R$5.081 · L5 -R$87). IMUTAVEL.
     L1: {
-      'Tatiane': {S1:147, S2:29, S3:33},
-      'Rayra': {S1:125, S2:26, S3:23},
-      'Sofia': {S1:72, S2:4, S3:11},
-      'Bárbara': {S1:76, S2:21, S3:13},
-      _em_pct: {S1:126.4, S2:75.9, S3:72.3},
-      _pool:   {S1:420, S2:80, S3:80},
+      'Tatiane': {S1:147, S2:29, S3:33, S4:27},
+      'Rayra': {S1:125, S2:26, S3:23, S4:40},
+      'Sofia': {S1:72, S2:4, S3:11, S4:16},
+      'Bárbara': {S1:76, S2:21, S3:13, S4:17},
+      _em_pct: {S1:126.4, S2:75.9, S3:72.3, S4:84.4},
+      _pool:   {S1:420, S2:80, S3:80, S4:100},
     },
     L3: {
-      'Ana Mira': {S1:46, S2:0, S3:0},
-      'Raimunda': {S1:54, S2:0, S3:0},
-      _em_pct: {S1:84, S2:56.9, S3:46.9},
-      _pool:   {S1:100, S2:0, S3:0},
+      'Ana Mira': {S1:46, S2:0, S3:0, S4:0},
+      'Raimunda': {S1:54, S2:0, S3:0, S4:0},
+      _em_pct: {S1:84, S2:56.9, S3:46.9, S4:43.2},
+      _pool:   {S1:100, S2:0, S3:0, S4:0},
     },
     L4: {
-      'Tanaia': {S1:0, S2:0, S3:0},
-      'Josilene': {S1:21, S2:0, S3:0},
-      'Bruna F.': {S1:55, S2:0, S3:0},
-      'Débora': {S1:24, S2:0, S3:0},
-      _em_pct: {S1:80.8, S2:61.1, S3:56.2},
-      _pool:   {S1:100, S2:0, S3:0},
+      'Tanaia': {S1:0, S2:0, S3:0, S4:0},
+      'Josilene': {S1:21, S2:0, S3:0, S4:0},
+      'Bruna F.': {S1:55, S2:0, S3:0, S4:0},
+      'Débora': {S1:24, S2:0, S3:0, S4:0},
+      _em_pct: {S1:80.8, S2:61.1, S3:56.2, S4:63.7},
+      _pool:   {S1:100, S2:0, S3:0, S4:0},
     },
     L5: {
-      'Rayssa': {S1:32, S2:14, S3:0},
-      'Joyce': {S1:21, S2:19, S3:0},
-      'Rosiene': {S1:22, S2:25, S3:0},
-      'Karina': {S1:25, S2:22, S3:0},
-      _em_pct: {S1:87.8, S2:70.6, S3:67.6},
-      _pool:   {S1:100, S2:80, S3:0},
+      'Rayssa': {S1:32, S2:14, S3:0, S4:0},
+      'Joyce': {S1:21, S2:19, S3:0, S4:0},
+      'Rosiene': {S1:22, S2:25, S3:0, S4:0},
+      'Karina': {S1:25, S2:22, S3:0, S4:0},
+      _em_pct: {S1:87.8, S2:70.6, S3:67.6, S4:69.6},
+      _pool:   {S1:100, S2:80, S3:0, S4:0},
     },
   },
 };
