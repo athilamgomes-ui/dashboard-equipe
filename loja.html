@@ -1068,7 +1068,7 @@ function isDesligada(nome) { return (VENDEDORAS_META[nome]?.status) === 'desliga
 // do cron (formato 'DD/MM/AAAA HH:MM'). O JS só LÊ esse valor pra exibir e
 // calcular "dado velho" — NUNCA sobrescrever com new Date() (bug do timestamp
 // mentiroso: a hora exibida tem que ser a da coleta real, não a do page-load).
-const DADOS_COLETADO_EM = '28/09/2026 12:30';
+const DADOS_COLETADO_EM = '28/09/2026 12:36';
 
 // MOCK DATA — substituir depois pelo carregamento de dados_premiacao.json gerado pelo agente
 // Atualizado pra Jun/2026 S1 em 01/06/2026 (dados parciais 01/06 — segunda; ontem=sáb 30/05)
@@ -1107,10 +1107,10 @@ const DADOS_LOJA = {
     nome_loja: 'Miss Beleza Itaituba',
     meta_mensal: 90000,
     meta_semana: 11312,
-    vendido_semana: 737,
-    vendido_mes: 50713,
+    vendido_semana: 774,
+    vendido_mes: 50750,
     posicao_loja: 4, // 1-4
-    ma_pct_loja_sem: 37.2,
+    ma_pct_loja_sem: 35.4,
     ma_pct_loja_mes: 16.1,
     semana_atual: 'S5',
     semana_label: 'Semana 28 a 30/09',
@@ -1492,9 +1492,9 @@ const VENDAS_HIST = {
       S2:{Outros:2911,'Ana Mira':6035,Raimunda:4136},
       S3:{Outros:5696,'Ana Mira':4074,Raimunda:3089},
       S4:{Outros:4302,'Ana Mira':4311,Raimunda:2405},
-      S5:{Outros:165,'Ana Mira':174,Raimunda:398},
+      S5:{Outros:202,'Ana Mira':174,Raimunda:398},
     },
-    marcasA_loja: {S1:20.6,S2:14.9,S3:14.5,S4:12.9,S5:37.2},
+    marcasA_loja: {S1:20.6,S2:14.9,S3:14.5,S4:12.9,S5:35.4},
     ontem: {data:'26/09/2026', dia_semana:'sábado', vendas:{'Ana Mira':646,Raimunda:252}},
     hoje: {data:'28/09/2026', dia_semana:'segunda', vendas:{'Ana Mira':174,Raimunda:398}},
   },
