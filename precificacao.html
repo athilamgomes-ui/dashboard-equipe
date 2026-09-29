@@ -254,6 +254,7 @@ function renderAvisoConfig(){
   const itens=[];
   for(const L of LOJAS) for(const c in (ov[L]||{})){
     const padrao=custoPct((PARAMS_FILE.lojas||{})[L]||{}, c);
+    if(Math.abs(Number(ov[L][c])-padrao)<1e-9) continue;   // override IGUAL ao padrão (ex. mudou o oficial depois) → não é divergência, não avisa
     itens.push(`${L} ${CAMPO_NOME[c]||c} ${(ov[L][c]*100).toFixed(1)}% (padrão ${(padrao*100).toFixed(1)}%)`);
   }
   if(!itens.length){ el.style.display="none"; return; }
