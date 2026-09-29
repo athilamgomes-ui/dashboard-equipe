@@ -135,7 +135,11 @@
           <button class="btn sec" id="btnConcluir" style="border-color:var(--ok);color:var(--ok)" title="Marca esta NF-e como precificada — ela sai da tela agora e não volta">✅ Concluída</button>
         </div>
       </div>
-      <div class="tbl-wrap">
+      <div class="row" style="gap:6px;margin-bottom:8px">
+        <button class="btn" id="tabPadrao">Precificação padrão</button>
+        <button class="btn sec" id="tabMargem60">Margem fixa sobre a compra</button>
+      </div>
+      <div class="tbl-wrap" id="viewPadrao">
         <table id="tbl">
           <thead><tr>
             <th class="l">Produto</th><th class="l">Marca</th><th>Qtd</th>
@@ -144,6 +148,22 @@
           </tr></thead>
           <tbody id="tbody"><tr><td colspan="10" class="empty">Selecione uma NF-e ao lado.</td></tr></tbody>
         </table>
+      </div>
+      <div id="viewMargem60" style="display:none">
+        <div style="margin:8px 0;font-size:13px">
+          Margem sobre o preço de compra: <input type="number" id="margem60Inp" value="60" step="5" min="0" style="width:70px;text-align:right;font-weight:700"> %
+          <span class="muted"> — preço = custo + margem; depois desconta imposto, taxas e custo fixo; o que sobra é o <b>líquido da empresa</b>.</span>
+        </div>
+        <div class="tbl-wrap">
+          <table id="tblM60">
+            <thead><tr>
+              <th class="l">Produto</th><th>1· Custo compra</th><th>2· + margem → Preço</th>
+              <th>3· − Imposto</th><th>4· − Cartão+Com.+Outros</th><th>5· − Custo fixo</th>
+              <th>= Líquido R$</th><th>Líquido %</th>
+            </tr></thead>
+            <tbody id="tbodyM60"><tr><td colspan="8" class="empty">Selecione uma NF-e ao lado.</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -266,6 +286,51 @@ function renderAvisoConfig(){
 document.getElementById("btnConfig").onclick=()=>{ const p=document.getElementById("configPanel"); const show=p.style.display==="none"; if(show) renderConfig(); p.style.display=show?"":"none"; };
 document.getElementById("btnSalvarConfig").onclick=salvarConfig;
 document.getElementById("btnReset").onclick=()=>{ localStorage.removeItem(CFG_KEY); location.reload(); };
+
+// ===== Modelo 2: Margem FIXA sobre a compra (cascata custo → preço → descontos → líquido) =====
+function m60Ativo(){ const v=document.getElementById("viewMargem60"); return v && v.style.display!=="none"; }
+function renderMargem60(){
+  const tb=document.getElementById("tbodyM60"); if(!tb) return;
+  const arr=(DADOS&&DADOS.lojas[lojaAtual])||[]; const nf=arr[nfeSel];
+  if(!nf){ tb.innerHTML='<tr><td colspan="8" class="empty">Selecione uma NF-e ao lado.</td></tr>'; return; }
+  const cfg=PARAMS.lojas[lojaAtual]||{};
+  const mk=(parseFloat(document.getElementById("margem60Inp").value)||0)/100;
+  const taxasPct=custoPct(cfg,"cartao")+custoPct(cfg,"comissao")+custoPct(cfg,"outros");
+  const cfPct=cfg.custo_fixo||0;
+  let sc=0,sp=0,si=0,st=0,scf=0,sl=0;
+  const rows=nf.itens.map(it=>{
+    const custo=custoEfetivo(it);
+    const preco=arredonda90(custo*(1+mk));
+    const impPct=it.st?0:(cfg.imposto||0);
+    const imp=impPct*preco, tax=taxasPct*preco, cf=cfPct*preco;
+    const liq=preco-custo-imp-tax-cf, liqp=preco>0?liq/preco:0;
+    sc+=custo;sp+=preco;si+=imp;st+=tax;scf+=cf;sl+=liq;
+    return `<tr><td class="l desc" title="${it.descricao}">${it.descricao}</td>`+
+      `<td class="mono">${brl(custo)}</td>`+
+      `<td class="mono"><b>${brl(preco)}</b> <span class="muted" style="font-size:11px">+${(mk*100).toFixed(0)}%</span></td>`+
+      `<td class="mono" style="color:var(--crit)">${it.st?'<span class="muted" title="produto ST: imposto na venda 0%">— (ST)</span>':'−'+brl(imp)+' <span class="muted" style="font-size:11px">'+(impPct*100).toFixed(0)+'%</span>'}</td>`+
+      `<td class="mono" style="color:var(--crit)">−${brl(tax)} <span class="muted" style="font-size:11px">${(taxasPct*100).toFixed(0)}%</span></td>`+
+      `<td class="mono" style="color:var(--crit)">−${brl(cf)} <span class="muted" style="font-size:11px">${(cfPct*100).toFixed(0)}%</span></td>`+
+      `<td class="mono" style="font-weight:700;color:${liq>=0?'var(--ok)':'var(--crit)'}">${brl(liq)}</td>`+
+      `<td class="mono" style="font-weight:700;color:${liqp>=0?'var(--ok)':'var(--crit)'}">${pct(liqp)}</td></tr>`;
+  }).join("");
+  const liqtot=sp>0?sl/sp:0;
+  tb.innerHTML=rows+`<tr style="border-top:2px solid var(--indigo);font-weight:700;background:#f8fafc">`+
+    `<td class="l">TOTAL · ${nf.itens.length} itens</td><td class="mono">${brl(sc)}</td><td class="mono">${brl(sp)}</td>`+
+    `<td class="mono" style="color:var(--crit)">−${brl(si)}</td><td class="mono" style="color:var(--crit)">−${brl(st)}</td><td class="mono" style="color:var(--crit)">−${brl(scf)}</td>`+
+    `<td class="mono" style="color:${sl>=0?'var(--ok)':'var(--crit)'}">${brl(sl)}</td>`+
+    `<td class="mono" style="color:${liqtot>=0?'var(--ok)':'var(--crit)'}">${pct(liqtot)}</td></tr>`;
+}
+function setTabM60(on){
+  document.getElementById("viewPadrao").style.display=on?"none":"";
+  document.getElementById("viewMargem60").style.display=on?"":"none";
+  document.getElementById("tabPadrao").className="btn"+(on?" sec":"");
+  document.getElementById("tabMargem60").className="btn"+(on?"":" sec");
+  if(on) renderMargem60();
+}
+document.getElementById("tabPadrao").onclick=()=>setTabM60(false);
+document.getElementById("tabMargem60").onclick=()=>setTabM60(true);
+document.getElementById("margem60Inp").oninput=()=>renderMargem60();
 
 // ===== ÚLTIMA MARGEM POR MARCA e POR PRODUTO (persistidas) =====
 // Guarda a última margem usada em cada MARCA e a margem individual de cada PRODUTO (por EAN),
@@ -479,6 +544,7 @@ function renderItens(){
     if(!isNaN(v)&&v>0) precoOver[inp.dataset.k]=v; else delete precoOver[inp.dataset.k];
     renderItens();
   });
+  if(m60Ativo()) renderMargem60();
 }
 // margem real a partir de um preço final (manual ou calculado)
 function margemDoPreco(item, preco){
