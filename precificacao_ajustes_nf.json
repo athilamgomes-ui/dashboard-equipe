@@ -4,7 +4,8 @@
     "manter_cfop_excluido": "[{cprod,cfop}] — mantém uma linha de bonificação/amostra que o filtro por-item removeria (marca o item com bonificacao=true).",
     "remover_cprod": "[cprod] — tira um item do resultado final (ex. embalagem que não é de venda).",
     "custo_kit": "{cprod_ou_'KIT-...': valorUnit} — força o custo unitário do kit/avulso para o valor do romaneio.",
-    "desmembrar_cronograma": "true — NÃO monta o KIT CRONOGRAMA; as 3 máscaras ficam AVULSAS (loja que vende as máscaras separadas)."
+    "desmembrar_cronograma": "true — NÃO monta o KIT CRONOGRAMA; as 3 máscaras ficam AVULSAS (loja que vende as máscaras separadas).",
+    "desconto_pct": "0.15 — desconto comercial (fração) aplicado ao CUSTO de TODOS os itens da NF (ex. desconto do fornecedor que não veio na nota). custo *= (1-pct)."
   },
   "56927323000180:932": {
     "_nota": "Franca / L3 Itaituba, jul/2026 (Pedido 2082). Kit CRONOGRAMA DESMEMBRADO — as 3 máscaras (169 alho, 1044 therapy S.O.S, 1047 therapy negro, 16un cada) são vendidas individualmente (usuário zerou o kit e subiu +16 em cada no ERP). Bonificação Máscara Alho (169, CFOP 6910, 12un) precisa constar. Bobina shrink (1095) removida. Amostras sachê 15ml (909/1055/1056, CFOP 6911) saem sozinhas pelo filtro.",
@@ -21,5 +22,9 @@
   "61730517000120:20091": {
     "_nota": "LMB Cosméticos (Let me be) / L5 Santarém, 28/09/2026. MEIA NOTA — a NFe entrou com METADE do custo real. Custo real = 2x o da nota (batido item a item com o PDF do Pedido 27174, 0 divergências). Os 28 itens com EAN estão em precificacao_custos_manuais.json; os 5 SEM GTIN (2 kits + 3 shampoos/cond 'Com Você') têm o custo real forçado aqui por custo_kit (aceita avulso). NÃO toca no ERP; o usuário aplica os preços.",
     "custo_kit": { "LMB108109": 52, "LMB106107": 70, "LMB507": 18.5, "LMB510": 18.5, "LMB511": 18.5 }
+  },
+  "02167473000294:82060": {
+    "_nota": "Ville / L5 Santarém, 30/09/2026. Desconto comercial de 15% em todos os itens (Athila informou) — aplicado ao custo p/ a precificação. NÃO toca no ERP.",
+    "desconto_pct": 0.15
   }
 }

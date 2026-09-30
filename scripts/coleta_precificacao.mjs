@@ -815,6 +815,16 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
           }
         }
       }
+      // desconto comercial em % sobre o custo de TODOS os itens da NF (ex. desconto do fornecedor
+      // que não veio na nota). Aplica depois do custo_kit. (30/09/2026)
+      if (aj.desconto_pct != null && Number(aj.desconto_pct) > 0) {
+        const f = 1 - Number(aj.desconto_pct);
+        for (const it of nf.itens) {
+          if (it.custo_unit_cheio != null) it.custo_unit_cheio = Math.round(it.custo_unit_cheio * f * 10000) / 10000;
+          if (it.custo_cheio_total != null) it.custo_cheio_total = Math.round(it.custo_cheio_total * f * 100) / 100;
+          ajCustos++;
+        }
+      }
     }
     if (ajRemovidos || ajCustos) log(`ajustes por NF (romaneio): ${ajRemovidos} item(ns) removido(s), ${ajCustos} custo(s) forçado(s)`);
 
