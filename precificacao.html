@@ -152,6 +152,7 @@
       <div id="viewMargem60" style="display:none">
         <div style="margin:8px 0;font-size:13px">
           Margem sobre o custo: <input type="number" id="margem60Inp" value="60" step="5" min="0" style="width:70px;text-align:right;font-weight:700"> %
+          &nbsp;·&nbsp; Líquido alvo: <input type="number" id="liqAlvoInp" value="10" step="1" min="0" style="width:60px;text-align:right;font-weight:700"> %
           <span class="muted"> — <b>custo = valor da nota (sem ST)</b>. Preço = custo + margem. Do preço saem: custo (pago ao fornecedor), <b>ST</b> (nos ST, % sobre o custo) ou imposto na venda (nos não-ST), taxas e custo fixo → o que resta é o <b>líquido da empresa</b>.</span>
         </div>
         <div class="tbl-wrap">
@@ -159,9 +160,9 @@
             <thead><tr>
               <th class="l">Produto</th><th>Preço venda (custo +margem)</th><th>− Custo compra</th>
               <th>− ST / Imposto</th><th>− Cartão+Com.+Outros</th><th>− Custo fixo</th>
-              <th>= Líquido R$</th><th>Líquido %</th>
+              <th>= Líquido R$</th><th>Líquido %</th><th>Markup mín. p/ alvo</th>
             </tr></thead>
-            <tbody id="tbodyM60"><tr><td colspan="8" class="empty">Selecione uma NF-e ao lado.</td></tr></tbody>
+            <tbody id="tbodyM60"><tr><td colspan="9" class="empty">Selecione uma NF-e ao lado.</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -295,6 +296,7 @@ function renderMargem60(){
   if(!nf){ tb.innerHTML='<tr><td colspan="8" class="empty">Selecione uma NF-e ao lado.</td></tr>'; return; }
   const cfg=PARAMS.lojas[lojaAtual]||{};
   const mk=(parseFloat(document.getElementById("margem60Inp").value)||0)/100;
+  const X=(parseFloat(document.getElementById("liqAlvoInp").value)||0)/100;   // líquido alvo
   const taxasPct=custoPct(cfg,"cartao")+custoPct(cfg,"comissao")+custoPct(cfg,"outros");
   const cfPct=cfg.custo_fixo||0;
   let sc=0,sp=0,si=0,st=0,scf=0,sl=0;
@@ -305,6 +307,11 @@ function renderMargem60(){
     const fiscal=it.st?(stPct*custo):((cfg.imposto||0)*preco);   // ST de entrada (% do custo) p/ item ST; imposto na venda p/ não-ST
     const tax=taxasPct*preco, cf=cfPct*preco;
     const liq=preco-custo-fiscal-tax-cf, liqp=preco>0?liq/preco:0;
+    // markup mínimo p/ líquido ≥ X: item ST → (1+ST%)/(1−taxas−custofixo−X)−1 ; não-ST → 1/(1−imp−taxas−custofixo−X)−1
+    const custoMult=it.st?(1+stPct):1;
+    const fixedPct=(it.st?0:(cfg.imposto||0))+taxasPct+cfPct;
+    const K=1-fixedPct-X;
+    const mMin=K>1e-9?(custoMult/K-1):null;   // null = inviável (impossível atingir X)
     sc+=custo;sp+=preco;si+=fiscal;st+=tax;scf+=cf;sl+=liq;
     return `<tr><td class="l desc" title="${it.descricao}">${it.descricao}</td>`+
       `<td class="mono"><b>${brl(preco)}</b> <span class="muted" style="font-size:11px">custo ${brl(custo)} +${(mk*100).toFixed(0)}%</span></td>`+
@@ -313,7 +320,8 @@ function renderMargem60(){
       `<td class="mono" style="color:var(--crit)">−${brl(tax)} <span class="muted" style="font-size:11px">${(taxasPct*100).toFixed(0)}%</span></td>`+
       `<td class="mono" style="color:var(--crit)">−${brl(cf)} <span class="muted" style="font-size:11px">${(cfPct*100).toFixed(0)}%</span></td>`+
       `<td class="mono" style="font-weight:700;color:${liq>=0?'var(--ok)':'var(--crit)'}">${brl(liq)}</td>`+
-      `<td class="mono" style="font-weight:700;color:${liqp>=0?'var(--ok)':'var(--crit)'}">${pct(liqp)}</td></tr>`;
+      `<td class="mono" style="font-weight:700;color:${liqp>=0?'var(--ok)':'var(--crit)'}">${pct(liqp)}</td>`+
+      `<td class="mono" style="font-weight:700;color:${mMin==null?'var(--crit)':(mMin<=mk?'var(--ok)':'#b45309')}" title="${mMin==null?'impossível atingir o alvo (taxas+custo fixo já passam de 100%−alvo)':'markup necessário p/ líquido ≥ '+(X*100).toFixed(0)+'%'}">${mMin==null?'inviável':(mMin*100).toFixed(0)+'%'}</td></tr>`;
   }).join("");
   const liqtot=sp>0?sl/sp:0;
   tb.innerHTML=rows+`<tr style="border-top:2px solid var(--indigo);font-weight:700;background:#f8fafc">`+
@@ -321,7 +329,7 @@ function renderMargem60(){
     `<td class="mono" style="color:var(--crit)">−${brl(sc)}</td>`+
     `<td class="mono" style="color:var(--crit)">−${brl(si)}</td><td class="mono" style="color:var(--crit)">−${brl(st)}</td><td class="mono" style="color:var(--crit)">−${brl(scf)}</td>`+
     `<td class="mono" style="color:${sl>=0?'var(--ok)':'var(--crit)'}">${brl(sl)}</td>`+
-    `<td class="mono" style="color:${liqtot>=0?'var(--ok)':'var(--crit)'}">${pct(liqtot)}</td></tr>`;
+    `<td class="mono" style="color:${liqtot>=0?'var(--ok)':'var(--crit)'}">${pct(liqtot)}</td><td></td></tr>`;
 }
 function setTabM60(on){
   document.getElementById("viewPadrao").style.display=on?"none":"";
@@ -333,6 +341,7 @@ function setTabM60(on){
 document.getElementById("tabPadrao").onclick=()=>setTabM60(false);
 document.getElementById("tabMargem60").onclick=()=>setTabM60(true);
 document.getElementById("margem60Inp").oninput=()=>renderMargem60();
+document.getElementById("liqAlvoInp").oninput=()=>renderMargem60();
 
 // ===== ÚLTIMA MARGEM POR MARCA e POR PRODUTO (persistidas) =====
 // Guarda a última margem usada em cada MARCA e a margem individual de cada PRODUTO (por EAN),
