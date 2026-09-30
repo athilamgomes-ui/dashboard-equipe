@@ -729,8 +729,11 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
           }
           const cstN = String(tx.cst || "").padStart(2, "0").slice(-2);
           const ncm = String(tx.ncm || "").replace(/\D/g, "");
-          const stPorNcm = ncmEhST(ncm);                                    // PRIMÁRIO: NCM na lista SEFA-PA
-          const sinalNF = CST_ST_X.has(cstN) || Number(tx.vICMSST) > 0 || !!tx.cest; // fallback: sinais da NF
+          const stPorNcm = ncmEhST(ncm);                                    // PRIMÁRIO: NCM na lista SEFA-PA (Anexo XIII, sem seg 28 porta-a-porta)
+          // Fallback: só sinal REAL de ST cobrado na nota (CST 10/30/60/70 ou vICMS-ST>0).
+          // A MERA presença de CEST NÃO define ST — o CEST pode ser do seg 28 (porta a porta), que não
+          // se aplica a varejo (ex. pentes/escovas/lixa/maquiagem tinham CEST 28.xxx e viravam ST à toa). (30/09/2026)
+          const sinalNF = CST_ST_X.has(cstN) || Number(tx.vICMSST) > 0;
           const temST = stPorNcm || sinalNF;
           it.cst = tx.cst != null ? (tx.orig != null ? tx.orig + tx.cst : tx.cst) : (tx.csosn != null ? "CSOSN " + tx.csosn : null);
           it.icms_pct = Number(tx.pICMS) || 0;
