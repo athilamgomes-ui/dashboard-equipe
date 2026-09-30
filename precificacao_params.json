@@ -96,11 +96,11 @@
   "_santa_clara_ambos_doc": "Categorias (substring na descrição) da Santa Clara vendidas COMO PACOTE E COMO UNIDADE — na prática só as lixas de PAPEL p/ unhas. Preço principal = pacote (não divide); a tela mostra também o preço derivado por unidade (pacote ÷ divisor da descrição). 'santa_clara_ambos_excecoes' tira dessa categoria o que casa com 'LIXA' mas vende só o pacote (refil).",
   "_st_entrada_doc": "ICMS-ST antecipado na ENTRADA, somado ao custo do produto SEMPRE que o item for ST (determinado por NCM x CST do XML). % por UF de origem da nota (regra do usuário 23/06).",
   "st_entrada_por_uf": {
-    "SP": 0.21,
-    "RJ": 0.21,
-    "ES": 0.21,
-    "MG": 0.21,
+    "SP": 0.05,
+    "RJ": 0.05,
+    "ES": 0.05,
+    "MG": 0.05,
     "GO": 0.18,
-    "_default": 0.21
+    "_default": 0.05
   }
 }
