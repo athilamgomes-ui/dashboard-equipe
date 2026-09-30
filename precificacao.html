@@ -151,14 +151,14 @@
       </div>
       <div id="viewMargem60" style="display:none">
         <div style="margin:8px 0;font-size:13px">
-          Margem sobre o preço de compra: <input type="number" id="margem60Inp" value="60" step="5" min="0" style="width:70px;text-align:right;font-weight:700"> %
-          <span class="muted"> — preço = custo + margem; depois desconta imposto, taxas e custo fixo; o que sobra é o <b>líquido da empresa</b>.</span>
+          Margem sobre o custo: <input type="number" id="margem60Inp" value="60" step="5" min="0" style="width:70px;text-align:right;font-weight:700"> %
+          <span class="muted"> — <b>custo = valor da nota (sem ST)</b>. Preço = custo + margem. Do preço saem: custo (pago ao fornecedor), imposto, taxas e custo fixo → o que resta é o <b>líquido da empresa</b>.</span>
         </div>
         <div class="tbl-wrap">
           <table id="tblM60">
             <thead><tr>
-              <th class="l">Produto</th><th>1· Custo compra</th><th>2· + margem → Preço</th>
-              <th>3· − Imposto</th><th>4· − Cartão+Com.+Outros</th><th>5· − Custo fixo</th>
+              <th class="l">Produto</th><th>Preço venda (custo +margem)</th><th>− Custo compra</th>
+              <th>− Imposto</th><th>− Cartão+Com.+Outros</th><th>− Custo fixo</th>
               <th>= Líquido R$</th><th>Líquido %</th>
             </tr></thead>
             <tbody id="tbodyM60"><tr><td colspan="8" class="empty">Selecione uma NF-e ao lado.</td></tr></tbody>
@@ -299,15 +299,15 @@ function renderMargem60(){
   const cfPct=cfg.custo_fixo||0;
   let sc=0,sp=0,si=0,st=0,scf=0,sl=0;
   const rows=nf.itens.map(it=>{
-    const custo=custoEfetivo(it);
+    const custo=(custoManual(it)!=null?custoManual(it):(it.custo_unit_cheio||0));  // valor da nota, SEM ST
     const preco=arredonda90(custo*(1+mk));
     const impPct=it.st?0:(cfg.imposto||0);
     const imp=impPct*preco, tax=taxasPct*preco, cf=cfPct*preco;
     const liq=preco-custo-imp-tax-cf, liqp=preco>0?liq/preco:0;
     sc+=custo;sp+=preco;si+=imp;st+=tax;scf+=cf;sl+=liq;
     return `<tr><td class="l desc" title="${it.descricao}">${it.descricao}</td>`+
-      `<td class="mono">${brl(custo)}</td>`+
-      `<td class="mono"><b>${brl(preco)}</b> <span class="muted" style="font-size:11px">+${(mk*100).toFixed(0)}%</span></td>`+
+      `<td class="mono"><b>${brl(preco)}</b> <span class="muted" style="font-size:11px">custo ${brl(custo)} +${(mk*100).toFixed(0)}%</span></td>`+
+      `<td class="mono" style="color:var(--crit)">−${brl(custo)}</td>`+
       `<td class="mono" style="color:var(--crit)">${it.st?'<span class="muted" title="produto ST: imposto na venda 0%">— (ST)</span>':'−'+brl(imp)+' <span class="muted" style="font-size:11px">'+(impPct*100).toFixed(0)+'%</span>'}</td>`+
       `<td class="mono" style="color:var(--crit)">−${brl(tax)} <span class="muted" style="font-size:11px">${(taxasPct*100).toFixed(0)}%</span></td>`+
       `<td class="mono" style="color:var(--crit)">−${brl(cf)} <span class="muted" style="font-size:11px">${(cfPct*100).toFixed(0)}%</span></td>`+
@@ -316,7 +316,8 @@ function renderMargem60(){
   }).join("");
   const liqtot=sp>0?sl/sp:0;
   tb.innerHTML=rows+`<tr style="border-top:2px solid var(--indigo);font-weight:700;background:#f8fafc">`+
-    `<td class="l">TOTAL · ${nf.itens.length} itens</td><td class="mono">${brl(sc)}</td><td class="mono">${brl(sp)}</td>`+
+    `<td class="l">TOTAL · ${nf.itens.length} itens</td><td class="mono">${brl(sp)}</td>`+
+    `<td class="mono" style="color:var(--crit)">−${brl(sc)}</td>`+
     `<td class="mono" style="color:var(--crit)">−${brl(si)}</td><td class="mono" style="color:var(--crit)">−${brl(st)}</td><td class="mono" style="color:var(--crit)">−${brl(scf)}</td>`+
     `<td class="mono" style="color:${sl>=0?'var(--ok)':'var(--crit)'}">${brl(sl)}</td>`+
     `<td class="mono" style="color:${liqtot>=0?'var(--ok)':'var(--crit)'}">${pct(liqtot)}</td></tr>`;
