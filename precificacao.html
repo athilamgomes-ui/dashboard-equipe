@@ -152,13 +152,13 @@
       <div id="viewMargem60" style="display:none">
         <div style="margin:8px 0;font-size:13px">
           Margem sobre o custo: <input type="number" id="margem60Inp" value="60" step="5" min="0" style="width:70px;text-align:right;font-weight:700"> %
-          <span class="muted"> — <b>custo = valor da nota (sem ST)</b>. Preço = custo + margem. Do preço saem: custo (pago ao fornecedor), imposto, taxas e custo fixo → o que resta é o <b>líquido da empresa</b>.</span>
+          <span class="muted"> — <b>custo = valor da nota (sem ST)</b>. Preço = custo + margem. Do preço saem: custo (pago ao fornecedor), <b>ST</b> (nos ST, % sobre o custo) ou imposto na venda (nos não-ST), taxas e custo fixo → o que resta é o <b>líquido da empresa</b>.</span>
         </div>
         <div class="tbl-wrap">
           <table id="tblM60">
             <thead><tr>
               <th class="l">Produto</th><th>Preço venda (custo +margem)</th><th>− Custo compra</th>
-              <th>− Imposto</th><th>− Cartão+Com.+Outros</th><th>− Custo fixo</th>
+              <th>− ST / Imposto</th><th>− Cartão+Com.+Outros</th><th>− Custo fixo</th>
               <th>= Líquido R$</th><th>Líquido %</th>
             </tr></thead>
             <tbody id="tbodyM60"><tr><td colspan="8" class="empty">Selecione uma NF-e ao lado.</td></tr></tbody>
@@ -301,14 +301,15 @@ function renderMargem60(){
   const rows=nf.itens.map(it=>{
     const custo=(custoManual(it)!=null?custoManual(it):(it.custo_unit_cheio||0));  // valor da nota, SEM ST
     const preco=arredonda90(custo*(1+mk));
-    const impPct=it.st?0:(cfg.imposto||0);
-    const imp=impPct*preco, tax=taxasPct*preco, cf=cfPct*preco;
-    const liq=preco-custo-imp-tax-cf, liqp=preco>0?liq/preco:0;
-    sc+=custo;sp+=preco;si+=imp;st+=tax;scf+=cf;sl+=liq;
+    const stPct=it.st?stEntradaPct(it):0;
+    const fiscal=it.st?(stPct*custo):((cfg.imposto||0)*preco);   // ST de entrada (% do custo) p/ item ST; imposto na venda p/ não-ST
+    const tax=taxasPct*preco, cf=cfPct*preco;
+    const liq=preco-custo-fiscal-tax-cf, liqp=preco>0?liq/preco:0;
+    sc+=custo;sp+=preco;si+=fiscal;st+=tax;scf+=cf;sl+=liq;
     return `<tr><td class="l desc" title="${it.descricao}">${it.descricao}</td>`+
       `<td class="mono"><b>${brl(preco)}</b> <span class="muted" style="font-size:11px">custo ${brl(custo)} +${(mk*100).toFixed(0)}%</span></td>`+
       `<td class="mono" style="color:var(--crit)">−${brl(custo)}</td>`+
-      `<td class="mono" style="color:var(--crit)">${it.st?'<span class="muted" title="produto ST: imposto na venda 0%">— (ST)</span>':'−'+brl(imp)+' <span class="muted" style="font-size:11px">'+(impPct*100).toFixed(0)+'%</span>'}</td>`+
+      `<td class="mono" style="color:var(--crit)">−${brl(fiscal)} <span class="muted" style="font-size:11px">${it.st?('ST '+(stPct*100).toFixed(0)+'%'):('imp '+((cfg.imposto||0)*100).toFixed(0)+'%')}</span></td>`+
       `<td class="mono" style="color:var(--crit)">−${brl(tax)} <span class="muted" style="font-size:11px">${(taxasPct*100).toFixed(0)}%</span></td>`+
       `<td class="mono" style="color:var(--crit)">−${brl(cf)} <span class="muted" style="font-size:11px">${(cfPct*100).toFixed(0)}%</span></td>`+
       `<td class="mono" style="font-weight:700;color:${liq>=0?'var(--ok)':'var(--crit)'}">${brl(liq)}</td>`+
