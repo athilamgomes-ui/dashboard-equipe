@@ -733,7 +733,69 @@ const DADOS = {
       vendas_marca: {}
     },
   },
-  '2026-10': null,
+  '2026-10': {
+    // OUTUBRO/2026 — rollover 01/10. Metas semanais pela capacidade real de cada semana.
+    // Feriado 12/10 (N.Sra Aparecida) fecha as 4 lojas → S3 vai de 13 a 17/10. S1 = abertura
+    // curta (qui–sáb), S2 = pico pós-pagamento, S4/S5 cheias. Somam o teto mensal (= setembro).
+    // Sem folga de Comerciário (confirmado com o Athila 01/10).
+    semana_atual: 'S1',
+    L1: {
+      meta_mensal: 160000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/10–03/10', meta:19300},{id:'S2', label:'Semana 2', periodo:'05/10–10/10', meta:38700},{id:'S3', label:'Semana 3', periodo:'13/10–17/10', meta:31600},{id:'S4', label:'Semana 4', periodo:'19/10–24/10', meta:35200},{id:'S5', label:'Semana 5', periodo:'26/10–31/10', meta:35200},
+      ],
+      vendas: {
+      },
+      marcasA_loja: {},
+      marcasA_indiv: {},
+      tickets: {},
+      pecas: {},
+      cmv: {},
+      vendas_marca: {}
+    },
+    L3: {
+      meta_mensal: 90000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/10–03/10', meta:10900},{id:'S2', label:'Semana 2', periodo:'05/10–10/10', meta:21800},{id:'S3', label:'Semana 3', periodo:'13/10–17/10', meta:17800},{id:'S4', label:'Semana 4', periodo:'19/10–24/10', meta:19750},{id:'S5', label:'Semana 5', periodo:'26/10–31/10', meta:19750},
+      ],
+      vendas: {
+      },
+      marcasA_loja: {},
+      marcasA_indiv: {},
+      tickets: {},
+      pecas: {},
+      cmv: {},
+      vendas_marca: {}
+    },
+    L4: {
+      meta_mensal: 160000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/10–03/10', meta:19300},{id:'S2', label:'Semana 2', periodo:'05/10–10/10', meta:38700},{id:'S3', label:'Semana 3', periodo:'13/10–17/10', meta:31600},{id:'S4', label:'Semana 4', periodo:'19/10–24/10', meta:35200},{id:'S5', label:'Semana 5', periodo:'26/10–31/10', meta:35200},
+      ],
+      vendas: {
+      },
+      marcasA_loja: {},
+      marcasA_indiv: {},
+      tickets: {},
+      pecas: {},
+      cmv: {},
+      vendas_marca: {}
+    },
+    L5: {
+      meta_mensal: 90000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/10–03/10', meta:10900},{id:'S2', label:'Semana 2', periodo:'05/10–10/10', meta:21800},{id:'S3', label:'Semana 3', periodo:'13/10–17/10', meta:17800},{id:'S4', label:'Semana 4', periodo:'19/10–24/10', meta:19750},{id:'S5', label:'Semana 5', periodo:'26/10–31/10', meta:19750},
+      ],
+      vendas: {
+      },
+      marcasA_loja: {},
+      marcasA_indiv: {},
+      tickets: {},
+      pecas: {},
+      cmv: {},
+      vendas_marca: {}
+    },
+  },
   '2026-11': null,
   '2026-12': null,
 };
@@ -1893,7 +1955,7 @@ const METAS_FUTURAS = {
   '2026-07': {L1:140000,L3:85000,L4:140000,L5:90000}, // confirmado 04/07 via Tabela de Premiação/PDF (L3 subiu de 80k pra 85k)
   '2026-08': {L1:160000,L3:90000,L4:160000,L5:90000},
   '2026-09': {L1:160000,L3:90000,L4:160000,L5:90000}, // mantidas = agosto (decisão Athila 31/08)
-  '2026-10': {L1:140000,L3:80000,L4:140000,L5:90000},
+  '2026-10': {L1:160000,L3:90000,L4:160000,L5:90000},
   '2026-11': {L1:145000,L3:82000,L4:145000,L5:92000},
   '2026-12': {L1:160000,L3:90000,L4:160000,L5:100000},
 };
