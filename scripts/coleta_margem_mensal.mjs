@@ -167,7 +167,17 @@ for (const { mes, di, df } of periodos) {
   for (const { key, emp } of LOJAS) {
     let cell = vazio(), raw = null;
     for (let att = 0; att < 3; att++) {
-      try { raw = await gerar(page, emp, di, df); if (raw) break; }
+      try {
+        const r = await gerar(page, emp, di, df);
+        if (r) {
+          // guarda anti-parse-incompleto: Totais com faturamento mas custo das marcas somando ~0
+          // = streaming pego cedo (deu "margem 100%" em L1/ago e L4/mai no backfill 01/10). Re-tenta.
+          const cr = r.marcas.reduce((s, m) => s + (m.custo || 0), 0);
+          const ft = parseBR((r.totais || [])[7]);
+          if (ft > 0 && cr <= 0 && r.marcas.length > 0) { log(`  ${key} ${mes}/${ANO} tentativa ${att + 1}: custo=0 com fat>0 (parse incompleto) — re-tenta`); await page.waitForTimeout(3000); continue; }
+          raw = r; break;
+        }
+      }
       catch (e) { log(`  ${key} ${mes}/${ANO} tentativa ${att + 1}: ${String(e.message).split("\n")[0]}`); }
       await page.waitForTimeout(2500);
     }
