@@ -2301,6 +2301,39 @@ const HISTORICO_PREMIOS = {
       _pool:   {S1:100, S2:80, S3:0, S4:0},
     },
   },
+  '2026-10': {
+    // S1 (01/10–03/10) FECHADA+CONGELADA em 05/10/2026 após recoleta final (pipeline 08:25, janela completa). L1 119,3% → R$350 · L3 71,3% → R$80 · L4 86,7% → R$100 · L5 102% → R$280 (Meta Real). IMUTÁVEL.
+    L1: {
+      'Tatiane': {S1:105},
+      'Rayra': {S1:113},
+      'Sofia': {S1:55},
+      'Bárbara': {S1:77},
+      _em_pct: {S1:119.3},
+      _pool: {S1:350},
+    },
+    L3: {
+      'Ana Mira': {S1:31},
+      'Raimunda': {S1:49},
+      _em_pct: {S1:71.3},
+      _pool: {S1:80},
+    },
+    L4: {
+      'Tanaia': {S1:0},
+      'Josilene': {S1:32},
+      'Bruna F.': {S1:44},
+      'Débora': {S1:24},
+      _em_pct: {S1:86.7},
+      _pool: {S1:100},
+    },
+    L5: {
+      'Rayssa': {S1:96},
+      'Joyce': {S1:0},
+      'Rosiene': {S1:86},
+      'Karina': {S1:98},
+      _em_pct: {S1:102},
+      _pool: {S1:280},
+    },
+  },
 };
 function _frozenTem(mesKey, lojaKey, semId) {
   const lh = (HISTORICO_PREMIOS[mesKey] || {})[lojaKey];

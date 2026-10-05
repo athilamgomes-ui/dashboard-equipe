@@ -145,6 +145,7 @@ function grava(file) {
   }
   h = h.slice(0, ini) + bloco + h.slice(fim + 1);
   // ── VALIDA ANTES DE GRAVAR (nunca deixar o arquivo em estado quebrado) ──
+  if (process.env.DBG) fs.writeFileSync("/tmp/dbg_h.html", h);
   const chk = extrai(h, "HISTORICO_PREMIOS").obj;
   for (const L of ["L1", "L3", "L4", "L5"]) {
     const g = chk[mesKey][L];
