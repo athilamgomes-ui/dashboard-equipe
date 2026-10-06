@@ -1,0 +1,17 @@
+{
+  "_leiame": "NFs FIXADAS no dashboard de precificação para revisão (ex. reajuste de margem de marca cuja última compra é antiga). O coletor força estas NFs na tela ignorando o gatilho de entrada recente, e abre a janela de busca p/ alcançá-las. REVERSÍVEL: esvazie \"pins\" (ou apague o arquivo) p/ voltar ao normal. Chave OU loja+numero identificam a NF. Ver RUNBOOK_PRECIFICACAO + mecanismo em coleta_precificacao.mjs (const PINS).",
+  "pins": [
+    {
+      "loja": "L4",
+      "numero": 92586,
+      "chave": "31260511271239000201550010000925861394061831",
+      "_nota": "Cadiveu (Tricosmeticos) / L4 Altamira, emissao 13/05/2026, VENDA SEM ST, 34 itens, R$6.873,12. Pinada 05/10/2026 p/ reajuste de margem Cadiveu (margem estava alta). Remover quando o usuario aplicar os novos precos."
+    },
+    {
+      "loja": "L4",
+      "numero": 92587,
+      "chave": "31260511271239000201550010000925871384279696",
+      "_nota": "Cadiveu (Tricosmeticos) / L4 Altamira, emissao 13/05/2026, VENDA SEM ST, 49 itens, R$9.041,52. Pinada 05/10/2026 p/ reajuste de margem Cadiveu. Remover quando o usuario aplicar os novos precos."
+    }
+  ]
+}

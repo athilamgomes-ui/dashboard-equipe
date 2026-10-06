@@ -36,6 +36,12 @@ const PARAMS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard
 const MARCA_IDS = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/compras/marca_ids.json", "utf8"));
 // Preços de venda FIXOS por EAN (definidos manualmente pelo usuário) — injetados em item.preco_manual.
 const PRECOS_MANUAIS = (() => { try { return JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_precos_manuais.json", "utf8")).precos || {}; } catch { return {}; } })();
+// EAN de cadastro por código do fornecedor, p/ itens que vêm SEM GTIN na NFe (fornecedor não informou o
+// código de barras). Chave "CNPJ:CPROD" (preferida) ou só "CPROD". SÓ preenche item SEM GTIN; nunca
+// sobrescreve o EAN da nota. Chaves com "_" são ignoradas. O FRONTEND também aplica isso (precificacao.html),
+// mas aqui preenche ANTES do match de preço atual, p/ a coluna "Preço atual ERP" casar por EAN. (05/10/2026)
+const EANS_MANUAIS = (() => { try { const o = JSON.parse(readFileSync("/Users/elkgomes/Desktop/claude/dashboard-equipe/precificacao_eans_manuais.json", "utf8")); const m = {}; for (const k in o) if (!k.startsWith("_")) m[k] = String(o[k]); return m; } catch { return {}; } })();
+const eanManual = (cnpj, cprod) => EANS_MANUAIS[`${cnpj}:${cprod}`] ?? EANS_MANUAIS[String(cprod)] ?? null;
 // Código INTERNO do ERP por CNPJ do fornecedor + cprod (inclui kits, chave "KIT-<cprods ordenados>").
 // Para NF que precisa exportar o .txt por "Código" (não "Código de Barras"): produtos novos cujo EAN
 // da nota não bate com o cadastro, e kits que não têm EAN na nota. Ex.: Franca/Nathydras+Varcare. (05/08/2026)
@@ -77,7 +83,18 @@ const MARCA_ALIAS = { GAMA: ["BRASITECH"] }; // pedido marca → marcas de NF eq
 const URL_NFE = "https://linx.microvix.com.br/gestor_web/produtos/entrada_nfe/index.html";
 const HOJE = new Date();
 const ANO = HOJE.getFullYear();
-const CUTOFF_DIAS = 90;       // janela ampla p/ achar a NF (a NF pode ser dias antes da entrega)
+// PINS (05/10/2026): NFs antigas que o usuário quer REVER no dashboard (ex. reajuste de margem de uma
+// marca cuja última compra é de meses atrás). Arquivo precificacao_pin_nf.json = { "pins": [ {chave,
+// loja, numero, _nota} ] }. NF pinada é FORÇADA na tela (ignora o gatilho/elegibilidade de entrada
+// recente), desde que passe keepNfe (CFOP de revenda) e não seja fornecedor ignorado/uso interno.
+// REVERSÍVEL: esvaziar "pins" (ou apagar o arquivo) volta ao comportamento normal. Enquanto houver
+// pin, a janela de busca abre p/ PIN_JANELA_DIAS (default 220) p/ alcançar a NF antiga.
+const PINS = (() => { try { return (JSON.parse(readFileSync(REPO + "/precificacao_pin_nf.json", "utf8")).pins) || []; } catch { return []; } })();
+const PIN_CHAVES = new Set(PINS.map(p => String(p.chave || "").replace(/\D/g, "")).filter(Boolean));
+const PIN_NUMS = new Set(PINS.map(p => p.loja && p.numero != null ? `${p.loja}|${String(p.numero)}` : "").filter(Boolean));
+const temPins = PIN_CHAVES.size > 0 || PIN_NUMS.size > 0;
+const JANELA_DIAS = Number(process.env.JANELA_DIAS) || (temPins ? Number(process.env.PIN_JANELA_DIAS) || 220 : 90);
+const CUTOFF_DIAS = JANELA_DIAS; // janela ampla p/ achar a NF (a NF pode ser dias antes da entrega); abre p/ alcançar pins
 // GATILHO (29/06/2026): dispara pela ENTRADA da NF no ERP (campo LancadaNoMicrovix da API), não mais pelo status ENTREGUE do Planejamento.
 // Como a API não traz a DATA do lançamento, guardamos em precificacao_lancadas.json quando cada NF foi vista lançada pela 1ª vez e mostramos as dos últimos N dias.
 const DIAS_ENTRADA = Number(process.env.DIAS_ENTRADA || process.env.DIAS_ENTREGA) || 3; // dias que a NF fica visível DEPOIS de detectada como precificada (regra "some 3 dias após precificar")
@@ -400,9 +417,9 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
 
     if (NF_FILTER) log(`MODO TESTE: puxando só a NF ${NF_FILTER} (ignorando gatilho de entrada)`);
 
-    const raw = await page.evaluate(async (empresas) => {
+    const raw = await page.evaluate(async ({ empresas, dias }) => {
       const pad = n => String(n).padStart(2, "0");
-      const now = new Date(); const d90 = new Date(now.getTime() - 90 * 86400000);
+      const now = new Date(); const d90 = new Date(now.getTime() - dias * 86400000);
       const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T03:00:00.000Z`;
       const token = localStorage.getItem("token_api");
       const base = (localStorage.getItem("url_fiscal_api") || "https://fiscalwebapi-prod.microvix.com.br").replace(/\/$/, "");
@@ -417,7 +434,8 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         } catch (e) { res[String(E)] = { NFes: [], _erro: String(e) }; }
       }
       return res;
-    }, EMPRESAS);
+    }, { empresas: EMPRESAS, dias: JANELA_DIAS });
+    if (temPins) log(`PINS ativos (${PINS.length}) — janela aberta p/ ${JANELA_DIAS}d; NFs pinadas forçadas na tela`);
 
     // GATILHO POR ENTRADA NO ERP + FICA NA TELA ATÉ SER PRECIFICADA (pedido do usuário 06/07/2026).
     // state[chave] = {desde: 1ª aparição, aplicadoDesde: quando detectou preço já aplicado no ERP, ou null}.
@@ -519,20 +537,29 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         // nem marca única (fornBrand) nem multi-marca ('+'). Multi-marca (ex. Franca=Varcare+Nathydras)
         // NÃO é pendente: a marca é resolvida item a item adiante. (05/08/2026 — banner era falso alarme)
         const marcaPendente = !marcaForn && !marcaCandidatas.length;
+        const pinned = temPins && (PIN_CHAVES.has(String(nfe.Chave || "").replace(/\D/g, "")) || PIN_NUMS.has(`${loja}|${String(nfe.Numero)}`));
         if (NF_FILTER) {
           if (!NF_FILTER.includes(String(nfe.Numero))) continue; // modo teste: só a(s) NF(s) pedida(s)
+        } else if (pinned) {
+          // PIN: NF forçada na tela p/ revisão (ignora elegibilidade de entrada recente). Só exige keepNfe
+          // (já passou) + não ser uso interno. (05/10/2026, reajuste de margem Cadiveu)
+          if (marcaForn && marcaNaoRevenda(marcaForn)) continue;
+          log(`📌 NF pinada forçada na tela: ${loja} NF ${nfe.Numero} (${marcaForn || "marca pendente"})`);
         } else {
           // GATILHO: entrada no ERP + visível por DIAS_ENTRADA dias a partir da 1ª aparição (depois some)
           if (marcaForn && marcaNaoRevenda(marcaForn)) continue; // sacolas/uso interno não vão p/ precificação
           if (!elegivel(loja, nfe)) continue;
         }
+        const cnpjForn = String(emit.Documento || "").replace(/\D/g, "");
         const itens = (nfe.Produtos || []).map(p => {
           const valorBase = num(p.ValorTotalLiquido) || (num(p.ValorBruto) - num(p.ValorDesconto));
           const custoTotal = valorBase + num(p.ValorFrete) + num(p.ValorSeguro) + num(p.ValorOutrasDespesas) + num(p.vIPI) + num(p.ValorICMSST) + num(p.ValorFCPST);
           const qtd = num(p.QuantidadeComercial) || 1;
+          const eanNota = String(p.CEAN || "");
+          const eanEff = (!eanNota || eanNota === "SEM GTIN") ? (eanManual(cnpjForn, String(p.CProd || "")) || eanNota) : eanNota; // SEM GTIN → EAN de cadastro (precificacao_eans_manuais.json)
           return {
             cprod: String(p.CProd || ""),
-            ean: String(p.CEAN || ""),
+            ean: eanEff,
             descricao: String(p.DescricaoProduto || ""),
             qtd,
             cfop: String(p.CFOP || ""),
