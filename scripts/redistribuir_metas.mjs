@@ -112,6 +112,7 @@ async function main() {
       const fim = parseFimPeriodo(s.periodo, ano);
       (fim && fim <= hoje ? fechadas : restantes).push(s);
     }
+    if (!restantes.length) { porLoja[loja] = null; continue; } // última semana fechou — nada a redistribuir
     let realizado = 0;
     for (const s of fechadas) for (const v of Object.values((L.vendas || {})[s.id] || {})) realizado += (+v || 0);
     realizado = Math.round(realizado);
@@ -125,6 +126,7 @@ async function main() {
   // relatório
   for (const loja of ["L1", "L3", "L4", "L5"]) {
     const p = porLoja[loja];
+    if (!p) { console.log(`\n${loja} · sem semanas restantes — nada a redistribuir`); continue; }
     console.log(`\n${loja} · realizado(fechadas)=${p.realizado} · restantes devem somar ${p.alvoRestantes}`);
     p.restantes.forEach((s, i) => {
       const ideal = p.ideaisRest[i], nova = p.novas[i], d = nova - ideal;
@@ -141,6 +143,7 @@ async function main() {
   for (let j = braceStart; j < html.length; j++) { const c = html[j]; if (c === "{") depth++; else if (c === "}") { depth--; if (depth === 0) { regEnd = j; break; } } }
   let region = html.slice(braceStart, regEnd + 1);
   for (const loja of ["L1", "L3", "L4", "L5"]) {
+    if (!porLoja[loja]) continue;
     const map = porLoja[loja].mapNovo;
     // atualiza meta: dentro do bloco da loja, pra cada semana restante, troca meta:NN
     const lreg = region.match(new RegExp(`(\\n    ${loja}: \\{[\\s\\S]*?semanas: \\[)([\\s\\S]*?)(\\n\\s*\\],)`));
@@ -158,10 +161,11 @@ async function main() {
   // Supabase + Worker (só as restantes mudam de meta)
   const ISO = new Date().toISOString();
   const rows = [];
-  for (const loja of ["L1", "L3", "L4", "L5"]) for (const [id, nova] of Object.entries(porLoja[loja].mapNovo)) rows.push({ mes: MES, loja, semana: id, meta: nova, atualizado_em: ISO });
+  for (const loja of ["L1", "L3", "L4", "L5"]) { if (!porLoja[loja]) continue; for (const [id, nova] of Object.entries(porLoja[loja].mapNovo)) rows.push({ mes: MES, loja, semana: id, meta: nova, atualizado_em: ISO }); }
   const rS = await fetch(`${SUPA_URL}/rest/v1/metas_semanais?on_conflict=mes,loja,semana`, { method: "POST", headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}`, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates" }, body: JSON.stringify(rows) });
   console.log("Supabase", rS.status);
   for (const loja of ["L1", "L3", "L4", "L5"]) {
+    if (!porLoja[loja]) continue;
     const todas = mes[loja].semanas.map(s => ({ id: s.id, nova: porLoja[loja].mapNovo[s.id] ?? s.meta }));
     const r = await fetch(`${WORKER_URL}/metas-loja`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mes: MES, loja, tipo: "custom", em: ISO, metas: todas }) });
     console.log("Worker", loja, r.status);
