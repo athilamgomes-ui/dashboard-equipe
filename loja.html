@@ -1070,7 +1070,7 @@ function isDesligada(nome) { return (VENDEDORAS_META[nome]?.status) === 'desliga
 // do cron (formato 'DD/MM/AAAA HH:MM'). O JS só LÊ esse valor pra exibir e
 // calcular "dado velho" — NUNCA sobrescrever com new Date() (bug do timestamp
 // mentiroso: a hora exibida tem que ser a da coleta real, não a do page-load).
-const DADOS_COLETADO_EM = '06/10/2026 15:47';
+const DADOS_COLETADO_EM = '07/10/2026 15:08';
 
 // MOCK DATA — substituir depois pelo carregamento de dados_premiacao.json gerado pelo agente
 // Atualizado pra Jun/2026 S1 em 01/06/2026 (dados parciais 01/06 — segunda; ontem=sáb 30/05)
@@ -1078,28 +1078,28 @@ const DADOS_LOJA = {
   L1: {
     nome_loja: 'Casa da Beleza Altamira',
     meta_mensal: 160000,
-    meta_semana: 37676,
-    vendido_semana: 14832,
-    vendido_mes: 37856,
+    meta_semana: 35200,
+    vendido_semana: 23647,
+    vendido_mes: 46671,
     posicao_loja: 1, // 1-4
-    ma_pct_loja_sem: 25.8,
-    ma_pct_loja_mes: 23,
+    ma_pct_loja_sem: 21.7,
+    ma_pct_loja_mes: 21.4,
     semana_atual: 'S2',
     semana_label: 'Semana 05 a 10/10',
     vendedoras: {
-      'Tatiane':  {sem:3069, mes:9974, ma_sem:34.4, ma_mes:28.6, melhorias:[
+      'Tatiane':  {sem:6178, mes:13083, ma_sem:27.5, ma_mes:26.7, melhorias:[
         'Suas Marcas A estão em 22%. Pra chegar em 30%, faça assim: pra cada 10 clientes que você atender, ofereça primeiro uma marca A (Truss, Marco Boni ou Itallian) pra 7 deles. Os outros 3 podem ser outras marcas.',
         'Você foi a vendedora que mais vendeu na loja essa semana. Mantenha o ritmo - quanto mais você fechar venda, mais cresce o prêmio de toda a equipe.'
       ]},
-      'Rayra':    {sem:5461, mes:12885, ma_sem:30.2, ma_mes:26.5, melhorias:[
+      'Rayra':    {sem:7254, mes:14678, ma_sem:27.3, ma_mes:25.5, melhorias:[
         'Suas Marcas A caíram de 21% (média do mês) pra 19% essa semana. Pra subir de novo: ofereça shampoo + condicionador + máscara da mesma marca como combo. Vendendo combo, suas Marcas A sobem e o valor do atendimento também.',
         'Quando um cliente que já comprou com você vem de novo, ele compra mais. Pegue o celular dos seus 10 melhores clientes e mande uma mensagem assim: "Oi fulana, chegou uma novidade da marca X que você vai amar". Mensagens assim trazem cliente pra loja.'
       ]},
-      'Bárbara':  {sem:3881, mes:8940, ma_sem:19.6, ma_mes:18.2, melhorias:[
+      'Bárbara':  {sem:6584, mes:11643, ma_sem:14.3, ma_mes:15.5, melhorias:[
         'Bem-vinda à equipe! Como você está chegando agora, foque essa primeira semana em aprender as Marcas A da loja (Truss, Marco Boni, Itallian). Saber o que cada uma faz vai te dar confiança pra oferecer pro cliente.',
         'Pareie com a Tatiane (gerente) ou a Rayra (top de vendas) por 2 dias - observe como elas abordam o cliente e quais frases usam pra oferecer marca A. Depois aplique nas suas próprias vendas.'
       ]},
-      'Sofia':    {sem:2421, mes:6015, ma_sem:15.1, ma_mes:13.2, melhorias:[
+      'Sofia':    {sem:3631, mes:7225, ma_sem:14.4, ma_mes:13.1, melhorias:[
         'Você é nova e está aprendendo - cresceu 24% na semana passada, parabéns! Próximo passo: quando o cliente estiver olhando um produto, não espere ele decidir sozinho. Diga: "Esse aqui está fazendo sucesso, quer levar?" ou "Se quiser, eu já separo aqui pra você". Frases assim ajudam a fechar a venda.',
         'Seu foco dessa semana: aprender bem as 3 marcas A da loja - Truss, Marco Boni e Itallian. Saber o que cada uma faz e ter pelo menos 1 frase pronta pra oferecer ela. Quando você dominar uma marca, sua confiança sobe e você vende mais.'
       ]},
@@ -1108,20 +1108,20 @@ const DADOS_LOJA = {
   L3: {
     nome_loja: 'Miss Beleza Itaituba',
     meta_mensal: 90000,
-    meta_semana: 22662,
-    vendido_semana: 5496,
-    vendido_mes: 13267,
+    meta_semana: 21800,
+    vendido_semana: 7474,
+    vendido_mes: 15245,
     posicao_loja: 4, // 1-4
-    ma_pct_loja_sem: 21.1,
-    ma_pct_loja_mes: 11.3,
+    ma_pct_loja_sem: 19.7,
+    ma_pct_loja_mes: 11.9,
     semana_atual: 'S2',
     semana_label: 'Semana 05 a 10/10',
     vendedoras: {
-      'Ana Mira': {sem:1104, mes:2698, ma_sem:17.3, ma_mes:8.7, melhorias:[
+      'Ana Mira': {sem:1794, mes:3388, ma_sem:15.2, ma_mes:9.4, melhorias:[
         'A loja vendeu 39% menos na semana 2 do que na semana 1. Precisamos retomar o ritmo. Olhe os números: o que mudou entre uma semana e outra? Faltou alguma marca importante? Algum dia ficou com pouca gente atendendo?',
         'Como gerente, sua maior ferramenta é a equipe. Conversa rápida individual com cada uma no início da semana: o que ela vai focar? Quanto ela quer vender? Quando cada uma tem uma meta clara, todo mundo bate mais.'
       ]},
-      'Raimunda': {sem:1043, mes:3504, ma_sem:36.2, ma_mes:11.6, melhorias:[
+      'Raimunda': {sem:1397, mes:3858, ma_sem:30, ma_mes:11.7, melhorias:[
         'Manter consistência é o segredo de quem chega no topo. Vendedora que vende todo dia, mesmo que seja pouco, bate mais meta do que quem vende muito num dia e zero no outro. Olhe seu número de hoje - se está em zero, vá em busca de cliente agora.',
         'Suas Marcas A estão em 20%. Pequena mudança que vai te fazer crescer: pra cada cliente novo que entrar, primeira sugestão sua é uma marca A (Truss, Itallian ou Natum). Se ele recusar, aí oferece outras marcas. Mas a primeira tem que ser A.'
       ]},
@@ -1138,12 +1138,12 @@ const DADOS_LOJA = {
   L4: {
     nome_loja: 'MissBeleza Altamira',
     meta_mensal: 160000,
-    meta_semana: 39405,
-    vendido_semana: 10492,
-    vendido_mes: 27230,
+    meta_semana: 38700,
+    vendido_semana: 17353,
+    vendido_mes: 34091,
     posicao_loja: 2, // 1-4
-    ma_pct_loja_sem: 13.5,
-    ma_pct_loja_mes: 18.1,
+    ma_pct_loja_sem: 14.1,
+    ma_pct_loja_mes: 17.5,
     semana_atual: 'S2',
     semana_label: 'Semana 05 a 10/10',
     vendedoras: {
@@ -1151,15 +1151,15 @@ const DADOS_LOJA = {
         'Foco essa semana é liderar e delegar. Sua equipe vende muito quando você dá clareza do que cada uma precisa fazer. Reserve 10 minutos no início do dia pra alinhar com elas o foco do dia.',
         'Como gerente, dê suporte especial à Rosana (vendedora nova). Pareie ela com Bruna F. (sua top em Marcas A) por 2 dias dessa semana - vai ver Rosana atendendo junto com Bruna, anotando frases que funcionam, depois aplicando sozinha.'
       ]},
-      'Josilene': {sem:3560, mes:8926, ma_sem:8.2, ma_mes:14.5, melhorias:[
+      'Josilene': {sem:5401, mes:10767, ma_sem:10.7, ma_mes:14.7, melhorias:[
         'Você cresceu na semana passada, parabéns! Tem espaço pra subir ainda: você está em 24% de Marcas A. Pra chegar em 30% e destravar o bônus extra de R$50 no prêmio da loja, faça assim: oferece marca A pra cada cliente novo, primeiro.',
         'Estratégia que aumenta tanto vendas quanto Marcas A: combo. Pra cada cliente, ofereça shampoo + condicionador + máscara da mesma marca A. O cliente sai com 3 produtos em vez de 1, e seu ticket sobe.'
       ]},
-      'Bruna F.': {sem:4367, mes:11804, ma_sem:17.2, ma_mes:22.3, melhorias:[
+      'Bruna F.': {sem:8265, mes:15702, ma_sem:16.6, ma_mes:20.7, melhorias:[
         'Você é a referência da loja em Marcas A (30%) - parabéns. Objetivo agora: manter esse nível e aumentar o volume total. Mais atendimentos = mais venda fechada = mais prêmio.',
         'Você já sabe vender Marca A com naturalidade. Continue assim. Quando suas colegas perguntarem como você faz, conte sem segredo - quanto mais a equipe inteira vender Marca A, mais o prêmio sobe pra todas vocês (loja em 30% leva bônus extra).'
       ]},
-      'Débora':   {sem:2565, mes:6500, ma_sem:14.8, ma_mes:15.5, melhorias:[
+      'Débora':   {sem:3687, mes:7622, ma_sem:13.6, ma_mes:14.8, melhorias:[
         'Bem-vinda à equipe! Primeira semana é aprendizado: aprenda as 3 marcas A da loja (Truss, Itallian, Marco Boni). Saber o que cada uma faz vai te dar segurança pra oferecer pro cliente.',
         'Pareie com a Bruna F. (top em Marcas A) por 2 dias - observa como ela aborda e oferece. Anota as frases que funcionam e aplica nos seus atendimentos.'
       ]},
@@ -1168,16 +1168,16 @@ const DADOS_LOJA = {
   L5: {
     nome_loja: 'MissBeleza Santarém',
     meta_mensal: 90000,
-    meta_semana: 21739,
-    vendido_semana: 4232,
-    vendido_mes: 15354,
+    meta_semana: 21578,
+    vendido_semana: 6477,
+    vendido_mes: 17599,
     posicao_loja: 3, // 1-4
     ma_pct_loja_sem: 28.4,
     ma_pct_loja_mes: 21.7,
     semana_atual: 'S2',
     semana_label: 'Semana 05 a 10/10',
     vendedoras: {
-      'Rayssa':   {sem:2066, mes:5863, ma_sem:39.7, ma_mes:23.4, melhorias:[
+      'Rayssa':   {sem:2569, mes:6366, ma_sem:39.7, ma_mes:23.4, melhorias:[
         'Você lidera Santarém com R$14.021 acumulados - merecido. Foco agora: manter o ritmo. Tenta vender pelo menos R$1.500 por semana - assim você não cai do topo.',
         'Você converte bem e fecha bem. Quando Joyce ou Karina (que está aprendendo) perguntarem como você aborda o cliente, conte. Quando todo mundo da loja vende bem, o prêmio sobe pra todas (loja em 30% Marcas A leva bônus extra).'
       ]},
@@ -1185,11 +1185,11 @@ const DADOS_LOJA = {
         'Você vendeu R$280 essa semana (sua média é R$4.000) - caiu muito. O que mudou? Tem dado certo o horário? Cliente difícil? Quando uma semana fica abaixo do normal, conversa rápida com Rosiene (gerente) pra entender e ajustar.',
         'Suas Marcas A estão em 18% - faltam 12 pontos pra chegar nos 30% onde a loja ganha bônus extra. Foco dessa semana: Truss e Itallian. Pra cada cliente novo que entrar, primeira sugestão sua é uma dessas duas marcas. Em uma semana você melhora 5 pontos.'
       ]},
-      'Rosiene':  {sem:1423, mes:4853, ma_sem:25.2, ma_mes:28.4, melhorias:[
+      'Rosiene':  {sem:2024, mes:5454, ma_sem:25.2, ma_mes:28.4, melhorias:[
         'A loja tem chance de bater meta de maio - precisa de ritmo todos os dias. Reforce escala de fim de semana (sexta e sábado) com todas presentes - são os dias que mais movimento entra.',
         'Karina (vendedora nova) precisa de apoio pra crescer. Combine com ela um esquema de meio período junto com você nos próximos 5 dias - acompanhe ela atendendo cliente e dê feedback na hora: o que falou bem, o que pode melhorar.'
       ]},
-      'Karina':   {sem:730, mes:4625, ma_sem:3.2, ma_mes:12.7, melhorias:[
+      'Karina':   {sem:1931, mes:5826, ma_sem:3.2, ma_mes:12.7, melhorias:[
         'Você é nova e está aprendendo. Foco dessa semana: aprender bem 3 marcas A da loja - Truss, Itallian e Santa Clara. Saber o que cada uma faz e ter 1 frase pronta pra oferecer cada uma. Quando você dominar uma marca, sua confiança sobe e a venda acontece naturalmente.',
         'Pra subir 5 pontos em Marcas A em 2 semanas, faça assim: pra cada cliente novo que entrar, sua primeira sugestão é uma marca A (Truss, Itallian ou Santa Clara). Mesmo se o cliente recusar, você plantou a ideia - ele pode lembrar depois.'
       ]},
@@ -1508,56 +1508,56 @@ const VENDAS_HIST = {
   // (01-04/07, 06-11/07, 13-18/07, 20-25/07, 27-31/07) — nº de semanas por mês é VARIÁVEL, decidido pelo Athila
   // no início do mês. Meta Real jul ajustada pelo admin em 15/07 (S3/S4/S5) — espelha o painel e o Supabase.
   L1: {
-    semanas: [{id:'S1', meta:19300},{id:'S2', meta:37676},{id:'S3', meta:30764},{id:'S4', meta:34268},{id:'S5', meta:34268}],
+    semanas: [{id:'S1', meta:19300},{id:'S2', meta:35200},{id:'S3', meta:31600},{id:'S4', meta:35200},{id:'S5', meta:34976}],
     vendas: {
       S1:{Outros:42,Tatiane:6905,Sofia:3594,Bárbara:5059,Rayra:7424},
-      S2:{Tatiane:3069,Rayra:5461,Sofia:2421,Bárbara:3881},
+      S2:{Tatiane:6178,Rayra:7254,Sofia:3631,Bárbara:6584},
       S3:{Outros:232,Tatiane:12287,Bárbara:4797,Rayra:8558,Sofia:4202},
       S4:{Tatiane:8468,Rayra:12328,Sofia:4908,Bárbara:5258},
       S5:{Outros:51,Tatiane:2996,Rayra:2447,Sofia:1007,Bárbara:1685},
     },
-    marcasA_loja: {S1:21.1,S2:25.8,S3:23.5,S4:20.8,S5:29.9},
-    ontem: {data:'05/10/2026', dia_semana:'segunda', vendas:{Tatiane:1032,Rayra:3519,Sofia:1400,Bárbara:2662}},
-    hoje: {data:'06/10/2026', dia_semana:'terça', vendas:{Tatiane:2037,Rayra:1942,Sofia:1020,Bárbara:1218}},
+    marcasA_loja: {S1:21.1,S2:21.7,S3:23.5,S4:20.8,S5:29.9},
+    ontem: {data:'06/10/2026', dia_semana:'terça', vendas:{Tatiane:3338,Rayra:2771,Sofia:1052,Bárbara:2252}},
+    hoje: {data:'07/10/2026', dia_semana:'quarta', vendas:{Tatiane:1808,Rayra:964,Sofia:1178,Bárbara:1671}},
   },
   L3: {
-    semanas: [{id:'S1', meta:10900},{id:'S2', meta:22662},{id:'S3', meta:18504},{id:'S4', meta:20531},{id:'S5', meta:20532}],
+    semanas: [{id:'S1', meta:10900},{id:'S2', meta:21800},{id:'S3', meta:20929},{id:'S4', meta:19750},{id:'S5', meta:19750}],
     vendas: {
       S1:{Outros:3716,'Ana Mira':1594,Raimunda:2461},
-      S2:{Outros:3349,'Ana Mira':1104,Raimunda:1043},
+      S2:{'Ana Mira':1794,Raimunda:1397,Iris:2287,Gisele:1996},
       S3:{Outros:5696,'Ana Mira':4074,Raimunda:3089},
       S4:{Outros:4302,'Ana Mira':4311,Raimunda:2405},
       S5:{Outros:1848,'Ana Mira':1610,Raimunda:1669},
     },
-    marcasA_loja: {S1:4.4,S2:21.1,S3:14.5,S4:12.9,S5:16.4},
-    ontem: {data:'05/10/2026', dia_semana:'segunda', vendas:{'Ana Mira':563,Raimunda:906}},
-    hoje: {data:'06/10/2026', dia_semana:'terça', vendas:{'Ana Mira':541,Raimunda:138}},
+    marcasA_loja: {S1:4.4,S2:19.7,S3:14.5,S4:12.9,S5:16.4},
+    ontem: {data:'06/10/2026', dia_semana:'terça', vendas:{'Ana Mira':770,Raimunda:221,Iris:977,Gisele:1278}},
+    hoje: {data:'07/10/2026', dia_semana:'quarta', vendas:{'Ana Mira':462,Raimunda:271,Iris:162,Gisele:320}},
   },
   L4: {
-    semanas: [{id:'S1', meta:19300},{id:'S2', meta:39405},{id:'S3', meta:32175},{id:'S4', meta:35841},{id:'S5', meta:35841}],
+    semanas: [{id:'S1', meta:19300},{id:'S2', meta:38700},{id:'S3', meta:34162},{id:'S4', meta:35200},{id:'S5', meta:35200}],
     vendas: {
       S1:{Josilene:5366,'Bruna F.':7437,Débora:3935},
-      S2:{Josilene:3560,'Bruna F.':4367,Débora:2565},
+      S2:{Josilene:5401,'Bruna F.':8265,Débora:3687},
       S3:{Josilene:5776,'Bruna F.':13260,Débora:6992},
       S4:{Josilene:6233,'Bruna F.':13744,Débora:9055},
       S5:{Josilene:1726,'Bruna F.':5088,Débora:2888},
     },
-    marcasA_loja: {S1:21,S2:13.5,S3:22.1,S4:24.5,S5:20.7},
-    ontem: {data:'05/10/2026', dia_semana:'segunda', vendas:{Josilene:2647,'Bruna F.':2546,Débora:1656}},
-    hoje: {data:'06/10/2026', dia_semana:'terça', vendas:{Josilene:913,'Bruna F.':1821,Débora:908}},
+    marcasA_loja: {S1:21,S2:14.1,S3:22.1,S4:24.5,S5:20.7},
+    ontem: {data:'06/10/2026', dia_semana:'terça', vendas:{Josilene:1522,'Bruna F.':2362,Débora:995}},
+    hoje: {data:'07/10/2026', dia_semana:'quarta', vendas:{Josilene:1232,'Bruna F.':3358,Débora:1035}},
   },
   L5: {
-    semanas: [{id:'S1', meta:10900},{id:'S2', meta:21739},{id:'S3', meta:17750},{id:'S4', meta:19695},{id:'S5', meta:19694}],
+    semanas: [{id:'S1', meta:10900},{id:'S2', meta:21578},{id:'S3', meta:17800},{id:'S4', meta:19750},{id:'S5', meta:19750}],
     vendas: {
       S1:{Rayssa:3797,Karina:3895,Rosiene:3430},
-      S2:{Outros:13,Rayssa:2066,Rosiene:1423,Karina:730},
+      S2:{Outros:-47,Rayssa:2569,Rosiene:2024,Karina:1931},
       S3:{Rayssa:3846,Joyce:3603,Rosiene:4449,Karina:5744},
       S4:{Rayssa:4019,Joyce:4179,Rosiene:4003,Karina:3953},
       S5:{Rayssa:1179,Joyce:618,Rosiene:953,Karina:1315},
     },
     marcasA_loja: {S1:19.2,S2:28.4,S3:15,S4:17.3,S5:15.2},
-    ontem: {data:'05/10/2026', dia_semana:'segunda', vendas:{Rayssa:1889,Rosiene:865,Karina:387}},
-    hoje: {data:'06/10/2026', dia_semana:'terça', vendas:{Rayssa:177,Rosiene:559,Karina:343}},
+    ontem: {data:'06/10/2026', dia_semana:'terça', vendas:{Rayssa:437,Rosiene:856,Karina:765}},
+    hoje: {data:'07/10/2026', dia_semana:'quarta', vendas:{Rayssa:243,Rosiene:303,Karina:779}},
   },
 };
 
