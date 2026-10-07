@@ -8,6 +8,7 @@ REPO=/Users/elkgomes/Desktop/claude/dashboard-equipe
 LOG(){ echo "[redistrib $(date '+%H:%M:%S')] $*"; }
 MES=$(date '+%Y-%m')
 cd "$REPO" || { LOG "repo não encontrado"; exit 20; }
+caffeinate -s -w $$ &   # segura o Mac acordado enquanto o processo rodar
 
 # 1) Coleta o REAL final da semana que fechou (+ baka o estado atual). atualizar_premiacao.sh
 #    pega a trava, coleta, commita. Precisa rodar ANTES pra o real da semana estar fresco.
