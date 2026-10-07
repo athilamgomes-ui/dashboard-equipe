@@ -30,7 +30,7 @@ const EMPRESAS = [1, 3, 4, 10];
 // Elianna dispensada em 23/06/2026 — removida (vendas residuais caem em "Outros").
 const VENDEDORAS = {
   L1: ["Tatiane", "Rayra", "Alcione", "Sofia", "Bárbara"],
-  L3: ["Ana Mira", "Raimunda", "Brunna", "Naila"],
+  L3: ["Ana Mira", "Raimunda", "Brunna", "Naila", "Iris", "Gisele"],
   L4: ["Tanaia", "Josilene", "Bruna F.", "Rosana", "Débora"],
   L5: ["Rayssa", "Joyce", "Rosiene", "Karina", "Lucas"],
 };
