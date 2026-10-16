@@ -552,7 +552,15 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
         }
         const cnpjForn = String(emit.Documento || "").replace(/\D/g, "");
         const itens = (nfe.Produtos || []).map(p => {
-          const valorBase = num(p.ValorTotalLiquido) || (num(p.ValorBruto) - num(p.ValorDesconto));
+          // Base = MERCADORIA (ValorBruto − desconto). ⚠️ NÃO usar ValorTotalLiquido como base:
+          // alguns fornecedores (ex. Chroma/Dona Pele, NF 23588) mandam ValorTotalLiquido JÁ com
+          // frete+IPI embutidos (VTL 174,67 = bruto 119,40 + frete 38,20 + IPI 17,07). Usando VTL
+          // como base e somando frete+IPI de novo, o custo DOBRAVA (CHH550: 9,95 → 19,16). Então a
+          // base é a mercadoria; VTL só entra quando é MENOR que o bruto (desconto financeiro
+          // embutido que não veio em ValorDesconto). Extras somam UMA vez. (16/10/2026)
+          const _vbruto = num(p.ValorBruto) - num(p.ValorDesconto);
+          const _vtl = num(p.ValorTotalLiquido);
+          const valorBase = (_vtl > 0 && _vtl < _vbruto) ? _vtl : _vbruto;
           const custoTotal = valorBase + num(p.ValorFrete) + num(p.ValorSeguro) + num(p.ValorOutrasDespesas) + num(p.vIPI) + num(p.ValorICMSST) + num(p.ValorFCPST);
           const qtd = num(p.QuantidadeComercial) || 1;
           const eanNota = String(p.CEAN || "");
