@@ -1070,7 +1070,7 @@ function isDesligada(nome) { return (VENDEDORAS_META[nome]?.status) === 'desliga
 // do cron (formato 'DD/MM/AAAA HH:MM'). O JS só LÊ esse valor pra exibir e
 // calcular "dado velho" — NUNCA sobrescrever com new Date() (bug do timestamp
 // mentiroso: a hora exibida tem que ser a da coleta real, não a do page-load).
-const DADOS_COLETADO_EM = '17/10/2026 16:08';
+const DADOS_COLETADO_EM = '17/10/2026 23:28';
 
 // MOCK DATA — substituir depois pelo carregamento de dados_premiacao.json gerado pelo agente
 // Atualizado pra Jun/2026 S1 em 01/06/2026 (dados parciais 01/06 — segunda; ontem=sáb 30/05)
@@ -1169,15 +1169,15 @@ const DADOS_LOJA = {
     nome_loja: 'MissBeleza Santarém',
     meta_mensal: 90000,
     meta_semana: 20493,
-    vendido_semana: 13672,
-    vendido_mes: 43679,
+    vendido_semana: 13796,
+    vendido_mes: 43803,
     posicao_loja: 3, // 1-4
-    ma_pct_loja_sem: 23.9,
-    ma_pct_loja_mes: 19.7,
+    ma_pct_loja_sem: 23.7,
+    ma_pct_loja_mes: 19.6,
     semana_atual: 'S3',
     semana_label: 'Semana 13 a 17/10',
     vendedoras: {
-      'Rayssa':   {sem:4676, mes:13645, ma_sem:21.5, ma_mes:21.5, melhorias:[
+      'Rayssa':   {sem:4800, mes:13769, ma_sem:20.9, ma_mes:21.3, melhorias:[
         'Você lidera Santarém com R$14.021 acumulados - merecido. Foco agora: manter o ritmo. Tenta vender pelo menos R$1.500 por semana - assim você não cai do topo.',
         'Você converte bem e fecha bem. Quando Joyce ou Karina (que está aprendendo) perguntarem como você aborda o cliente, conte. Quando todo mundo da loja vende bem, o prêmio sobe pra todas (loja em 30% Marcas A leva bônus extra).'
       ]},
@@ -1552,13 +1552,13 @@ const VENDAS_HIST = {
     vendas: {
       S1:{Rayssa:3797,Karina:3895,Rosiene:3430},
       S2:{Outros:-47,Rayssa:5172,Rosiene:6538,Karina:7222},
-      S3:{Rayssa:4676,Rosiene:4482,Karina:4514},
+      S3:{Rayssa:4800,Rosiene:4482,Karina:4514},
       S4:{Rayssa:4019,Joyce:4179,Rosiene:4003,Karina:3953},
       S5:{Rayssa:1179,Joyce:618,Rosiene:953,Karina:1315},
     },
-    marcasA_loja: {S1:19.2,S2:16.9,S3:23.9,S4:17.3,S5:15.2},
+    marcasA_loja: {S1:19.2,S2:16.9,S3:23.7,S4:17.3,S5:15.2},
     ontem: {data:'16/10/2026', dia_semana:'sexta', vendas:{Rayssa:1223,Rosiene:980,Karina:923}},
-    hoje: {data:'17/10/2026', dia_semana:'sábado', vendas:{Rayssa:636,Rosiene:1376,Karina:1132}},
+    hoje: {data:'17/10/2026', dia_semana:'sábado', vendas:{Rayssa:760,Rosiene:1376,Karina:1132}},
   },
 };
 
