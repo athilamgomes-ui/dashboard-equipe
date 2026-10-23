@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-10-23T18:35:57.685Z",
+  "gerado_em": "2026-10-23T18:49:25.769Z",
   "cutoff_dias": 220,
   "dias_entrada": 3,
   "lojas": {
@@ -1056,12 +1056,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 2.88,
             "cod_erp": "79887",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049100",
             "cest": "2001300",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 1.44
           },
           {
             "cprod": "98815",
@@ -1085,12 +1086,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 6.12,
             "cod_erp": "79889",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 3.85
           },
           {
             "cprod": "98865",
@@ -1201,12 +1203,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 14.98,
             "cod_erp": "79891",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 7.7
           },
           {
             "cprod": "98942",
@@ -1665,12 +1668,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 9.54,
             "cod_erp": "79894",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 4.24
           },
           {
             "cprod": "99046",
@@ -20254,7 +20258,7 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.07012987012987014,
-            "preco_atual": 25,
+            "preco_atual": 12.9,
             "cod_erp": "40292",
             "match_tipo": "ref",
             "preco_manual": null,
@@ -20262,7 +20266,7 @@
             "cest": "2001300",
             "st": false,
             "st_motivo": null,
-            "custo_erp": 15.4
+            "custo_erp": 5.5
           },
           {
             "cprod": "FB126-D",
@@ -20461,7 +20465,7 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 18,
+            "preco_atual": 12.9,
             "cod_erp": "40307",
             "match_tipo": "ref",
             "preco_manual": null,
@@ -20469,7 +20473,7 @@
             "cest": "2003700",
             "st": true,
             "st_motivo": "ncm",
-            "custo_erp": 1.19
+            "custo_erp": 5.95
           },
           {
             "cprod": "FB192-D",
@@ -20785,7 +20789,7 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.07012987012987014,
-            "preco_atual": 10,
+            "preco_atual": 12.9,
             "cod_erp": "61773",
             "match_tipo": "ref",
             "preco_manual": null,
@@ -20793,7 +20797,7 @@
             "cest": "2001300",
             "st": false,
             "st_motivo": null,
-            "custo_erp": 15.4
+            "custo_erp": 5.5
           },
           {
             "cprod": "FB299-D",
@@ -20905,7 +20909,7 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.07011173184357541,
-            "preco_atual": 35.9,
+            "preco_atual": 18.9,
             "cod_erp": "52030",
             "match_tipo": "ref",
             "preco_manual": null,
@@ -20913,7 +20917,7 @@
             "cest": "2001000",
             "st": false,
             "st_motivo": null,
-            "custo_erp": 35.8
+            "custo_erp": 8.95
           },
           {
             "cprod": "FB535-D",
