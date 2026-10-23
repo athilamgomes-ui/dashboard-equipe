@@ -860,6 +860,18 @@ async function gotoRetry(page, url, { tentativas = 3, timeout = 45000 } = {}) {
           ajCustos++;
         }
       }
+      // NF SUBFATURADA uniforme: o custo da nota é 1/N do real (ex. Raotes/Face Beautiful NF 10309 =
+      // 20% do real → multiplicador 5). Multiplica o custo de TODOS os itens da NF pelo fator — cobre
+      // inclusive itens SEM GTIN e os que não constam do romaneio. Fonte = PDF do pedido (razão
+      // real/NFe verificada uniforme). Aplica depois do custo_kit/desconto_pct. (23/10/2026)
+      if (aj.multiplicador_custo != null && Number(aj.multiplicador_custo) > 0) {
+        const m = Number(aj.multiplicador_custo);
+        for (const it of nf.itens) {
+          if (it.custo_unit_cheio != null) it.custo_unit_cheio = Math.round(it.custo_unit_cheio * m * 10000) / 10000;
+          if (it.custo_cheio_total != null) it.custo_cheio_total = Math.round(it.custo_cheio_total * m * 100) / 100;
+          ajCustos++;
+        }
+      }
     }
     if (ajRemovidos || ajCustos) log(`ajustes por NF (romaneio): ${ajRemovidos} item(ns) removido(s), ${ajCustos} custo(s) forçado(s)`);
 

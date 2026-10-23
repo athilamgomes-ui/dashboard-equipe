@@ -5,7 +5,12 @@
     "remover_cprod": "[cprod] — tira um item do resultado final (ex. embalagem que não é de venda).",
     "custo_kit": "{cprod_ou_'KIT-...': valorUnit} — força o custo unitário do kit/avulso para o valor do romaneio.",
     "desmembrar_cronograma": "true — NÃO monta o KIT CRONOGRAMA; as 3 máscaras ficam AVULSAS (loja que vende as máscaras separadas).",
-    "desconto_pct": "0.15 — desconto comercial (fração) aplicado ao CUSTO de TODOS os itens da NF (ex. desconto do fornecedor que não veio na nota). custo *= (1-pct)."
+    "desconto_pct": "0.15 — desconto comercial (fração) aplicado ao CUSTO de TODOS os itens da NF (ex. desconto do fornecedor que não veio na nota). custo *= (1-pct).",
+    "multiplicador_custo": "5 — NF SUBFATURADA uniforme: custo da nota = 1/N do real; multiplica o custo de TODOS os itens pelo fator (cobre SEM GTIN e itens fora do romaneio). custo *= N."
+  },
+  "58137453000144:10309": {
+    "_nota": "Fortaleza da Maquiagem (Grupo Raotes — Face Beautiful/Lovely/JUPXT/BeautyLoo/You Se Me) / L5 Santarém. NF SUBFATURADA: entrou a 20% do real. Custo real = NFe × 5 (razão verificada EXATA 5,00 em 35 itens casados com o romaneio do pedido 12723, total R$6.171,25, 23/10/2026). Multiplicador cobre tb os 2 SEM GTIN (YO-150, YO-170R) e 2 fora do romaneio (FB228-D, FB126-D). Athila vai aplicar os preços e depois corrigir o custo no cadastro.",
+    "multiplicador_custo": 5
   },
   "56927323000180:932": {
     "_nota": "Franca / L3 Itaituba, jul/2026 (Pedido 2082). Kit CRONOGRAMA DESMEMBRADO — as 3 máscaras (169 alho, 1044 therapy S.O.S, 1047 therapy negro, 16un cada) são vendidas individualmente (usuário zerou o kit e subiu +16 em cada no ERP). Bonificação Máscara Alho (169, CFOP 6910, 12un) precisa constar. Bobina shrink (1095) removida. Amostras sachê 15ml (909/1055/1056, CFOP 6911) saem sozinhas pelo filtro.",
