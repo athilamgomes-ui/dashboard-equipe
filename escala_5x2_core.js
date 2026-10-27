@@ -7,7 +7,7 @@
   const LOJAS = {
     L1: { nome: "L1 · Casa da Beleza Altamira", gerenteVende: true, G: "Tatiane", C: "Marines", V: ["Rayra Luana", "Bárbara Sabrina", "Sofia de Oliveira"], gOff: 1, cOff: 2, slots: [0, 3, 5] },
     L3: { nome: "L3 · Casa da Beleza Itaituba", gerenteVende: true, G: "Ana Mira", C: "Irislene", V: ["Gisele Pauleane", "Raimunda Erlita", "Vendedora 3 (confirmar)", "Vendedora 4 (confirmar)"], gOff: 2, cOff: 0, slots: [1, 3, 5, 5] },
-    L4: { nome: "L4 · MissBeleza Altamira", gerenteVende: true, G: "Alessandra", C: "Bia", V: ["Bruna Figueiró", "Debora Emily", "Josilene", "Ronald Lima"], gOff: 1, cOff: 2, slots: [0, 3, 4, 5] },
+    L4: { nome: "L4 · MissBeleza Altamira", gerenteVende: false, G: "Alessandra", C: "Bia", V: ["Bruna Figueiró", "Debora Emily", "Josilene", "Ronald Lima"], gOff: 1, cOff: 2, slots: [0, 3, 4, 5] },
     L5: { nome: "L5 · MissBeleza Santarém", gerenteVende: false, G: "Rose", C: "Diego", V: ["Karina Paiva", "Rayssa Elis", "Rosiene Silva", "Joyce Rafaela"], gOff: 1, cOff: 3, slots: [0, 0, 2, 2] },
   };
   const FECHADOS_PADRAO = ["2026-12-25", "2027-01-01"];
