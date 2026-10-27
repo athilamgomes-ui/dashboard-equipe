@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Escala 5x2 · A.M. Gomes</title>
+<meta name="theme-color" content="#0f172a"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f172a;color:#e2e8f0;font:15px/1.5 Inter,system-ui,-apple-system,sans-serif;padding:16px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:0 auto}
+a.back{color:#94a3b8;font-size:13px;text-decoration:none}
+h1{font-size:24px;font-weight:800;letter-spacing:-.4px;margin-top:6px}h1 span{color:#38bdf8}
+.sub{color:#94a3b8;font-size:13px;margin-top:3px}
+.pill{display:inline-flex;align-items:center;gap:7px;background:#1e293b;border:1px solid #334155;border-radius:999px;padding:5px 12px;font-size:12px;color:#cbd5e1;margin-top:10px}
+.dot{width:7px;height:7px;border-radius:50%;background:#22c55e}.dot.off{background:#f59e0b}
+.hoje{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:18px 0}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:12px 14px;border-left:4px solid #38bdf8}
+.card .t{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:#94a3b8;font-weight:600}.card .v{font-size:22px;font-weight:800;margin:2px 0}.card .d{font-size:12px;color:#94a3b8}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 12px}
+.tab{background:#1e293b;border:1px solid #334155;border-radius:9px;padding:8px 14px;font-size:13px;font-weight:600;color:#94a3b8;cursor:pointer;white-space:nowrap}
+.tab.on{background:#0284c7;border-color:#0284c7;color:#fff}
+.nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.btn{background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:8px;padding:7px 12px;font:600 13px Inter,sans-serif;cursor:pointer}.btn:hover{border-color:#38bdf8}
+.btn.pri{background:#0284c7;border-color:#0284c7}.btn.sm{padding:3px 8px;font-size:12px}
+.wk{font-weight:700;font-size:16px}.badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#334155;color:#cbd5e1}
+.badge.trans{background:#78350f;color:#fde68a}.badge.fer{background:#4c1d95;color:#ddd6fe}.badge.norm{background:#064e3b;color:#a7f3d0}
+.scroll{overflow-x:auto;border:1px solid #334155;border-radius:12px;background:#1e293b}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:8px 6px;text-align:center;border-bottom:1px solid #334155;font-size:13px}
+th{background:#172033;font-weight:600;color:#cbd5e1;position:sticky;top:0}th small{display:block;color:#64748b;font-weight:500}
+th.cl{cursor:pointer}th.cl:hover{color:#38bdf8}
+td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:#1e293b;z-index:1;padding-left:12px;min-width:170px}th:first-child{background:#172033}
+.nm{font-weight:600;cursor:pointer}.nm:hover{color:#38bdf8}.fn{font-size:11px;color:#94a3b8;font-weight:500}
+.c-folga{background:#7f1d1d;color:#fecaca;font-weight:800;border-radius:6px;padding:3px 9px;cursor:pointer;display:inline-block}
+.c-folga:hover{background:#991b1b}.c-fech{color:#64748b;font-size:12px}.c-sab{color:#7dd3fc;font-weight:600}.c-ok{color:#e2e8f0}.c-reg{color:#64748b;font-size:12px}
+tr.pres td{font-style:italic;background:#172033;color:#94a3b8;border-bottom:0}.p-ok{color:#4ade80}.p-m{color:#fbbf24}.p-bad{color:#f87171}
+.hrs{font-weight:700;color:#38bdf8}.alerts{margin:12px 0}.al{background:#422006;border:1px solid #854d0e;color:#fde68a;border-radius:9px;padding:8px 12px;font-size:13px;margin-bottom:6px}
+.box{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:12px 16px;margin-top:14px;font-size:13px;color:#cbd5e1}
+.box h3{font-size:13px;margin-bottom:6px;color:#e2e8f0}.box li{margin-left:18px;margin-bottom:3px}
+.tr{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #334155}
+.ov{position:fixed;inset:0;background:rgba(2,6,23,.75);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}.ov.on{display:flex}
+.md{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:18px;width:100%;max-width:380px}
+.md h2{font-size:16px;margin-bottom:4px}.md p{font-size:13px;color:#94a3b8;margin-bottom:10px}
+.md .opt{display:flex;width:100%;justify-content:space-between;margin-bottom:6px}
+.md input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font:15px Inter,sans-serif;margin-bottom:10px}
+.row{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+@media(max-width:600px){body{padding:12px}h1{font-size:20px}}
+</style></head><body><div class="wrap">
+<a class="back" href="index.html">← Painel A.M. Gomes</a>
+<h1>Escala <span>5x2</span></h1>
+<div class="sub">Folgas e almoço das 4 lojas a partir de 16/12/2026. Toque em uma folga para trocar, no nome para renomear, no dia para marcar loja fechada.</div>
+<div class="pill"><span class="dot" id="dot"></span><span id="sync">carregando…</span></div>
+<div class="hoje" id="hoje"></div>
+<div class="tabs" id="tabs"></div>
+<div class="nav"><button class="btn" id="prev">◀</button><span class="wk" id="wk"></span><button class="btn" id="next">▶</button><button class="btn" id="cur">Esta semana</button><span class="badge" id="bd"></span></div>
+<div class="alerts" id="alerts"></div>
+<div class="scroll"><table id="tb"></table></div>
+<div class="box" id="trocas"></div>
+<div class="box" id="horas"></div>
+<div class="box"><h3>Como ler</h3><ul>
+<li>Dias úteis: 8h–18h com 2h de almoço. O horário na célula é o almoço da pessoa (11–13h, 12–14h ou 14–16h). Sábado: 8h–14h, sem almoço de 2h.</li>
+<li>Gerente almoça 14–16h e caixa 12–14h, nunca juntos. Ninguém almoça das 10h às 11h (pico de vendas). Das 12h às 13h, o caixa reserva cobre o caixa.</li>
+<li>Transição (16–19/12): a semana começou no regime antigo, então a folga de segunda/terça migra para quarta–sexta.</li>
+<li>Semana com feriado fechado: o feriado vale como a 2ª folga, todos trabalham seg–qui e sábado, sem folga extra.</li>
+<li>De 04/01 em diante o ciclo gira: cada vendedora folga em um dia diferente a cada semana (ciclo de 3 semanas na L1 e 4 nas demais). Gerente e caixa têm folga fixa.</li>
+<li>Teto de 42h semanais até dez/2027. Quem trabalha seg–sex faz 40h; quem folga em dia útil e trabalha o sábado faz 37h45. A sobra (2h a 4h15 por semana) fica de reserva para pico ou compensação.</li>
+<li>Trocar folga = as duas pessoas trocam de dia só naquela semana. Renomear vale para todas as semanas. O almoço é recalculado sozinho.</li></ul></div>
+</div>
+<div class="ov" id="ov"><div class="md" id="md"></div></div>
+<script src="escala_5x2_core.js?v=3"></script>
+<script>
+const SUPA_URL='https://valhewbvjwdkkvuejrxa.supabase.co', SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4', TB='escala_ajustes';
+const E=Escala5x2, MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=i=>{const[y,m,d]=i.split('-');return d+'/'+m};
+let ajustes=[], online=false, loja='L1', seg=null;
+const H=()=>({apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json'});
+const LS='escala5x2_ajustes_v1';
+function lsGet(){try{return JSON.parse(localStorage.getItem(LS)||'[]')}catch(e){return[]}}
+function lsSet(a){try{localStorage.setItem(LS,JSON.stringify(a))}catch(e){}}
+async function carregar(){
+  try{const r=await fetch(`${SUPA_URL}/rest/v1/${TB}?select=*&order=atualizado_em.asc`,{headers:H(),cache:'no-store'});
+    if(!r.ok)throw new Error(r.status);ajustes=await r.json();online=true;
+    $('sync').textContent='Sincronizado — alterações valem para todos';$('dot').className='dot';
+  }catch(e){online=false;ajustes=lsGet();$('sync').textContent='Modo local — tabela do Supabase ainda não criada; alterações ficam só neste aparelho';$('dot').className='dot off';}
+}
+async function gravar(row){row.atualizado_em=new Date().toISOString();
+  if(online){const r=await fetch(`${SUPA_URL}/rest/v1/${TB}`,{method:'POST',headers:{...H(),Prefer:'return=minimal'},body:JSON.stringify(row)});if(!r.ok){alert('Não consegui salvar ('+r.status+').');return}}
+  else{const a=lsGet();a.push(row);lsSet(a)}
+  ajustes.push(row);render();}
+async function apagar(chave){
+  if(online){const r=await fetch(`${SUPA_URL}/rest/v1/${TB}?chave=eq.${encodeURIComponent(chave)}`,{method:'DELETE',headers:H()});if(!r.ok){alert('Não consegui apagar ('+r.status+').');return}}
+  else lsSet(lsGet().filter(x=>x.chave!==chave));
+  ajustes=ajustes.filter(x=>x.chave!==chave);render();}
+const nomes=l=>{const m={};ajustes.filter(a=>a.tipo==='nome'&&a.loja===l).forEach(a=>m[a.dados.id]=a.dados.nome);return m};
+const fechados=()=>new Set([...E.FECHADOS_PADRAO,...ajustes.filter(a=>a.tipo==='fechado').map(a=>a.dados.data)]);
+const fechadosRem=()=>new Set(ajustes.filter(a=>a.tipo==='fechado_rem').map(a=>a.dados.data));
+function fecSet(){const s=fechados();fechadosRem().forEach(d=>s.delete(d));return s}
+const trocasSem=(l,s)=>ajustes.filter(a=>a.tipo==='troca'&&a.loja===l&&a.semana===s);
+function hojeISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function calc(l,s){return E.semana(l,s,{fechados:fecSet(),trocas:trocasSem(l,s).map(t=>t.dados)})}
+function nomeDe(l,id){const cfg=E.LOJAS[l],o=nomes(l);if(o[id])return o[id];const p=E.pessoas(cfg).find(x=>x[0]===id);return p[1]}
+function renderHoje(){
+  const h=hojeISO(),sg=E.segundaDe(h),dow=(new Date(h+'T12:00:00').getDay()+6)%7,out=[];
+  for(const l of Object.keys(E.LOJAS)){const cfg=E.LOJAS[l];let v,d;
+    if(h<'2026-12-16'){v='Começa 16/12';d='Hoje ainda vale o regime atual.'}
+    else if(dow===6){v='Fechada';d='Domingo.'}
+    else{const r=calc(l,sg);if(r.fechDia[dow]){v='Fechada';d='Feriado.'}
+      else{const fo=Object.keys(r.cel).filter(id=>r.cel[id][dow]==='FOLGA').map(id=>nomeDe(l,id));
+        v=(r.presentes[dow]??'–')+' na loja';d=fo.length?'Folga: '+fo.join(', '):'Sem folgas hoje.'}}
+    out.push(`<div class="card"><div class="t">${esc(cfg.nome)}</div><div class="v">${esc(v)}</div><div class="d">${esc(d)}</div></div>`)}
+  $('hoje').innerHTML=out.join('')}
+function render(){
+  renderHoje();
+  $('tabs').innerHTML=Object.keys(E.LOJAS).map(l=>`<div class="tab ${l===loja?'on':''}" data-l="${l}">${esc(E.LOJAS[l].nome)}</div>`).join('');
+  document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{loja=t.dataset.l;render()});
+  const r=calc(loja,seg),cfg=E.LOJAS[loja],ids=E.ordem(cfg),no=nomes(loja);
+  $('wk').textContent=fmt(r.datas[0])+' a '+fmt(r.datas[5]);
+  const B={antes:['Regime atual (6x1)',''],trans:['Transição · 5x2 começa quarta 16/12','trans'],fer:['Semana de feriado · sem folga extra','fer'],norm:['Ciclo normal','norm']}[r.tipo];
+  $('bd').textContent=B[0];$('bd').className='badge '+B[1];
+  const hd='<tr><th>Pessoa</th>'+E.DIAS.map((d,i)=>`<th class="cl" data-i="${i}" title="Marcar loja fechada neste dia">${d}<small>${fmt(r.datas[i])}${r.fechDia[i]?' · fechada':''}</small></th>`).join('')+`<th>${r.tipo==='trans'?'Horas (qua–sáb)':'Horas na semana'}</th></tr>`;
+  let rows='';
+  ids.forEach(id=>{const p=E.pessoas(cfg).find(x=>x[0]===id),papel=id==='G'?(cfg.gerenteVende?'Gerente e vendedora':'Gerente'):p[2];
+    rows+=`<tr><td><span class="nm" data-id="${id}">${esc(no[id]||p[1])} ✎</span><div class="fn">${papel}</div></td>`+r.cel[id].map((c,i)=>{
+      if(c==='FOLGA')return `<td><span class="c-folga" data-id="${id}" data-i="${i}">FOLGA</span></td>`;
+      if(c==='FECHADO')return '<td class="c-fech">fechado</td>';if(c==='regime atual')return '<td class="c-reg">regime atual</td>';
+      return `<td class="${i===5?'c-sab':'c-ok'}">${c}</td>`}).join('')+`<td class="${E.minutos(r,id)>E.LIMITE_MIN?'hrs p-bad':'hrs'}">${E.hm(E.minutos(r,id))}<div class="fn">${r.tipo==='antes'?'':'teto '+E.hm(E.LIMITE_MIN)}</div></td></tr>`});
+  rows+='<tr class="pres"><td>Presentes</td>'+r.presentes.map(n=>n==null?'<td>–</td>':`<td class="${n>=5?'p-ok':n===4?'p-m':'p-bad'}">${n}</td>`).join('')+'<td></td></tr>';
+  $('tb').innerHTML=hd+rows;
+  $('tb').querySelectorAll('.nm').forEach(e=>e.onclick=()=>modalNome(e.dataset.id));
+  $('tb').querySelectorAll('.c-folga').forEach(e=>e.onclick=()=>modalTroca(e.dataset.id,+e.dataset.i,r));
+  $('tb').querySelectorAll('th.cl').forEach(e=>e.onclick=()=>modalFechado(r.datas[+e.dataset.i],r.fechDia[+e.dataset.i]));
+  const al=[];for(let d=0;d<5;d++){if(r.fechDia[d]||(r.tipo==='trans'&&d<2)||r.presentes[d]==null)continue;
+    const nl=E.naLojaPorHora(r,d),mn=Math.min(...Object.values(nl)),h=Object.keys(nl).find(k=>nl[k]===mn);
+    if(mn<2)al.push(`${E.DIAS[d]} ${fmt(r.datas[d])}: só ${mn} pessoa na loja às ${h}h (almoço). Considere reforço ou temporário.`);
+    else if(r.presentes[d]<4)al.push(`${E.DIAS[d]} ${fmt(r.datas[d])}: apenas ${r.presentes[d]} pessoas no dia.`)}
+  $('alerts').innerHTML=al.map(a=>`<div class="al">⚠ ${esc(a)}</div>`).join('');
+  const tr=trocasSem(loja,seg);
+  $('trocas').innerHTML='<h3>Trocas desta semana</h3>'+(tr.length?tr.map(t=>`<div class="tr"><span>${esc(nomeDe(loja,t.dados.a))} ⇄ ${esc(nomeDe(loja,t.dados.b))}</span><button class="btn sm" data-k="${esc(t.chave)}">Desfazer</button></div>`).join(''):'<span style="color:#64748b">Nenhuma troca. Toque em uma folga para trocar.</span>');
+  const mc=E.mediaCiclo(loja);
+  $('horas').innerHTML='<h3>Horas por semana no ciclo normal</h3><div style="color:#94a3b8;margin-bottom:6px">Média por semana ao longo de '+cfg.V.length+' semanas, sem feriados nem trocas. Dia útil = 8h líquidas; sábado = 5h45 (8–14h menos 15 min de intervalo). Teto semanal: 42h até dezembro de 2027. Nenhuma semana passa de 40h, então a escala também cabe na regra seguinte se o teto cair para 40h.</div>'+ids.map(id=>`<div class="tr"><span>${esc(nomeDe(loja,id))}</span><b>${E.hm(mc[id])}</b></div>`).join('');
+  $('trocas').querySelectorAll('button').forEach(b=>b.onclick=()=>apagar(b.dataset.k))}
+function abrir(h){$('md').innerHTML=h;$('ov').classList.add('on')}
+function fechar(){$('ov').classList.remove('on')}
+$('ov').onclick=e=>{if(e.target.id==='ov')fechar()};
+function modalTroca(a,dia,r){const cfg=E.LOJAS[loja];const op=E.ordem(cfg).filter(id=>id!==a&&r.folga[id]!==undefined&&r.folga[id]!==dia);
+  abrir(`<h2>Trocar a folga de ${esc(nomeDe(loja,a))}</h2><p>Hoje folga ${E.DIAS[dia]} ${fmt(r.datas[dia])}. Quem fica com esse dia? A outra pessoa leva o dia de folga que a ${esc(nomeDe(loja,a))} passa a ter. Vale só nesta semana.</p>`+
+    op.map(id=>`<button class="btn opt" data-b="${id}"><span>${esc(nomeDe(loja,id))}</span><span style="color:#94a3b8">folga ${E.DIAS[r.folga[id]]}</span></button>`).join('')+'<div class="row"><button class="btn" id="x">Cancelar</button></div>');
+  $('x').onclick=fechar;$('md').querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{fechar();gravar({chave:`troca|${loja}|${seg}|${Date.now()}`,loja,semana:seg,tipo:'troca',dados:{a,b:b.dataset.b}})})}
+function modalNome(id){const cur=nomeDe(loja,id);abrir(`<h2>Renomear</h2><p>O novo nome vale para todas as semanas desta loja.</p><input id="ni" value="${esc(cur)}" maxlength="40"><div class="row"><button class="btn" id="x">Cancelar</button><button class="btn" id="rs">Restaurar</button><button class="btn pri" id="ok">Salvar</button></div>`);
+  $('x').onclick=fechar;const k=`nome|${loja}|${id}`;
+  $('rs').onclick=async()=>{fechar();await apagar(k)};
+  $('ok').onclick=async()=>{const v=$('ni').value.trim();if(!v)return;fechar();await apagar(k);await gravar({chave:k,loja,semana:null,tipo:'nome',dados:{id,nome:v}})}}
+function modalFechado(data,esta){abrir(`<h2>${esta?'Reabrir':'Fechar'} a loja em ${fmt(data)}?</h2><p>Vale para as 4 lojas. Em semana com feriado fechado de segunda a sexta, o feriado vira a 2ª folga e não há folga extra.</p><div class="row"><button class="btn" id="x">Cancelar</button><button class="btn pri" id="ok">${esta?'Reabrir':'Marcar fechada'}</button></div>`);
+  $('x').onclick=fechar;$('ok').onclick=async()=>{fechar();const padrao=E.FECHADOS_PADRAO.includes(data);
+    await apagar('fechado|'+data);await apagar('fechado_rem|'+data);
+    if(esta){if(padrao)await gravar({chave:'fechado_rem|'+data,loja:null,semana:null,tipo:'fechado_rem',dados:{data}});else{}}
+    else{if(!padrao)await gravar({chave:'fechado|'+data,loja:null,semana:null,tipo:'fechado',dados:{data}})}
+    render()}}
+$('prev').onclick=()=>{seg=E.addDias(seg,-7);render()};$('next').onclick=()=>{seg=E.addDias(seg,7);render()};
+$('cur').onclick=()=>{seg=inicio();render()};
+function inicio(){const s=E.segundaDe(hojeISO());return s<E.TRANSICAO?E.TRANSICAO:s}
+(async()=>{seg=inicio();await carregar();render()})();
+</script></body></html>
