@@ -186,9 +186,14 @@ log "ERP ok"
 
 # ── 2) InfinitePay ───────────────────────────────────────────────────────────
 mkdir -p "$ARQ"
-rm -f "$ARQ"/*.csv                     # só o dia corrente na pasta: sobra de
-                                       # ontem faria o motor conciliar dois dias
-                                       # e contar movimento repetido.
+# Limpa SÓ os arquivos do dia que vai ser conciliado. O motor precisa de um dia
+# por vez (sobra de ontem faria ele conciliar dois dias e contar movimento
+# repetido), mas apagar a pasta INTEIRA destrói coleta feita por fora.
+# ⚠️ Aconteceu em 29/10/2026: 20 dias da L4, recém-coletados à mão com o token
+# do portal da Caixa, foram varridos por esta linha quando a rotina diária
+# entrou na etapa de coleta — e o token só pode ser digitado por uma pessoa.
+DD_LIMPA="$(echo "$DIA" | cut -d- -f3)-$(echo "$DIA" | cut -d- -f2)"
+rm -f "$ARQ"/*"$DD_LIMPA".csv
 FALHAS=""
 for L in $LOJAS; do
   log "coletando InfinitePay $L..."
