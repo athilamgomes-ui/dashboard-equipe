@@ -223,6 +223,13 @@ if [ -z "$(ls -A "$ARQ"/*.csv 2>/dev/null)" ]; then
   exit 10
 fi
 
+# ── 2c) tira o que não é venda ───────────────────────────────────────────────
+# Aporte de capital, transferência entre contas e afins existem de verdade na
+# adquirente mas não têm venda no ERP — apareceriam como "cobrança sem venda" e
+# mandariam o Athila caçar dinheiro que está no lugar. Regras em
+# ~/.claude/caixa-exclusoes.json, casamento estrito por loja+dia+valor.
+$NODE "$SCRIPTS/caixa_exclusoes.mjs" 2>&1 | tee -a "$HOJE_LOG-exclusoes.log"
+
 # ── 3+4) conciliação + histórico cifrado ─────────────────────────────────────
 log "conciliando..."
 RES="$HOJE_LOG-resumos.json"
