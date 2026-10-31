@@ -53,6 +53,29 @@ function fornIgnorado(nome) {
   return lst.some(s => up.includes(String(s).toUpperCase()));
 }
 
+// ⚠️ JANELA COMERCIAL (31/10/2026, auditoria do painel de estoque). Este detector rodava a cada
+// 2 min as 24 horas e, por usar o MESMO lock do perfil do Microvix, disputava o perfil com o
+// pipeline de estoque das 22:05 — que ficou de 22:12 às 00:01 esperando e só começou a coletar na
+// madrugada, quando o Mac cochila e o Wi-Fi cai (ERR_INTERNET_DISCONNECTED). Resultado: 5 dias de
+// painel de estoque velho. À noite ninguém lança NFe, então o detector não tem o que detectar:
+// fora de 07:30–20:00 ele sai na hora e devolve o perfil para os pipelines da noite.
+// JANELA_DETECTA="0730-2000" ajusta; JANELA_DETECTA=sempre volta ao comportamento antigo.
+const janela = process.env.JANELA_DETECTA || "0730-2000";
+if (janela !== "sempre") {
+  const [ini, fim] = janela.split("-").map(Number);
+  const agora = Number(new Date().toTimeString().slice(0, 5).replace(":", ""));
+  if (agora < ini || agora >= fim) { log(`fora da janela ${janela} (agora ${agora}) — saindo sem tocar no perfil`); process.exit(0); }
+}
+// ⚠️ e nunca passar na frente de um pipeline longo que já reservou o perfil (estoque/financeiro):
+// (lock órfão com mais de 2h é ignorado — senão um run morto trava o detector para sempre)
+for (const lk of ["/tmp/amgomes_estoque.lock", "/tmp/amgomes_update.lock", "/tmp/premiacao_update.lock"]) {
+  try {
+    const idadeMin = (Date.now() - statSync(lk).mtimeMs) / 60000;
+    if (idadeMin < 120) { log(`${lk} ativo (${Math.round(idadeMin)}min) — pipeline longo em andamento, pulando ciclo`); process.exit(0); }
+    log(`${lk} parece órfão (${Math.round(idadeMin)}min) — ignorando`);
+  } catch {}
+}
+
 // lock: se o coletor (cron/watcher) está rodando, pula — ele mesmo capta a transição
 try { if (Date.now() - statSync(LOCKDIR).mtimeMs > 30 * 60000) rmSync(LOCKDIR, { recursive: true, force: true }); } catch {}
 try { mkdirSync(LOCKDIR); } catch { log("coletor em execução — pulando ciclo"); process.exit(0); }
