@@ -24,7 +24,11 @@ const PAINEL = join(__dirname, "..", "dashboard_premiacao.html");
 const WORKER_URL = "https://premiacao-amgomes.nhf6t85hdk.workers.dev";
 const SUPA_URL = "https://valhewbvjwdkkvuejrxa.supabase.co";
 const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4";
-const CAP = { L1: 40000, L3: 23000, L4: 40000, L5: 23000 };
+// Teto por semana (safety ceiling do valley-fill): proporcional ao mês, pra acompanhar
+// meses grandes (nov 200k/Black Friday, dez 250k/Natal) sem travar a redistribuição. Antes
+// era fixo {L1:40k,L3:23k,L4:40k,L5:23k} — ok só pra ~160k. 50% do mês dá folga pra uma
+// semana de pico (BF/Natal ~40%) e segue escalando sozinho em qualquer meta futura.
+const capSemanaDaLoja = (metaMensal) => Math.round(metaMensal * 0.5);
 
 const MES = process.argv[2];
 const APPLY = process.argv.includes("--apply");
@@ -118,7 +122,7 @@ async function main() {
     realizado = Math.round(realizado);
     const alvoRestantes = L.meta_mensal - realizado;
     const ideaisRest = restantes.map(s => (s.base != null ? s.base : s.meta)); // ideal
-    const novas = redistribuir(ideaisRest, alvoRestantes, CAP[loja]);
+    const novas = redistribuir(ideaisRest, alvoRestantes, capSemanaDaLoja(L.meta_mensal));
     porLoja[loja] = { fechadas, restantes, realizado, alvoRestantes, ideaisRest, novas,
       mapNovo: Object.fromEntries(restantes.map((s, i) => [s.id, novas[i]])) };
   }

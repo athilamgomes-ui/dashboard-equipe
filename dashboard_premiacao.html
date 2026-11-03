@@ -817,15 +817,15 @@ const DADOS = {
     },
   },
   '2026-11': {
-    // NOVEMBRO/2026 — rollover 03/11 (segunda 02/11 perdida, Mac desligado). Semanas seg–sáb.
-    // ⚠️ METAS PROVISÓRIAS (split flat por dias abertos, teto = outubro 160/90/160/90) — o Athila
-    //    AINDA VAI DEFINIR. ⚠️ Feriado 20/11 (Consciência Negra, SEXTA) pode fechar as lojas →
-    //    CONFIRMAR ao definir as metas (afeta a S3). 01/11 domingo. S5 = só seg 30/11 (toco de 1 dia).
+    // NOVEMBRO/2026 — metas DEFINIDAS pelo Athila 03/11 (L1 200k·L3 90k·L4 180k·L5 120k). Semanas seg–sáb.
+    // Divisão por dias úteis + perfil histórico, com: S1 reduzida (Finados 02/11 + Aniv. Altamira 06/11 só L1/L4),
+    // S3 reduzida (Consciência Negra 20/11 + meio-de-mês fraco), S4 = PICO Black Friday (27-28/11).
+    // 01/11 domingo. S5 = só seg 30/11 (toco de 1 dia).
     semana_atual: 'S1',
     L1: {
-      meta_mensal: 160000,
+      meta_mensal: 200000,
       semanas: [
-        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:38400, base:38400},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:38400, base:38400},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:38400, base:38400},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:38400, base:38400},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:6400, base:6400},
+        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:32000, base:32000},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:48000, base:48000},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:35000, base:35000},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:80000, base:80000},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:5000, base:5000},
       ],
       vendas: {
         S1:{Tatiane:1285,Rayra:112,Bárbara:482,Sofia:129},
@@ -840,7 +840,7 @@ const DADOS = {
     L3: {
       meta_mensal: 90000,
       semanas: [
-        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:21600, base:21600},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:21600, base:21600},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:21600, base:21600},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:21600, base:21600},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:3600, base:3600},
+        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:16000, base:16000},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:21000, base:21000},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:15000, base:15000},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:35000, base:35000},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:3000, base:3000},
       ],
       vendas: {
         S1:{'Ana Mira':156,Raimunda:176,Iris:167,Gisele:99},
@@ -853,9 +853,9 @@ const DADOS = {
       vendas_marca: {}
     },
     L4: {
-      meta_mensal: 160000,
+      meta_mensal: 180000,
       semanas: [
-        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:38400, base:38400},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:38400, base:38400},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:38400, base:38400},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:38400, base:38400},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:6400, base:6400},
+        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:29000, base:29000},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:43000, base:43000},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:31000, base:31000},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:72000, base:72000},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:5000, base:5000},
       ],
       vendas: {
         S1:{Josilene:768,'Bruna F.':715,Débora:49,Ronald:152},
@@ -868,9 +868,9 @@ const DADOS = {
       vendas_marca: {}
     },
     L5: {
-      meta_mensal: 90000,
+      meta_mensal: 120000,
       semanas: [
-        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:21600, base:21600},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:21600, base:21600},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:21600, base:21600},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:21600, base:21600},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:3600, base:3600},
+        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:20000, base:20000},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:27000, base:27000},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:21000, base:21000},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:48000, base:48000},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:4000, base:4000},
       ],
       vendas: {
         S1:{Rayssa:51,Joyce:347,Rosiene:70,Karina:281},
@@ -883,7 +883,40 @@ const DADOS = {
       vendas_marca: {}
     },
   },
-  '2026-12': null,
+  '2026-12': {
+    // DEZEMBRO/2026 — metas DEFINIDAS pelo Athila 03/11 (L1 250k·L3 120k·L4 200k·L5 150k). Semanas seg–sáb.
+    // Pré-criado (mês futuro, vendas vazias): a virada de 01/12 só coleta as vendas. Pico S4 (pré-Natal 21-24;
+    // 25/12 Natal fecha). S3 de L3 reduzida pelo Aniv. de Itaituba (15/12). 01/12 terça → S1 = toco ter–sáb.
+    semana_atual: 'S1',
+    L1: {
+      meta_mensal: 250000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/12–05/12', meta:33000, base:33000},{id:'S2', label:'Semana 2', periodo:'07/12–12/12', meta:45000, base:45000},{id:'S3', label:'Semana 3', periodo:'14/12–19/12', meta:55000, base:55000},{id:'S4', label:'Semana 4', periodo:'21/12–26/12', meta:87000, base:87000},{id:'S5', label:'Semana 5', periodo:'28/12–31/12', meta:30000, base:30000},
+      ],
+      vendas: {}, marcasA_loja: {}, marcasA_indiv: {}, tickets: {}, pecas: {}, cmv: {}, vendas_marca: {}
+    },
+    L3: {
+      meta_mensal: 120000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/12–05/12', meta:16000, base:16000},{id:'S2', label:'Semana 2', periodo:'07/12–12/12', meta:22000, base:22000},{id:'S3', label:'Semana 3', periodo:'14/12–19/12', meta:24000, base:24000},{id:'S4', label:'Semana 4', periodo:'21/12–26/12', meta:44000, base:44000},{id:'S5', label:'Semana 5', periodo:'28/12–31/12', meta:14000, base:14000},
+      ],
+      vendas: {}, marcasA_loja: {}, marcasA_indiv: {}, tickets: {}, pecas: {}, cmv: {}, vendas_marca: {}
+    },
+    L4: {
+      meta_mensal: 200000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/12–05/12', meta:26000, base:26000},{id:'S2', label:'Semana 2', periodo:'07/12–12/12', meta:36000, base:36000},{id:'S3', label:'Semana 3', periodo:'14/12–19/12', meta:44000, base:44000},{id:'S4', label:'Semana 4', periodo:'21/12–26/12', meta:70000, base:70000},{id:'S5', label:'Semana 5', periodo:'28/12–31/12', meta:24000, base:24000},
+      ],
+      vendas: {}, marcasA_loja: {}, marcasA_indiv: {}, tickets: {}, pecas: {}, cmv: {}, vendas_marca: {}
+    },
+    L5: {
+      meta_mensal: 150000,
+      semanas: [
+        {id:'S1', label:'Semana 1', periodo:'01/12–05/12', meta:19000, base:19000},{id:'S2', label:'Semana 2', periodo:'07/12–12/12', meta:27000, base:27000},{id:'S3', label:'Semana 3', periodo:'14/12–19/12', meta:33000, base:33000},{id:'S4', label:'Semana 4', periodo:'21/12–26/12', meta:54000, base:54000},{id:'S5', label:'Semana 5', periodo:'28/12–31/12', meta:17000, base:17000},
+      ],
+      vendas: {}, marcasA_loja: {}, marcasA_indiv: {}, tickets: {}, pecas: {}, cmv: {}, vendas_marca: {}
+    },
+  },
 };
 
 // ─── METADADOS DAS VENDEDORAS ────────────────────────────────────────────────
@@ -2365,8 +2398,8 @@ const METAS_FUTURAS = {
   '2026-08': {L1:160000,L3:90000,L4:160000,L5:90000},
   '2026-09': {L1:160000,L3:90000,L4:160000,L5:90000}, // mantidas = agosto (decisão Athila 31/08)
   '2026-10': {L1:160000,L3:90000,L4:160000,L5:90000},
-  '2026-11': {L1:145000,L3:82000,L4:145000,L5:92000},
-  '2026-12': {L1:160000,L3:90000,L4:160000,L5:100000},
+  '2026-11': {L1:200000,L3:90000,L4:180000,L5:120000}, // definidas Athila 03/11 (Black Friday)
+  '2026-12': {L1:250000,L3:120000,L4:200000,L5:150000}, // definidas Athila 03/11 (Natal)
 };
 
 // ─── TABELAS DE PRÊMIO ───────────────────────────────────────────────────────
