@@ -31,7 +31,7 @@ const EMPRESAS = [1, 3, 4, 10];
 const VENDEDORAS = {
   L1: ["Tatiane", "Rayra", "Alcione", "Sofia", "Bárbara"],
   L3: ["Ana Mira", "Raimunda", "Brunna", "Naila", "Iris", "Gisele"],
-  L4: ["Tanaia", "Josilene", "Bruna F.", "Rosana", "Débora"],
+  L4: ["Tanaia", "Josilene", "Bruna F.", "Rosana", "Débora", "Ronald"],
   L5: ["Rayssa", "Joyce", "Rosiene", "Karina", "Lucas"],
 };
 
