@@ -1462,30 +1462,31 @@ const HISTORICO_PREMIOS = {
   },
   '2026-10': {
     // S4 (19/10–24/10) congelada em 26/10: L1 pool R$280 · L5 pool R$100 · L3/L4 R$0
-    // S3 out/2026 congelada em 19/10 (recoleta 14:21, Meta Real)
+    // S3 out/2026 congelada em 19/10. RECORRIGIDA 03/11: 12/10 (feriado) foi trabalhado → janela 12–17/10,
+    //   vendas do 12/10 somadas (Tatiane/Ana Mira/Iris/Débora). L1 redivide (pool 350); L4 cruza 70% → pool 0→80.
     // S2 (05/10-10/10) congelada em 14/10/2026
     // S1 (01/10–03/10) FECHADA+CONGELADA em 05/10/2026 após recoleta final (pipeline 08:25, janela completa). L1 119,3% → R$350 · L3 71,3% → R$80 · L4 86,7% → R$100 · L5 102% → R$280 (Meta Real). IMUTÁVEL.
     L1: {
-      'Tatiane': {S1:105, S2:127, S3:97, S4:89},
-      'Rayra': {S1:113, S2:113, S3:102, S4:73},
-      'Sofia': {S1:55, S2:70, S3:45, S4:49},
-      'Bárbara': {S1:77, S2:120, S3:106, S4:69},
-      _em_pct: {S1:119.3, S2:137.9, S3:113.2, S4:100.8},
+      'Tatiane': {S1:105, S2:127, S3:111, S4:89},
+      'Rayra': {S1:113, S2:113, S3:96, S4:73},
+      'Sofia': {S1:55, S2:70, S3:42, S4:49},
+      'Bárbara': {S1:77, S2:120, S3:101, S4:69},
+      _em_pct: {S1:119.3, S2:137.9, S3:119.6, S4:100.8},
       _pool: {S1:350, S2:430, S3:350, S4:280},
     },
     L3: {
       'Ana Mira': {S1:31, S2:0, S3:0, S4:0},
       'Raimunda': {S1:49, S2:0, S3:0, S4:0},
-      _em_pct: {S1:71.3, S2:69.5, S3:49.2, S4:57.9},
+      _em_pct: {S1:71.3, S2:69.5, S3:52.5, S4:57.9},
       _pool: {S1:80, S2:0, S3:0, S4:0},
     },
     L4: {
       'Tanaia': {S1:0, S2:0, S3:0, S4:0},
-      'Josilene': {S1:32, S2:54, S3:0, S4:0},
-      'Bruna F.': {S1:44, S2:83, S3:0, S4:0},
-      'Débora': {S1:24, S2:43, S3:0, S4:0},
-      _em_pct: {S1:86.7, S2:92.1, S3:68.8, S4:60.7},
-      _pool: {S1:100, S2:180, S3:0, S4:0},
+      'Josilene': {S1:32, S2:54, S3:9, S4:0},
+      'Bruna F.': {S1:44, S2:83, S3:37, S4:0},
+      'Débora': {S1:24, S2:43, S3:34, S4:0},
+      _em_pct: {S1:86.7, S2:92.1, S3:72.1, S4:60.7},
+      _pool: {S1:100, S2:180, S3:80, S4:0},
     },
     L5: {
       'Rayssa': {S1:96, S2:27, S3:0, S4:34},
@@ -1614,9 +1615,9 @@ const HIST_MENSAL_VENDAS = {
     L5: {'Rayssa':17075,'Joyce':15568,'Rosiene':17825,'Karina':19519},
   },
   '2026-10': {
-    L1: {'Tatiane':49710,'Sofia':28249,'Bárbara':45698,'Rayra':47147},
-    L3: {'Ana Mira':18599,'Raimunda':15427,'Iris':8632,'Gisele':17268},
-    L4: {'Josilene':31358,'Bruna F.':52658,'Débora':36249},
+    L1: {'Tatiane':51749,'Sofia':28249,'Bárbara':45698,'Rayra':47147}, // Tatiane +2039 (12/10)
+    L3: {'Ana Mira':19046,'Raimunda':15427,'Iris':8947,'Gisele':17268}, // Ana Mira +447, Iris +315 (12/10)
+    L4: {'Josilene':31358,'Bruna F.':52658,'Débora':37481}, // Débora +1232 (12/10)
     L5: {'Rayssa':25406,'Karina':27394,'Rosiene':25507,'Joyce':1432},
   },
 };
