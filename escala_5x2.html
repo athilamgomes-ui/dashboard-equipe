@@ -50,7 +50,7 @@ tr.pres td{font-style:italic;background:#172033;color:#94a3b8;border-bottom:0}.p
 </style></head><body><div class="wrap">
 <a class="back" href="index.html">← Painel A.M. Gomes</a>
 <h1>Escala <span>5x2</span></h1>
-<div class="sub">Folgas e almoço das 4 lojas a partir de 16/12/2026. Toque em uma folga para trocar, no nome para renomear, no dia para marcar loja fechada.</div>
+<div class="sub">Folgas, turnos e almoço das 4 lojas a partir de 16/12/2026. Toque em uma folga para trocar, no nome para renomear, no dia para marcar loja fechada.</div>
 <div class="pill"><span class="dot" id="dot"></span><span id="sync">carregando…</span></div>
 <div class="hoje" id="hoje"></div>
 <div class="tabs" id="tabs"></div>
@@ -60,16 +60,16 @@ tr.pres td{font-style:italic;background:#172033;color:#94a3b8;border-bottom:0}.p
 <div class="box" id="trocas"></div>
 <div class="box" id="horas"></div>
 <div class="box"><h3>Como ler</h3><ul>
-<li>Dias úteis: 8h–18h com 2h de almoço. O horário na célula é o almoço da pessoa (11–13h, 12–14h ou 14–16h). Sábado: 8h–14h, sem almoço de 2h.</li>
-<li>Gerente almoça 14–16h e caixa 12–14h, nunca juntos. Ninguém almoça das 10h às 11h (pico de vendas). Das 12h às 13h, o caixa reserva cobre o caixa.</li>
+<li>Dias úteis com <b>1h de almoço</b>. Turno cedo <b>8–17h</b> (2 pessoas abrem a loja nas lojas L1, L3 e L4) e turno <b>9–18h</b> (o resto da equipe; na L5 todos entram às 9h). Cada célula mostra o turno e, embaixo, o almoço da pessoa. Sábado: 8–14h ou 9–14h, com 15 min de intervalo, sem almoço de 1h.</li>
+<li>O caixa abre a loja (turno cedo) e o gerente fecha. Gerente almoça às 14h e caixa às 13h, nunca juntos. Ninguém almoça das 10h às 12h (pico de vendas). Quem abre às 8h almoça até 14h; quem entra às 9h, até 15h. O caixa reserva cobre o caixa no almoço do titular.</li>
 <li>Transição (16–19/12): a semana começou no regime antigo, então a folga de segunda/terça migra para quarta–sexta.</li>
 <li>Semana com feriado fechado: o feriado vale como a 2ª folga, todos trabalham seg–qui e sábado, sem folga extra.</li>
 <li>De 04/01 em diante o ciclo gira: cada vendedora folga em um dia diferente a cada semana (ciclo de 3 semanas na L1 e 4 nas demais). Gerente e caixa têm folga fixa.</li>
-<li>Teto de 42h semanais até dez/2027. Quem trabalha seg–sex faz 40h; quem folga em dia útil e trabalha o sábado faz 37h45. A sobra (2h a 4h15 por semana) fica de reserva para pico ou compensação.</li>
+<li>Teto de 42h semanais até dez/2027. Quem trabalha seg–sex faz 40h; quem folga em dia útil e trabalha o sábado faz 36h45 (sábado 9–14h) ou 37h45 (sábado 8–14h). A sobra de 2h a 5h15 por semana fica de reserva para pico ou compensação.</li>
 <li>Trocar folga = as duas pessoas trocam de dia só naquela semana. Renomear vale para todas as semanas. O almoço é recalculado sozinho.</li></ul></div>
 </div>
 <div class="ov" id="ov"><div class="md" id="md"></div></div>
-<script src="escala_5x2_core.js?v=4"></script>
+<script src="escala_5x2_core.js?v=5"></script>
 <script>
 const SUPA_URL='https://valhewbvjwdkkvuejrxa.supabase.co', SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbGhld2J2andka2t2dWVqcnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzEwMTgsImV4cCI6MjA5NzMwNzAxOH0.DhQaFpQ1Ca-W8Od6jl3KatGai_shXOoc14Fqk7P3lK4', TB='escala_ajustes';
 const E=Escala5x2, MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
@@ -126,21 +126,20 @@ function render(){
     rows+=`<tr><td><span class="nm" data-id="${id}">${esc(no[id]||p[1])} ✎</span><div class="fn">${papel}</div></td>`+r.cel[id].map((c,i)=>{
       if(c==='FOLGA')return `<td><span class="c-folga" data-id="${id}" data-i="${i}">FOLGA</span></td>`;
       if(c==='FECHADO')return '<td class="c-fech">fechado</td>';if(c==='regime atual')return '<td class="c-reg">regime atual</td>';
-      return `<td class="${i===5?'c-sab':'c-ok'}">${c}</td>`}).join('')+`<td class="${E.minutos(r,id)>E.LIMITE_MIN?'hrs p-bad':'hrs'}">${E.hm(E.minutos(r,id))}<div class="fn">${r.tipo==='antes'?'':'teto '+E.hm(E.LIMITE_MIN)}</div></td></tr>`});
+      const pt=c.split(' · ');return `<td class="${i===5?'c-sab':'c-ok'}">${pt[0]}${pt[1]?`<div class="fn">almoço ${pt[1]}</div>`:''}</td>`}).join('')+`<td class="${E.minutos(r,id)>E.LIMITE_MIN?'hrs p-bad':'hrs'}">${E.hm(E.minutos(r,id))}<div class="fn">${r.tipo==='antes'?'':'teto '+E.hm(E.LIMITE_MIN)}</div></td></tr>`});
   rows+='<tr class="pres"><td>Presentes</td>'+r.presentes.map(n=>n==null?'<td>–</td>':`<td class="${n>=5?'p-ok':n===4?'p-m':'p-bad'}">${n}</td>`).join('')+'<td></td></tr>';
   $('tb').innerHTML=hd+rows;
   $('tb').querySelectorAll('.nm').forEach(e=>e.onclick=()=>modalNome(e.dataset.id));
   $('tb').querySelectorAll('.c-folga').forEach(e=>e.onclick=()=>modalTroca(e.dataset.id,+e.dataset.i,r));
   $('tb').querySelectorAll('th.cl').forEach(e=>e.onclick=()=>modalFechado(r.datas[+e.dataset.i],r.fechDia[+e.dataset.i]));
   const al=[];for(let d=0;d<5;d++){if(r.fechDia[d]||(r.tipo==='trans'&&d<2)||r.presentes[d]==null)continue;
-    const nl=E.naLojaPorHora(r,d),mn=Math.min(...Object.values(nl)),h=Object.keys(nl).find(k=>nl[k]===mn);
-    if(mn<2)al.push(`${E.DIAS[d]} ${fmt(r.datas[d])}: só ${mn} pessoa na loja às ${h}h (almoço). Considere reforço ou temporário.`);
-    else if(r.presentes[d]<4)al.push(`${E.DIAS[d]} ${fmt(r.datas[d])}: apenas ${r.presentes[d]} pessoas no dia.`)}
+    const fa=E.alertas(r,d);
+    if(fa.length)al.push(`${E.DIAS[d]} ${fmt(r.datas[d])}: pouca gente na loja — ${fa.map(f=>f.n+' pessoa'+(f.n===1?'':'s')+' às '+f.hora+'h').join(', ')}. Considere reforço ou temporário.`)}
   $('alerts').innerHTML=al.map(a=>`<div class="al">⚠ ${esc(a)}</div>`).join('');
   const tr=trocasSem(loja,seg);
   $('trocas').innerHTML='<h3>Trocas desta semana</h3>'+(tr.length?tr.map(t=>`<div class="tr"><span>${esc(nomeDe(loja,t.dados.a))} ⇄ ${esc(nomeDe(loja,t.dados.b))}</span><button class="btn sm" data-k="${esc(t.chave)}">Desfazer</button></div>`).join(''):'<span style="color:#64748b">Nenhuma troca. Toque em uma folga para trocar.</span>');
   const mc=E.mediaCiclo(loja);
-  $('horas').innerHTML='<h3>Horas por semana no ciclo normal</h3><div style="color:#94a3b8;margin-bottom:6px">Média por semana ao longo de '+cfg.V.length+' semanas, sem feriados nem trocas. Dia útil = 8h líquidas; sábado = 5h45 (8–14h menos 15 min de intervalo). Teto semanal: 42h até dezembro de 2027. Nenhuma semana passa de 40h, então a escala também cabe na regra seguinte se o teto cair para 40h.</div>'+ids.map(id=>`<div class="tr"><span>${esc(nomeDe(loja,id))}</span><b>${E.hm(mc[id])}</b></div>`).join('');
+  $('horas').innerHTML='<h3>Horas por semana no ciclo normal</h3><div style="color:#94a3b8;margin-bottom:6px">Média por semana ao longo de '+cfg.V.length+' semanas, sem feriados nem trocas. Dia útil = 8h líquidas (9h de turno menos 1h de almoço); sábado = 5h45 no turno 8–14h ou 4h45 no 9–14h. Teto semanal: 42h até dezembro de 2027. Nenhuma semana passa de 40h, então a escala também cabe na regra seguinte se o teto cair para 40h.</div>'+ids.map(id=>`<div class="tr"><span>${esc(nomeDe(loja,id))}</span><b>${E.hm(mc[id])}</b></div>`).join('');
   $('trocas').querySelectorAll('button').forEach(b=>b.onclick=()=>apagar(b.dataset.k))}
 function abrir(h){$('md').innerHTML=h;$('ov').classList.add('on')}
 function fechar(){$('ov').classList.remove('on')}
