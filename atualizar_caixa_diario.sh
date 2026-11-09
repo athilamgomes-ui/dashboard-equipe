@@ -233,7 +233,13 @@ $NODE "$SCRIPTS/caixa_exclusoes.mjs" 2>&1 | tee -a "$HOJE_LOG-exclusoes.log"
 # ── 3+4) conciliação + histórico cifrado ─────────────────────────────────────
 log "conciliando..."
 RES="$HOJE_LOG-resumos.json"
-if ! $NODE "$SCRIPTS/conciliar_headless.mjs" --dir "$ARQ" --salvar --json "$RES" > $HOJE_LOG-conciliacao.log 2>&1; then
+# ⚠️ Passa os arquivos DO DIA, nunca --dir na pasta inteira. Até 29/10/2026 a
+# rotina apagava todos os CSVs antes de coletar, então "a pasta" era "o dia" e
+# --dir funcionava. Quando a limpeza passou a ser por dia (para não destruir
+# coleta feita à mão), a pasta virou um histórico — e o --dir passou a conciliar
+# SEMANAS de uma vez: em 09/11/2026 gravou registros de 150 KB rotulados como
+# 30/10 e 28/10 numa rodada que era do dia 08/11. Conferência de dia nenhum.
+if ! $NODE "$SCRIPTS/conciliar_headless.mjs" "$ARQ"/*"$DD_LIMPA".csv --salvar --json "$RES" > $HOJE_LOG-conciliacao.log 2>&1; then
   log "ERRO na conciliação"; tail -8 $HOJE_LOG-conciliacao.log
   avisar_falha "conciliação de $DIA falhou"
   exit 20
