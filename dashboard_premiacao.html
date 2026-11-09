@@ -822,7 +822,7 @@ const DADOS = {
     // Divisão por dias úteis + perfil histórico, com: S1 reduzida (Finados 02/11 + Aniv. Altamira 06/11 só L1/L4),
     // S3 reduzida (Consciência Negra 20/11 + meio-de-mês fraco), S4 = PICO Black Friday (27-28/11).
     // 01/11 domingo. S5 = só seg 30/11 (toco de 1 dia).
-    semana_atual: 'S1',
+    semana_atual: 'S2',
     L1: {
       meta_mensal: 200000,
       semanas: [
@@ -830,12 +830,13 @@ const DADOS = {
       ],
       vendas: {
         S1:{Tatiane:5782,Rayra:5024,Bárbara:6125,Sofia:6042},
+        S2:{Tatiane:755,Rayra:750,Sofia:214,Bárbara:728},
       },
-      marcasA_loja: {S1:24.4},
-      marcasA_indiv: {Tatiane:31.9,Rayra:14.6,Sofia:27.3,Bárbara:22.3},
-      tickets: {S1:{Tatiane:58,Rayra:69,Bárbara:64,Sofia:74}},
-      pecas: {S1:{Tatiane:160,Rayra:250,Bárbara:261,Sofia:224}},
-      cmv: {S1:{Tatiane:41.2,Rayra:51.5,Bárbara:56.4,Sofia:49.4}},
+      marcasA_loja: {S1:24.4,S2:14.1},
+      marcasA_indiv: {Tatiane:29.6,Rayra:16.1,Sofia:26.4,Bárbara:20.9},
+      tickets: {S1:{Tatiane:58,Rayra:69,Bárbara:64,Sofia:74},S2:{Tatiane:6,Rayra:7,Sofia:4,Bárbara:6}},
+      pecas: {S1:{Tatiane:160,Rayra:250,Bárbara:261,Sofia:224},S2:{Tatiane:17,Rayra:18,Sofia:11,Bárbara:16}},
+      cmv: {S1:{Tatiane:41.2,Rayra:51.5,Bárbara:56.4,Sofia:49.4},S2:{Tatiane:41.4,Rayra:38,Sofia:32.5,Bárbara:42.4}},
       vendas_marca: {}
     },
     L3: {
@@ -845,12 +846,13 @@ const DADOS = {
       ],
       vendas: {
         S1:{'Ana Mira':2965,Raimunda:2697,Iris:3730,Gisele:3692},
+        S2:{Raimunda:272,Iris:49,Gisele:48},
       },
-      marcasA_loja: {S1:14.5},
-      marcasA_indiv: {'Ana Mira':13.1,Raimunda:14.3,Iris:12.9,Gisele:17.5},
-      tickets: {S1:{'Ana Mira':44,Raimunda:38,Iris:57,Gisele:40}},
-      pecas: {S1:{'Ana Mira':130,Raimunda:113,Iris:153,Gisele:145}},
-      cmv: {S1:{'Ana Mira':47.4,Raimunda:48.4,Iris:53.6,Gisele:46.7}},
+      marcasA_loja: {S1:14.5,S2:40.7},
+      marcasA_indiv: {'Ana Mira':13.1,Raimunda:18.1,Iris:12.7,Gisele:17.3},
+      tickets: {S1:{'Ana Mira':44,Raimunda:38,Iris:57,Gisele:40},S2:{Raimunda:5,Iris:2,Gisele:1}},
+      pecas: {S1:{'Ana Mira':130,Raimunda:113,Iris:153,Gisele:145},S2:{Raimunda:11,Iris:7,Gisele:3}},
+      cmv: {S1:{'Ana Mira':47.4,Raimunda:48.4,Iris:53.6,Gisele:46.7},S2:{Raimunda:50.2,Iris:193.6,Gisele:34.6}},
       vendas_marca: {}
     },
     L4: {
@@ -860,12 +862,13 @@ const DADOS = {
       ],
       vendas: {
         S1:{Josilene:5664,'Bruna F.':9818,Débora:4952,Ronald:4070},
+        S2:{Josilene:181,'Bruna F.':803,Débora:245,Ronald:444},
       },
-      marcasA_loja: {S1:24.1},
-      marcasA_indiv: {Josilene:19.9,'Bruna F.':28.4,Débora:14,Ronald:32},
-      tickets: {S1:{Josilene:74,'Bruna F.':111,Débora:76,Ronald:62}},
-      pecas: {S1:{Josilene:223,'Bruna F.':322,Débora:181,Ronald:147}},
-      cmv: {S1:{Josilene:41.7,'Bruna F.':40.6,Débora:44.6,Ronald:41.9}},
+      marcasA_loja: {S1:24.1,S2:16.4},
+      marcasA_indiv: {Josilene:21.4,'Bruna F.':26.8,Débora:13.4,Ronald:30.9},
+      tickets: {S1:{Josilene:74,'Bruna F.':111,Débora:76,Ronald:62},S2:{Josilene:3,'Bruna F.':15,Débora:4,Ronald:5}},
+      pecas: {S1:{Josilene:223,'Bruna F.':322,Débora:181,Ronald:147},S2:{Josilene:4,'Bruna F.':25,Débora:9,Ronald:17}},
+      cmv: {S1:{Josilene:41.7,'Bruna F.':40.6,Débora:44.6,Ronald:41.9},S2:{Josilene:20.7,'Bruna F.':40,Débora:36.3,Ronald:37.1}},
       vendas_marca: {}
     },
     L5: {
@@ -875,12 +878,13 @@ const DADOS = {
       ],
       vendas: {
         S1:{Rayssa:3709,Joyce:4830,Rosiene:4143,Karina:2971},
+        S2:{Rayssa:318,Rosiene:319},
       },
-      marcasA_loja: {S1:12.3},
-      marcasA_indiv: {Rayssa:3.4,Joyce:2.2,Rosiene:29.4,Karina:15.8},
-      tickets: {S1:{Rayssa:36,Joyce:53,Rosiene:45,Karina:33}},
-      pecas: {S1:{Rayssa:154,Joyce:185,Rosiene:170,Karina:191}},
-      cmv: {S1:{Rayssa:53.9,Joyce:63,Rosiene:43.7,Karina:58}},
+      marcasA_loja: {S1:12.3,S2:36.7},
+      marcasA_indiv: {Rayssa:6.8,Joyce:2.2,Rosiene:29.2,Karina:15.8},
+      tickets: {S1:{Rayssa:36,Joyce:53,Rosiene:45,Karina:33},S2:{Rayssa:3,Rosiene:2}},
+      pecas: {S1:{Rayssa:154,Joyce:185,Rosiene:170,Karina:191},S2:{Rayssa:10,Rosiene:10}},
+      cmv: {S1:{Rayssa:53.9,Joyce:63,Rosiene:43.7,Karina:58},S2:{Rayssa:29.6,Rosiene:55.8}},
       vendas_marca: {}
     },
   },
