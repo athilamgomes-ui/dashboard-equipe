@@ -2549,6 +2549,42 @@ function getPool(em_pct, marcasA_pct) {
 // e NÃO são recalculados quando alguém é demitida/desativada. Só recálculo
 // manual explícito do admin reescreve. Ver [[premiacao-imutabilidade-semanas-fechadas]].
 const HISTORICO_PREMIOS = {
+  '2026-11': {
+    // Congelada 09/11/2026 (run automático): recoleta final idêntica; Meta REAL; maior-resto excl. Outros/caixa.
+    L1: {
+      'Tatiane': {S1:20},
+      'Rayra': {S1:18},
+      'Sofia': {S1:21},
+      'Bárbara': {S1:21},
+      _em_pct: {S1:71.8},
+      _pool: {S1:80},
+    },
+    L3: {
+      'Ana Mira': {S1:23},
+      'Raimunda': {S1:21},
+      'Iris': {S1:28},
+      'Gisele': {S1:28},
+      _em_pct: {S1:81.8},
+      _pool: {S1:100},
+    },
+    L4: {
+      'Tanaia': {S1:0},
+      'Josilene': {S1:23},
+      'Bruna F.': {S1:40},
+      'Débora': {S1:20},
+      'Ronald': {S1:17},
+      _em_pct: {S1:84.5},
+      _pool: {S1:100},
+    },
+    L5: {
+      'Rayssa': {S1:19},
+      'Joyce': {S1:25},
+      'Rosiene': {S1:21},
+      'Karina': {S1:15},
+      _em_pct: {S1:78.3},
+      _pool: {S1:80},
+    },
+  },
   '2026-06': {
     // Snapshot CONGELADO das semanas FECHADAS de junho (S1-S4 — mês completo). IMUTÁVEL.
     // Gerado 30/06/2026 com o roster ORIGINAL de cada semana (Elianna incluída
