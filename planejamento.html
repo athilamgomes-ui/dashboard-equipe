@@ -100,7 +100,7 @@ var OWNER_EMAIL = 'athilamgomes@gmail.com';
 var WEB3FORMS_KEY = '65791c8f-eab3-4e7a-91bf-ce645c273332';  // avisa o aprovador por e-mail ao lançar (web3forms.com)
 /* ================================================== */
 
-var LOJAS=[{id:'ALTAMIRA',nome:'Altamira (L1+L4)'},{id:'ITAITUBA',nome:'Itaituba (L3)'},{id:'SANTAREM',nome:'Santarém (L5)'}];
+var LOJAS=[{id:'ALTAMIRA',nome:'Altamira (L1+L4)'},{id:'ITAITUBA',nome:'Itaituba (L3)'},{id:'SANTAREM',nome:'Santarém (L5)'},{id:'EXPRESS',nome:'Santarém Express (L6)'}];
 var MARCA_ALIAS={'GAMA':['BRASITECH']}; // pedido marca (UPPER) → outras marcas de NF que também são desta marca (fornecedor que fatura com nome diferente)
 var STATUS=['ATHILA','APROVADO','ENVIADO','FATURADO','ENTREGUE','REJEITADO'];
 var STATUS_COMPROMETE=['ENVIADO','FATURADO','ENTREGUE'];   // OTB
@@ -221,7 +221,7 @@ async function carregar(){
    (regressão de 03/09/2026 — commit f8c69c5 apagou por corrida read-modify-write). */
 async function persistirComprometido(){
   try{
-    var porLojaMes={ALTAMIRA:{},ITAITUBA:{},SANTAREM:{}};
+    var porLojaMes={ALTAMIRA:{},ITAITUBA:{},SANTAREM:{},EXPRESS:{}};
     DB.pedidos.forEach(function(p){
       if(STATUS_A_PAGAR.indexOf(p.status)<0)return;   // só ENVIADO/FATURADO
       if(p._noERP)return;                              // FATURADO já no ERP → não duplicar
@@ -237,13 +237,13 @@ async function persistirComprometido(){
    do dashboard de VENDAS, removido em 19/06/2026). Blob = {meses:[...], L1:[...], L3, L4, L5, geradoEm}. */
 function parseContasERP(blob, atualizado){
   var meses=blob.meses||[]; if(!meses.length)return null;
-  var e1=blob.L1||[],e3=blob.L3||[],e4=blob.L4||[],e5=blob.L5||[];
+  var e1=blob.L1||[],e3=blob.L3||[],e4=blob.L4||[],e5=blob.L5||[],e6=blob.L6||[];
   var ab=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-  var out={ALTAMIRA:{},ITAITUBA:{},SANTAREM:{},L1:{},L4:{}};
+  var out={ALTAMIRA:{},ITAITUBA:{},SANTAREM:{},EXPRESS:{},L1:{},L4:{}};
   meses.forEach(function(lbl,i){var p=String(lbl).toLowerCase().split('/');var mi=ab.indexOf(p[0]);if(mi<0)return;
     var k='20'+p[1]+'-'+('0'+(mi+1)).slice(-2);
     out.L1[k]=e1[i]||0; out.L4[k]=e4[i]||0;
-    out.ALTAMIRA[k]=(e1[i]||0)+(e4[i]||0); out.ITAITUBA[k]=e3[i]||0; out.SANTAREM[k]=e5[i]||0;});
+    out.ALTAMIRA[k]=(e1[i]||0)+(e4[i]||0); out.ITAITUBA[k]=e3[i]||0; out.SANTAREM[k]=e5[i]||0; out.EXPRESS[k]=e6[i]||0;});
   var em=blob.geradoEm||(atualizado?String(atualizado).slice(0,10).split('-').reverse().join('/'):'');
   return {dados:out, em:em, atualizadoISO:atualizado||''};
 }
@@ -261,7 +261,7 @@ function diasContasERP(){
 function contasERPmes(m){
   var c=DB.contasERP&&DB.contasERP.dados; if(!c)return 0;
   if(FILTRO_LOJA!=='TODAS')return (c[FILTRO_LOJA]||{})[m]||0;
-  return (c.ALTAMIRA[m]||0)+(c.ITAITUBA[m]||0)+(c.SANTAREM[m]||0);
+  return (c.ALTAMIRA[m]||0)+(c.ITAITUBA[m]||0)+(c.SANTAREM[m]||0)+(c.EXPRESS?(c.EXPRESS[m]||0):0);
 }
 /* ---------- recálculo do prazo dos pedidos PENDENTES (rolling a partir de hoje) ----------
    Opção A do usuário: enquanto ATHILA, os meses do prazo (30/60/90...) são contados a partir de
@@ -330,8 +330,8 @@ function breakdownAltamira(jan,comp,L,G,T){
 }
 function montarRealizado(dd){
   var ano=new Date().getFullYear();
-  var mapLoja={L1:'ALTAMIRA',L4:'ALTAMIRA',L3:'ITAITUBA',L5:'SANTAREM'};
-  var out={ALTAMIRA:{},ITAITUBA:{},SANTAREM:{}};
+  var mapLoja={L1:'ALTAMIRA',L4:'ALTAMIRA',L3:'ITAITUBA',L5:'SANTAREM',L6:'EXPRESS'};
+  var out={ALTAMIRA:{},ITAITUBA:{},SANTAREM:{},EXPRESS:{}};
   (dd.marcas||[]).forEach(function(m){
     var cmr=m.compras_mensais_rs||{};
     Object.keys(cmr).forEach(function(lo){var alvo=mapLoja[lo];if(!alvo)return;
@@ -342,7 +342,7 @@ function montarRealizado(dd){
 }
 /* Cruza os pedidos ENVIADO com as NFs faturadas do ERP (chegadas_mes) por marca+loja.
    Anexa p._nfSug = NF mais recente encontrada → vira sugestão de "recalcular pela data do faturamento". */
-function agruparNfesPorLoja(lista){ var o={L1:[],L3:[],L4:[],L5:[]}; lista.forEach(function(x){ if(o[x.loja]) o[x.loja].push(x); }); return o; }
+function agruparNfesPorLoja(lista){ var o={L1:[],L3:[],L4:[],L5:[],L6:[]}; lista.forEach(function(x){ if(o[x.loja]) o[x.loja].push(x); }); return o; }
 /* Acha o subconjunto de NFs cuja SOMA ≈ alvo (fornecedor divide 1 pedido em N notas, ex. Brasitech/Gama).
    Retorna {items,sum,cnt} preferindo MENOS NFs e soma mais próxima; null se nada dentro de 2%. */
 function bestSubsetSum(cands,target){
@@ -357,7 +357,7 @@ function bestSubsetSum(cands,target){
   return best;
 }
 function detectarFaturamentos(dd){
-  var mapLoja={ALTAMIRA:['L1','L4'],ITAITUBA:['L3'],SANTAREM:['L5']};
+  var mapLoja={ALTAMIRA:['L1','L4'],ITAITUBA:['L3'],SANTAREM:['L5'],EXPRESS:['L6']};
   var cm=(dd&&dd.chegadas_mes)||{};
   function norm(s){return String(s||'').toUpperCase().trim();}
   DB.pedidos.forEach(function(p){ delete p._noERP; delete p._dataFat; delete p._dataLanc; delete p._nfMatch; delete p._temLancada; delete p._forte; delete p._nfsAll; });
@@ -690,7 +690,7 @@ function renderOTB(){
 function renderReal(){
   if(!DB.realizado){ el('main').innerHTML='<div class="card">Não consegui carregar o "realizado" do dashboard de Compras agora. Recarregue a página (Cmd+Shift+R).</div>'; return; }
   var ano=new Date().getFullYear();
-  var plan={ALTAMIRA:{},ITAITUBA:{},SANTAREM:{}};
+  var plan={ALTAMIRA:{},ITAITUBA:{},SANTAREM:{},EXPRESS:{}};
   DB.pedidos.forEach(function(p){ if(p.status==='REJEITADO')return; var mp=mesDoPedido(p); if(mp.slice(0,4)!=String(ano))return; if(!plan[p.loja])return; plan[p.loja][mp]=(plan[p.loja][mp]||0)+(Number(p.valor_total)||0); });
   var html='<div class="card"><h2>Planejado × Realizado '+ano+'</h2>'+
     '<p class="mut" style="margin:-8px 0 12px;font-weight:600">Planejado = valor dos pedidos lançados aqui (por mês do pedido, exceto rejeitados). Realizado = NFs de compra que entraram no ERP, por mês de emissão (fonte: dashboard de Compras'+(DB.realizadoEm?' · '+DB.realizadoEm:'')+'). Δ = Realizado − Planejado.</p>';
