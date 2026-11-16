@@ -120,7 +120,17 @@ async function main() {
     let realizado = 0;
     for (const s of fechadas) for (const v of Object.values((L.vendas || {})[s.id] || {})) realizado += (+v || 0);
     realizado = Math.round(realizado);
-    const alvoRestantes = L.meta_mensal - realizado;
+    // O teto do mês é um TETO da SOMA das metas — nunca pode ser ultrapassado.
+    //  · Vendeu a MENOS que as metas fechadas (atrasada): NÃO inflar as restantes (viram
+    //    impossíveis e a soma passa do teto). Alvo = teto − metas das semanas fechadas →
+    //    as restantes seguem no ideal, soma fecha exatamente o teto.
+    //  · Vendeu a MAIS (adiantada): reduz as restantes pelo excedente (recompensa), aí a
+    //    soma fica ABAIXO do teto (mesmo esforço rende mais %). → alvo = teto − realizado.
+    // Bug corrigido 16/11/2026: era `teto − realizado` sempre, o que inflava a S3/S4 quando
+    // a loja estava atrasada (ex.: L1 S1+S2 venderam 32.179 a menos → S3 saltou p/ 67.179 e a
+    // soma das metas foi a 232.179 > teto 200.000). Ver [[premiacao-redistribuicao-automatica-regra]].
+    const somaMetasFechadas = fechadas.reduce((a, s) => a + s.meta, 0);
+    const alvoRestantes = L.meta_mensal - Math.max(realizado, somaMetasFechadas);
     const ideaisRest = restantes.map(s => (s.base != null ? s.base : s.meta)); // ideal
     const novas = redistribuir(ideaisRest, alvoRestantes, capSemanaDaLoja(L.meta_mensal));
     porLoja[loja] = { fechadas, restantes, realizado, alvoRestantes, ideaisRest, novas,
