@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-11-16T14:55:32.179Z",
+  "gerado_em": "2026-11-16T15:06:05.366Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
@@ -5350,50 +5350,6 @@
             "cest": "2002000",
             "st": true,
             "st_motivo": "ncm"
-          }
-        ],
-        "uf": "SP"
-      },
-      {
-        "id": 4885,
-        "chave_nfe": "35260846098775000142550010000064221071177019",
-        "numero": "6422",
-        "serie": "1",
-        "fornecedor": "DAMIA ACESSORIOS LTDA",
-        "cnpj": "46098775000142",
-        "data_emissao": "2026-08-18",
-        "valor": 518,
-        "lancada": true,
-        "natureza": "VENDA",
-        "itens": [
-          {
-            "cprod": "7898233932136",
-            "ean": "SEM GTIN",
-            "descricao": "TINTA DA ALEGRIA 150ML",
-            "qtd": 280,
-            "cfop": "6102",
-            "marca": "Damia",
-            "valor_bruto": 518,
-            "desconto": 0,
-            "frete": 0,
-            "seguro": 0,
-            "outras": 0,
-            "ipi": 0,
-            "icms_st": 0,
-            "fcp_st": 0,
-            "custo_cheio_total": 518,
-            "custo_unit_cheio": 1.85,
-            "cst": "CSOSN 102",
-            "icms_pct": 0,
-            "credito_icms_pct": 0,
-            "preco_atual": null,
-            "cod_erp": null,
-            "match_tipo": null,
-            "preco_manual": null,
-            "ncm": "32131000",
-            "cest": "1900100",
-            "st": false,
-            "st_motivo": null
           }
         ],
         "uf": "SP"
@@ -15256,50 +15212,6 @@
           }
         ],
         "uf": "RS"
-      },
-      {
-        "id": 4890,
-        "chave_nfe": "35260846098775000142550010000064231071178012",
-        "numero": "6423",
-        "serie": "1",
-        "fornecedor": "DAMIA ACESSORIOS LTDA",
-        "cnpj": "46098775000142",
-        "data_emissao": "2026-08-18",
-        "valor": 212.75,
-        "lancada": true,
-        "natureza": "VENDA",
-        "itens": [
-          {
-            "cprod": "7898233932136",
-            "ean": "SEM GTIN",
-            "descricao": "TINTA DA ALEGRIA 150ML",
-            "qtd": 115,
-            "cfop": "6108",
-            "marca": "Damia",
-            "valor_bruto": 212.75,
-            "desconto": 0,
-            "frete": 0,
-            "seguro": 0,
-            "outras": 0,
-            "ipi": 0,
-            "icms_st": 0,
-            "fcp_st": 0,
-            "custo_cheio_total": 212.75,
-            "custo_unit_cheio": 1.85,
-            "cst": "CSOSN 102",
-            "icms_pct": 0,
-            "credito_icms_pct": 0,
-            "preco_atual": null,
-            "cod_erp": null,
-            "match_tipo": null,
-            "preco_manual": null,
-            "ncm": "32131000",
-            "cest": "1900100",
-            "st": false,
-            "st_motivo": null
-          }
-        ],
-        "uf": "SP"
       }
     ]
   }
