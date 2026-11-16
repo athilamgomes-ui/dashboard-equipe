@@ -63,31 +63,23 @@ export function redistribuir(ideais, alvoSoma, capSemana) {
       }
     }
   } else {
-    // FALTA: somar D, preenchendo o vale das NÃO-finais (poupa o último); sem passar o teto.
-    let D = diff;
-    const ultimo = n - 1;
-    let guard = 0;
-    while (D > 0 && guard++ < 10000) {
-      const cands = metas.map((m, i) => ({ m, i })).filter(x => x.i !== ultimo && x.m < capSemana);
-      if (!cands.length) {
-        // não-finais esgotadas (teto) → usa a última, respeitando o teto
-        if (metas[ultimo] < capSemana) { const rem = Math.min(D, capSemana - metas[ultimo]); metas[ultimo] += rem; D -= rem; }
-        else break; // tudo no teto — não cabe (não deve acontecer com teto do mês coerente)
-      } else {
-        const minv = Math.min(...cands.map(x => x.m));
-        const vale = cands.filter(x => x.m === minv);                 // mais baixas
-        const maiores = cands.map(x => x.m).filter(m => m > minv);
-        const prox = Math.min(capSemana, maiores.length ? Math.min(...maiores) : capSemana);
-        const espacoAteProx = (prox - minv) * vale.length;
-        if (espacoAteProx <= D && espacoAteProx > 0) {
-          for (const x of vale) metas[x.i] = prox;
-          D -= espacoAteProx;
-        } else {
-          // sobe as do vale (preferindo início/meio = menor índice primeiro) até consumir D
-          for (const x of vale.sort((a, b) => a.i - b.i)) { if (D <= 0) break; const rem = Math.min(D, prox - x.i, prox - minv); metas[x.i] += Math.min(D, prox - minv); D -= Math.min(D, prox - minv); }
-          if (espacoAteProx === 0) break;
-        }
-      }
+    // FALTA (atrasada): distribui o déficit PROPORCIONAL à força (ideal) de cada semana — a
+    // mais forte (ex. Black Friday) recebe mais, a mais fraca menos. A soma fecha EXATO o alvo
+    // (mês bate a meta). maior-resto p/ manter inteiro. SEM teto por semana: a semana forte
+    // carrega a recuperação (Athila 16/11/2026 — substituiu o "preenche o vale", que inflava
+    // a semana FRACA e estourava; agora a forte recebe mais).
+    const somaBase = ideais.reduce((a, b) => a + b, 0);
+    if (somaBase <= 0) {
+      const q = Math.floor(diff / n);
+      for (let i = 0; i < n; i++) metas[i] = ideais[i] + q;
+      for (let i = 0; i < diff - q * n; i++) metas[i] += 1;
+    } else {
+      const raw = ideais.map(b => diff * b / somaBase);
+      const add = raw.map(Math.floor);
+      const resto = diff - add.reduce((a, b) => a + b, 0);
+      const ord = raw.map((r, i) => ({ i, frac: r - Math.floor(r) })).sort((a, b) => b.frac - a.frac);
+      for (let k = 0; k < resto; k++) add[ord[k].i] += 1;
+      for (let i = 0; i < n; i++) metas[i] = ideais[i] + add[i];
     }
   }
   return metas;
@@ -120,17 +112,11 @@ async function main() {
     let realizado = 0;
     for (const s of fechadas) for (const v of Object.values((L.vendas || {})[s.id] || {})) realizado += (+v || 0);
     realizado = Math.round(realizado);
-    // O teto do mês é um TETO da SOMA das metas — nunca pode ser ultrapassado.
-    //  · Vendeu a MENOS que as metas fechadas (atrasada): NÃO inflar as restantes (viram
-    //    impossíveis e a soma passa do teto). Alvo = teto − metas das semanas fechadas →
-    //    as restantes seguem no ideal, soma fecha exatamente o teto.
-    //  · Vendeu a MAIS (adiantada): reduz as restantes pelo excedente (recompensa), aí a
-    //    soma fica ABAIXO do teto (mesmo esforço rende mais %). → alvo = teto − realizado.
-    // Bug corrigido 16/11/2026: era `teto − realizado` sempre, o que inflava a S3/S4 quando
-    // a loja estava atrasada (ex.: L1 S1+S2 venderam 32.179 a menos → S3 saltou p/ 67.179 e a
-    // soma das metas foi a 232.179 > teto 200.000). Ver [[premiacao-redistribuicao-automatica-regra]].
-    const somaMetasFechadas = fechadas.reduce((a, s) => a + s.meta, 0);
-    const alvoRestantes = L.meta_mensal - Math.max(realizado, somaMetasFechadas);
+    // Alvo das semanas restantes = teto − realizado: o MÊS tem que FECHAR na meta mensal.
+    //  · Atrasada (realizado < ideal): o déficit vai pras restantes, PROPORCIONAL à força de
+    //    cada uma (ver redistribuir) — a mais forte recebe mais, a mais fraca menos.
+    //  · Adiantada (realizado > ideal): achata o PICO (reduz a semana mais alta); soma < teto.
+    const alvoRestantes = L.meta_mensal - realizado;
     const ideaisRest = restantes.map(s => (s.base != null ? s.base : s.meta)); // ideal
     const novas = redistribuir(ideaisRest, alvoRestantes, capSemanaDaLoja(L.meta_mensal));
     porLoja[loja] = { fechadas, restantes, realizado, alvoRestantes, ideaisRest, novas,

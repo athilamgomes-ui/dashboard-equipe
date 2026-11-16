@@ -826,7 +826,7 @@ const DADOS = {
     L1: {
       meta_mensal: 200000,
       semanas: [
-        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:32000, base:32000},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:48000, base:48000},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:35000, base:35000},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:80000, base:80000},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:5000, base:5000},
+        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:32000, base:32000},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:48000, base:48000},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:44385, base:35000},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:101453, base:80000},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:6341, base:5000},
       ],
       vendas: {
         S1:{Tatiane:5782,Rayra:5024,Bárbara:6125,Sofia:6042},
@@ -843,7 +843,7 @@ const DADOS = {
     L3: {
       meta_mensal: 90000,
       semanas: [
-        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:16000, base:16000},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:21000, base:21000},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:15000, base:15000},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:35000, base:35000},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:3000, base:3000},
+        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:16000, base:16000},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:21000, base:21000},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:17928, base:15000},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:41831, base:35000},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:3585, base:3000},
       ],
       vendas: {
         S1:{'Ana Mira':2965,Raimunda:2697,Iris:3730,Gisele:3692},
@@ -860,7 +860,7 @@ const DADOS = {
     L4: {
       meta_mensal: 180000,
       semanas: [
-        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:29000, base:29000},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:43000, base:43000},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:31000, base:31000},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:72000, base:72000},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:5000, base:5000},
+        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:29000, base:29000},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:43000, base:43000},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:38628, base:31000},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:89716, base:72000},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:6230, base:5000},
       ],
       vendas: {
         S1:{Josilene:5664,'Bruna F.':9818,Débora:4952,Ronald:4070},
@@ -877,7 +877,7 @@ const DADOS = {
     L5: {
       meta_mensal: 120000,
       semanas: [
-        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:20000, base:20000},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:27000, base:27000},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:21000, base:21000},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:48000, base:48000},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:4000, base:4000},
+        {id:'S1', label:'Semana 1', periodo:'02/11–07/11', meta:20000, base:20000},{id:'S2', label:'Semana 2', periodo:'09/11–14/11', meta:27000, base:27000},{id:'S3', label:'Semana 3', periodo:'16/11–21/11', meta:25885, base:21000},{id:'S4', label:'Semana 4', periodo:'23/11–28/11', meta:59166, base:48000},{id:'S5', label:'Semana 5', periodo:'30/11–30/11', meta:4931, base:4000},
       ],
       vendas: {
         S1:{Rayssa:3709,Joyce:4830,Rosiene:4143,Karina:2971},
@@ -3223,26 +3223,20 @@ function redistribuirRegra(ideais, alvoSoma, capSemana) {
       }
     }
   } else {
-    let D = diff; const ultimo = n - 1; let guard = 0;
-    while (D > 0 && guard++ < 10000) {
-      const cands = metas.map((m, i) => ({ m, i })).filter(x => x.i !== ultimo && x.m < capSemana);
-      if (!cands.length) {
-        if (metas[ultimo] < capSemana) { const rem = Math.min(D, capSemana - metas[ultimo]); metas[ultimo] += rem; D -= rem; }
-        else break;
-      } else {
-        const minv = Math.min(...cands.map(x => x.m));
-        const vale = cands.filter(x => x.m === minv);
-        const maiores = cands.map(x => x.m).filter(m => m > minv);
-        const prox = Math.min(capSemana, maiores.length ? Math.min(...maiores) : capSemana);
-        const espacoAteProx = (prox - minv) * vale.length;
-        if (espacoAteProx <= D && espacoAteProx > 0) {
-          for (const x of vale) metas[x.i] = prox;
-          D -= espacoAteProx;
-        } else {
-          for (const x of vale.sort((a, b) => a.i - b.i)) { if (D <= 0) break; metas[x.i] += Math.min(D, prox - minv); D -= Math.min(D, prox - minv); }
-          if (espacoAteProx === 0) break;
-        }
-      }
+    // FALTA (atrasada): déficit PROPORCIONAL à força (ideal) de cada semana — mais forte recebe
+    // mais, mais fraca menos. Soma fecha EXATO o alvo (mês bate a meta). maior-resto. Sem teto.
+    const somaBase = ideais.reduce((a, b) => a + b, 0);
+    if (somaBase <= 0) {
+      const q = Math.floor(diff / n);
+      for (let i = 0; i < n; i++) metas[i] = ideais[i] + q;
+      for (let i = 0; i < diff - q * n; i++) metas[i] += 1;
+    } else {
+      const raw = ideais.map(b => diff * b / somaBase);
+      const add = raw.map(Math.floor);
+      const resto = diff - add.reduce((a, b) => a + b, 0);
+      const ord = raw.map((r, i) => ({ i, frac: r - Math.floor(r) })).sort((a, b) => b.frac - a.frac);
+      for (let k = 0; k < resto; k++) add[ord[k].i] += 1;
+      for (let i = 0; i < n; i++) metas[i] = ideais[i] + add[i];
     }
   }
   return metas;
@@ -3267,14 +3261,11 @@ function calcularAjusteMeta(ld, semAtual, lojaKey, mesKey) {
     return {sem:s, total, gap: s.meta - total};
   });
 
-  // O teto do mês é um TETO da soma das metas. Atrasada → NÃO infla as restantes acima do
-  // teto (alvo = teto − metas fechadas; restantes seguem no ideal). Adiantada → reduz as
-  // restantes pelo excedente (alvo = teto − vendido). Mesmo cap do motor (16/11/2026).
-  const somaMetasFechadas = concluidas.reduce((a,s)=>a+s.meta, 0);
-  const faltaMensal = ld.meta_mensal - vendidoAcum;                 // gap de VENDAS (texto)
-  const alvoRestantes = ld.meta_mensal - Math.max(vendidoAcum, somaMetasFechadas);
+  // Alvo das restantes = teto − vendido: o MÊS tem que fechar na meta mensal. Atrasada → déficit
+  // distribuído PROPORCIONAL à força (ideal) das restantes; adiantada → achata o pico. (16/11/2026)
+  const faltaMensal = ld.meta_mensal - vendidoAcum;
   const somaRestantesOrig = restantes.reduce((a,s)=>a+s.meta, 0);
-  const gapTotal = alvoRestantes - somaRestantesOrig; // >0 = restantes sobem · <0 = descem
+  const gapTotal = faltaMensal - somaRestantesOrig; // >0 = atrasada · <0 = adiantada
 
   if (Math.abs(gapTotal) < 100) return null; // em linha — nada a fazer
 
@@ -3286,7 +3277,7 @@ function calcularAjusteMeta(ld, semAtual, lojaKey, mesKey) {
   // só aparece quando ainda há gap de verdade (fail-safe caso a automação não tenha fechado).
   const capSemana = Math.round(ld.meta_mensal * 0.5);
   const ideaisRest = restantes.map(s => (s.base != null ? s.base : s.meta));
-  const novasArr = redistribuirRegra(ideaisRest, alvoRestantes, capSemana);
+  const novasArr = redistribuirRegra(ideaisRest, faltaMensal, capSemana);
   const sugestao = restantes.map((s, i) => ({sem: s, atual: s.meta, nova: novasArr[i], delta: novasArr[i] - s.meta}));
 
   return {tipo: gapTotal > 0 ? 'atrasado' : 'adiantado', gapTotal, gapPorSemana, sugestao, faltaMensal, vendidoAcum};
