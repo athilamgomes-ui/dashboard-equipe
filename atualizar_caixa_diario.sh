@@ -174,6 +174,18 @@ else
   done
   [ $ERP -eq 0 ] && [ $ESPERA -gt 0 ] && log "  ERP liberado após ${ESPERA} min de espera"
 fi
+# ⚠️ Falha de PUBLICAÇÃO não é falha de DADO. Em 17/11/2026 a coleta e o build
+# do ERP foram bem às 08:22 e só o `git push` deu timeout de rede — mesmo assim
+# a rotina abortou e o dia 16/11 ficou sem conferência. A conciliação lê o JSON
+# local; o GitHub Pages é só vitrine. Se o dado do dia está lá, segue.
+if [ $ERP -ne 0 ]; then
+  RAW_DIA=$($NODE -e "const D=require(process.argv[1]);const d=new Date(D.geradoEm);const z=n=>String(n).padStart(2,0);console.log(d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()))" "$REPO/conferencia_caixa_raw.json" 2>/dev/null)
+  if [ "$RAW_DIA" = "$(date +%Y-%m-%d)" ]; then
+    log "ERP saiu com $ERP, mas o dado de hoje ESTÁ coletado — provável falha de push. Seguindo."
+    avisar_falha "o painel nao foi publicado hoje (ERP exit $ERP), mas a conferencia de $DIA foi feita com o dado local"
+    ERP=0
+  fi
+fi
 if [ $ERP -ne 0 ]; then
   # Sem ERP do dia, conciliar produziria "cobrança sem venda" para o dia todo —
   # alarme falso pior que silêncio. Para aqui.
@@ -245,6 +257,13 @@ if ! $NODE "$SCRIPTS/conciliar_headless.mjs" "$ARQ"/*"$DD_LIMPA".csv --salvar --
   exit 20
 fi
 cat $HOJE_LOG-conciliacao.log
+# ⚠️ Marca o sucesso AQUI: a conferência está feita e guardada. Antes ficava no
+# fim, depois do envio — e com o número do WhatsApp recolhido pela Meta toda
+# rodada terminava em exit 40, então o contador dizia "17 DIAS SEM CONFERÊNCIA"
+# enquanto o painel tinha os cinco dias da semana. Alarme que exagera vira ruído
+# tão rápido quanto alarme que falta. Falta de AVISO é outro problema e tem o
+# seu próprio aviso.
+date +%Y-%m-%d > "$LOGDIR/ultimo_sucesso.txt"
 
 # ── 5) aviso ─────────────────────────────────────────────────────────────────
 log "avisando..."
@@ -271,6 +290,6 @@ elif [ $AV -ne 0 ]; then
 fi
 
 CONCLUIU=1
-date +%Y-%m-%d > "$LOGDIR/ultimo_sucesso.txt"
+
 log "pronto."
 exit 0
