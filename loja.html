@@ -1045,11 +1045,12 @@ const VENDEDORAS_META = {
   'Raimunda': {loja:'L3', badges:[]},
   'Iris':     {loja:'L3', badges:[]},
   'Gisele':   {loja:'L3', badges:[]},
-  'Tanaia':   {loja:'L4', badges:['gerente','gestante']},
+  'Tanaia':   {loja:'L4', badges:['gestante']},  // deixou de ser gerente nov/2026 (férias; volta vendedora normal jan/2027)
   'Josilene': {loja:'L4', badges:[]},
   'Bruna F.': {loja:'L4', badges:[]},
   'Débora':   {loja:'L4', badges:['nova']},  // entrou jun/2026
   'Ronald':   {loja:'L4', badges:['nova']},  // entrou nov/2026
+  'Helen':    {loja:'L4', badges:['nova']},  // entrou nov/2026 (cód 174), sem meta individual este mês
   'Rayssa':   {loja:'L5', badges:[]},
   'Joyce':    {loja:'L5', badges:[]},
   'Rosiene':  {loja:'L5', badges:['gerente']},
@@ -1175,6 +1176,10 @@ const DADOS_LOJA = {
       'Ronald':   {sem:728, mes:7348, ma_sem:7, ma_mes:27.5, melhorias:[
         'Bem-vindo à equipe! Primeira semana é aprendizado: aprenda as 3 marcas A da loja (Truss, Itallian, Marco Boni). Saber o que cada uma faz vai te dar segurança pra oferecer pro cliente.',
         'Pareie com a Bruna F. (top em Marcas A) por 2 dias - observa como ela aborda e oferece. Anota as frases que funcionam e aplica nos seus atendimentos.'
+      ]},
+      'Helen':    {sem:0, mes:0, ma_sem:0, ma_mes:0, melhorias:[
+        'Bem-vinda à equipe, Helen! Sua primeira semana é de aprendizado — não se cobre por meta ainda. Comece dominando as 3 marcas A da loja (Truss, Itallian, Marco Boni): saber o que cada uma faz te dá segurança pra oferecer.',
+        'Pareie com a Bruna F. (a maior em Marcas A da loja) por alguns dias: observe como ela aborda e oferece, anote as frases que funcionam e vá aplicando nos seus atendimentos.'
       ]},
     }
   },
@@ -3521,7 +3526,7 @@ function acessoDoPainelDono() {
 }
 
 // Mapeia gerente padrão de cada loja (login automático pro dono)
-const GERENTE_LOJA = {L1:'Tatiane', L3:'Ana Mira', L4:'Tanaia', L5:'Rosiene'};
+const GERENTE_LOJA = {L1:'Tatiane', L3:'Ana Mira', L4:'', L5:'Rosiene'};  // L4 sem gerente até Tanaia voltar (jan/2027)
 
 async function init() {
   // Modo reset: ?reset=1 limpa tudo (sessao + localStorage) - util pra athila testar
