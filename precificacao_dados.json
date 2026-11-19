@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-11-19T19:42:04.601Z",
+  "gerado_em": "2026-11-19T19:51:32.028Z",
   "cutoff_dias": 90,
   "dias_entrada": 3,
   "lojas": {
@@ -36,14 +36,15 @@
             "cst": "100",
             "icms_pct": 4,
             "credito_icms_pct": 0.040008449514152944,
-            "preco_atual": 360,
+            "preco_atual": 416.9,
             "cod_erp": "60699",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85163200",
             "cest": "2110300",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 94.68
           },
           {
             "cprod": "2.09.02.001.03",
@@ -94,14 +95,15 @@
             "cst": "100",
             "icms_pct": 4,
             "credito_icms_pct": 0.03999600182773589,
-            "preco_atual": 326.9,
+            "preco_atual": 359.9,
             "cod_erp": "51911",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85163200",
             "cest": null,
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 210.1
           },
           {
             "cprod": "1.09.07.011.03",
@@ -152,14 +154,15 @@
             "cst": "100",
             "icms_pct": 4,
             "credito_icms_pct": 0.039992710189535076,
-            "preco_atual": 592.6,
+            "preco_atual": 600.9,
             "cod_erp": "80156",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85163200",
             "cest": null,
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 296.3
           },
           {
             "cprod": "2.09.06.001.03",
@@ -181,14 +184,15 @@
             "cst": "100",
             "icms_pct": 4,
             "credito_icms_pct": 0.03998926462694579,
-            "preco_atual": 220.94,
+            "preco_atual": 229.9,
             "cod_erp": "204184",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85163200",
             "cest": null,
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 85.85
           },
           {
             "cprod": "1.01.05.011.03",
@@ -210,14 +214,15 @@
             "cst": "100",
             "icms_pct": 4,
             "credito_icms_pct": 0.04000371264154445,
-            "preco_atual": 473.9,
+            "preco_atual": 526.9,
             "cod_erp": "59644",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85163200",
             "cest": null,
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 258.58
           },
           {
             "cprod": "2.03.01.001.03",
@@ -241,12 +246,13 @@
             "credito_icms_pct": 0.03999554367201426,
             "preco_atual": 209.9,
             "cod_erp": "204183",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85163200",
             "cest": null,
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 107.71
           },
           {
             "cprod": "2.01.10.010.03",
@@ -268,14 +274,15 @@
             "cst": "100",
             "icms_pct": 4,
             "credito_icms_pct": 0.04000234211983137,
-            "preco_atual": 631.9,
+            "preco_atual": 643.9,
             "cod_erp": "41411",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85163200",
             "cest": null,
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 281.8
           },
           {
             "cprod": "2.01.10.001.03",
@@ -297,14 +304,15 @@
             "cst": "100",
             "icms_pct": 4,
             "credito_icms_pct": 0.039999777253085046,
-            "preco_atual": 438.9,
+            "preco_atual": 640.9,
             "cod_erp": "76901",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85163200",
             "cest": null,
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 269.36
           },
           {
             "cprod": "1.01.10.010.03",
@@ -326,14 +334,15 @@
             "cst": "100",
             "icms_pct": 4,
             "credito_icms_pct": 0.0400037618412503,
-            "preco_atual": 522.56,
+            "preco_atual": 487.9,
             "cod_erp": "80170",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85163200",
             "cest": null,
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 233.93
           },
           {
             "cprod": "2.02.10.010.01",
@@ -357,12 +366,13 @@
             "credito_icms_pct": 0.04000550444287175,
             "preco_atual": 649.9,
             "cod_erp": "204182",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85163100",
             "cest": null,
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 305.21
           },
           {
             "cprod": "2.02.10.001.01",
@@ -384,14 +394,15 @@
             "cst": "100",
             "icms_pct": 4,
             "credito_icms_pct": 0.03999404660656574,
-            "preco_atual": 564.38,
+            "preco_atual": 587.9,
             "cod_erp": "78107",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85163100",
             "cest": null,
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 282.19
           }
         ],
         "uf": "SC"
@@ -2840,14 +2851,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.07000721723889061,
-            "preco_atual": 102.9,
+            "preco_atual": 129.9,
             "cod_erp": "14423",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85103000",
             "cest": "2108700",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 64.66
           },
           {
             "cprod": "1495",
@@ -2898,14 +2910,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 31.9,
+            "preco_atual": 35.9,
             "cod_erp": "11320",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 18.13
           },
           {
             "cprod": "1184",
@@ -2927,14 +2940,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 54.9,
+            "preco_atual": 62.9,
             "cod_erp": "10581",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 32.36
           },
           {
             "cprod": "1181",
@@ -2956,14 +2970,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 19.9,
+            "preco_atual": 22.9,
             "cod_erp": "10583",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 11.42
           },
           {
             "cprod": "1191",
@@ -2985,14 +3000,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 56.9,
+            "preco_atual": 62.9,
             "cod_erp": "10582",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 32.36
           },
           {
             "cprod": "1189",
@@ -3101,14 +3117,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 31.9,
+            "preco_atual": 35.9,
             "cod_erp": "61739",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 18.13
           },
           {
             "cprod": "1299",
@@ -3130,14 +3147,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 53.9,
+            "preco_atual": 58.9,
             "cod_erp": "20186",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 28.99
           },
           {
             "cprod": "1414",
@@ -3159,14 +3177,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.06999668654738236,
-            "preco_atual": 33.9,
+            "preco_atual": 39.9,
             "cod_erp": "10580",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 20.12
           },
           {
             "cprod": "1432",
@@ -3188,14 +3207,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.07000727348295926,
-            "preco_atual": 53.9,
+            "preco_atual": 58.9,
             "cod_erp": "60186",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 32.08
           },
           {
             "cprod": "1431",
@@ -3217,14 +3237,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.06999801705334126,
-            "preco_atual": 27.9,
+            "preco_atual": 32.9,
             "cod_erp": "11322",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 16.81
           },
           {
             "cprod": "1293",
@@ -3246,14 +3267,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 8.9,
+            "preco_atual": 9.9,
             "cod_erp": "11324",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 4.39
           },
           {
             "cprod": "1291",
@@ -3275,14 +3297,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 8.9,
+            "preco_atual": 9.9,
             "cod_erp": "13060",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 4.39
           },
           {
             "cprod": "1294",
@@ -3304,14 +3327,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 8.9,
+            "preco_atual": 9.9,
             "cod_erp": "13061",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 4.39
           },
           {
             "cprod": "1296",
@@ -3333,14 +3357,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 7.5,
+            "preco_atual": 9.9,
             "cod_erp": "13062",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 4.39
           },
           {
             "cprod": "1292",
@@ -3362,14 +3387,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 8.9,
+            "preco_atual": 9.9,
             "cod_erp": "11326",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 4.39
           },
           {
             "cprod": "1287",
@@ -3391,14 +3417,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 8.78,
+            "preco_atual": 9.9,
             "cod_erp": "204912",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 4.39
           },
           {
             "cprod": "1286",
@@ -3420,14 +3447,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 8.78,
+            "preco_atual": 9.9,
             "cod_erp": "204913",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 4.39
           },
           {
             "cprod": "1281",
@@ -3449,14 +3477,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0,
-            "preco_atual": 7.8,
+            "preco_atual": 9.9,
             "cod_erp": "202746",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 4.39
           },
           {
             "cprod": "1144",
@@ -3480,12 +3509,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 62.9,
             "cod_erp": "62997",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072090",
             "cest": "2002900",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 32.36
           },
           {
             "cprod": "1141",
@@ -3536,14 +3566,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.07002649325626205,
-            "preco_atual": 21.9,
+            "preco_atual": 26.9,
             "cod_erp": "29711",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 13.84
           },
           {
             "cprod": "1345",
@@ -3565,14 +3596,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.06999241274658574,
-            "preco_atual": 20.9,
+            "preco_atual": 26.9,
             "cod_erp": "11327",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 13.18
           },
           {
             "cprod": "1385",
@@ -3594,14 +3626,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.06998293099244088,
-            "preco_atual": 19.9,
+            "preco_atual": 26.9,
             "cod_erp": "40264",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 13.67
           },
           {
             "cprod": "1355",
@@ -3623,14 +3656,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.06999241274658574,
-            "preco_atual": 22.9,
+            "preco_atual": 26.9,
             "cod_erp": "76271",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 13.18
           },
           {
             "cprod": "1374",
@@ -3652,14 +3686,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.06997384155455905,
-            "preco_atual": 13.9,
+            "preco_atual": 16.9,
             "cod_erp": "62115",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 8.92
           },
           {
             "cprod": "1344",
@@ -3681,14 +3716,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.06997384155455905,
-            "preco_atual": 15.9,
+            "preco_atual": 16.9,
             "cod_erp": "76273",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 8.92
           },
           {
             "cprod": "1354",
@@ -3710,14 +3746,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.06997384155455905,
-            "preco_atual": 15.9,
+            "preco_atual": 16.9,
             "cod_erp": "76272",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 8.92
           },
           {
             "cprod": "1383",
@@ -3739,14 +3776,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.06999241274658574,
-            "preco_atual": 27.9,
+            "preco_atual": 34.9,
             "cod_erp": "23817",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 15.54
           },
           {
             "cprod": "1256",
@@ -3768,14 +3806,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.0699874686716792,
-            "preco_atual": 21.9,
+            "preco_atual": 24.9,
             "cod_erp": "20194",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 13.3
           },
           {
             "cprod": "1255",
@@ -3797,14 +3836,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.07002005347593583,
-            "preco_atual": 12.9,
+            "preco_atual": 13.9,
             "cod_erp": "23816",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 7.48
           },
           {
             "cprod": "1254",
@@ -3826,14 +3866,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.07001446987634834,
-            "preco_atual": 20.9,
+            "preco_atual": 24.9,
             "cod_erp": "13064",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 12.67
           },
           {
             "cprod": "1253",
@@ -3855,14 +3896,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.06997863247863248,
-            "preco_atual": 11.9,
+            "preco_atual": 13.9,
             "cod_erp": "10585",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 7.02
           },
           {
             "cprod": "1527",
@@ -3884,14 +3926,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.06999046938289255,
-            "preco_atual": 24.9,
+            "preco_atual": 27.9,
             "cod_erp": "11329",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 13.99
           },
           {
             "cprod": "1532",
@@ -3913,14 +3956,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.06999046938289255,
-            "preco_atual": 24.9,
+            "preco_atual": 28.9,
             "cod_erp": "11333",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 13.99
           },
           {
             "cprod": "1515",
@@ -3942,14 +3986,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.06999244142101284,
-            "preco_atual": 26.9,
+            "preco_atual": 29.9,
             "cod_erp": "11335",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 14.7
           },
           {
             "cprod": "1511",
@@ -3973,12 +4018,13 @@
             "credito_icms_pct": 0.06999646705529058,
             "preco_atual": 10.9,
             "cod_erp": "40265",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33079000",
             "cest": "2003201",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 6.29
           }
         ],
         "uf": "PR"
@@ -6943,7 +6989,7 @@
             "descricao": "BASE FORCA EXTREMA IMPALA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -6964,7 +7010,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001006271",
@@ -6972,7 +7020,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA SUAVE COBERTURA CIGANA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -6993,7 +7041,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001009349",
@@ -7001,7 +7051,7 @@
             "descricao": "FORTALECEDOR DE UNHAS BASE ENDURECEDORA CASCO DE CAVALO IMPALA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -7022,7 +7072,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001007042",
@@ -7030,7 +7082,7 @@
             "descricao": "ESMALTE IMPALA TRATAMENTO BASE PARA UNHAS FRACAS COMERCIAL",
             "qtd": 18,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 52.44,
             "desconto": 0,
             "frete": 0,
@@ -7051,7 +7103,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001007048",
@@ -7059,7 +7113,7 @@
             "descricao": "ESMALTE IMPALA TRATAMENTO BASE VITAMINADA COMERCIAL",
             "qtd": 18,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 52.44,
             "desconto": 0,
             "frete": 0,
@@ -7080,7 +7134,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001007051",
@@ -7088,7 +7144,7 @@
             "descricao": "ESMALTE IMPALA TRATAMENTO SUPER BRILHO COMERCIAL",
             "qtd": 24,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 69.92,
             "desconto": 0,
             "frete": 0,
@@ -7109,7 +7165,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001021380",
@@ -7117,7 +7175,7 @@
             "descricao": "VERNIZ EXTRA BRILHO HIPOALERGENICO COBERTURA ESPELHADA IMPALA COMERCIAL",
             "qtd": 36,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 121.86,
             "desconto": 0,
             "frete": 0,
@@ -7138,7 +7196,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001009348",
@@ -7146,7 +7206,7 @@
             "descricao": "ESMALTE IMPALA COBERTURA EXTRA FOSCA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -7167,7 +7227,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001009003",
@@ -7175,7 +7237,7 @@
             "descricao": "IMPALA BASE RECUPERADORA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -7196,7 +7258,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0748300000000-1",
@@ -7233,7 +7297,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO LUZIA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -7254,7 +7318,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001009486",
@@ -7262,7 +7328,7 @@
             "descricao": "VERNIZ INTENSIFICADOR DE VERMELHO COBERTURA ESPELHADA IMPALA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -7283,7 +7349,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001009889",
@@ -7291,7 +7359,7 @@
             "descricao": "BASE REVITALIZANTE COM FIBRAS IMPALA CORAL LIGHT COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 20.31,
             "desconto": 0,
             "frete": 0,
@@ -7312,7 +7380,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001009892",
@@ -7320,7 +7390,7 @@
             "descricao": "SOLUCAO CONCENTRADA REVITALIZANTE IMPALA COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 20.31,
             "desconto": 0,
             "frete": 0,
@@ -7341,7 +7411,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002407",
@@ -7349,7 +7421,7 @@
             "descricao": "ESMALTE IMPALA BAILARINA CREMOSO TUTU COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -7370,7 +7442,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002404",
@@ -7378,7 +7452,7 @@
             "descricao": "ESMALTE IMPALA BAILARINA CREMOSO COLLANT COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -7399,7 +7473,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001005555",
@@ -7407,7 +7483,7 @@
             "descricao": "ESMALTE IMPALA JU PAES FULL COLORS CHEIA DE MANIAS COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 20.31,
             "desconto": 0,
             "frete": 0,
@@ -7428,7 +7504,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001005876",
@@ -7436,7 +7514,7 @@
             "descricao": "ESMALTE IMPALA JU PAES - NA ESTRADA METAL LIKE CONFIANTE E IMPREVISIVEL COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 20.31,
             "desconto": 0,
             "frete": 0,
@@ -7457,7 +7535,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001005882",
@@ -7465,7 +7545,7 @@
             "descricao": "ESMALTE IMPALA JU PAES - NA ESTRADA METAL LIKE ADRENALINDA COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 20.31,
             "desconto": 0,
             "frete": 0,
@@ -7486,7 +7566,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010021097",
@@ -7494,7 +7576,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO INSTANTE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -7515,7 +7597,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0756300000000-1",
@@ -7552,7 +7636,7 @@
             "descricao": "VERNIZ COM PARTICULAS RADIANTES PONTO DE LUZ IMPALA COMERCIAL",
             "qtd": 18,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 60.93,
             "desconto": 0,
             "frete": 0,
@@ -7573,7 +7657,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001009888",
@@ -7581,7 +7667,7 @@
             "descricao": "BASE REVITALIZANTE COM FIBRAS IMPALA BRANCO SOFT COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 20.31,
             "desconto": 0,
             "frete": 0,
@@ -7602,7 +7688,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001009890",
@@ -7610,7 +7698,7 @@
             "descricao": "BASE REVITALIZANTE COM FIBRAS IMPALA ROSA SWEET COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 20.31,
             "desconto": 0,
             "frete": 0,
@@ -7631,7 +7719,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002422",
@@ -7639,7 +7729,7 @@
             "descricao": "ESMALTE IMPALA BAILARINA CREMOSO NA PONTA DO PE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -7660,7 +7750,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002406",
@@ -7668,7 +7760,7 @@
             "descricao": "ESMALTE IMPALA BAILARINA CREMOSO PLIE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -7689,7 +7781,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002405",
@@ -7697,7 +7791,7 @@
             "descricao": "ESMALTE IMPALA BAILARINA CREMOSO BALLET CLASSICO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -7718,7 +7812,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001005554",
@@ -7726,7 +7822,7 @@
             "descricao": "ESMALTE IMPALA JU PAES FULL COLORS DIDIDIDIE COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 20.31,
             "desconto": 0,
             "frete": 0,
@@ -7747,7 +7843,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001009560",
@@ -7755,7 +7853,7 @@
             "descricao": "IMPALA VERNIZ TOP COAT GLOSS BRILHO FIXADOR JU PAES COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -7776,7 +7874,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "222M001000099",
@@ -7813,7 +7913,7 @@
             "descricao": "ESMALTE IMPALA JU PAES FULL COLORS MENINA BONITA COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 20.31,
             "desconto": 0,
             "frete": 0,
@@ -7834,7 +7934,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001005880",
@@ -7842,7 +7944,7 @@
             "descricao": "ESMALTE IMPALA JU PAES - NA ESTRADA METAL LIKE A MIL POR HORA COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 20.31,
             "desconto": 0,
             "frete": 0,
@@ -7863,7 +7965,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001005881",
@@ -7871,7 +7975,7 @@
             "descricao": "ESMALTE IMPALA JU PAES - NA ESTRADA METAL LIKE SEM LIMITES COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 20.31,
             "desconto": 0,
             "frete": 0,
@@ -7892,7 +7996,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010021095",
@@ -7900,7 +8006,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO INTUICAO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -7921,7 +8027,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010021096",
@@ -7929,7 +8037,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO MEMORIA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -7950,7 +8058,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010051080",
@@ -7958,7 +8068,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA GLITTER PRATA DEMAIS COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -7979,7 +8089,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010051082",
@@ -7987,7 +8099,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA EFEITO PO CROMADO CAUDA DE SEREIA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -8008,7 +8120,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010051084",
@@ -8016,7 +8130,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA EFEITO PO CROMADO CONCHA MAGICA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -8037,7 +8151,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002730",
@@ -8045,7 +8161,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO ACONCHEGO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8066,7 +8182,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010071085",
@@ -8074,7 +8192,7 @@
             "descricao": "OLEO PARA CUTICULAS IMPALA TRATAMENTO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8095,7 +8213,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "000100091049",
@@ -8103,7 +8223,7 @@
             "descricao": "TOP COAT PRO FINISH IMPALA BRILHO ABSOLUTO COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 36.7,
             "desconto": 0,
             "frete": 0,
@@ -8124,7 +8244,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "000100091048",
@@ -8132,7 +8254,7 @@
             "descricao": "TOP COAT PRO FINISH IMPALA BLINDAGEM 4D COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 36.7,
             "desconto": 0,
             "frete": 0,
@@ -8153,7 +8275,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002224",
@@ -8161,7 +8285,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO GATINHA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8182,7 +8306,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002426",
@@ -8190,7 +8316,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO LOLITA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8211,7 +8337,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002428",
@@ -8219,7 +8347,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO ALLURE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8240,7 +8368,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002440",
@@ -8248,7 +8378,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO LEME COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8269,7 +8399,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002443",
@@ -8277,7 +8409,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO DONATA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8298,7 +8430,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010071086",
@@ -8306,7 +8440,7 @@
             "descricao": "ESMALTE IMPALA TRATAMENTO BASE NUTRITIVA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8327,7 +8461,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "000100091050",
@@ -8335,7 +8471,7 @@
             "descricao": "TOP COAT PRO FINISH IMPALA ULTRA SECAGEM COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 36.7,
             "desconto": 0,
             "frete": 0,
@@ -8356,7 +8492,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "L119663000099",
@@ -8393,7 +8531,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO VINHO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8414,7 +8552,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002065",
@@ -8422,7 +8562,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO ZAZ COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8443,7 +8583,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002427",
@@ -8451,7 +8593,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO TOMATE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8472,7 +8614,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002501",
@@ -8480,7 +8624,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO PRETO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8501,7 +8645,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002515",
@@ -8509,7 +8655,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO SORVETE DE CEU AZUL COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8530,7 +8676,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002617",
@@ -8538,7 +8686,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO MADONNA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8559,7 +8707,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002618",
@@ -8567,7 +8717,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO JANE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8588,7 +8738,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002728",
@@ -8596,7 +8748,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO XODO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8617,7 +8769,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002702",
@@ -8625,7 +8779,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO MARINA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8646,7 +8800,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002801",
@@ -8654,7 +8810,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO COFFEE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8675,7 +8831,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002862",
@@ -8683,7 +8841,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO ATRACAO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8704,7 +8862,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002608",
@@ -8712,7 +8872,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO BRANCO COMERCIAL",
             "qtd": 36,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 104.88,
             "desconto": 0,
             "frete": 0,
@@ -8733,7 +8893,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002615",
@@ -8741,7 +8903,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO MARILYN COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8762,7 +8924,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002619",
@@ -8770,7 +8934,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO AUDREY COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8791,7 +8955,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002625",
@@ -8799,7 +8965,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO PRAZERES COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8820,7 +8986,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002703",
@@ -8828,7 +8996,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO CROCHE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8849,7 +9017,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002705",
@@ -8857,7 +9027,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO BUQUE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8878,7 +9048,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002706",
@@ -8886,7 +9058,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO INOCENSE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8907,7 +9079,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002708",
@@ -8915,7 +9089,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO LE ROSE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8936,7 +9110,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002710",
@@ -8944,7 +9120,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO CONFETI COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -8965,7 +9141,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "109BL03000099",
@@ -9002,7 +9180,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO MARIA CEREJA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9023,7 +9201,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002724",
@@ -9031,7 +9211,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO PATINS COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9052,7 +9232,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002729",
@@ -9060,7 +9242,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO SUTILEZA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9081,7 +9263,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002731",
@@ -9089,7 +9273,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO SERENA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9110,7 +9294,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002734",
@@ -9118,7 +9304,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO EQUILIBRIO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9139,7 +9325,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002742",
@@ -9147,7 +9335,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO MANTRA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9168,7 +9356,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002743",
@@ -9176,7 +9366,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO ACALANTO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9197,7 +9387,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002785",
@@ -9205,7 +9397,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO TEU CHEIRO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9226,7 +9418,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002789",
@@ -9234,7 +9428,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO PRIMOR COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9255,7 +9449,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002793",
@@ -9263,7 +9459,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO TA ESCRITO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9284,7 +9480,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "BC34108000099",
@@ -9321,7 +9519,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO AMOR PROFUNDO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9342,7 +9540,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002859",
@@ -9350,7 +9550,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO NOVOS ARES COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9371,7 +9571,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002733",
@@ -9379,7 +9581,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO VIBRACOES COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9400,7 +9602,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002736",
@@ -9408,7 +9612,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO DADIVA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9429,7 +9633,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002738",
@@ -9437,7 +9643,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO FLUTUA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9458,7 +9664,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002739",
@@ -9466,7 +9674,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO TERRA MOLHADA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9487,7 +9695,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002741",
@@ -9495,7 +9705,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO LAGUNA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9516,7 +9726,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002744",
@@ -9524,7 +9736,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO COMPAIXAO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9545,7 +9757,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002745",
@@ -9553,7 +9767,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO IMENSIDAO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9574,7 +9788,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002746",
@@ -9582,7 +9798,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO ABRIGO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9603,7 +9819,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002747",
@@ -9611,7 +9829,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO COISA LINDA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9632,7 +9850,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002786",
@@ -9640,7 +9860,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO CAFUNE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9661,7 +9881,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002788",
@@ -9669,7 +9891,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO DESCOMPLICADO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9690,7 +9912,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002790",
@@ -9698,7 +9922,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO RECOMECOS COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9719,7 +9943,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002791",
@@ -9727,7 +9953,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO ADMIRE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9748,7 +9974,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002864",
@@ -9756,7 +9984,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO CHAMEGO MEU COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9777,7 +10005,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001012922",
@@ -9785,7 +10015,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO NUDE CLASSICO COMERCIAL",
             "qtd": 18,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 52.44,
             "desconto": 0,
             "frete": 0,
@@ -9806,7 +10036,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002974",
@@ -9814,7 +10046,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO DESTINOS COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9835,7 +10067,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002975",
@@ -9843,7 +10077,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO DELICADO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9864,7 +10098,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002976",
@@ -9872,7 +10108,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO INTENSO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9893,7 +10129,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0522307000000-1",
@@ -9930,7 +10168,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO SOSSEGO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9951,7 +10189,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002979",
@@ -9959,7 +10199,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO VIVENCIA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -9980,7 +10220,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001012914",
@@ -9988,7 +10230,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO CAFE CAFE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -10009,7 +10251,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001012918",
@@ -10017,7 +10261,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO MARIA FLOR COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -10038,7 +10282,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002863",
@@ -10046,7 +10292,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO BELEZA RARA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -10067,7 +10313,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001161",
@@ -10075,7 +10323,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO BRILHANTE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -10096,7 +10344,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002865",
@@ -10104,7 +10354,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSOALENTO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -10125,7 +10375,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002973",
@@ -10133,7 +10385,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO FASCINACAO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -10154,7 +10406,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002977",
@@ -10162,7 +10416,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO VIRTUDE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -10183,7 +10437,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001002980",
@@ -10191,7 +10447,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO QUERER COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -10212,7 +10468,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001012913",
@@ -10220,7 +10478,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO ROYAL COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -10241,7 +10499,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001012917",
@@ -10249,7 +10509,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO BONECA DE LUXO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -10270,7 +10530,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010021025",
@@ -10278,7 +10540,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO SOFISTICADO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -10299,7 +10561,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001003125",
@@ -10307,7 +10571,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA TRANSPARENTE BETERRABA COMERCIAL",
             "qtd": 18,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 52.44,
             "desconto": 0,
             "frete": 0,
@@ -10328,7 +10592,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001014054",
@@ -10336,7 +10602,7 @@
             "descricao": "VERNIZ EXTRA BRILHO COBERTURA ESPELHADA IMPALA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -10357,7 +10623,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "9800001000099",
@@ -10800,7 +11068,7 @@
             "descricao": "IMPALA CERA HIDRATANTE PARA UNHAS E CUTICULAS COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 56.39,
             "desconto": 0,
             "frete": 0,
@@ -10821,7 +11089,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "K000018417",
@@ -10945,7 +11215,7 @@
             "descricao": "ESMALTE IMPALA CACAU SHOW CREMOSO VALE CADA MORDIDA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -10966,7 +11236,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001473",
@@ -10974,7 +11246,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO PARAISO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -10995,7 +11267,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010021027",
@@ -11003,7 +11277,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO PRESENCA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11024,7 +11298,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001003342",
@@ -11032,7 +11308,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA TRANSPARENTE TOP BLANC COMERCIAL",
             "qtd": 18,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 52.44,
             "desconto": 0,
             "frete": 0,
@@ -11053,7 +11329,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0772307006000-1",
@@ -11090,7 +11368,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA GLITTER TUDO DOURADO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -11111,7 +11389,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010051104",
@@ -11119,7 +11399,7 @@
             "descricao": "ESMALTE IMPALA DISNEY CHANNEL GLITTER FEITICEIRO DA FAMILIA COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 22.72,
             "desconto": 0,
             "frete": 0,
@@ -11140,7 +11420,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010051101",
@@ -11148,7 +11430,7 @@
             "descricao": "ESMALTE IMPALA DISNEY CHANNEL METALIZADO COUNTRY GIRL COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 22.72,
             "desconto": 0,
             "frete": 0,
@@ -11169,7 +11451,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010051099",
@@ -11177,7 +11461,7 @@
             "descricao": "ESMALTE IMPALA DISNEY CHANNEL METALIZADO EAST HIGH COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 22.72,
             "desconto": 0,
             "frete": 0,
@@ -11198,7 +11482,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010011091",
@@ -11206,7 +11492,7 @@
             "descricao": "ESMALTE IMPALA CACAU SHOW PEROLADO OPS, ACABOU COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -11227,7 +11513,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010021094",
@@ -11235,7 +11523,7 @@
             "descricao": "ESMALTE IMPALA CACAU SHOW CREMOSO EXPLOSAO DE CACAU COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -11256,7 +11544,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010051103",
@@ -11264,7 +11554,7 @@
             "descricao": "ESMALTE IMPALA DISNEY CHANNEL METALIZADO WE ROCK COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 22.72,
             "desconto": 0,
             "frete": 0,
@@ -11285,7 +11575,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010051102",
@@ -11293,7 +11585,7 @@
             "descricao": "ESMALTE IMPALA DISNEY CHANNEL CAT EYE THIS IS ME COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 22.72,
             "desconto": 0,
             "frete": 0,
@@ -11314,7 +11606,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0735407006000-1",
@@ -11351,7 +11645,7 @@
             "descricao": "ESMALTE IMPALA DISNEY CHANNEL CAT EYE POP STAR WORLD COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 22.72,
             "desconto": 0,
             "frete": 0,
@@ -11372,7 +11666,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001858",
@@ -11380,7 +11676,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO DIZERES COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11401,7 +11697,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001981",
@@ -11409,7 +11707,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO SEGREDOS COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11430,7 +11728,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001982",
@@ -11438,7 +11738,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO LEMBRANCAS COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11459,7 +11759,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001454",
@@ -11467,7 +11769,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO LENNY COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11488,7 +11790,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001003",
@@ -11496,7 +11800,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO CARICIA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11517,7 +11821,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001250",
@@ -11525,7 +11831,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO DENGO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11546,7 +11852,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001245",
@@ -11554,7 +11862,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO LUNA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11575,7 +11883,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0778307000014-1",
@@ -11612,7 +11922,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO AMORE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11633,7 +11943,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010021026",
@@ -11641,7 +11953,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO ELEGANTE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11662,7 +11974,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010021028",
@@ -11670,7 +11984,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO ESSENCIAL COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11691,7 +12005,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010031032",
@@ -11699,7 +12015,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA TRANSPARENTE RELIQUIA COMERCIAL",
             "qtd": 18,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 52.44,
             "desconto": 0,
             "frete": 0,
@@ -11720,7 +12036,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001857",
@@ -11728,7 +12046,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO INFINITO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11749,7 +12067,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001856",
@@ -11757,7 +12077,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO SEMEAR COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11778,7 +12098,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001460",
@@ -11786,7 +12108,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO SONHO COMERCIAL",
             "qtd": 24,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 69.92,
             "desconto": 0,
             "frete": 0,
@@ -11807,7 +12129,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001458",
@@ -11815,7 +12139,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO POLAR COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11836,7 +12160,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001257",
@@ -11844,7 +12170,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO LUA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11865,7 +12191,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010011024",
@@ -11873,7 +12201,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO BORDADO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11894,7 +12222,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0522307003000-1",
@@ -11931,7 +12261,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO AMOR COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11952,7 +12282,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001001",
@@ -11960,7 +12292,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO AMANTE COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -11981,7 +12313,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001001256",
@@ -11989,7 +12323,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA PEROLADO NENEM COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -12010,7 +12344,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001005557",
@@ -12018,7 +12354,7 @@
             "descricao": "ESMALTE IMPALA JU PAES FULL COLORS TODA DENGOSA - COMERCIAL",
             "qtd": 6,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 20.31,
             "desconto": 0,
             "frete": 0,
@@ -12039,7 +12375,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010021029",
@@ -12047,7 +12385,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO LINHO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -12068,7 +12406,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010021030",
@@ -12076,7 +12416,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA CREMOSO AFETO COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -12097,7 +12437,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001003343",
@@ -12105,7 +12447,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA TRANSPARENTE TOP POP COMERCIAL",
             "qtd": 36,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 104.88,
             "desconto": 0,
             "frete": 0,
@@ -12126,7 +12468,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001003503",
@@ -12134,7 +12478,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA TRANSPARENTE FENDA COMERCIAL",
             "qtd": 18,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 52.44,
             "desconto": 0,
             "frete": 0,
@@ -12155,7 +12499,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001003860",
@@ -12163,7 +12509,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA TRANSPARENTE LEVE E SUAVE COMERCIAL",
             "qtd": 18,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 52.44,
             "desconto": 0,
             "frete": 0,
@@ -12184,7 +12530,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001003861",
@@ -12192,7 +12540,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA TRANSPARENTE SEM PRESSA COMERCIAL",
             "qtd": 18,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 52.44,
             "desconto": 0,
             "frete": 0,
@@ -12213,7 +12561,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0778307000013-1",
@@ -12250,7 +12600,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA TRANSPARENTE DISCRETO COMERCIAL",
             "qtd": 18,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 52.44,
             "desconto": 0,
             "frete": 0,
@@ -12271,7 +12621,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "00010031033",
@@ -12279,7 +12631,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA TRANSPARENTE DEVANEIO COMERCIAL",
             "qtd": 18,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 52.44,
             "desconto": 0,
             "frete": 0,
@@ -12300,7 +12652,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001006272",
@@ -12308,7 +12662,7 @@
             "descricao": "ESMALTE IMPALA A COR DA MODA SUAVE COBERTURA GAIA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -12329,7 +12683,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001007047",
@@ -12337,7 +12693,7 @@
             "descricao": "ESMALTE IMPALA TRATAMENTO BASE FORTALECEDORA COMERCIAL",
             "qtd": 18,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 52.44,
             "desconto": 0,
             "frete": 0,
@@ -12358,7 +12714,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001009347",
@@ -12366,7 +12724,7 @@
             "descricao": "OLEO SECANTE IMPALA MELALEUCA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -12387,7 +12745,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001007046",
@@ -12395,7 +12755,7 @@
             "descricao": "OLEO SECANTE IMPALA TRATAMENTO COMERCIAL",
             "qtd": 18,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 52.44,
             "desconto": 0,
             "frete": 0,
@@ -12416,7 +12776,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001007044",
@@ -12424,7 +12786,7 @@
             "descricao": "ESMALTE IMPALA TRATAMENTO INCOLOR COMERCIAL",
             "qtd": 36,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 104.88,
             "desconto": 0,
             "frete": 0,
@@ -12445,7 +12807,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001007043",
@@ -12453,7 +12817,7 @@
             "descricao": "ESMALTE IMPALA TRATAMENTO BASE SEDA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 34.96,
             "desconto": 0,
             "frete": 0,
@@ -12474,7 +12838,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001021381",
@@ -12482,7 +12848,7 @@
             "descricao": "FORTALECEDOR DE UNHAS HIPOALERGENICO BASE ENDURECEDORA CASCO DE CAVALO IMPALA COMERCIAL",
             "qtd": 24,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 81.24,
             "desconto": 0,
             "frete": 0,
@@ -12503,7 +12869,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "0001009487",
@@ -12511,7 +12879,7 @@
             "descricao": "BASE BOMBA ACELERADOR DE CRESCIMENTO IMPALA COMERCIAL",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "MUNDIAL DISTRIBUIDORA DE PRODUTOS DE CONSUMO LTDA",
+            "marca": "Impala",
             "valor_bruto": 40.62,
             "desconto": 0,
             "frete": 0,
@@ -12532,7 +12900,9 @@
             "ncm": "33043000",
             "cest": "2001200",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           }
         ],
         "uf": "MG"
@@ -12890,12 +13260,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 3.58,
             "cod_erp": "79884",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33041000",
             "cest": "2000900",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 1.72
           },
           {
             "cprod": "98536",
@@ -12948,12 +13319,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 4.12,
             "cod_erp": "79885",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33041000",
             "cest": "2000900",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 2.02
           },
           {
             "cprod": "98815",
@@ -12977,12 +13349,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 6.12,
             "cod_erp": "79889",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 3.85
           },
           {
             "cprod": "98865",
@@ -13093,12 +13466,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 10.28,
             "cod_erp": "79890",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 5.04
           },
           {
             "cprod": "98889",
@@ -13238,12 +13612,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 7.18,
             "cod_erp": "79892",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 4.41
           },
           {
             "cprod": "99001",
@@ -14128,7 +14503,7 @@
             "descricao": "MODELADOR DE CACHOS ALHO 255ML 109051",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
+            "marca": "Nathydras",
             "valor_bruto": 221.63,
             "desconto": 0,
             "frete": 0,
@@ -14142,14 +14517,17 @@
             "cst": "CSOSN 101",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": 0.04,
+            "preco_atual": 46.9,
             "cod_erp": "12191",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 18.47,
+            "marca_detectada": true,
+            "marca_fonte": "erp"
           },
           {
             "cprod": "132",
@@ -14187,7 +14565,7 @@
             "descricao": "S.O.S. MOISTURE SHAMPOO 1L S/ VAL. 106432",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
+            "marca": "Varcare",
             "valor_bruto": 658.15,
             "desconto": 0,
             "frete": 0,
@@ -14209,7 +14587,9 @@
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "codigo_erp": "13265"
+            "codigo_erp": "13265",
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "106",
@@ -14217,7 +14597,7 @@
             "descricao": "MÁSCARA MATIZADORA ALHO 500G 103455",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
+            "marca": "Nathydras",
             "valor_bruto": 362.34,
             "desconto": 0,
             "frete": 0,
@@ -14231,15 +14611,18 @@
             "cst": "CSOSN 101",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": 66.9,
+            "preco_atual": 76.9,
             "cod_erp": "26608",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "codigo_erp": "26608"
+            "codigo_erp": "26608",
+            "custo_erp": 30.2,
+            "marca_detectada": true,
+            "marca_fonte": "erp"
           },
           {
             "cprod": "133",
@@ -14247,7 +14630,7 @@
             "descricao": "S.O.S. AMINOFLUID FLUÍDO DE AMINOÁCIDOS 120ML 107668",
             "qtd": 36,
             "cfop": "6102",
-            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
+            "marca": "Varcare",
             "valor_bruto": 1322.24,
             "desconto": 0,
             "frete": 0,
@@ -14269,7 +14652,9 @@
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "codigo_erp": "29963"
+            "codigo_erp": "29963",
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "140",
@@ -14277,7 +14662,7 @@
             "descricao": "S.O.S. MOISTURE MÁSCARA MATIZADORA 250G 107583",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
+            "marca": "Varcare",
             "valor_bruto": 241.16,
             "desconto": 0,
             "frete": 0,
@@ -14298,7 +14683,9 @@
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "12",
@@ -14364,7 +14751,7 @@
             "descricao": "CREME DE PENTEAR LEAVE-IN ALHO 255ML 104292",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
+            "marca": "Nathydras",
             "valor_bruto": 221.62,
             "desconto": 0,
             "frete": 0,
@@ -14380,13 +14767,16 @@
             "credito_icms_pct": 0,
             "preco_atual": 40.9,
             "cod_erp": "12195",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "codigo_erp": "12195"
+            "codigo_erp": "12195",
+            "custo_erp": 18.47,
+            "marca_detectada": true,
+            "marca_fonte": "erp"
           },
           {
             "cprod": "129",
@@ -14394,7 +14784,7 @@
             "descricao": "S.O.S. MOISTURE MÁSCARA 2,5KG 106388",
             "qtd": 8,
             "cfop": "6102",
-            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
+            "marca": "Varcare",
             "valor_bruto": 605.09,
             "desconto": 0,
             "frete": 0,
@@ -14416,7 +14806,9 @@
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "codigo_erp": "13268"
+            "codigo_erp": "13268",
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "130",
@@ -14424,7 +14816,7 @@
             "descricao": "S.O.S. INVERSOR 250ML 107675",
             "qtd": 48,
             "cfop": "6102",
-            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
+            "marca": "Varcare",
             "valor_bruto": 1404.43,
             "desconto": 0,
             "frete": 0,
@@ -14446,7 +14838,9 @@
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "codigo_erp": "26599"
+            "codigo_erp": "26599",
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "131",
@@ -14454,7 +14848,7 @@
             "descricao": "S.O.S. INVERSOR 1L S/ VALVULA 106418",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
+            "marca": "Varcare",
             "valor_bruto": 1383.48,
             "desconto": 0,
             "frete": 0,
@@ -14476,7 +14870,9 @@
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "codigo_erp": "7222"
+            "codigo_erp": "7222",
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "105",
@@ -14484,7 +14880,7 @@
             "descricao": "MÁSCARA MATIZADORA ALHO 250G 105886",
             "qtd": 48,
             "cfop": "6102",
-            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
+            "marca": "Nathydras",
             "valor_bruto": 824.69,
             "desconto": 0,
             "frete": 0,
@@ -14498,15 +14894,18 @@
             "cst": "CSOSN 101",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": 38.9,
+            "preco_atual": 42.9,
             "cod_erp": "12193",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
             "st_motivo": "ncm",
-            "codigo_erp": "12193"
+            "codigo_erp": "12193",
+            "custo_erp": 17.18,
+            "marca_detectada": true,
+            "marca_fonte": "erp"
           },
           {
             "cprod": "139",
@@ -14514,7 +14913,7 @@
             "descricao": "S.O.S. MOISTURE MÁSCARA 250G 106371",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
+            "marca": "Varcare",
             "valor_bruto": 241.16,
             "desconto": 0,
             "frete": 0,
@@ -14535,7 +14934,9 @@
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "169",
@@ -14543,7 +14944,7 @@
             "descricao": "MÁSCARA ALHO 250G 103189",
             "qtd": 36,
             "cfop": "6102",
-            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
+            "marca": "Nathydras",
             "valor_bruto": 552.42,
             "desconto": 0,
             "frete": 0,
@@ -14564,7 +14965,9 @@
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           },
           {
             "cprod": "876",
@@ -14572,7 +14975,7 @@
             "descricao": "MÁSCARA MATIZADORA AÇAI 250G 108276",
             "qtd": 12,
             "cfop": "6102",
-            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
+            "marca": "Nathydras",
             "valor_bruto": 140.18,
             "desconto": 0,
             "frete": 0,
@@ -14586,14 +14989,17 @@
             "cst": "CSOSN 101",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": 34.9,
+            "preco_atual": 40.9,
             "cod_erp": "52146",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "0000000",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 11.68,
+            "marca_detectada": true,
+            "marca_fonte": "erp"
           },
           {
             "cprod": "KIT-130-139-142",
@@ -14601,7 +15007,7 @@
             "descricao": "KIT: S.O.S. MOISTURE SHAMPOO 250ML 107651 + S.O.S. INVERSOR 250ML 107675 + S.O.S. MOISTURE MÁSCARA 250G 106371",
             "qtd": 36,
             "cfop": "6102",
-            "marca": "FRANCA PLUS COMERCIO DE COSMETICOS LTDA",
+            "marca": "Varcare",
             "valor_bruto": 0,
             "desconto": 0,
             "frete": 0,
@@ -14647,7 +15053,9 @@
                 "custo_cheio_total": 660.02
               }
             ],
-            "codigo_erp": "60725"
+            "codigo_erp": "60725",
+            "marca_detectada": true,
+            "marca_fonte": "descricao"
           }
         ],
         "uf": "SP"
@@ -14686,12 +15094,13 @@
             "credito_icms_pct": 0.039993917274939166,
             "preco_atual": 19.9,
             "cod_erp": "204936",
-            "match_tipo": "ean*",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 10.96
           },
           {
             "cprod": "KBMS01BB",
@@ -14713,14 +15122,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.040053567080594106,
-            "preco_atual": 19.9,
+            "preco_atual": 23.9,
             "cod_erp": "52226",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 13.69
           },
           {
             "cprod": "KKFM02BB",
@@ -14742,14 +15152,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.03998392605987543,
-            "preco_atual": 24.9,
+            "preco_atual": 29.9,
             "cod_erp": "57389",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 16.59
           },
           {
             "cprod": "ECB05B",
@@ -14771,14 +15182,15 @@
             "cst": "000",
             "icms_pct": 12,
             "credito_icms_pct": 0.11999374217772217,
-            "preco_atual": 63.92,
+            "preco_atual": 59.9,
             "cod_erp": "204062",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 31.96
           },
           {
             "cprod": "ECB09B",
@@ -14800,14 +15212,15 @@
             "cst": "000",
             "icms_pct": 12,
             "credito_icms_pct": 0.11999374217772217,
-            "preco_atual": 63.92,
+            "preco_atual": 59.9,
             "cod_erp": "204063",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 31.96
           },
           {
             "cprod": "SLB09B",
@@ -14829,14 +15242,15 @@
             "cst": "000",
             "icms_pct": 12,
             "credito_icms_pct": 0,
-            "preco_atual": 23.04,
+            "preco_atual": 26.9,
             "cod_erp": "204595",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "34013000",
             "cest": "2003700",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 11.52
           },
           {
             "cprod": "BS01B",
@@ -14858,14 +15272,15 @@
             "cst": "000",
             "icms_pct": 12,
             "credito_icms_pct": 0,
-            "preco_atual": 43.14,
+            "preco_atual": 55.9,
             "cod_erp": "77265",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072010",
             "cest": "2002701",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 26.58
           },
           {
             "cprod": "BS02B",
@@ -14887,14 +15302,15 @@
             "cst": "000",
             "icms_pct": 12,
             "credito_icms_pct": 0,
-            "preco_atual": 43.14,
+            "preco_atual": 55.9,
             "cod_erp": "77266",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072010",
             "cest": "2002701",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 26.58
           },
           {
             "cprod": "BS10B",
@@ -14916,14 +15332,15 @@
             "cst": "000",
             "icms_pct": 12,
             "credito_icms_pct": 0,
-            "preco_atual": 54.46,
+            "preco_atual": 55.9,
             "cod_erp": "204067",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072010",
             "cest": "2002700",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 26.58
           },
           {
             "cprod": "BS11B",
@@ -14945,14 +15362,15 @@
             "cst": "000",
             "icms_pct": 12,
             "credito_icms_pct": 0,
-            "preco_atual": 54.46,
+            "preco_atual": 55.9,
             "cod_erp": "204068",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072010",
             "cest": "2002700",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 26.58
           },
           {
             "cprod": "BS12B",
@@ -14974,14 +15392,15 @@
             "cst": "000",
             "icms_pct": 12,
             "credito_icms_pct": 0,
-            "preco_atual": 54.46,
+            "preco_atual": 55.9,
             "cod_erp": "204069",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33072010",
             "cest": "2002700",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 26.58
           },
           {
             "cprod": "RBTB01BB",
@@ -15003,14 +15422,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.0399810926852326,
-            "preco_atual": 6.9,
+            "preco_atual": 7.9,
             "cod_erp": "204098",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "82121010",
             "cest": null,
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 3.39
           },
           {
             "cprod": "RBTB02BB",
@@ -15032,14 +15452,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.0399810926852326,
-            "preco_atual": 6.9,
+            "preco_atual": 7.9,
             "cod_erp": "204099",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "82121010",
             "cest": null,
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 3.53
           },
           {
             "cprod": "TWZ01BB",
@@ -15061,14 +15482,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.039968652037617555,
-            "preco_atual": 17.9,
+            "preco_atual": 22.9,
             "cod_erp": "14988",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "82032090",
             "cest": "2005300",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 12.76
           },
           {
             "cprod": "TWZ09BR",
@@ -15092,12 +15514,13 @@
             "credito_icms_pct": 0.04000458505272811,
             "preco_atual": 25.9,
             "cod_erp": "14987",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "82032090",
             "cest": "2005300",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 15.3
           },
           {
             "cprod": "TWZ11BB",
@@ -15119,14 +15542,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.04000466526708654,
-            "preco_atual": 23.9,
+            "preco_atual": 24.9,
             "cod_erp": "57382",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "82032090",
             "cest": "2005300",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 14.29
           },
           {
             "cprod": "TWZB01BB",
@@ -15148,14 +15572,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.03998780859494056,
-            "preco_atual": 7.9,
+            "preco_atual": 6.9,
             "cod_erp": "28366",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "82032090",
             "cest": "2005300",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 2.28
           },
           {
             "cprod": "TWZB02BB",
@@ -15177,14 +15602,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.03998780859494056,
-            "preco_atual": 0.08,
+            "preco_atual": 6.9,
             "cod_erp": "28367",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "82032090",
             "cest": "2005300",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 2.28
           },
           {
             "cprod": "TWZB03BB",
@@ -15206,14 +15632,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.03998780859494056,
-            "preco_atual": 6.89,
+            "preco_atual": 6.9,
             "cod_erp": "52210",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "82032090",
             "cest": "2005300",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 2.28
           },
           {
             "cprod": "SB303BXSET01BB",
@@ -15235,14 +15662,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.03996947438710293,
-            "preco_atual": 6.89,
+            "preco_atual": 8.9,
             "cod_erp": "28364",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "68053090",
             "cest": null,
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 4.37
           },
           {
             "cprod": "SB302NBXSET01BB",
@@ -15293,14 +15721,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.03996947438710293,
-            "preco_atual": 0.33,
+            "preco_atual": 8.9,
             "cod_erp": "28365",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "68053090",
             "cest": null,
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 4.37
           },
           {
             "cprod": "CCS01BB",
@@ -15380,14 +15809,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0,
-            "preco_atual": 45.88,
+            "preco_atual": 50.9,
             "cod_erp": "204092",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 18.35
           },
           {
             "cprod": "CCS06BB",
@@ -15409,14 +15839,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0,
-            "preco_atual": 45.88,
+            "preco_atual": 50.9,
             "cod_erp": "204093",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 18.35
           },
           {
             "cprod": "CCS07BB",
@@ -15438,14 +15869,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0,
-            "preco_atual": 45.88,
+            "preco_atual": 50.9,
             "cod_erp": "204094",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": "2001700",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 18.35
           },
           {
             "cprod": "LGC02BB",
@@ -15467,14 +15899,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0,
-            "preco_atual": 37.9,
+            "preco_atual": 38.9,
             "cod_erp": "13587",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 18.48
           },
           {
             "cprod": "LGC03BB",
@@ -15496,14 +15929,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0,
-            "preco_atual": 37.9,
+            "preco_atual": 38.9,
             "cod_erp": "13588",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 18.48
           },
           {
             "cprod": "BGC01BB",
@@ -15525,14 +15959,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0,
-            "preco_atual": 56.5,
+            "preco_atual": 45.9,
             "cod_erp": "204096",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 23.96
           },
           {
             "cprod": "BGC05BB",
@@ -15554,14 +15989,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0,
-            "preco_atual": 47.92,
+            "preco_atual": 45.9,
             "cod_erp": "204597",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 23.96
           },
           {
             "cprod": "KEW01DBB",
@@ -15612,14 +16048,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0,
-            "preco_atual": 94.16,
+            "preco_atual": 69.9,
             "cod_erp": "204070",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": "2002000",
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 32.89
           },
           {
             "cprod": "UC20BB",
@@ -15641,14 +16078,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.04002297970126388,
-            "preco_atual": 52.22,
+            "preco_atual": 49.9,
             "cod_erp": "204599",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 26.11
           },
           {
             "cprod": "UC30BB",
@@ -15670,14 +16108,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.04002297970126388,
-            "preco_atual": 52.58,
+            "preco_atual": 49.9,
             "cod_erp": "76165",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 26.11
           },
           {
             "cprod": "RFS01BB",
@@ -15699,14 +16138,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.040007080899274204,
-            "preco_atual": 23,
+            "preco_atual": 38.9,
             "cod_erp": "28361",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 18.83
           },
           {
             "cprod": "CPS01B",
@@ -15757,14 +16197,15 @@
             "cst": "100",
             "icms_pct": 4,
             "credito_icms_pct": 0.04003460751927009,
-            "preco_atual": 44.86,
+            "preco_atual": 43.9,
             "cod_erp": "202506",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 24.22
           },
           {
             "cprod": "MBS02B",
@@ -15786,14 +16227,15 @@
             "cst": "100",
             "icms_pct": 4,
             "credito_icms_pct": 0.04003460751927009,
-            "preco_atual": 44.86,
+            "preco_atual": 49.9,
             "cod_erp": "202501",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 24.22
           },
           {
             "cprod": "RMPS15BR",
@@ -15815,14 +16257,15 @@
             "cst": "100",
             "icms_pct": 4,
             "credito_icms_pct": 0.03997539975399754,
-            "preco_atual": 57.36,
+            "preco_atual": 57.9,
             "cod_erp": "202512",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 30.98
           },
           {
             "cprod": "RMLP03BB",
@@ -15844,14 +16287,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.03998505231689088,
-            "preco_atual": 17.84,
+            "preco_atual": 18.9,
             "cod_erp": "204077",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33041000",
             "cest": "2000900",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 8.92
           },
           {
             "cprod": "RMLP04BB",
@@ -15873,14 +16317,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.03998505231689088,
-            "preco_atual": 17.84,
+            "preco_atual": 18.9,
             "cod_erp": "204078",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33041000",
             "cest": "2000900",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 8.92
           },
           {
             "cprod": "RMLP05BB",
@@ -15902,14 +16347,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.03998505231689088,
-            "preco_atual": 13.9,
+            "preco_atual": 18.9,
             "cod_erp": "62525",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33041000",
             "cest": "2000900",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 8.92
           },
           {
             "cprod": "RMLP06BB",
@@ -15931,14 +16377,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.03998505231689088,
-            "preco_atual": 13.9,
+            "preco_atual": 18.9,
             "cod_erp": "62526",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33041000",
             "cest": "2000900",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 8.92
           },
           {
             "cprod": "RMLP08BB",
@@ -15960,14 +16407,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.03998505231689088,
-            "preco_atual": 13.92,
+            "preco_atual": 18.9,
             "cod_erp": "11478",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33041000",
             "cest": "2000900",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 8.92
           },
           {
             "cprod": "RMLP14BB",
@@ -15989,14 +16437,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.03998505231689088,
-            "preco_atual": 13.9,
+            "preco_atual": 18.9,
             "cod_erp": "11480",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33041000",
             "cest": "2000900",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 8.92
           },
           {
             "cprod": "RMLS48BB",
@@ -16018,14 +16467,15 @@
             "cst": "800",
             "icms_pct": 4,
             "credito_icms_pct": 0.03996003996003996,
-            "preco_atual": 29.24,
+            "preco_atual": 38.9,
             "cod_erp": "76193",
-            "match_tipo": "balanco",
+            "match_tipo": "ref",
             "preco_manual": null,
             "ncm": "33041000",
             "cest": "2000900",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 20.02
           }
         ],
         "uf": "ES"
@@ -19938,14 +20388,15 @@
             "cst": "150",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": 549.9,
+            "preco_atual": 689.9,
             "cod_erp": "80155",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85163200",
             "cest": "2110300",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 263.99
           }
         ],
         "uf": "PR"
@@ -19982,14 +20433,15 @@
             "cst": "150",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": 549.9,
+            "preco_atual": 689.9,
             "cod_erp": "80155",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "85163200",
             "cest": "2110300",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 263.99
           }
         ],
         "uf": "PR"
@@ -20681,14 +21133,15 @@
             "cst": "060",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": 202.9,
+            "preco_atual": 257.9,
             "cod_erp": "29287",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 163.12
           },
           {
             "cprod": "1859",
@@ -20710,14 +21163,15 @@
             "cst": "060",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": null,
-            "cod_erp": null,
-            "match_tipo": null,
+            "preco_atual": 518,
+            "cod_erp": "204970",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 259
           },
           {
             "cprod": "1204",
@@ -20826,14 +21280,15 @@
             "cst": "060",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": 178.16,
+            "preco_atual": 148.9,
             "cod_erp": "203486",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 95.61
           },
           {
             "cprod": "1230",
@@ -20884,14 +21339,15 @@
             "cst": "060",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": null,
-            "cod_erp": null,
-            "match_tipo": null,
+            "preco_atual": 575.66,
+            "cod_erp": "204971",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 287.83
           },
           {
             "cprod": "1236",
@@ -20913,14 +21369,15 @@
             "cst": "060",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": null,
-            "cod_erp": null,
-            "match_tipo": null,
+            "preco_atual": 141.72,
+            "cod_erp": "204972",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 70.86
           },
           {
             "cprod": "1276",
@@ -20942,14 +21399,15 @@
             "cst": "060",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": 243.1,
+            "preco_atual": 187.9,
             "cod_erp": "203488",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 118.59
           },
           {
             "cprod": "1352",
@@ -20971,14 +21429,15 @@
             "cst": "060",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": 129.4,
+            "preco_atual": 129.9,
             "cod_erp": "203489",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 78.42
           },
           {
             "cprod": "1357",
@@ -21029,14 +21488,15 @@
             "cst": "060",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": 110.9,
+            "preco_atual": 116.9,
             "cod_erp": "59860",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 74.73
           },
           {
             "cprod": "1361",
@@ -21087,14 +21547,15 @@
             "cst": "060",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": null,
-            "cod_erp": null,
-            "match_tipo": null,
+            "preco_atual": 129.9,
+            "cod_erp": "18333",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 78.42
           },
           {
             "cprod": "1368",
@@ -21116,14 +21577,15 @@
             "cst": "060",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": null,
-            "cod_erp": null,
-            "match_tipo": null,
+            "preco_atual": 110.9,
+            "cod_erp": "19049",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 78.42
           },
           {
             "cprod": "1376",
@@ -21174,14 +21636,15 @@
             "cst": "060",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": 159.98,
+            "preco_atual": 160.9,
             "cod_erp": "203487",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 119.2
           },
           {
             "cprod": "1850",
@@ -21203,14 +21666,15 @@
             "cst": "060",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": null,
-            "cod_erp": null,
-            "match_tipo": null,
+            "preco_atual": 253.64,
+            "cod_erp": "204973",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 126.82
           },
           {
             "cprod": "1857",
@@ -21232,14 +21696,15 @@
             "cst": "060",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": null,
-            "cod_erp": null,
-            "match_tipo": null,
+            "preco_atual": 159.4,
+            "cod_erp": "204974",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33059000",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 79.7
           },
           {
             "cprod": "1858",
@@ -21261,14 +21726,15 @@
             "cst": "060",
             "icms_pct": 0,
             "credito_icms_pct": 0,
-            "preco_atual": null,
-            "cod_erp": null,
-            "match_tipo": null,
+            "preco_atual": 518,
+            "cod_erp": "204975",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33051000",
             "cest": null,
             "st": true,
-            "st_motivo": "ncm"
+            "st_motivo": "ncm",
+            "custo_erp": 259
           },
           {
             "cprod": "1197",
@@ -21363,14 +21829,15 @@
             "cst": "000",
             "icms_pct": 7,
             "credito_icms_pct": 0.07014767932489452,
-            "preco_atual": 1.58,
+            "preco_atual": 9.9,
             "cod_erp": "204819",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 3.95
           }
         ],
         "uf": "SP"
@@ -21947,12 +22414,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 4.12,
             "cod_erp": "79885",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33041000",
             "cest": "2000900",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 2.02
           },
           {
             "cprod": "98589",
@@ -21976,12 +22444,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 2.84,
             "cod_erp": "79886",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049100",
             "cest": "2001300",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 1.42
           },
           {
             "cprod": "98590",
@@ -22005,12 +22474,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 2.88,
             "cod_erp": "79887",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049100",
             "cest": "2001300",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 1.44
           },
           {
             "cprod": "98698",
@@ -22092,12 +22562,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 6.12,
             "cod_erp": "79889",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 3.85
           },
           {
             "cprod": "98865",
@@ -22353,12 +22824,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 7.52,
             "cod_erp": "79893",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33042010",
             "cest": "2001000",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 4.58
           },
           {
             "cprod": "99011",
@@ -22411,12 +22883,13 @@
             "credito_icms_pct": 0,
             "preco_atual": 9.54,
             "cod_erp": "79894",
-            "match_tipo": "balanco",
+            "match_tipo": "ean",
             "preco_manual": null,
             "ncm": "33049990",
             "cest": "2001500",
             "st": false,
-            "st_motivo": null
+            "st_motivo": null,
+            "custo_erp": 4.24
           },
           {
             "cprod": "99036",
