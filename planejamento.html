@@ -109,7 +109,7 @@ var STATUS_A_PAGAR=['ENVIADO','FATURADO']; // em trânsito: já comprometeram o 
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var DB={email:'',isOwner:false,pedidos:[],limites:[],meses:[],otb:{}};
 var TAB='lancar', EDIT=null, FILTRO_LOJA='TODAS', FILTRO_MARCA='TODAS';
-var BUILD='ORD-40'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
+var BUILD='ORD-41'; // versão da página — incrementar a cada deploy; serve de selo e de checagem de auto-update
 
 function lojasVisiveis(){ return FILTRO_LOJA==='TODAS'?LOJAS:LOJAS.filter(function(l){return l.id===FILTRO_LOJA;}); }
 function pedidosVisiveis(){ return FILTRO_LOJA==='TODAS'?DB.pedidos:DB.pedidos.filter(function(p){return p.loja===FILTRO_LOJA;}); }
@@ -189,7 +189,7 @@ async function carregar(){
   ]);
   if(pr.error){ el('main').innerHTML='<div class="card">Erro: '+pr.error.message+'</div>'; return; }
   DB.pedidos=(pr.data||[]).map(function(p){ if(typeof p.distribuicao==='string'){try{p.distribuicao=JSON.parse(p.distribuicao);}catch(e){p.distribuicao={};}} return p; });
-  DB.limites=lr.data||[];
+  DB.limites=lr.data||[]; DB.limitesOk=!lr.error;   // limitesOk=false → trava de lançamento bloqueia por segurança
   await recomputarPendentes();   // rolling do prazo dos pedidos ATHILA a partir de hoje
   await garantirPrioridades();   // pedidos ATHILA sem prioridade ainda recebem sequencial (1ª carga)
   DB.meses=mesesHorizonte();
@@ -522,8 +522,8 @@ function valApagar(valor,ent){ return Math.max(0,(Number(valor)||0)-(Number(ent)
 function renderLancar(){
   var p=EDIT||{};
   var lojaOpts=LOJAS.map(function(l){return '<option value="'+l.id+'" '+(p.loja===l.id?'selected':'')+'>'+l.nome+'</option>';}).join('');
-  el('main').innerHTML='<div class="card"><h2>'+(EDIT?'Editar pedido':'Lançar novo pedido')+'</h2><div class="grid">'+
-    campo('Loja','<select id="f_loja">'+lojaOpts+'</select>')+
+  el('main').innerHTML='<div class="card"><h2>'+(EDIT?'Editar pedido':'Lançar novo pedido')+'</h2><div id="limite_status"></div><div class="grid">'+
+    campo('Loja','<select id="f_loja" onchange="prev()">'+lojaOpts+'</select>')+
     campo('Marca','<input id="f_marca" value="'+(p.marca||'')+'" placeholder="Ex.: TRUSS">')+
     campo('Fornecedor','<input id="f_forn" value="'+(p.fornecedor||'')+'">')+
     campo('Data do pedido','<input id="f_data" type="date" value="'+isoDate(p.data_pedido)+'">')+
@@ -534,17 +534,20 @@ function renderLancar(){
     campo('Data base p/ vencimento','<input id="f_base" type="date" value="'+isoDate(p.data_base_venc||p.data_entrega||p.data_pedido)+'" oninput="prev()">')+
     campo('Previsão de entrega','<input id="f_entrega" type="date" value="'+isoDate(p.data_entrega)+'">')+
     '</div><label>Observação</label><textarea id="f_obs" rows="2">'+(p.obs||'')+'</textarea>'+
-    '<div class="split-preview" id="split"></div>'+
-    '<div style="margin-top:16px"><button class="btn" onclick="salvar()">'+(EDIT?'Salvar alterações':'Lançar pedido (entra como ATHILA)')+'</button> '+
+    '<div class="split-preview" id="split"></div><div id="limite_alerta" style="margin-top:10px"></div>'+
+    '<div style="margin-top:16px"><button class="btn" id="btn_lancar" onclick="salvar()">'+(EDIT?'Salvar alterações':'Lançar pedido (entra como ATHILA)')+'</button> '+
     (EDIT?'<button class="btn sec" onclick="go(\'pedidos\')">Cancelar</button>':'')+'</div></div>';
   prev();
 }
 function prev(){
-  var valor=Number(el('f_valor').value)||0; if(!valor){el('split').textContent='';return;}
+  atualizarLimiteStatus();   // painel "sem limite em ..." da loja escolhida (só pedido novo)
+  var valor=Number(el('f_valor').value)||0; if(!valor){el('split').textContent=''; setBloqueio(null); return;}
   var ent=Number(el('f_entrada').value)||0, ap=valApagar(valor,ent);
   var ehPendente=!EDIT||EDIT.status==='ATHILA'||EDIT.status==='APROVADO';
   var d=autoSplit(ap,el('f_prazo').value,el('f_parc').value, ehPendente?'':el('f_base').value);
   el('split').innerHTML=(ehPendente?'Divisão a partir de HOJE (recalcula sozinha até ser ENVIADO; congela na data do envio): ':'Divisão automática: ')+(ent>0?'<span class="mut">entrada '+brl(ent)+' abatida → a pagar '+brl(ap)+': </span>':'')+Object.keys(d).sort().map(function(k){return '<b>'+nomeMes(k)+'</b> '+brl(d[k]);}).join(' · ');
+  if(EDIT){ setBloqueio(null); }   // editar NUNCA é travado (religa o botão explicitamente)
+  else { var loja=el('f_loja').value; setBloqueio(checarLimiteNovoPedido(loja,d),loja,ent); }
 }
 async function salvar(){
   var valor=Number(el('f_valor').value)||0, marca=el('f_marca').value.trim();
@@ -552,6 +555,11 @@ async function salvar(){
   var ent=Number(el('f_entrada').value)||0, ap=valApagar(valor,ent);
   var ehPendente=!EDIT||EDIT.status==='ATHILA'||EDIT.status==='APROVADO'; // ainda não enviado conta de hoje (rolling); ENVIADO+ usa a data base informada
   var dist=autoSplit(ap,el('f_prazo').value,el('f_parc').value, ehPendente?'':(el('f_base').value||el('f_entrega').value||el('f_data').value)); // distribui só o que fica A PAGAR (valor − entrada)
+  if(!EDIT){ // TRAVA: pedido novo só entra se couber no limite disponível (relê o banco — tela pode estar velha)
+    toast('Conferindo limite…');
+    var lojaChk=el('f_loja').value, chkF=await checarLimiteFresco(lojaChk,dist);
+    if(!chkF.ok){ setBloqueio(chkF,lojaChk,ent); toast('⛔ Sem limite disponível — pedido NÃO lançado.'); return; }
+  }
   var row={loja:el('f_loja').value,marca:marca.toUpperCase(),fornecedor:el('f_forn').value,
     data_pedido:el('f_data').value||null,valor_total:valor,prazo:el('f_prazo').value,parcelas:el('f_parc').value,
     data_base_venc:el('f_base').value||null,distribuicao:dist,data_entrega:el('f_entrega').value,obs:el('f_obs').value};
@@ -674,9 +682,8 @@ function renderOTB(){
     html+='<div class="lojahead">'+lo.nome+'</div><div style="overflow:auto"><table><tr><th>Mês</th><th class="num">Limite</th><th class="num">Comprometido</th><th class="num">Em aprovação</th><th class="num">Disponível</th><th class="num">Disp. se aprovar tudo</th></tr>';
     DB.meses.forEach(function(m){
       var otbC=(DB.otb[lo.id]||{})[m]||{limite:0,em_aprovacao:0};
-      var limite=otbC.limite||0, emAprov=otbC.em_aprovacao||0;
-      var comprometido=Math.round((comprometidoLojaMes(lo.id,m)+contasERPLojaMes(lo.id,m))*100)/100;
-      var disponivel=Math.round((limite-comprometido)*100)/100;
+      var emAprov=otbC.em_aprovacao||0;
+      var dx=dispLojaMes(lo.id,m), limite=dx.limite, comprometido=dx.compr, disponivel=dx.disp;
       var disponivelPos=Math.round((limite-comprometido-emAprov)*100)/100;
       if(!limite&&!comprometido&&!emAprov)return;
       html+='<tr><td>'+nomeMes(m)+'</td><td class="num">'+brl(limite)+'</td><td class="num">'+brl(comprometido)+'</td>'+
@@ -761,9 +768,9 @@ function editar(id){EDIT=DB.pedidos.filter(function(p){return p.id===id;})[0];TA
    no ERP por vencimento. Antes o "compr" da aba Limites usava só DB.otb (pedidos ENVIADO+FATURADO+
    ENTREGUE, SEM o ERP) — dava um número menor e inconsistente com o total que aparece em Aprovações/
    Pedidos. Corrigido 19/08/2026: uma ÚNICA fonte de verdade pro "comprometido", usada em TODA a tela. */
-function comprometidoLojaMes(loja,mes){
+function comprometidoLojaMes(loja,mes,peds){
   var v=0;
-  DB.pedidos.forEach(function(p){
+  (peds||DB.pedidos).forEach(function(p){
     if(STATUS_A_PAGAR.indexOf(p.status)<0)return;
     if(p._noERP)return; // já contado na linha do ERP, não duplica
     if(p.loja!==loja)return;
@@ -772,6 +779,74 @@ function comprometidoLojaMes(loja,mes){
   return Math.round(v*100)/100;
 }
 function contasERPLojaMes(loja,mes){var c=DB.contasERP&&DB.contasERP.dados; return (c&&c[loja]&&c[loja][mes])||0;}
+/* FONTE ÚNICA do "disponível" por loja×mês = limite (aba Limites) − comprometido (trânsito + ERP).
+   Usada pela aba Limites, pela aba OTB e pela TRAVA de lançamento — três telas, uma conta.
+   ctx (opcional) = {pedidos,limites} frescos do banco, p/ a checagem final no momento de salvar. */
+function dispLojaMes(loja,mes,ctx){
+  var lims=(ctx&&ctx.limites)||DB.limites, limite=0;
+  lims.forEach(function(l){ if(l.loja===loja&&l.mes===mes) limite=Number(l.valor)||0; });
+  var compr=Math.round((comprometidoLojaMes(loja,mes,ctx&&ctx.pedidos)+contasERPLojaMes(loja,mes))*100)/100;
+  return {limite:limite,compr:compr,disp:Math.round((limite-compr)*100)/100};
+}
+/* ---------- TRAVA DE LIMITE no lançamento (pedido do dono, 25/11/2026) ----------
+   Pedido NOVO só entra se CADA parcela (por mês de vencimento) couber no "disp" da aba Limites.
+   Sem limite definido pro mês (R$0) = sem disponível = bloqueia. EDITAR e EXCLUIR seguem livres.
+   ⚠️ É trava de TELA (o banco aceita insert de qualquer logado); a checagem final em salvar()
+   relê pedidos+limites do banco, então tela velha não deixa passar o que outro já consumiu. */
+function checarLimiteNovoPedido(loja,dist,ctx){
+  if(!ctx&&DB.limitesOk===false) return {ok:false,erroCarga:true,motivos:[],maxAP:0};
+  var ap=0, motivos=[], maxAP=Infinity;
+  Object.keys(dist||{}).forEach(function(m){ ap+=Number(dist[m])||0; });
+  Object.keys(dist||{}).sort().forEach(function(m){
+    var parcela=Number(dist[m])||0; if(parcela<=0)return;
+    var x=dispLojaMes(loja,m,ctx);
+    if(parcela>x.disp+0.005) motivos.push({mes:m,parcela:parcela,disp:x.disp,limite:x.limite,compr:x.compr});
+    var share=ap>0?parcela/ap:0; if(share>0) maxAP=Math.min(maxAP,Math.max(0,x.disp)/share);
+  });
+  return {ok:!motivos.length,motivos:motivos,maxAP:isFinite(maxAP)?Math.floor(maxAP):0};
+}
+var ALERTA_CRIT='<div class="alerta-box" style="border-left-color:var(--crit);background:#fef2f2;color:#991b1b">';
+function limiteAlertaHTML(chk,loja,ent){
+  if(chk.erroCarga) return ALERTA_CRIT+'⛔ <b>Não consegui conferir os limites agora</b> — por segurança o lançamento está bloqueado. Recarregue a página (Cmd+Shift+R) e tente de novo.</div>';
+  var h=ALERTA_CRIT+'⛔ <b>Sem limite disponível — pedido bloqueado</b> ('+lojaNome(loja)+')<br>'+
+    chk.motivos.map(function(x){
+      return '• <b>'+nomeMes(x.mes)+'</b>: '+(x.limite?('disponível '+brl(x.disp)+' (limite '+brl(x.limite)+' − comprometido '+brl(x.compr)+')'):'<b>sem limite definido</b> nesse mês')+' — esta compra precisa de '+brl(x.parcela)+' nesse mês.';
+    }).join('<br>')+'<br>'+
+    (chk.maxAP>0?'Nesse prazo cabe no máximo <b>'+brl(chk.maxAP+(Number(ent)||0))+'</b> de valor total'+((Number(ent)||0)>0?' (já somada a entrada)':'')+'. ':'Nesse prazo não cabe nenhum valor. ')+
+    'Reduza o valor, mude o prazo ou peça ao dono pra aumentar o limite na aba 🎯 Limites. <span style="font-weight:500">Editar ou excluir pedidos que já existem continua liberado.</span></div>';
+  return h;
+}
+/* Painel fixo no topo do formulário: avisa quais meses JÁ estão sem limite pra essa loja. */
+function limiteStatusHTML(loja){
+  var meses=janela6(), semLim=[], linha=[];
+  meses.forEach(function(m){ var x=dispLojaMes(loja,m);
+    linha.push('<span class="'+(x.disp<=0?'neg':'pos')+'">'+nomeMes(m)+' '+brl(x.disp)+'</span>');
+    if(x.disp<=0) semLim.push(nomeMes(m)+(x.limite?'':' (sem limite definido)')); });
+  var diasERP=diasContasERP();
+  var avisoERP=(diasERP===null)?ALERTA_CRIT+'🚨 Contas a pagar do ERP indisponível — o "disponível" abaixo NÃO inclui as faturas do ERP; não confie até normalizar.</div>'
+    :(diasERP>1?ALERTA_CRIT+'🚨 Contas a pagar do ERP desatualizado há '+diasERP+' dias — o "disponível" abaixo pode estar errado.</div>':'');
+  return avisoERP+
+    (semLim.length?ALERTA_CRIT+'⛔ <b>'+lojaNome(loja)+': sem limite disponível em '+semLim.join(', ')+'.</b> Pedido com parcela nesses meses fica bloqueado.</div>':'')+
+    '<p class="mut" style="margin:0 0 10px;font-size:11.5px">Disponível por mês (limite − comprometido): '+linha.join(' · ')+'</p>';
+}
+function atualizarLimiteStatus(){ var s=el('limite_status'); if(!s)return; s.innerHTML=EDIT?'':limiteStatusHTML(el('f_loja').value); }
+function setBloqueio(chk,loja,ent){
+  var a=el('limite_alerta'), b=el('btn_lancar'); if(!a||!b)return;
+  if(!chk||chk.ok){ a.innerHTML=''; b.disabled=false; b.textContent=EDIT?'Salvar alterações':'Lançar pedido (entra como ATHILA)'; return; }
+  a.innerHTML=limiteAlertaHTML(chk,loja,ent); b.disabled=true; b.textContent='⛔ Sem limite — lançamento bloqueado';
+}
+/* Checagem FINAL ao salvar: relê pedidos+limites do banco (a tela pode estar aberta há horas). */
+async function checarLimiteFresco(loja,dist){
+  try{
+    var r=await Promise.all([sb.from('pedidos').select('id,loja,status,distribuicao'),sb.from('limites').select('*')]);
+    if(r[0].error||r[1].error) throw new Error('leitura');
+    var porId={}; DB.pedidos.forEach(function(p){porId[p.id]=p;});
+    var peds=(r[0].data||[]).map(function(p){
+      if(typeof p.distribuicao==='string'){try{p.distribuicao=JSON.parse(p.distribuicao);}catch(e){p.distribuicao={};}}
+      var o=porId[p.id]; if(o&&o._noERP)p._noERP=true; return p; });
+    return checarLimiteNovoPedido(loja,dist,{pedidos:peds,limites:r[1].data||[]});
+  }catch(e){ return {ok:false,erroCarga:true,motivos:[],maxAP:0}; }
+}
 function renderLimites(){
   var lim={};DB.limites.forEach(function(l){lim[l.loja+'|'+l.mes]=l.valor;});
   var diasERP=diasContasERP();
@@ -782,8 +857,7 @@ function renderLimites(){
   lojasVisiveis().forEach(function(lo){html+='<div class="lojahead">'+lo.nome+'</div><div style="overflow:auto"><table><tr>';
     DB.meses.forEach(function(m){html+='<th class="num">'+nomeMes(m)+'</th>';});html+='</tr><tr>';
     DB.meses.forEach(function(m){var v=lim[lo.id+'|'+m]||'';
-      var compr=comprometidoLojaMes(lo.id,m)+contasERPLojaMes(lo.id,m);
-      var limiteAtual=Number(v)||0, disp=Math.round((limiteAtual-compr)*100)/100;
+      var dx=dispLojaMes(lo.id,m), compr=dx.compr, disp=dx.disp;
       html+='<td><div style="display:flex;align-items:center;gap:3px"><span class="mut" style="font-size:11px">R$</span>'+
         '<input type="text" inputmode="numeric" value="'+(v?Math.round(v).toLocaleString('pt-BR'):'')+'" style="width:96px" onchange="setLim(\''+lo.id+'\',\''+m+'\',this.value,this)"></div>'+
         '<div class="mut" style="font-size:10px;margin-top:2px">compr '+brl(compr)+'</div>'+
